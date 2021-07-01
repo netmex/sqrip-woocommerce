@@ -104,12 +104,15 @@ add_filter('woocommerce_email_attachments', 'pm_attach_qrcode_pdf_to_email', 99,
 
 function pm_attach_qrcode_pdf_to_email($attachments, $email_id, $order)
 {
+
+	// $order can either be of type Order, WC_Order or WC_Product / WC_Product_Variation or completely omitted
 	// fix as per: https://stackoverflow.com/a/53253862/5991864
-    if (empty($order) ||  !is_a( $order, 'WC_Order' || ! isset( $email_id )  )) {
+    if (empty($order) || ! isset( $email_id ) || !method_exists($order,'get_payment_method')) {
         return $attachments;
     }
+
     $payment_method = $order->get_payment_method();
-    if (isset($email_id) && $email_id === 'customer_on_hold_order' && $payment_method === 'sqrip') {
+    if ($email_id === 'customer_on_hold_order' && $payment_method === 'sqrip') {
 
         $order_id = $order->id;
         $attachments[] = get_post_meta($order_id, 'pm_pdf_file', true);
