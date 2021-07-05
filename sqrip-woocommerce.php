@@ -86,12 +86,15 @@ function pb_email_after_order_table($order, $sent_to_admin, $plain_text, $email)
 {
     $payment_method = $order->get_payment_method();
 
-
+    // TODO: disable image display if customer chose email_integration as attachment only
+	// TODO: make e-mail output configurable using options
     if (isset($email->id) && $email->id === 'customer_on_hold_order' && $payment_method === 'sqrip') {
 
         $order_id = $order->id;
         $pm_qr_img = get_post_meta($order_id, 'pm_png_file', true);
-        echo '<p>Scan below QR code and pay</p><img src="' . $pm_qr_img . '" alt="img" /><p></p>';
+	    $pm_qr_pdf = get_post_meta($order_id, 'pm_pdf_file', true);
+
+        echo '<p>Verwende die untenstehende QR Rechnung, um den ausstehenden Betrag zu bezahlen.</p><a href="'.$pm_qr_pdf.'" title="QR Rechnung" target="_blank"><img src="' . $pm_qr_img . '" alt="img" /></a>';
     }
 }
 
@@ -130,7 +133,15 @@ function pm_qr_image_display_thankyou($order_id)
     if ($payment_method === 'sqrip') {
 
         $pm_qr_img = get_post_meta($order_id, 'pm_png_file', true);
-        echo '<p>Scan below QR code and pay</p><img src="' . $pm_qr_img . '" alt="img"  height=200 width=200/><p></p>';
+	    $pm_qr_pdf = get_post_meta($order_id, 'pm_pdf_file', true);
+
+	    // TODO: make output configurable using options
+	    // TODO: add option to enable / disable output on thankyou page
+
+        echo '<div>
+				<p>Verwende die untenstehende QR Rechnung, um den ausstehenden Betrag zu bezahlen.</p>
+				<a href="'.$pm_qr_pdf.'" title="QR Rechnung" target="_blank"><img src="' . $pm_qr_img . '" alt="img"  height=200 width=200/></a>
+			</div>';
     }
 }
 
