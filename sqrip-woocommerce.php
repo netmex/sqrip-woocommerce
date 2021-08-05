@@ -107,20 +107,18 @@ if (!function_exists('sqrip_add_fields_for_order_details')) {
 
         $reference_id = get_post_meta($post->ID, 'sqrip_reference_id', true);
         $pdf_file = get_post_meta($post->ID, 'sqrip_pdf_file', true);
-
-        $output = '<ul class="sqrip-payment">';
-
+        
         if ($reference_id || $pdf_file) {
-            $output .=  $reference_id ? '<li><b>'.esc_html('Reference Number','sqrip').' :</b> '. esc_html($reference_id) . '</li>' : '';
-            $output .= $pdf_file ? '<li><b>'.esc_html( 'QR-Code PDF', 'sqrip' ).' :</b> <a target="_blank" href="' . esc_url($pdf_file) . '"><span class="dashicons dashicons-media-document"></span></a></li>' : '';
-            
+            echo '<ul class="sqrip-payment">';
+
+            echo $reference_id ? '<li><b>'.esc_html__('Reference Number','sqrip').' :</b> '.esc_html($reference_id).'</li>' : '';
+
+            echo $pdf_file ? '<li><b>'.esc_html__( 'QR-Code PDF', 'sqrip' ).' :</b> <a target="_blank" href="'.esc_url($pdf_file).'"><span class="dashicons dashicons-media-document"></span></a></li>' : '';
+
+            echo '</ul>';
         } else {
-            $output .= '<li>'.esc_html('No Data', 'sqrip').'</li>';
+            echo esc_html__( 'Order not use sqrip method', 'sqrip' );
         }
-
-        $output .= '</ul>';
-
-        echo $output;
     }
 }
 
@@ -150,7 +148,7 @@ function sqrip_add_qrcode_in_email_after_order_table($order, $sent_to_admin, $pl
         $order_id = $order->id;
         $png_file = get_post_meta($order_id, 'sqrip_png_file', true);
 
-        echo $png_file ? '<div class="sqrip-qrcode-png"><p>' . esc_html( "Verwende die untenstehende QR Rechnung, um den ausstehenden Betrag zu bezahlen." , "sqrip") . '</p><img src="' . esc_url($png_file) . '" alt="'.esc_attr('sqrip QR-Code','sqrip').'" width="200"/></div>' : '';
+        echo $png_file ? '<div class="sqrip-qrcode-png"><p>' . esc_html__( 'Verwende die untenstehende QR Rechnung, um den ausstehenden Betrag zu bezahlen.' , 'sqrip') . '</p><img src="' . esc_url($png_file) . '" alt="'.esc_attr('sqrip QR-Code','sqrip').'" width="200"/></div>' : '';
     }
 }
 
@@ -215,23 +213,21 @@ function sqrip_qr_action_order_details_after_order_table($order)
         $png_file = get_post_meta($order_id, 'sqrip_png_file', true);
         $pdf_file = get_post_meta($order_id, 'sqrip_pdf_file', true);
 
-        $output = '<div class="sqrip-order-details">';
+        echo '<div class="sqrip-order-details">';
 
         if ( in_array( $integration_order, array('both', 'qrcode') ) && $png_file ) {
-            $output .= '<div class="sqrip-qrcode-png"><p>' . esc_html( "Verwende die untenstehende QR Rechnung, um den ausstehenden Betrag zu bezahlen." , "sqrip") . '</p><img src="' . esc_url($png_file) . '" alt="'.esc_attr('sqrip QR-Code','sqrip').'" width="200" /></div>';
+            echo '<div class="sqrip-qrcode-png"><p>' . esc_html__( 'Verwende die untenstehende QR Rechnung, um den ausstehenden Betrag zu bezahlen.' , 'sqrip') . '</p><img src="' . esc_url($png_file) . '" alt="'.esc_attr('sqrip QR-Code','sqrip').'" width="200" /></div>';
         }
 
         if ( in_array( $integration_order, array('both', 'pdf') ) && $pdf_file ) {
-            $output .= '<div class="sqrip-qrcode-pdf"><a href="' . esc_url($pdf_file) . '" >'.esc_html('Herunterladen PDF QR-Code','sqrip').'</a></div>';
+            echo '<div class="sqrip-qrcode-pdf"><a href="' . esc_url($pdf_file) . '" >'.esc_html__('Herunterladen PDF QR-Code','sqrip').'</a></div>';
         }
 
         if ( is_wc_endpoint_url( 'view-order' ) ) {
-            $output .= '<div class="sqrip-generate-new-qrcode"><button id="sqripGenerateNewQRCode" data-order="'.esc_attr($order_id).'" class="button button-sqrip-generate-qrcode">'. esc_html('Neuen QR-Code generieren','sqrip'). '</a></button>';
+            echo '<div class="sqrip-generate-new-qrcode"><button id="sqripGenerateNewQRCode" data-order="'.esc_attr($order_id).'" class="button button-sqrip-generate-qrcode">'. esc_html__('Neuen QR-Code generieren','sqrip'). '</a></button>';
         }
 
-        $output .= '</div>';
-
-        echo $output;
+        echo '</div>';
     }
 }
 
@@ -567,7 +563,7 @@ function sqrip_init_gateway_class()
                 wc_add_notice( sprintf( __( 'Error: %s', 'sqrip' ), esc_html( $data['message'] ) ), 'error' );
 
                 // Add note to the order for your reference
-                $order->add_order_note( sprintf( __( 'Error: %s', 'sqrip' ), esc_html($data['message']) ) );
+                $order->add_order_note( sprintf( __( 'Error: %s', 'sqrip' ), esc_html( $data['message'] ) ) );
 
                 return false; // Bail early
             }
