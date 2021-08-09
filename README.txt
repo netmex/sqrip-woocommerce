@@ -12,7 +12,7 @@ sqrip erweitert die Zahlungsmöglichkeiten von WooCommerce für Schweizer Shops 
 
 == Description ==
 
-Ende September 2021 werden die traditionellen Einzahlungsscheine (ESR) für Banküberweisungen in der Schweiz verschwinden. Als Ablösung folgt die"QR-Rechnung" (https://www.paymentstandards.ch/), welche im Juli 2020 eingeführt wurde. 
+Ende September 2022 werden die traditionellen Einzahlungsscheine (ESR) für Banküberweisungen in der Schweiz verschwinden. Als Ablösung folgt die"QR-Rechnung" (https://www.paymentstandards.ch/), welche im Juli 2020 eingeführt wurde. 
 
 Um auch in Zukunft diese kostengünstige Zahlungsmöglichkeit anzubieten, haben wir sqrip entwickelt. sqrip für WooCommerce besteht aus einer universellen API (http://api.sqrip.ch/) sowie einem WordPress-Plugin, welches sich nahtlos mit WooCommerce verbindet und mit verschiedenen Optionen aufwartet. Das Plugin ist "open source" (https://github.com/) und lässt sich so für anderen Shopsysteme anpassen.
 
