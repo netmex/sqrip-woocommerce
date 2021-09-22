@@ -1,4 +1,5 @@
 jQuery( document ).ready(function($){
+
     $('#sqripGenerateNewQRCode').on('click', function(e){
         e.preventDefault();
         _this = $(this);
@@ -8,9 +9,11 @@ jQuery( document ).ready(function($){
             url : sqrip.ajax_url, 
             data : {
                 action: "sqrip_generate_new_qr_code", 
+                security: sqrip.ajax_nonce,
                 order_id: order_id
             },
             beforeSend: function(){
+                _this.prop( "disabled", true );
                 _this.text('Generating...');
             },
             success: function(response) {
@@ -18,12 +21,14 @@ jQuery( document ).ready(function($){
                     _this.text('Success generated! Redirecting...');
                     window.location.href = response.redirect;
                 }  else {
-                    _this.text('Some error occurred! Please try again later.');
+                    _this.text('Some error occurred! Try gain.');
                 } 
             },
             error: function( jqXHR, textStatus, errorThrown ){
-                _this.text('Some error occurred! Please try again later.');
-                console.log( 'The following error occured: ' + textStatus, errorThrown );
+                _this.text('Some error occurred! Try gain.');
+            },
+            complete: function(){
+                _this.prop( "disabled", false );
             }
         })
     })
