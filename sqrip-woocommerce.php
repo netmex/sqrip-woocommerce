@@ -557,10 +557,10 @@ function sqrip_init_gateway_class()
                 );
             } else {
 
-                wc_add_notice( sprintf( __( 'Error: %s', 'sqrip' ), esc_html( $data['message'] ) ), 'error' );
+                wc_add_notice( sprintf( __( 'Error: %s', 'sqrip' ), esc_html( $data->message ) ), 'error' );
 
                 // Add note to the order for your reference
-                $order->add_order_note( sprintf( __( 'Error: %s', 'sqrip' ), esc_html( $data['message'] ) ) );
+                $order->add_order_note( sprintf( __( 'Error: %s', 'sqrip' ), esc_html( $data->message ) ) );
 
                 return false; // Bail early
             }
