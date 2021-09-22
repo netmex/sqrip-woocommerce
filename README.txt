@@ -72,6 +72,9 @@ https://documenter.getpostman.com/view/2535172/TW6xnoDp
 4. Sqrip API Key
 
 == Changelog ==
+= 1.0.1 =
+* Remove deprecated "payable_to" field
+* Fix error handling
 = 1.0 =
 * First commit
 
