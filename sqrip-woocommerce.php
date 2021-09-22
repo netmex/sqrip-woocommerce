@@ -491,10 +491,6 @@ function sqrip_init_gateway_class()
                     "amount" => $amount,
                     "due_date" => $due_date,
                 ],
-                "payable_to" =>
-                [
-                    "title" => "Zirkl"
-                ],
                 "lang" => "de",
                 "file_type" => $file_type,
                 "product" => $product,
@@ -560,6 +556,7 @@ function sqrip_init_gateway_class()
                     'redirect' => $this->get_return_url($order),
                 );
             } else {
+
                 wc_add_notice( sprintf( __( 'Error: %s', 'sqrip' ), esc_html( $data['message'] ) ), 'error' );
 
                 // Add note to the order for your reference
