@@ -107,6 +107,11 @@ if (!function_exists('sqrip_add_fields_for_order_details')) {
 
         $reference_id = get_post_meta($post->ID, 'sqrip_reference_id', true);
         $pdf_file = get_post_meta($post->ID, 'sqrip_pdf_file_url', true);
+	    
+        // check for legacy pdf meta file
+        if(!$pdf_file) {
+            $pdf_file = get_post_meta($post->ID, 'sqrip_pdf_file', true);
+        }
         
         if ($reference_id || $pdf_file) {
             echo '<ul class="sqrip-payment">';
