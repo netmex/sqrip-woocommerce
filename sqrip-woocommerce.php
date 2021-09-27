@@ -106,7 +106,7 @@ if (!function_exists('sqrip_add_fields_for_order_details')) {
         global $post;
 
         $reference_id = get_post_meta($post->ID, 'sqrip_reference_id', true);
-        $pdf_file = get_post_meta($post->ID, 'sqrip_pdf_file', true);
+        $pdf_file = get_post_meta($post->ID, 'sqrip_pdf_file_url', true);
         
         if ($reference_id || $pdf_file) {
             echo '<ul class="sqrip-payment">';
@@ -177,10 +177,11 @@ function sqrip_attach_qrcode_pdf_to_email($attachments, $email_id, $order)
     if ( $email_id === 'customer_on_hold_order' && $payment_method === 'sqrip' && in_array($integration_email, $array_in) ) {
         $order_id = $order->id;
 
-        $pdf_file = get_post_meta($order_id, 'sqrip_pdf_file', true);
+        $pdf_file_path = get_post_meta($order_id, 'sqrip_pdf_file_path', true);
 
-        if ($pdf_file) {
-            $attachments[] = $pdf_file;
+		// WARNING: attachments must be local file paths and not URLs
+        if ($pdf_file_path) {
+            $attachments[] = $pdf_file_path;
         }
     }
 
@@ -210,13 +211,13 @@ function sqrip_qr_action_order_details_after_order_table($order)
 
         $integration_order = array_key_exists('integration_order', $plugin_options) ? $plugin_options['integration_order'] : '';
 
-        $png_file = get_post_meta($order_id, 'sqrip_png_file', true);
-        $pdf_file = get_post_meta($order_id, 'sqrip_pdf_file', true);
+        $png_file = get_post_meta($order_id, 'sqrip_png_file_url', true);
+        $pdf_file = get_post_meta($order_id, 'sqrip_pdf_file_url', true);
 
         echo '<div class="sqrip-order-details">';
 
         if ( in_array( $integration_order, array('both', 'qrcode') ) && $png_file ) {
-            echo '<div class="sqrip-qrcode-png"><p>' . esc_html__( 'Verwende die untenstehende QR Rechnung, um den ausstehenden Betrag zu bezahlen.' , 'sqrip') . '</p><img src="' . esc_url($png_file) . '" alt="'.esc_attr('sqrip QR-Code','sqrip').'" width="200" /></div>';
+            echo '<div class="sqrip-qrcode-png"><p>' . esc_html__( 'Verwende die untenstehende QR Rechnung, um den ausstehenden Betrag zu bezahlen.' , 'sqrip') . '</p><a href="' . esc_url($png_file) . '" target="_blank"><img src="' . esc_url($png_file) . '" alt="'.esc_attr('sqrip QR-Code','sqrip').'" width="200" /></a></div>';
         }
 
         if ( in_array( $integration_order, array('both', 'pdf') ) && $pdf_file ) {
@@ -535,14 +536,25 @@ function sqrip_init_gateway_class()
                 $sqrip_png       =    $data->png_file;
                 $sqrip_reference =    $data->reference;
 
-                $sqrip__wp_qr_pdf = $this->file_upload($sqrip_pdf, '.pdf');
-                $sqrip__wp_qr_png = $this->file_upload($sqrip_png, '.png');
+                // TODO: replace with attachment ID and store this in meta instead of actual file
+				$sqrip_qr_pdf_attachment_id = $this->file_upload($sqrip_pdf, '.pdf');
+                $sqrip_qr_png_attachment_id = $this->file_upload($sqrip_png, '.png');
+
+				$sqrip_qr_pdf_url = wp_get_attachment_url($sqrip_qr_pdf_attachment_id);
+	            $sqrip_qr_pdf_path = get_attached_file($sqrip_qr_pdf_attachment_id);
+
+	            $sqrip_qr_png_url = wp_get_attachment_url($sqrip_qr_png_attachment_id);
+	            $sqrip_qr_png_path = get_attached_file($sqrip_qr_png_attachment_id);
 
                 $order->add_order_note( __('sqrip payment QR-Code generated.', 'sqrip') );
 
                 $order->update_meta_data('sqrip_reference_id', $sqrip_reference);
-                $order->update_meta_data('sqrip_pdf_file', $sqrip__wp_qr_pdf);
-                $order->update_meta_data('sqrip_png_file', $sqrip__wp_qr_png);
+
+                $order->update_meta_data('sqrip_pdf_file_url', $sqrip_qr_pdf_url);
+	            $order->update_meta_data('sqrip_pdf_file_path', $sqrip_qr_pdf_path);
+
+				$order->update_meta_data('sqrip_png_file_url', $sqrip_qr_png_url);
+	            $order->update_meta_data('sqrip_png_file_path', $sqrip_qr_png_path);
 
                 // Update order status
                 $order->update_status('on-hold');
@@ -587,7 +599,19 @@ function sqrip_init_gateway_class()
             $uploaddir = wp_upload_dir();
             $uploadfile = $uploaddir['path'] . '/' . $filename;
 
-            $contents = file_get_contents($fileurl);
+			// initiate context with request settings
+	        $plugin_options = get_option('woocommerce_sqrip_settings', array());
+	        $token = $plugin_options['token'];
+	        $stream_options = [
+		        "http" => [
+			        "method" => "GET",
+			        "header" => "Authorization: Bearer $token\r\n"
+		        ]
+	        ];
+
+	        $context = stream_context_create($stream_options);
+
+            $contents = file_get_contents($fileurl, false, $context);
             $savefile = fopen($uploadfile, 'w');
             fwrite($savefile, $contents);
             fclose($savefile);
@@ -607,7 +631,7 @@ function sqrip_init_gateway_class()
             $attach_data = wp_generate_attachment_metadata($attach_id, $uploadfile);
             wp_update_attachment_metadata($attach_id, $attach_data);
 
-            return wp_get_attachment_url($attach_id);
+            return $attach_id;
         }
     }
 }
