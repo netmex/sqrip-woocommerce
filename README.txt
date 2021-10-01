@@ -68,8 +68,8 @@ https://documenter.getpostman.com/view/2535172/TW6xnoDp
 == Screenshots ==
 1. The Settings
 2. Admin Order
-3. QRCode
-4. Sqrip API Key
+3. QR-Code
+4. sqrip API Key
 
 == Changelog ==
 = 1.0.1 =
