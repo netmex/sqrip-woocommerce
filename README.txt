@@ -1,7 +1,7 @@
 === sqrip – Swiss QR Invoice ===
 Contributors: sqrip
-Donate link: https://www.sqrip.ch/
-Tags: woocommerce, payment, sqrip, qrcode, qr, scan, swiss qr invoice
+Donate link: https://sqrip.ch/
+Tags: woocommerce, payment, sqrip, qrcode, qr, scan, swiss qr invoice, QR-Rechnung
 Requires at least: 4.7
 Tested up to: 5.8
 Stable tag: 1.0
@@ -12,16 +12,17 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 sqrip erweitert die Zahlungsmöglichkeiten von WooCommerce für Schweizer Shops und Schweizer Kunden um die neuen QR-Zahlungsteile.
 
 == Description ==
-Ende September 2022 werden die traditionellen Einzahlungsscheine (ESR) für Banküberweisungen in der Schweiz verschwinden. Als Ablösung folgt die"QR-Rechnung" (https://www.paymentstandards.ch/), welche im Juli 2020 eingeführt wurde. 
+Ende September 2022 werden die traditionellen Einzahlungsscheine (ESR) für Banküberweisungen in der Schweiz verschwinden. Als Ablösung folgt die"QR-Rechnung" (https://www.einfach-zahlen.ch/), welche im Juli 2020 eingeführt wurde. 
 
-Um auch in Zukunft diese kostengünstige Zahlungsmöglichkeit anzubieten, haben wir sqrip entwickelt. sqrip für WooCommerce besteht aus einer universellen API (http://api.sqrip.ch/) sowie einem WordPress-Plugin, welches sich nahtlos mit WooCommerce verbindet und mit verschiedenen Optionen aufwartet. Das Plugin ist "open source" (https://github.com/) und lässt sich so für anderen Shopsysteme anpassen.
+Um in Zukunft diese kostengünstige Zahlungsmöglichkeit mit all seinen Vorteilen anzubieten, haben wir sqrip entwickelt. sqrip für WooCommerce besteht aus einer universellen API (http://api.sqrip.ch/) sowie einem WordPress-Plugin, welches sich nahtlos mit WooCommerce verbindet und mit verschiedenen Optionen aufwartet. Das Plugin ist "open source" (https://github.com/netmex/sqrip-woocommerce) und lässt sich so für anderen Shopsysteme anpassen.
 
 = Funktionsweise =
 sqrip wird als zusätzliche Zahlungsmethode in WooCommerce aufgeführt und kann dort konfiguriert werden. Zwecks Identifikation und Abrechnung wird das Plugin über einen API Schlüssel/Token mit dem sqrip-Konto verbunden. Die verschiedenen Produkte (siehe unten) werden von der API erstellt, ausgeliefert und im gewünschten Format in der Mediathek abgespeichert. Von dort kann das Produkt an verschiedenen Orten integriert (z.B. als Beilage in die Bestätigungs-E-Mail) und jederzeit erneut geöffnet werden. Falls die Rechnung geändert wurde, kann mit einem Klick der QR-Zahlungsteil aktualisiert werden.
 
 = Gut zu wissen =
 - Die Rechnung aus WooCommerce wird nicht angetastet. Der QR-Zahlungsteil ist ein eigenes Dokument.
-- Die Referenznummer wird nach dem Zufallsprinzip erstellt.
+- Die Referenznummer wird entweder nach dem Zufallsprinzip erstellt oder auf Basis der Bestell-Nummer berechnet.
+- Um die Kunden zu zwingen, selbst bei manueller Eingabe der Zahlung im e-Banking die Referenz-Nummer anzugeben, empfehlen wir die Verwendung einer QR-IBAN, welche im e-Banking beim Konto zu finden ist oder bei der Bank erfragt werden kann.
 - Ein sqrip-Konto kann mit mehreren Shops verbunden werden.
 
 = Optionen =
@@ -44,10 +45,10 @@ c) Integration in E-Mail
 
 d) Fälligkeitsdatum (= Tage nach Rechnungsstellung)
 
-e) IBAN der Bankverbindung, auf die der Betrag überwiesen wird
+e) (QR-)IBAN der Bankverbindung, auf die der Betrag überwiesen wird.
 
 = Anforderungen =
-1. Neben einer aktuellen WordPress und Wocommerce Installation wird ein Konto auf sqrip.ch benötigt. 
+1. Neben einer aktuellen WordPress und WooCommerce Installation wird ein Konto auf sqrip.ch benötigt. 
 2. Sie benötigen eine (QR-)IBAN einer Schweizer/Liechtensteiner Bank.
 3. Die Kunden müssen Zahlungen mit dieser Methode überweisen können.
 4. Rechnungsbeträge müssen in CHF oder EUR lauten.
@@ -57,12 +58,15 @@ Die an sqrip zwecks Erstellung der QR-Rechnungsprodukt übermittelten Daten werd
 
 == Frequently Asked Questions ==
 = What information do I need? = 
-You need to create sqrip account and then from sqrip dashboard get API Key.
+You need 
+- a sqrip account (http://api.sqrip.ch/login); 
+- an API Key from that account;
+- a (QR-)IBAN
 
-= Where to create a Sqrip account?
+= Where to create a sqrip account?
 http://api.sqrip.ch/login
 
-= Where is Sqrip API documentation? = 
+= Where is sqrip API documentation? = 
 https://documenter.getpostman.com/view/2535172/TW6xnoDp
 
 == Screenshots ==
