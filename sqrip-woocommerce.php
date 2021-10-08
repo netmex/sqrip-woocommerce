@@ -364,6 +364,14 @@ function sqrip_init_gateway_class()
                     'type' => 'text',
                     'description' => __( 'QR-IBAN deines Kontos, auf das die Überweisung erfolgen soll', 'sqrip' ),
                 ),
+                'qr_reference' => array(
+                    'title' => __( 'Reference number', 'sqrip' ),
+                    'type' => 'select',
+                    'options' => array(
+                        'random' => __( 'Random', 'sqrip' ),
+                        'order_number' => __('Order Number', 'sqrip' ),
+                    )
+                ),
             );
         }
 
@@ -520,6 +528,8 @@ function sqrip_init_gateway_class()
             $iban_type          = $plugin_options['iban_type'];
             $file_type          = $plugin_options['file_type'];
             $product            = $plugin_options['product'];
+            $qr_reference       = $plugin_options['qr_reference'];
+            $address            = $plugin_options['address'];
 
             $date               = date('Y-m-d');
             $due_date           = date('Y-m-d', strtotime($date . " + ".$sqrip_due_date." days"));
@@ -544,39 +554,40 @@ function sqrip_init_gateway_class()
 
             $body = [
                 "iban" => [
-                    "iban" => $iban,
+                    "iban"      => $iban,
                     "iban_type" => $iban_type
                 ],
-                "payable_by" =>
-                [
+                "payable_by" => [
                     "name"          => $order_billing_first_name.' '.$order_billing_last_name,
                     "street"        => $order_billing_address_1,
                     "postal_code"   => $order_billing_postcode,
                     "town"          => $order_billing_city,
                     "country_code"  => $order_billing_country
                 ],
-                "payment_information" =>
-                [
-                    "currency_symbol" => $currency_symbol,
-                    "amount" => $amount,
-                    "due_date" => $due_date,
+                "payment_information" => [
+                    "currency_symbol"   => $currency_symbol,
+                    "amount"            => $amount,
+                    "due_date"          => $due_date,
                 ],
-                "lang" => "de",
+                "lang"      => "de",
                 "file_type" => $file_type,
-                "product" => $product,
-                "source" => "woocommerce"
+                "product"   => $product,
+                "source"    => "woocommerce"
             ];
 
-            $payable_to = sqrip_get_payable_to_address("woocommerce");
+            // If the user selects "Order Number" the API request will include param "qr_reference"
+            if ( $qr_reference == "order_number" ) {
+                $body['payment_information']['qr_reference'] = "order_number";
+            }
 
-            $body['payable_to'] = $payable_to ? $payable_to : [];
+            $body['payable_to'] = $address == "woocommerce" ? sqrip_get_payable_to_address("woocommerce") : [];
 
             $body = wp_json_encode($body);
 
             $args = [
                 'method'      => 'POST',
                 'headers'     => [
-                    'Content-Type' => 'application/json',
+                    'Content-Type'  => 'application/json',
                     'Authorization' => 'Bearer '.$token,
                     'Accept' => 'application/json'
                 ],
