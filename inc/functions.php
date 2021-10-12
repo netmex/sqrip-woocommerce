@@ -44,10 +44,12 @@ function sqrip_get_payable_to_address($address)
 
 		    // Country and state separated:
 		    $store_country = $split_country[0];
-
+            $address = get_option( 'woocommerce_store_address' );
+            $address .= get_option( 'woocommerce_store_address_2' ) ? ', '.get_option( 'woocommerce_store_address_2' ) : "";
+            
 		    $result = array(
 		        'name' => get_bloginfo('name'),
-		        'street' => get_option( 'woocommerce_store_address' ),
+		        'street' => $address,
 		        'city' => get_option( 'woocommerce_store_city' ),
 		        'postal_code' => get_option( 'woocommerce_store_postcode' ),
 		        'country_code' => $store_country,
