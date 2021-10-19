@@ -52,164 +52,6 @@ function sqrip_add_gateway_class($gateways)
 }
 
 /**
- *  Adding Meta container admin shop_order pages
- *  
- *  @since 1.0
- */
-
-add_action('add_meta_boxes', 'sqrip_add_meta_boxes');
-
-if (!function_exists('sqrip_add_meta_boxes')) {
-    function sqrip_add_meta_boxes()
-    {
-        add_meta_box('sqrip_detail_fields', __('sqrip Payment', 'sqrip'), 'sqrip_add_fields_for_order_details', 'shop_order', 'side', 'core');
-    }
-}
-
-/**
- *  Adding Meta field in the meta container admin shop_order pages to dislay sqrip payment details
- *  @since 1.0
- */
-
-if (!function_exists('sqrip_add_fields_for_order_details')) {
-    function sqrip_add_fields_for_order_details()
-    {
-        global $post;
-
-        $reference_id = get_post_meta($post->ID, 'sqrip_reference_id', true);
-        $pdf_file = get_post_meta($post->ID, 'sqrip_pdf_file_url', true);
-        
-        // check for legacy pdf meta file
-        if(!$pdf_file) {
-            $pdf_file = get_post_meta($post->ID, 'sqrip_pdf_file', true);
-        }
-        
-        if ($reference_id || $pdf_file) {
-            echo '<ul class="sqrip-payment">';
-
-            echo $reference_id ? '<li><b>'.esc_html__('Reference Number','sqrip').' :</b> '.esc_html($reference_id).'</li>' : '';
-
-            echo $pdf_file ? '<li><b>'.esc_html__( 'QR-Code PDF', 'sqrip' ).' :</b> <a target="_blank" href="'.esc_url($pdf_file).'"><span class="dashicons dashicons-media-document"></span></a></li>' : '';
-
-            echo '</ul>';
-        } else {
-            echo esc_html__( 'Order not use sqrip method', 'sqrip' );
-        }
-    }
-}
-
-/**
- *  Add sqrip QR code image in email body/content
- *  
- * @since 1.0
- */
-
-add_action('woocommerce_email_after_order_table', 'sqrip_add_qrcode_in_email_after_order_table', 99, 4);
-
-function sqrip_add_qrcode_in_email_after_order_table($order, $sent_to_admin, $plain_text, $email)
-{
-    if ( empty($order) || ! isset($email->id) || !method_exists($order,'get_payment_method') ) {
-        return;
-    }
-
-    $payment_method = $order->get_payment_method();
-
-    $plugin_options = get_option('woocommerce_sqrip_settings', array());
-
-    $integration_email = array_key_exists('integration_email', $plugin_options) ? $plugin_options['integration_email'] : '';
-
-    $array_in = array('both', 'body');
-
-    if ( $email->id === 'customer_on_hold_order' && $payment_method === 'sqrip' && in_array($integration_email, $array_in) ) {
-        $order_id = $order->id;
-        $png_file = get_post_meta($order_id, 'sqrip_png_file', true);
-
-        echo $png_file ? '<div class="sqrip-qrcode-png"><p>' . esc_html__( 'Verwende die untenstehende QR Rechnung, um den ausstehenden Betrag zu bezahlen.' , 'sqrip') . '</p><img src="' . esc_url($png_file) . '" alt="'.esc_attr('sqrip QR-Code','sqrip').'" width="200"/></div>' : '';
-    }
-}
-
-/**
- *  sqrip QR code file attach in email
- *  
- *  @since 1.0
- */
-
-add_filter('woocommerce_email_attachments', 'sqrip_attach_qrcode_pdf_to_email', 99, 3);
-
-function sqrip_attach_qrcode_pdf_to_email($attachments, $email_id, $order)
-{
-    if (empty($order) || ! isset( $email_id ) || !method_exists($order,'get_payment_method')) {
-        return $attachments;
-    }
-
-    $payment_method = $order->get_payment_method();
-
-    $plugin_options = get_option('woocommerce_sqrip_settings', array());
-
-    $integration_email = array_key_exists('integration_email', $plugin_options) ? $plugin_options['integration_email'] : '';
-
-    $array_in = array('both', 'attachment');
-    
-    if ( $email_id === 'customer_on_hold_order' && $payment_method === 'sqrip' && in_array($integration_email, $array_in) ) {
-        $order_id = $order->id;
-
-        $pdf_file_path = get_post_meta($order_id, 'sqrip_pdf_file_path', true);
-
-        // WARNING: attachments must be local file paths and not URLs
-        if ($pdf_file_path) {
-            $attachments[] = $pdf_file_path;
-        }
-    }
-
-    return $attachments;
-}
-
-/**
- *  Insert sqrip QR code after customer details
- *  
- *  @since 1.0
- */
-
-add_action('woocommerce_order_details_after_customer_details', 'sqrip_qr_action_order_details_after_order_table', 10, 1);
-
-function sqrip_qr_action_order_details_after_order_table($order)
-{
-    if ( !method_exists($order,'get_payment_method') ) {
-        return;
-    }
-
-    $payment_method = $order->get_payment_method();
-
-    if ($payment_method === 'sqrip') {
-        $order_id = $order->get_id(); 
-
-        $plugin_options = get_option('woocommerce_sqrip_settings', array());
-
-        $integration_order = array_key_exists('integration_order', $plugin_options) ? $plugin_options['integration_order'] : '';
-
-        $png_file = get_post_meta($order_id, 'sqrip_png_file_url', true);
-        $pdf_file = get_post_meta($order_id, 'sqrip_pdf_file_url', true);
-
-        echo '<div class="sqrip-order-details">';
-
-        if ( in_array( $integration_order, array('both', 'qrcode') ) && $png_file ) {
-            echo '<div class="sqrip-qrcode-png"><p>' . esc_html__( 'Verwende die untenstehende QR Rechnung, um den ausstehenden Betrag zu bezahlen.' , 'sqrip') . '</p><a href="' . esc_url($png_file) . '" target="_blank"><img src="' . esc_url($png_file) . '" alt="'.esc_attr('sqrip QR-Code','sqrip').'" width="200" /></a></div>';
-        }
-
-        if ( in_array( $integration_order, array('both', 'pdf') ) && $pdf_file ) {
-            echo '<div class="sqrip-qrcode-pdf"><a href="' . esc_url($pdf_file) . '" >'.esc_html__('Herunterladen PDF QR-Code','sqrip').'</a></div>';
-        }
-
-        if ( is_wc_endpoint_url( 'view-order' ) ) {
-            echo '<div class="sqrip-generate-new-qrcode"><button id="sqripGenerateNewQRCode" data-order="'.esc_attr($order_id).'" class="button button-sqrip-generate-qrcode">'. esc_html__('Neuen QR-Code generieren','sqrip'). '</a></button>';
-        }
-
-        echo '</div>';
-    }
-}
-
-
-/**
  * The class itself, please note that it is inside plugins_loaded action hook
  *
  * @since 1.0
@@ -253,10 +95,9 @@ function sqrip_init_gateway_class()
             $this->due_date = $this->get_option('due_date');
             $this->iban = $this->get_option('iban');
             $this->token = $this->get_option('token');
-            $this->file_type = $this->get_option('file_type');
             $this->product = $this->get_option('product');
             $this->address      = $this->get_option('address');
-
+         
             // This action hook saves the settings
             add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
         }
@@ -266,7 +107,9 @@ function sqrip_init_gateway_class()
          */
         public function init_form_fields()
         {
-
+            $address_woocommerce = sqrip_get_payable_to_address_txt('woocommerce');
+            $address_sqrip = sqrip_get_payable_to_address_txt('sqrip');
+            
             $this->form_fields = array(
                 'enabled' => array(
                     'title'       => __( 'Aktivieren/Deaktivieren', 'sqrip' ),
@@ -274,6 +117,11 @@ function sqrip_init_gateway_class()
                     'type'        => 'checkbox',
                     'description' => '',
                     'default'     => 'no'
+                ),
+                'token' => array(
+                    'title'       => __( 'sqrip Token' , 'sqrip' ),
+                    'type'        => 'textarea',
+                    'description' => __( 'Eröffne ein Konto auf <a href="https://sqrip.ch" target="_blank">https://sqrip.ch</a>, erstelle einen API Schlüssel, kopiere ihn und füge ihn hier ein. Fertig!', 'sqrip' ),
                 ),
                 'title' => array(
                     'title'       => __( 'Name der Zahlungsmethode', 'sqrip' ),
@@ -288,83 +136,178 @@ function sqrip_init_gateway_class()
                     'description' => __( 'Beschreibung, was der Kunde von dieser Zahlungsmöglichkeit zu erwarten hat.', 'sqrip' ),
                     'default'     => 'Bezahlen Sie mit einer QR-Rechnung.',
                 ),
-                'token' => array(
-                    'title'       => __( 'sqrip Token' , 'sqrip' ),
-                    'type'        => 'textarea',
-                    'description' => __( 'Eröffne ein Konto auf https://sqrip.ch, erstelle einen API Schlüssel, kopiere ihn und füge ihn hier ein. Fertig!', 'sqrip' )
-                ),
-                'product' => array(
-                    'title'  => __( 'Produkt', 'sqrip' ),
-                    'type' => 'select',
-                    'desc' => __( 'Produkt auswählen', 'sqrip' ),
-                    'desc_tip' => true,
-                    'options' => array(
-                        '' => __( 'Select the product type', 'sqrip' ),
-                        'QR-Code' => __( 'nur den QR Code' , 'sqrip' ),
-                        'Full A4' => __('A4 (leer) mit Zahlungsteil unten', 'sqrip' ),
-                        'Invoice Slip' => __('nur den Zahlungsteil', 'sqrip' ),
-                    )
-                ),
-                'file_type' => array(
-                    'title'  => __( 'Format', 'sqrip' ),
-                    'type' => 'select',
-                    'desc' => __( 'Format auswählen', 'sqrip' ),
-                    'desc_tip' => true,
-                    'options' => array(
-                        '' => __('Format auswählen', 'sqrip' ),
-                        'svg' => __( 'SVG' ),
-                        'png' => __('PNG'),
-                        'pdf' => __('PDF')
-                    )
-                ),
-                'integration_order' => array(
-                    'title'  => __( 'Integration in Ordnung', 'sqrip' ),
-                    'type' => 'select',
-                    'options' => array(
-                        '' => __('Wählen Sie die Methode', 'sqrip' ),
-                        'qrcode' => __( 'QR Code', 'sqrip' ),
-                        'pdf' => __('PDF', 'sqrip' ),
-                        'both' => __('beides', 'sqrip' ),
-                    )
-                ),
-                'integration_email' => array(
-                    'title'  => __( 'Integration in die Rechnungs-E-Mail', 'sqrip' ),
-                    'type' => 'select',
-                    'options' => array(
-                        '' => __('Ort auswählen', 'sqrip' ),
-                        'body' => __( 'im Text', 'sqrip' ),
-                        'attachment' => __('als Beilage', 'sqrip' ),
-                        'both' => __('beides', 'sqrip' ),
-                    )
-                ),
-                'due_date' => array(
-                    'title'       => __( 'Fälligkeit (Tage nach Bestellung)', 'sqrip' ),
-                    'type'        => 'number',
-                    'default'     => 30
+                'section_payment_recevier' => array(
+                    'title' => __( 'Zahlungsempfänger', 'sqrip' ),
+                    'type' => 'section',
                 ),
                 'address' => array(
                     'title' => __( 'Address', 'sqrip' ),
                     'type' => 'select',
                     'description' => 'The merchant address use from',
                     'options' => array(
-                        'sqrip' => __( 'Sqrip', 'sqrip' ),
-                        'woocommerce' => __('WooCommerce', 'sqrip' ),
+                        'sqrip'         => __( 'vom sqrip-Konto: '.$address_sqrip , 'sqrip' ),
+                        'woocommerce'   => __( 'aus WooCommerce: '.$address_woocommerce , 'sqrip' ),
+                        'individual'    => __( 'Drittadresse' , 'sqrip' ),
                     )
                 ),
-                'iban_type' => array(
-                    'title' => __( 'IBAN Type', 'sqrip' ),
-                    'type' => 'select',
-                    'options' => array(
-                        'qr' => __( 'QR-IBAN', 'sqrip' ),
-                        'simple' => __('Simple IBAN', 'sqrip' ),
-                    )
+                'address_1' => array(
+                    'title' => __( 'Strasse 1', 'sqrip' ),
+                    'type' => 'text',
+                    'class' => 'sqrip-address-individual',
+                ),
+                'address_2' => array(
+                    'title' => __( 'Strasse 2', 'sqrip' ),
+                    'type' => 'text',
+                    'class' => 'sqrip-address-individual',
+                ),
+                'address_postcode' => array(
+                    'title' => __( 'PLZ', 'sqrip' ),
+                    'type' => 'text',
+                    'class' => 'sqrip-address-individual',
+                ),
+                'address_city' => array(
+                    'title' => __( 'Ort', 'sqrip' ),
+                    'type' => 'text',
+                    'class' => 'sqrip-address-individual',
+                ),
+                'address_country' => array(
+                    'title' => __( 'Ländercode', 'sqrip' ),
+                    'type' => 'text',
+                    'class' => 'sqrip-address-individual',
                 ),
                 'iban' => array(
-                    'title' => __( 'IBAN', 'sqrip' ),
+                    'title' => __( '(QR-)IBAN', 'sqrip' ),
                     'type' => 'text',
                     'description' => __( 'QR-IBAN deines Kontos, auf das die Überweisung erfolgen soll', 'sqrip' ),
                 ),
+                'qr_reference' => array(
+                    'title' => __( 'Grundlage der (QR-)Referenznummer', 'sqrip' ),
+                    'type' => 'radio',
+                    'options' => array(
+                        'random' => __( 'zufällige Nummer', 'sqrip' ),
+                        'order_number' => __('Bestellnummer', 'sqrip' ),
+                    ),
+                ),
+                'due_date' => array(
+                    'title'       => __( 'Fälligkeit (Heute in x Tagen)', 'sqrip' ),
+                    'type'        => 'number',
+                    'default'     => 30,
+                    'css'         => "width:70px"
+                ),
+                'section_invoice_settings' => array(
+                    'title' => __('Anzeige der QR-Rechnung', 'sqrip'),
+                    'type'        => 'section',
+                ),
+                'integration_order' => array(
+                    'title'       => __( 'auf der Bestätigungsseite', 'sqrip' ),
+                    'label'       => __( 'Yes', 'sqrip' ),
+                    'type'        => 'checkbox',
+                    'description' => '',
+                    'default'     => 'yes'
+                ),
+                'product' => array(
+                    'title'         => __( 'in der Bestätigungs-E-Mail', 'sqrip' ),
+                    'type'          => 'select',
+                    'description'   => __( 'Produkt auswählen', 'sqrip' ),
+                    'desc_tip'      => true,
+                    'options'       => array(
+                        'Full A4'   => __('auf einem leeren A4-PDF', 'sqrip' ),
+                        'Invoice Slip' => __('nur den A6-Zahlungsteil als PDF', 'sqrip' ),
+                    )
+                ),
+                'integration_email' => array(
+                    'title'     => __( 'Integration', 'sqrip' ),
+                    'type'      => 'select',
+                    'options'   => array(
+                        'body'  => __( 'im Text', 'sqrip' ),
+                        'attachment' => __('als Beilage', 'sqrip' ),
+                        'both'  => __('am Textende UND als Beilage', 'sqrip' ),
+                    )
+                ),
+                'test_email' => array(
+                    'title'       => '',
+                    'type'        => 'checkbox',
+                    'default'     => 'no'
+                ),
+                
             );
+        }
+
+        public function generate_radio_html($key, $data)
+        {
+            $field_key = $this->get_field_key( $key );
+            $defaults  = array(
+              'title'             => '',
+              'disabled'          => false,
+              'class'             => '',
+              'css'               => '',
+              'placeholder'       => '',
+              'type'              => 'text',
+              'desc_tip'          => false,
+              'description'       => '',
+              'custom_attributes' => array(),
+            );
+
+            $data = wp_parse_args( $data, $defaults );
+            $value = $this->get_option( $key );
+
+            ob_start();
+            ?>
+                <tr valign="top">
+                    <th scope="row" class="titledesc">
+                        <label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?> <?php echo $this->get_tooltip_html( $data ); // WPCS: XSS ok. ?></label>
+                    </th>
+                    <td class="forminp">
+                        <fieldset>
+                            <legend class="screen-reader-text"><span><?php echo wp_kses_post( $data['title'] ); ?></span></legend>
+
+                            <?php foreach ( (array) $data['options'] as $option_key => $option_value ) : 
+                                $ip_id = $option_key.'_'.$field_key;
+                                $checked = (string) $option_key == esc_attr($value) ? "checked" : "";
+                                ?>
+                                <div class="sqrip-radio-field <?php echo esc_attr( $data['class'] ); ?>">
+                                <input id="<?php echo esc_attr($ip_id); ?>" type="radio" name="<?php echo esc_attr( $field_key ); ?>" value="<?php echo esc_attr( $option_key ); ?>" <?php echo esc_attr($checked); ?> />
+                                <label for="<?php echo esc_attr($ip_id); ?>"><?php echo esc_html( $option_value ); ?></label>
+                                </div>
+                            <?php endforeach; ?>
+                           
+                            <?php echo $this->get_description_html( $data ); // WPCS: XSS ok. ?>
+                        </fieldset>
+                    </td>
+                </tr>
+                <?php
+
+            return ob_get_clean();
+        }
+
+        public function generate_section_html($key, $data)
+        {
+            $field_key = $this->get_field_key( $key );
+            $defaults  = array(
+              'title'             => '',
+              'disabled'          => false,
+              'class'             => '',
+              'css'               => '',
+              'placeholder'       => '',
+              'type'              => 'text',
+              'desc_tip'          => false,
+              'description'       => '',
+              'custom_attributes' => array(),
+            );
+
+            $data = wp_parse_args( $data, $defaults );
+
+            ob_start();
+            ?>
+                <tr valign="top sqrip-section">
+                    <th scope="row" class="titledesc"  colspan="2">
+                        <h2><?php echo wp_kses_post( $data['title'] ); ?> <?php echo $this->get_tooltip_html( $data ); // WPCS: XSS ok. ?></h2>
+                        <?php echo $this->get_description_html( $data ); // WPCS: XSS ok. ?>
+                    </th>
+                </tr>
+            <?php
+
+            return ob_get_clean();
         }
 
         /**
@@ -392,72 +335,106 @@ function sqrip_init_gateway_class()
 
         }
 
-        /**
-         * Get address infomation from sqrip and store on WordPress
-         */
-        public function save_address_detail_from_sqrip($post_data)
-        {
-            $endpoint = 'https://api.sqrip.ch/api/details';
-            
-            $response   = sqrip_remote_request($endpoint);                
-            
-            if ( $response ) {
-
-                $sqrip_user = $response->user;
-                $sqrip_user_address = $sqrip_user->address;
-
-                $entity_name = $sqrip_user_address->entity_name;
-                $building_number = $sqrip_user_address->building_number;
-                $country_code = $sqrip_user_address->country_code;
-                $city = $sqrip_user_address->city;
-                $zip = $sqrip_user_address->zip;
-                $street = $sqrip_user_address->street;
-
-                // Save sqrip user address in WordPress
-                $option_name = "sqrip_user_address";
-                $option_value = array(
-                    'entity_name' => $entity_name,
-                    'building_number' => $building_number,
-                    'country_code' => $country_code,
-                    'city' => $city,
-                    'zip' => $zip,
-                    'street' => $street
-                );
-
-                if ( get_option( $option_name ) !== false ) {
-
-                    update_option( $option_name, $option_value );
-
-                } else {
-
-                    $deprecated = null;
-                    $autoload = 'no';
-                    add_option( $option_name, $option_value, $deprecated, $autoload );
-
-                }
-
-            } else {
-
-                $settings = new WC_Admin_Settings();
-                $settings->add_error( 'sqrip Token Error. Please make sure you enter the correct sqrip Token!' );
-
-            }
-        }
-
         public function process_admin_options()
         {
             $post_data  = $this->get_post_data();
 
             $this->check_iban_status($post_data);
 
-            // Save address return from sqrip
-            // -----------
-            // $address = $post_data['woocommerce_sqrip_address'];     
-            // if ($address && $address == "sqrip") {
-            //     $this->save_address_detail_from_sqrip($post_data);
-            // } 
+            if ( isset($post_data['woocommerce_sqrip_test_email']) ) {
+
+                $this->send_test_email($post_data);
+
+                unset($_POST['woocommerce_sqrip_test_email']);
+
+            }
 
             return parent::process_admin_options();
+        }
+
+        public function send_test_email($post_data)
+        {
+            $endpoint   = 'https://api.sqrip.madebycolorelephant.com/api/code';
+            $token = $post_data['woocommerce_sqrip_token'];
+            $iban = $post_data['woocommerce_sqrip_iban'];
+            $product = $post_data['woocommerce_sqrip_product'];
+            $sqrip_due_date = $post_data['woocommerce_sqrip_due_date'];
+
+            $date               = date('Y-m-d');
+            $due_date           = date('Y-m-d', strtotime($date . " + ".$sqrip_due_date." days"));
+
+            $body = [
+                "iban" => [
+                    "iban"      => $iban,
+                ],
+                "payable_by" =>
+                [
+                    "name"          => "ABC und XYZ GmbH",
+                    "street"        => "Max Muster, Laurenzenvorstadt 11",
+                    "postal_code"   => 5000,
+                    "town"          => "Aarau",
+                    "country_code"  => "CH"
+                ],
+                "payment_information" =>
+                [
+                    "currency_symbol" => 'CHF',
+                    "amount" => 107.77,
+                    "due_date" => $due_date,
+                ],
+                "lang" => "de",
+                "product" => $product,
+                "source" => "woocommerce"
+            ];
+
+            $body = wp_json_encode($body);
+
+            $args = [
+                'method'      => 'POST',
+                'headers'     => [
+                    'Content-Type' => 'application/json',
+                    'Authorization' => 'Bearer '.$token,
+                    'Accept' => 'application/json'
+                ],
+                'body'        => $body,
+                'data_format' => 'body',
+            ];
+
+            $response = wp_remote_post($endpoint, $args);
+
+            $response_body = wp_remote_retrieve_body($response);
+            $response_body = json_decode($response_body);
+
+            if ($response_body->reference) {
+                $sqrip_pdf       =    $response_body->pdf_file;
+                $sqrip_png       =    $response_body->png_file;
+                $sqrip_reference =    $response_body->reference;
+
+                // TODO: replace with attachment ID and store this in meta instead of actual file
+                $sqrip_qr_pdf_attachment_id = $this->file_upload($sqrip_pdf, '.pdf', $token);
+                $sqrip_qr_png_attachment_id = $this->file_upload($sqrip_png, '.png', $token);
+
+                $sqrip_qr_pdf_url = wp_get_attachment_url($sqrip_qr_pdf_attachment_id);
+                $sqrip_qr_pdf_path = get_attached_file($sqrip_qr_pdf_attachment_id);
+
+                $sqrip_qr_png_url = wp_get_attachment_url($sqrip_qr_png_attachment_id);
+                $sqrip_qr_png_path = get_attached_file($sqrip_qr_png_attachment_id);
+
+                $to = 'devacc247@gmail.com';
+                $subject = 'Test an [Admin-E-Mail of WooCommerce] senden';
+                $body = '<img src="'.$sqrip_qr_png_url.'" />';
+                $headers[] = 'Content-Type: text/html; charset=UTF-8';
+                $attachments = array( $sqrip_qr_pdf_path, $sqrip_qr_png_path );
+                 
+                $wp_mail = wp_mail( $to, $subject, $body, $headers, $attachments );
+                $settings = new WC_Admin_Settings();
+
+                if ( $wp_mail ) {
+                    $settings->add_message( __('Test-E-Mail wurde gesendet!', 'sqrip') );
+                } else {
+                    $settings->add_error( __('Email cannot be sent, please check WP MAIL SMTP', 'sqrip') );
+                }
+            }
+
         }
 
         /**
@@ -517,21 +494,16 @@ function sqrip_init_gateway_class()
             $sqrip_due_date     = $plugin_options['due_date'];
             $token              = $plugin_options['token'];
             $iban               = $plugin_options['iban'];
-            $iban_type          = $plugin_options['iban_type'];
-            $file_type          = $plugin_options['file_type'];
+            
             $product            = $plugin_options['product'];
+            $qr_reference       = $plugin_options['qr_reference'];
+            $address            = $plugin_options['address'];
 
             $date               = date('Y-m-d');
             $due_date           = date('Y-m-d', strtotime($date . " + ".$sqrip_due_date." days"));
 
             if ($iban == '') {
                 $err_msg = esc_html( 'Please add IBAN in setting or SQPR dashboard', 'sqrip' );
-                wc_add_notice($err_msg, 'error');
-                return false;
-            }
-
-            if ($file_type == '') {
-                $err_msg = esc_html( 'Please select file type in setting', 'sqrip' );
                 wc_add_notice($err_msg, 'error');
                 return false;
             }
@@ -544,8 +516,7 @@ function sqrip_init_gateway_class()
 
             $body = [
                 "iban" => [
-                    "iban" => $iban,
-                    "iban_type" => $iban_type
+                    "iban"      => $iban,
                 ],
                 "payable_by" =>
                 [
@@ -562,14 +533,21 @@ function sqrip_init_gateway_class()
                     "due_date" => $due_date,
                 ],
                 "lang" => "de",
-                "file_type" => $file_type,
                 "product" => $product,
                 "source" => "woocommerce"
             ];
 
-            $payable_to = sqrip_get_payable_to_address("woocommerce");
+            // If the user selects "Order Number" the API request will include param "qr_reference"
+            if ( $qr_reference == "order_number" ) {
+                $body['payment_information']['qr_reference'] = $order_id;
+            }
 
-            $body['payable_to'] = $payable_to ? $payable_to : [];
+            if ($address == "sqrip") {
+                $body['payable_to'] = []; 
+            } else{
+                $body['payable_to'] = sqrip_get_payable_to_address($address);
+            }
+
 
             $body = wp_json_encode($body);
 
@@ -683,7 +661,7 @@ function sqrip_init_gateway_class()
         /*
         *  sqrip QR Code PDF  Download in medialibrary and set
         */
-        public function file_upload($fileurl, $type)
+        public function file_upload($fileurl, $type, $token = "")
         {
             include_once(ABSPATH . 'wp-admin/includes/image.php');
 
@@ -696,7 +674,7 @@ function sqrip_init_gateway_class()
 
             // initiate context with request settings
             $plugin_options = get_option('woocommerce_sqrip_settings', array());
-            $token = $plugin_options['token'];
+            $token = $token ? $token : $plugin_options['token'];
             $stream_options = [
                 "http" => [
                     "method" => "GET",
@@ -765,27 +743,31 @@ function sqrip_add_admin_notice()
 }
 
 /**
- * Adding script for settings sqrip page in admin
+ * Adding scripts for settings sqrip page in admin
  *
  * @since 1.0
  */
 
-add_action( 'admin_enqueue_scripts', 'sqrip_admin_enqueue_scripts' );
+add_action( 'admin_enqueue_scripts', function (){
 
-function sqrip_admin_enqueue_scripts()
-{
-    wp_enqueue_style('sqrip-admin', plugins_url( 'css/sqrip-admin.css', __FILE__ ), '', '1.0.3');
+    if (isset($_GET['section']) && $_GET['section'] == "sqrip") {
 
-    wp_enqueue_script('sqrip-admin', plugins_url( 'js/sqrip-admin.js', __FILE__ ), array('jquery'), '1.0.3', true);
-    wp_localize_script( 'sqrip-admin', 'sqrip',
-        array( 
-            'ajax_url' => admin_url( 'admin-ajax.php' ),
-        )
-    );
-}
+        wp_enqueue_style('sqrip-admin', plugins_url( 'css/sqrip-admin.css', __FILE__ ), '', '1.0.3');
+
+        wp_enqueue_script('sqrip-admin', plugins_url( 'js/sqrip-admin.js', __FILE__ ), array('jquery'), '1.0.3', true);
+        wp_localize_script( 'sqrip-admin', 'sqrip',
+            array( 
+                'ajax_url' => admin_url( 'admin-ajax.php' ),
+                'txt_check_connection' => __( 'Verbindung prüfung', 'sqrip' ),
+                'txt_validate_iban' => __( 'Validieren', 'sqrip' ),
+                'txt_send_test_email' =>  __( 'Test an [Admin-E-Mail of WooCommerce] senden', 'sqrip' )
+            )
+        );
+    }
+});
 
 /**
- * Adding script for FE
+ * Adding scripts for FE
  *
  * @since 1.0
  */
@@ -802,4 +784,161 @@ function sqrip_enqueue_scripts()
             'ajax_nonce' => wp_create_nonce( 'sqrip-generate-new-qrcode' )
         )
     );
+}
+
+
+
+/**
+ *  Adding Meta container admin shop_order pages
+ *  
+ *  @since 1.0
+ */
+
+add_action('add_meta_boxes', 'sqrip_add_meta_boxes');
+
+if (!function_exists('sqrip_add_meta_boxes')) {
+    function sqrip_add_meta_boxes()
+    {
+        add_meta_box('sqrip_detail_fields', __('sqrip Payment', 'sqrip'), 'sqrip_add_fields_for_order_details', 'shop_order', 'side', 'core');
+    }
+}
+
+/**
+ *  Adding Meta field in the meta container admin shop_order pages to dislay sqrip payment details
+ *  @since 1.0
+ */
+
+if (!function_exists('sqrip_add_fields_for_order_details')) {
+    function sqrip_add_fields_for_order_details()
+    {
+        global $post;
+
+        $reference_id = get_post_meta($post->ID, 'sqrip_reference_id', true);
+        $pdf_file = get_post_meta($post->ID, 'sqrip_pdf_file_url', true);
+        
+        // check for legacy pdf meta file
+        if(!$pdf_file) {
+            $pdf_file = get_post_meta($post->ID, 'sqrip_pdf_file', true);
+        }
+        
+        if ($reference_id || $pdf_file) {
+            echo '<ul class="sqrip-payment">';
+
+            echo $reference_id ? '<li><b>'.__('Referenznummer','sqrip').' :</b> '.esc_html($reference_id).'</li>' : '';
+
+            echo $pdf_file ? '<li><b>'.__( 'QR-Code PDF', 'sqrip' ).' :</b> <a target="_blank" href="'.esc_url($pdf_file).'"><span class="dashicons dashicons-media-document"></span></a></li>' : '';
+
+            echo '</ul>';
+        } else {
+            echo __( 'Order not use sqrip method', 'sqrip' );
+        }
+    }
+}
+
+/**
+ *  Add sqrip QR code image in email body/content
+ *  
+ * @since 1.0
+ */
+
+add_action('woocommerce_email_after_order_table', 'sqrip_add_qrcode_in_email_after_order_table', 99, 4);
+
+function sqrip_add_qrcode_in_email_after_order_table($order, $sent_to_admin, $plain_text, $email)
+{
+    if ( empty($order) || ! isset($email->id) || !method_exists($order,'get_payment_method') ) {
+        return;
+    }
+
+    $payment_method = $order->get_payment_method();
+
+    $plugin_options = get_option('woocommerce_sqrip_settings', array());
+
+    $integration_email = array_key_exists('integration_email', $plugin_options) ? $plugin_options['integration_email'] : '';
+
+    $array_in = array('both', 'body');
+
+    if ( $email->id === 'customer_on_hold_order' && $payment_method === 'sqrip' && in_array($integration_email, $array_in) ) {
+        $order_id = $order->id;
+        $png_file = get_post_meta($order_id, 'sqrip_png_file_url', true);
+
+        echo $png_file ? '<div class="sqrip-qrcode-png"><p>' . esc_html__( 'Verwende die untenstehende QR Rechnung, um den ausstehenden Betrag zu bezahlen.' , 'sqrip') . '</p><img src="' . esc_url($png_file) . '" alt="'.esc_attr('sqrip QR-Code','sqrip').'" width="200"/></div>' : '';
+    }
+}
+
+/**
+ *  sqrip QR code file attach in email
+ *  
+ *  @since 1.0
+ */
+
+add_filter('woocommerce_email_attachments', 'sqrip_attach_qrcode_pdf_to_email', 99, 3);
+
+function sqrip_attach_qrcode_pdf_to_email($attachments, $email_id, $order)
+{
+    if (empty($order) || ! isset( $email_id ) || !method_exists($order,'get_payment_method')) {
+        return $attachments;
+    }
+
+    $payment_method = $order->get_payment_method();
+
+    $plugin_options = get_option('woocommerce_sqrip_settings', array());
+
+    $integration_email = array_key_exists('integration_email', $plugin_options) ? $plugin_options['integration_email'] : '';
+
+    $array_in = array('both', 'attachment');
+    
+    if ( $email_id === 'customer_on_hold_order' && $payment_method === 'sqrip' && in_array($integration_email, $array_in) ) {
+        $order_id = $order->id;
+
+        $pdf_file_path = get_post_meta($order_id, 'sqrip_pdf_file_path', true);
+
+        // WARNING: attachments must be local file paths and not URLs
+        if ($pdf_file_path) {
+            $attachments[] = $pdf_file_path;
+        }
+    }
+
+    return $attachments;
+}
+
+/**
+ *  Insert sqrip QR code after customer details
+ *  
+ *  @since 1.0
+ */
+
+add_action('woocommerce_order_details_after_customer_details', 'sqrip_qr_action_order_details_after_order_table', 10, 1);
+
+function sqrip_qr_action_order_details_after_order_table($order)
+{
+    if ( !method_exists($order,'get_payment_method') ) {
+        return;
+    }
+
+    $payment_method = $order->get_payment_method();
+
+    if ($payment_method === 'sqrip') {
+        $order_id = $order->get_id(); 
+
+        $plugin_options = get_option('woocommerce_sqrip_settings', array());
+
+        $integration_order = array_key_exists('integration_order', $plugin_options) ? $plugin_options['integration_order'] : '';
+
+        $png_file = get_post_meta($order_id, 'sqrip_png_file_url', true);
+        $pdf_file = get_post_meta($order_id, 'sqrip_pdf_file_url', true);
+
+        echo '<div class="sqrip-order-details">';
+
+        if ( $integration_order == "yes" && $png_file ) {
+            echo '<div class="sqrip-qrcode-png"><p>' . __( 'Verwende die untenstehende QR Rechnung, um den ausstehenden Betrag zu bezahlen.' , 'sqrip') . '</p><a href="' . esc_url($png_file) . '" target="_blank"><img src="' . esc_url($png_file) . '" alt="'.esc_attr('sqrip QR-Code','sqrip').'" width="300" /></a></div>';
+
+            echo '<div class="sqrip-qrcode-pdf"><a href="' . esc_url($pdf_file) . '" >'.__('Herunterladen PDF QR-Code','sqrip').'</a></div>';
+        }
+
+        if ( is_wc_endpoint_url( 'view-order' ) ) {
+            echo '<div class="sqrip-generate-new-qrcode"><button id="sqripGenerateNewQRCode" data-order="'.esc_attr($order_id).'" class="button button-sqrip-generate-qrcode">'. __('Neuen QR-Code generieren','sqrip'). '</a></button>';
+        }
+
+        echo '</div>';
+    }
 }

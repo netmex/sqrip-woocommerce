@@ -63,14 +63,61 @@ add_action( 'wp_ajax_sqrip_validation_iban', 'sqrip_validation_iban_ajax' );
 
 function sqrip_validation_iban_ajax()
 {
-    if (!$_POST['iban'] || !$_POST['iban_type']) return;
+    if (!$_POST['iban'] || !$_POST['token']) return;
 
     $iban = $_POST['iban'];
-    $iban_type = $_POST['iban_type'];
+    $token = $_POST['token'];
 
-    $response = sqrip_validation_iban($iban, $iban_type);
+    $response = sqrip_validation_iban($iban, $token);
+    $result = [];
+    switch ($response->message) {
+        case 'Valid simple IBAN':
+            $result['result'] = true;
+            $result['message'] = __( "validiert" , "sqrip" );
+            $result['description'] = __('Das ist eine normale IBAN. Der Kunde kann Einzahlungen ohne Vermerk der Referenznummer (RF...) tätigen. Der automatische Abgleich mit den Bestellungen ist daher nicht durchgehend gewährleistet. Eine manuelle Bearbeitung kann nötig sein. Für den automatischen Abgleich ist eine QR-IBAN notwendig. Diese ist für die gleiche Kontoverbindung verfügbar. Informationen dazu gibt es bei deiner Bank.', 'sqrip');
+            break;
+        
+        case 'Valid qr IBAN':
+            $result['result'] = true;
+            $result['message'] = __( "validiert" , "sqrip" );
+            $result['description'] = __('Das ist eine QR-IBAN. Der Kunde kann Zahlungen nur mit Angabe einer QR-Referenz(nummer) ausführen. Du kannst die Einzahlung eindeutig einem Kunden / einer Bestellung zuweisen. Damit wird der automatische Abgleich der eingegangenen Zahlungen mit den Bestellungen möglich. Möchtest du diesen Schritt automatisieren? Kontaktiere uns info@sqrip.ch.', 'sqrip');
+            break;
 
-    wp_send_json($response);
+        default:
+            $result['result'] = false;
+            $result['message'] = __( "fehlerhaft" , "sqrip" );
+            $result['description'] = __('(QR-)IBAN deines Kontos, auf das die Überweisung erfolgen soll.', 'sqrip');
+            break;
+    }
+
+    wp_send_json($result);
+      
+    die();
+}
+
+/**
+ * sqrip validation IBAN
+ *
+ * @since 1.0.3
+ */
+
+add_action( 'wp_ajax_sqrip_validation_token', 'sqrip_validation_token_ajax' );
+
+function sqrip_validation_token_ajax()
+{
+    if ( !$_POST['token'] ) return;   
+
+    $response = sqrip_verify_token( $_POST['token'] );
+
+    if ($response->message == "Valid simple IBAN") {
+        $result['result'] = true;
+        $result['message'] = __("API Schlüssel bestätigt", "sqrip");
+    } else {
+        $result['result'] = false;
+        $result['message'] = __("API Schlüssel NICHT bestätigt", "sqrip");
+    }
+
+    wp_send_json($result);
       
     die();
 }

@@ -1,9 +1,9 @@
 <?php 
 
-function sqrip_remote_request( $endpoint, $body = '', $method = 'GET' )
+function sqrip_remote_request( $endpoint, $body = '', $method = 'GET', $token = "" )
 {
     $plugin_options     = get_option('woocommerce_sqrip_settings', array());
-    $token              = $plugin_options['token'];
+    $token              = $token ? $token : $plugin_options['token'];
 
     $args = [];
     $args['method'] = $method;
@@ -35,7 +35,7 @@ function sqrip_get_payable_to_address($address)
     		$result = sqrip_get_user_details();
     		break;
     	
-    	default:
+    	case 'woocommerce':
     		// The country/state
 		    $store_raw_country = get_option( 'woocommerce_default_country' );
 
@@ -55,10 +55,39 @@ function sqrip_get_payable_to_address($address)
 		        'country_code' => $store_country,
 		    );
     		break;
+
+        case 'individual':
+            // sqrip Plugin Options 
+            $plugin_options     = get_option('woocommerce_sqrip_settings', array());
+
+            $address = $plugin_options['address_1'];
+            $address .= $plugin_options['address_2'] ? ', '.$plugin_options['address'] : "";
+            
+            $result = array(
+                'name' => get_bloginfo('name'),
+                'street' => $address,
+                'city' => $plugin_options['address_city'],
+                'postal_code' => $plugin_options['address_postcode'],
+                'country_code' => $plugin_options['address_country'],
+            );
+            break;
     }
    
     return $result;            
 }
+
+
+function sqrip_get_payable_to_address_txt($address){
+
+    $address_arr = sqrip_get_payable_to_address($address);
+
+    if ( !$address_arr ) {
+        return __('No address found!', 'sqrip');
+    }
+
+    return $address_txt = $address_arr['street'].', '.$address_arr['city'].', '.$address_arr['postal_code'].' '.$address_arr['city'];
+}
+
 
 /*
  *  Get user details from sqrip api 
@@ -86,13 +115,37 @@ function sqrip_get_user_details()
     return $result;
 }
 
-
 /*
  *  sqrip validation IBAN
  */
-function sqrip_validation_iban($iban, $iban_type)
+function sqrip_validation_iban($iban, $tokens)
 {
     $endpoint = 'https://api.sqrip.madebycolorelephant.com/api/validate-iban';
+
+    $body = '{
+        "iban": {
+            "iban": "'.$iban.'",
+            "iban_type": "simple"
+        }
+    }';
+
+    $res_decode  = sqrip_remote_request($endpoint, $body, $method = 'POST', $tokens);   
+    
+    return $res_decode;
+}
+
+/*
+ *  sqrip validation Token
+ */
+function sqrip_verify_token($token)
+{
+    if (!$token) {
+        return;
+    }
+
+    $endpoint = 'https://api.sqrip.madebycolorelephant.com/api/validate-iban';
+    $iban = 'CH5604835012345678009';
+    $iban_type = 'simple';
 
     $body = '{
         "iban": {
@@ -101,7 +154,7 @@ function sqrip_validation_iban($iban, $iban_type)
         }
     }';
 
-    $body_decode  = sqrip_remote_request($endpoint, $body, $method = 'POST');   
+    $res_decode  = sqrip_remote_request($endpoint, $body, $method = 'POST', $token);   
     
-    return $body_decode;
+    return $res_decode;
 }

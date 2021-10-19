@@ -25,4 +25,26 @@ body.sqrip-loading{
 
 .sqrip-notice{
     font-weight: bold;
+    display: inline-block;
+    margin: 0 0 0 15px!important;
+    line-height: 1;
+    height: 25px;
+}
+
+table.form-table td .sqrip-notice p{
+    margin: 0;
+    line-height: 22px;
+}
+
+.sqrip-radio-field{
+    display: inline-block;
+    margin-right: 15px;
+}
+
+.sqrip-radio-field input{
+    vertical-align: -webkit-baseline-middle;
+}
+
+.wp-core-ui .button-secondary.sqrip-btn-send-test-email{
+    margin-left: 15px;
 }
