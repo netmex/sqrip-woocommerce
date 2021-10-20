@@ -227,7 +227,8 @@ function sqrip_init_gateway_class()
                 'test_email' => array(
                     'title'       => '',
                     'type'        => 'checkbox',
-                    'default'     => 'no'
+                    'default'     => 'no',
+                    'css'         => 'visibility: hidden'  
                 ),
                 
             );
@@ -419,7 +420,7 @@ function sqrip_init_gateway_class()
                 $sqrip_qr_png_url = wp_get_attachment_url($sqrip_qr_png_attachment_id);
                 $sqrip_qr_png_path = get_attached_file($sqrip_qr_png_attachment_id);
 
-                $to = 'devacc247@gmail.com';
+                $to = get_option('admin_email');
                 $subject = 'Test an [Admin-E-Mail of WooCommerce] senden';
                 $body = '<img src="'.$sqrip_qr_png_url.'" />';
                 $headers[] = 'Content-Type: text/html; charset=UTF-8';
