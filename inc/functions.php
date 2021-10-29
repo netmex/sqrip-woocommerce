@@ -60,12 +60,9 @@ function sqrip_get_payable_to_address($address)
             // sqrip Plugin Options 
             $plugin_options     = get_option('woocommerce_sqrip_settings', array());
 
-            $address = $plugin_options['address_1'];
-            $address .= $plugin_options['address_2'] ? ', '.$plugin_options['address'] : "";
-            
             $result = array(
-                'name' => get_bloginfo('name'),
-                'street' => $address,
+                'name' => $plugin_options['address_name'],
+                'street' => $plugin_options['address_street'],
                 'city' => $plugin_options['address_city'],
                 'postal_code' => $plugin_options['address_postcode'],
                 'country_code' => $plugin_options['address_country'],
@@ -85,18 +82,18 @@ function sqrip_get_payable_to_address_txt($address){
         return __('No address found!', 'sqrip');
     }
 
-    return $address_txt = $address_arr['street'].', '.$address_arr['city'].', '.$address_arr['postal_code'].' '.$address_arr['city'];
+    return $address_txt = $address_arr['name'].', '.$address_arr['street'].', '.$address_arr['city'].', '.$address_arr['postal_code'].' '.$address_arr['city'];
 }
 
 
 /*
  *  Get user details from sqrip api 
  */
-function sqrip_get_user_details()
+function sqrip_get_user_details($token = "")
 {
 	$endpoint = 'https://api.sqrip.madebycolorelephant.com/api/details';
 
-    $body_decode   = sqrip_remote_request($endpoint);      
+    $body_decode   = sqrip_remote_request($endpoint, '', 'GET', $token);      
 
     $address = isset($body_decode->user->address) ? $body_decode->user->address : [];
 
@@ -136,6 +133,7 @@ function sqrip_validation_iban($iban, $tokens)
 
 /*
  *  sqrip validation Token
+ *  @deprecated since v1.0.3 | User sqrip_get_user_details instead
  */
 function sqrip_verify_token($token)
 {

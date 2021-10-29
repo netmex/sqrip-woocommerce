@@ -46,6 +46,10 @@ jQuery( document ).ready(function($){
                         output_html += '<p>'+response.message+'</p>';
                         output_html += '</div>';
                         _this.after(output_html);
+
+                        if (response.address) {
+                            ip_address.find('option[value="sqrip"]').text(response.address);
+                        }
                     }
                 },
                 error: function( jqXHR, textStatus, errorThrown ){
@@ -155,7 +159,7 @@ jQuery( document ).ready(function($){
                         output_html += '<p>'+response.message+'</p>';
                         output_html += '</div>';
                         _this.after(output_html);
-                        _this.siblings('.description').text(response.description);
+                        _this.siblings('.description').html(response.description);
                     }
                 },
                 error: function( jqXHR, textStatus, errorThrown ){
