@@ -423,7 +423,7 @@ function sqrip_init_gateway_class()
                     "due_date" => $due_date,
                 ],
                 "lang" => "de",
-                "product" => $product,
+                "product" => "QR-Code",
                 "source" => "woocommerce"
             ];
 
@@ -612,7 +612,7 @@ function sqrip_init_gateway_class()
                     "due_date" => $due_date,
                 ],
                 "lang" => "de",
-                "product" => $product,
+                "product" => "QR-Code",
                 "source" => "woocommerce"
             ];
 
