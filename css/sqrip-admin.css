@@ -1,0 +1,50 @@
+.sqrip-preview-address{
+	max-width: 368px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    padding: 5px 15px 10px;
+    overflow: hidden;
+    background-color: #fff;
+}
+
+.sqrip-preview-address > h4{
+    margin: 5px 0 10px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #ccc;
+}
+
+body.sqrip-loading{
+    opacity: 0.5;
+    pointer-events: none;
+    cursor: wait;
+}
+
+.forminp .sqrip-btn-validate{
+    margin-left: 10px;
+}
+
+.sqrip-notice{
+    font-weight: bold;
+    display: inline-block;
+    margin: 0 0 0 15px!important;
+    line-height: 1;
+    height: 25px;
+}
+
+table.form-table td .sqrip-notice p{
+    margin: 0;
+    line-height: 22px;
+}
+
+.sqrip-radio-field{
+    display: inline-block;
+    margin-right: 15px;
+}
+
+.sqrip-radio-field input{
+    vertical-align: -webkit-baseline-middle;
+}
+
+.wp-core-ui .button-secondary.sqrip-btn-send-test-email{
+    margin-left: 15px;
+}
