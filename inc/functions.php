@@ -91,7 +91,7 @@ function sqrip_get_payable_to_address_txt($address){
  */
 function sqrip_get_user_details($token = "")
 {
-	$endpoint = 'https://api.sqrip.madebycolorelephant.com/api/details';
+	$endpoint = 'https://api.sqrip.ch/api/details';
 
     $body_decode   = sqrip_remote_request($endpoint, '', 'GET', $token);      
 
@@ -117,7 +117,7 @@ function sqrip_get_user_details($token = "")
  */
 function sqrip_validation_iban($iban, $tokens)
 {
-    $endpoint = 'https://api.sqrip.madebycolorelephant.com/api/validate-iban';
+    $endpoint = 'https://api.sqrip.ch/api/validate-iban';
 
     $body = '{
         "iban": {
@@ -141,7 +141,7 @@ function sqrip_verify_token($token)
         return;
     }
 
-    $endpoint = 'https://api.sqrip.madebycolorelephant.com/api/validate-iban';
+    $endpoint = 'https://api.sqrip.ch/api/validate-iban';
     $iban = 'CH5604835012345678009';
     $iban_type = 'simple';
 

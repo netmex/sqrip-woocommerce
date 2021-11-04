@@ -4,7 +4,7 @@
  * Plugin Name:             sqrip – Swiss QR Invoice
  * Plugin URI:              https://sqrip.ch/
  * Description:             sqrip erweitert die Zahlungsmöglichkeiten von WooCommerce für Schweizer Shops und Schweizer Kunden um die neuen QR-Zahlungsteile.
- * Version:                 1.0.3
+ * Version:                 1.1
  * Author:                  netmex digital gmbh
  * Author URI:              #
  */
@@ -307,7 +307,7 @@ function sqrip_init_gateway_class()
          */
         public function check_iban_status($post_data)
         {
-            $endpoint   = 'https://api.sqrip.madebycolorelephant.com/api/iban-status';
+            $endpoint   = 'https://api.sqrip.ch/api/iban-status';
             $iban       = $post_data['woocommerce_sqrip_iban'];
 
             $body = '{
@@ -332,7 +332,7 @@ function sqrip_init_gateway_class()
          */
         public function update_iban($post_data)
         {
-            $endpoint   = 'https://api.sqrip.madebycolorelephant.com/api/update-iban';
+            $endpoint   = 'https://api.sqrip.ch/api/update-iban';
             $iban       = $post_data['woocommerce_sqrip_iban'];
 
             $body = '{
@@ -390,7 +390,7 @@ function sqrip_init_gateway_class()
 
         public function send_test_email($post_data)
         {
-            $endpoint       = 'https://api.sqrip.madebycolorelephant.com/api/code';
+            $endpoint       = 'https://api.sqrip.ch/api/code';
             $token          = $post_data['woocommerce_sqrip_token'];
             $iban           = $post_data['woocommerce_sqrip_iban'];
             $product        = $post_data['woocommerce_sqrip_product'];
@@ -550,7 +550,7 @@ function sqrip_init_gateway_class()
         {
             global $woocommerce;
             // sqrip API URL
-            $endpoint   = 'https://api.sqrip.madebycolorelephant.com/api/code';
+            $endpoint   = 'https://api.sqrip.ch/api/code';
 
             // we need it to get any order detailes
             $order      = wc_get_order($order_id);
