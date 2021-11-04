@@ -1,0 +1,7 @@
+/assets
+/.git
+/.github
+
+.DS_Store
+.distignore
+.gitignore
