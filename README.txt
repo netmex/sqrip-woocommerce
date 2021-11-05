@@ -4,7 +4,7 @@ Donate link: https://sqrip.ch/
 Tags: woocommerce, payment, sqrip, qrcode, qr, scan, swiss qr invoice, QR-Rechnung
 Requires at least: 4.7
 Tested up to: 5.8
-Stable tag: 1.1.1
+Stable tag: 1.1.2
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -76,6 +76,12 @@ https://documenter.getpostman.com/view/2535172/TW6xnoDp
 4. sqrip API Key
 
 == Changelog ==
+= 1.1.2 =
+* Update Format of PDF Invoices
+
+= 1.1.1 =
+* Add attachement in Email
+
 = 1.1 =
 * Validiert API-Schlüssel und Verbindung zu api.sqrip.ch;
 * Integriert Sicherheitsprozess bei Änderung der (QR-)IBAN: Informiert Konto-Inhaber über Änderung die entweder aktiv bestätigt oder passiv zugelassen werden muss. Deaktiviert vorsorglich Zahlungsmethode;
