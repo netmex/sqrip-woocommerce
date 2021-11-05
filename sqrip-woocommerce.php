@@ -4,7 +4,7 @@
  * Plugin Name:             sqrip – Swiss QR Invoice
  * Plugin URI:              https://sqrip.ch/
  * Description:             sqrip erweitert die Zahlungsmöglichkeiten von WooCommerce für Schweizer Shops und Schweizer Kunden um die neuen QR-Zahlungsteile.
- * Version:                 1.1
+ * Version:                 1.1.1
  * Author:                  netmex digital gmbh
  * Author URI:              #
  */
@@ -200,7 +200,7 @@ function sqrip_init_gateway_class()
                 ),
                 'integration_order' => array(
                     'title'       => __( 'auf der Bestätigungsseite', 'sqrip' ),
-                    'label'       => __( 'QR-Code anzeigen', 'sqrip' ),
+                    'label'       => __( 'QR-Rechnung zum Download anbieten', 'sqrip' ),
                     'type'        => 'checkbox',
                     'description' => '',
                     'default'     => 'yes'
@@ -423,7 +423,7 @@ function sqrip_init_gateway_class()
                     "due_date" => $due_date,
                 ],
                 "lang" => "de",
-                "product" => "QR-Code",
+                "product" => "qr-invoice",
                 "source" => "woocommerce"
             ];
 
@@ -550,7 +550,7 @@ function sqrip_init_gateway_class()
         {
             global $woocommerce;
             // sqrip API URL
-            $endpoint   = 'https://api.sqrip.ch/api/code';
+            $endpoint   = 'https://api.sqrip.madebycolorelephant.com/api/code';
 
             // we need it to get any order detailes
             $order      = wc_get_order($order_id);
@@ -612,7 +612,7 @@ function sqrip_init_gateway_class()
                     "due_date" => $due_date,
                 ],
                 "lang" => "de",
-                "product" => "QR-Code",
+                "product" => "qr-invoice",
                 "source" => "woocommerce"
             ];
 
@@ -833,9 +833,9 @@ add_action( 'admin_enqueue_scripts', function (){
 
     if (isset($_GET['section']) && $_GET['section'] == "sqrip") {
 
-        wp_enqueue_style('sqrip-admin', plugins_url( 'css/sqrip-admin.css', __FILE__ ), '', '1.0.3');
+        wp_enqueue_style('sqrip-admin', plugins_url( 'css/sqrip-admin.css', __FILE__ ), '', '1.1.1');
 
-        wp_enqueue_script('sqrip-admin', plugins_url( 'js/sqrip-admin.js', __FILE__ ), array('jquery'), '1.0.3', true);
+        wp_enqueue_script('sqrip-admin', plugins_url( 'js/sqrip-admin.js', __FILE__ ), array('jquery'), '1.1.1', true);
         wp_localize_script( 'sqrip-admin', 'sqrip',
             array( 
                 'ajax_url' => admin_url( 'admin-ajax.php' ),
@@ -1015,10 +1015,17 @@ function sqrip_qr_action_order_details_after_order_table($order)
 
         echo '<div class="sqrip-order-details">';
 
-        if ( $integration_order == "yes" && $png_file ) {
-            echo '<div class="sqrip-qrcode-png"><p>' . __( 'Verwende die untenstehende QR Rechnung, um den ausstehenden Betrag zu bezahlen.' , 'sqrip') . '</p><a href="' . esc_url($png_file) . '" target="_blank"><img src="' . esc_url($png_file) . '" alt="'.esc_attr('sqrip QR-Code','sqrip').'" width="300" /></a></div>';
+        if ( $integration_order == "yes" && $pdf_file ) {
+            /**
+             *  Insert sqrip QR code PNG after customer details
+             * 
+             *  @deprecated
+             *  @since 1.0.3
+             */
+            // echo '<div class="sqrip-qrcode-png"><p>' . __( 'Verwende die untenstehende QR Rechnung, um den ausstehenden Betrag zu bezahlen.' , 'sqrip') . '</p><a href="' . esc_url($png_file) . '" target="_blank"><img src="' . esc_url($png_file) . '" alt="'.esc_attr('sqrip QR-Code','sqrip').'" width="300" /></a></div>';
 
-            echo '<div class="sqrip-qrcode-pdf"><a href="' . esc_url($pdf_file) . '" >'.__('Herunterladen PDF QR-Code','sqrip').'</a></div>';
+            // Insert download button PDF
+            echo '<div class="sqrip-qrcode-pdf"><p>' . __( 'Verwende die untenstehende QR-Rechnung, um den ausstehenden Betrag zu bezahlen.' , 'sqrip') . '</p><a href="' . esc_url($pdf_file) . '" ><i class="dashicons dashicons-pdf"></i></a></div>';
         }
 
         if ( is_wc_endpoint_url( 'view-order' ) ) {
