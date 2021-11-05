@@ -550,7 +550,7 @@ function sqrip_init_gateway_class()
         {
             global $woocommerce;
             // sqrip API URL
-            $endpoint   = 'https://api.sqrip.madebycolorelephant.com/api/code';
+            $endpoint   = 'https://api.sqrip.ch/api/code';
 
             // we need it to get any order detailes
             $order      = wc_get_order($order_id);
