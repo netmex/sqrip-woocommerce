@@ -944,7 +944,7 @@ if (!function_exists('sqrip_add_fields_for_order_details')) {
 
             echo $pdf_file ? '<li><b>'.__( 'QR-Code PDF', 'sqrip' ).' :</b> <a target="_blank" href="'.esc_url($pdf_file).'"><span class="dashicons dashicons-media-document"></span></a></li>' : '';
 
-            echo '<li><button class="button button-secondary sqrip-re-generate-qrcode">'.__( 'QR-Rechnung erneuern', 'sqrip' ).'</button></li>';
+            echo '<li><button class="button button-secondary sqrip-re-generate-qrcode">'.__( 'QR-Rechnung erneuern', 'sqrip' ).'</button><p>'.__('für Referenznummern auf Basis der Bestellnummer noch NICHT verfügbar', 'sqrip').'</p></li>';
 
             echo '</ul>';
         } else {
