@@ -4,12 +4,12 @@ Donate link: https://sqrip.ch/
 Tags: woocommerce, payment, sqrip, qrcode, qr, scan, swiss qr invoice, QR-Rechnung
 Requires at least: 4.7
 Tested up to: 5.8
-Stable tag: 1.1.2
+Stable tag: 1.1.3
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-sqrip erweitert die Zahlungsmöglichkeiten von WooCommerce für Schweizer Shops und Schweizer Kunden um die neuen QR-Zahlungsteile.
+sqrip erweitert die Zahlungsmöglichkeiten von WooCommerce für Schweizer Shops und  Kunden um die neuen QR-Zahlungsteile.
 
 == Description ==
 Ende September 2022 werden die traditionellen Einzahlungsscheine (ESR) für Banküberweisungen in der Schweiz verschwinden. Als Ablösung folgt die"QR-Rechnung" (https://www.einfach-zahlen.ch/), welche im Juli 2020 eingeführt wurde. 
@@ -17,35 +17,45 @@ Ende September 2022 werden die traditionellen Einzahlungsscheine (ESR) für Bank
 Um in Zukunft diese kostengünstige Zahlungsmöglichkeit mit all seinen Vorteilen anzubieten, haben wir sqrip entwickelt. sqrip für WooCommerce besteht aus einer universellen API (http://api.sqrip.ch/) sowie einem WordPress-Plugin, welches sich nahtlos mit WooCommerce verbindet und mit verschiedenen Optionen aufwartet. Das Plugin ist "open source" (https://github.com/netmex/sqrip-woocommerce) und lässt sich so für anderen Shopsysteme anpassen.
 
 = Funktionsweise =
-sqrip wird als zusätzliche Zahlungsmethode in WooCommerce aufgeführt und kann dort konfiguriert werden. Zwecks Identifikation und Abrechnung wird das Plugin über einen API Schlüssel/Token mit dem sqrip-Konto verbunden. Die verschiedenen Produkte (siehe unten) werden von der API erstellt, ausgeliefert und im gewünschten Format in der Mediathek abgespeichert. Von dort kann das Produkt an verschiedenen Orten integriert (z.B. als Beilage in die Bestätigungs-E-Mail) und jederzeit erneut geöffnet werden. Falls die Rechnung geändert wurde, kann mit einem Klick der QR-Zahlungsteil aktualisiert werden.
+sqrip wird als zusätzliche Zahlungsmethode in WooCommerce aufgeführt und kann dort konfiguriert werden. Zwecks Identifikation und Abrechnung, aber auch aus Sicherheitsaspekten wird das Plugin über einen API Schlüssel/Token mit dem sqrip-Konto verbunden. Die QR-Rechnung wird von der API erstellt, ausgeliefert und im gewünschten Format in der Mediathek abgespeichert. Von dort kann die DAtei an verschiedenen Orten integriert (z.B. als Beilage in die Bestätigungs-E-Mail) und jederzeit erneut geöffnet werden. Falls die Rechnung geändert wurde, kann mit einem Klick der QR-Zahlungsteil aktualisiert werden. Die Referenznummer wird prominent beim Auftrag angezeigt, damit ein Abgleich schnell möglich ist.
 
 = Gut zu wissen =
-- Die Rechnung aus WooCommerce wird nicht angetastet. Der QR-Zahlungsteil ist ein eigenes Dokument.
-- Die Referenznummer wird entweder nach dem Zufallsprinzip erstellt oder auf Basis der Bestell-Nummer berechnet.
-- Um die Kunden zu zwingen, selbst bei manueller Eingabe der Zahlung im e-Banking die Referenz-Nummer anzugeben, empfehlen wir die Verwendung einer QR-IBAN, welche im e-Banking beim Konto zu finden ist oder bei der Bank erfragt werden kann.
-- Ein sqrip-Konto kann mit mehreren Shops verbunden werden.
+- Die Rechnung aus WooCommerce wird nicht angetastet. Die QR-Rechnung ist ein eigenes PDF-Dokument.
+- Als Empfängerkonto kann die normale IBAN oder die neue QR-IBAN verwendet werden. Mit einer QR-IBAN können Zahlungen nur mit Angabe einer QR-Referenz(nummer) ausgeführt werden. Damit lässt sich jede einzelne Einzahlung eindeutig einem Kunden / einer Bestellung zuweisen. Der automatische Abgleich der eingegangenen Zahlungen mit den Bestellungen wird so möglich. Dies ist Grundlage für eine weitere (Teil-)Automatisierung.
+- Ein sqrip-Konto kann mit mehreren Shops verbunden werden. Es sind mehrere API Schlüssel möglich. 
+- Jeder API Schlüssel sollte nach einer selbst gewählten Dauer ersetzt werden. Es besteht daher die Möglichkeit, ein Ablaufdatum zu definieren. Nach diesem Tag kann ohne Anpassungen des Shop-Eigentümers keine QR-Rechnung mehr angeboten werden. Es muss ein neuer API-Schlüssel erstellt und verlinkt werden. 
 
 = Optionen =
 sqrip bietet verschiedene Optionen an:
 
-a) Produkte
+a) Name und Beschreibung der Zahlungsmöglichkeit
+Nenne Sie die Zahlungsmethode 'Banküberweisung' oder 'Einzahlung' oder wie immer Sie wollen.
+
+b) Zahlungsempfänger
+Der Zahlungsempfänger wird automatisch vom sqrip-Konto oder den WooCommerce-Einstellungen übernommen. Eine manuelle Anpassung ist möglich.
+
+c) (QR-)IBAN
+Die Bankverbindung, auf die der Rechnungsbetrag überwiesen werden soll. Wird diese Kontonummer absichtlich oder unabsichtlich geändert, wird der Eigentümer des sqrip-Kontos über diese Änderung per E-Mail informiert. Er kann die Änderung aktiv bestätigen oder passiv zulassen. 
+
+d) (QR-)Referenznummer
+Die Referenznummer wird entweder nach dem Zufallsprinzip erstellt oder auf Basis der Bestell-Nummer berechnet. Sie passt sich automatisch dem verwendeten IBAN-Format an.
+
+e) Fälligkeitsdatum
+Die dem Zahlungspflichtigen gewährte Zeit bis zur Begleichung der Rechnung kann als Text auf dem Zahlungsteil mitgeteilt werden.
+
+f) Einbindung
+Die erstellte QR-Rechnung wird der Bestätigungs-E-Mail beigelegt. Sie kann auch auf der Bestätigungsseite zum Download angeboten werden.
+
+g) E-Mail Beilage
+Die QR-Rechnung kann in zwei Arten der E-Mail beigelegt werden:
 - Seite A4 (leer) mit Zahlungsteil unten
-- nur den Zahlungsteil (früher "Einzahlungsschein)
-- nur den QR-Code
+- nur den Zahlungsteil (früher "Einzahlungsschein) im Format A6
 
-b) Formate
-- PDF
-- PNG
-- SVG
+h) Sprache
+Die auf den QR-Rechnung zu verwendende Sprache (de, fr, it, en) lässt sich pro Shop einstellen.
 
-c) Integration in E-Mail
-- im Text
-- als Beilage
-- sowohl im Text wie auch als Beilage
-
-d) Fälligkeitsdatum (= Tage nach Rechnungsstellung)
-
-e) (QR-)IBAN der Bankverbindung, auf die der Betrag überwiesen wird.
+i) Test E-Mail
+Mit einem Klick testen Sie die Einstellungen und sehen, wie die QR-Rechnung bei Ihren Kunden ankommt.
 
 = Anforderungen =
 1. Neben einer aktuellen WordPress und WooCommerce Installation wird ein Konto auf sqrip.ch benötigt. 
@@ -54,26 +64,36 @@ e) (QR-)IBAN der Bankverbindung, auf die der Betrag überwiesen wird.
 4. Rechnungsbeträge müssen in CHF oder EUR lauten.
 
 = Datenschutz =
-Die an sqrip zwecks Erstellung der QR-Rechnungsprodukt übermittelten Daten werden nach der Auslieferung der Produkte umgehen wieder gelöscht. 
+- Die an sqrip zwecks Erstellung der QR-Rechnung übermittelten Daten (z.B. Zahlungspflichtiger, Betrag) werden nach der Auslieferung der Datei umgehend wieder gelöscht. 
+- Auf https://api.sqrip.ch wird jede Produktion/Auslieferung in einem Logbuch mit Datum/Uhrzeit, Herkunft (z.B. WooCommerce), aufgerufenem API Schlüssel und ausgeliefertem Produkt erfasst. 
 
 == Frequently Asked Questions ==
-= What information do I need? = 
-You need 
-- a sqrip account (http://api.sqrip.ch/login); 
-- an API Key from that account;
-- a (QR-)IBAN
+= Was brauche ich zum Starten? =  
+- Ein sqrip Konto (http://api.sqrip.ch/login); 
+- Einen API Schlüssel, der im Konto erstellt werden kann;
+- Eine (QR-)IBAN.
 
-= Where to create a sqrip account?
-http://api.sqrip.ch/login
+= Was kostet mich eine QR-Rechnung? = 
+Wir rechnen nach effektiv genutzten QR-Rechnungen ab. Eine QR-Rechnung kostet 1 Credit. Credits können in Paketen zu 100 Stk. (für CHF 20) bis 20'000 Stk. (für CHF 1'000) – jeweils zzgl. 7.7% MWST – gekauft werden. Der günstigste Preis für eine QR-Rechnung ist somit 5 Rappen (CHF 0.05).
 
-= Where is sqrip API documentation? = 
-https://documenter.getpostman.com/view/2535172/TW6xnoDp
+= Kann ich die Lösung kostenlos ausprobieren? =
+Ja. Die Anmeldung (http://api.sqrip.ch/login) ist kostenlos. Es werden keine Kreditkartendetails benötigt. Zum Ausprobieren gibt es 20 Credits. Damit lassen sich alle Funktionen testen (Test E-Mail!). Im Anschluss sind Pakete mit Credits zu kaufen. Wenn Ihnen die Leistung nicht passt, können Sie das Konto einfach wieder löschen.
+
+= Wird der Dienst weiterentwickelt? =
+Ja. Wir arbeiten bereits daran, den Abgleich der Aufträge/Bestellungen mit den eingegangenen Zahlungen auf dem Bankkonto zu vergleichen und so den Status einer Bestellung automatisch nachzuführen. Zudem möchten wir die Rückerstattung über den üblichen Bank-Weg ermöglichen. Unser Ziel bleibt: Eine günstige, einfache, vollwertige und verlässliche Zahlungsmethode anzubieten. Ihre Ideen nehmen wir dazu gerne entgegen.
+
+= Welches sind die besten Gründe, sqrip bei unserem Shop einzusetzen? =
+- sqrip ist in 5 Minuten eingerichtet – IT-Kenntnisse sind nicht nötig.
+- sqrip erkennt, wenn ungebetene Gäste die Zahlungsempfäger-IBAN zu ihren Gunsten änderen.
+- sqrip wurde von Shop-Betreibern entwickelt – wir kennen die Bedürfnisse unserer Kunden.
+- Wir wollen selbst nicht stehen bleiben. Deshalb entwickeln wir sqrip weiter. Die Roadmap steht. 
+- Nur gratis ist noch billiger. Eine QR-Rechnung gibt es ab 5 Rappen. Bei Transaktionen mit Kreditkarte oder Twint sind nur schon die fixen Beträge höher.
 
 == Screenshots ==
-1. The Settings
-2. Admin Order
-3. QR-Code
-4. sqrip API Key
+1. Verbindungseinstellungen und Bezeichnung
+2. Zahlungsempfänger
+3. Anzeige
+4. sqrip API Schlüssel
 
 == Changelog ==
 = 1.1 =
@@ -88,18 +108,18 @@ https://documenter.getpostman.com/view/2535172/TW6xnoDp
 * Kleinere Fehlerbehebungen.
 
 = 1.0.3 =
-* Add address options in settings
-* Add IBAN options in settings
+* Erlaubt Anpassung Adresse Zahlungsempfänger;
+* Wir unterscheiden nun zwischen IBAN und QR-IBAN
 
 = 1.0.2 =
-* Add check for legacy pdf file meta value
+* Bugfixing
 
 = 1.0.1 =
 * Remove deprecated "payable_to" field
 * Fix error handling
 
 = 1.0 =
-* First commit
+* Es geht los!
 
 == Upgrade Notice ==
 = 1.0 =

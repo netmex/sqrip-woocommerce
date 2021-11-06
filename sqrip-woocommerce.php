@@ -76,7 +76,7 @@ function sqrip_init_gateway_class()
             $this->icon = ''; // URL of the icon that will be displayed on checkout page near your gateway name
             $this->has_fields = true; // in case you need a custom credit card form
             $this->method_title = __( 'sqrip – Swiss QR-Invoice API' , 'sqrip' );
-            $this->method_description = __( 'sqrip erstellt shop- und kundenspezifische QR-Codes und Zahlungsteile für QR-Rechnungen für die Rechnungsstellung in der Schweiz', 'sqrip' ); // will be displayed on the options page
+            $this->method_description = __( 'sqrip erstellt QR-Codes, A6 QR-Zahlungsteile und A4 QR-Rechnungen für die Rechnungsstellung in der Schweiz', 'sqrip' ); // will be displayed on the options page
 
             // gateways can support subscriptions, refunds, saved payment methods,
             // but in this tutorial we begin with simple payments
@@ -121,7 +121,7 @@ function sqrip_init_gateway_class()
                 'token' => array(
                     'title'       => __( 'API Schlüssel' , 'sqrip' ),
                     'type'        => 'textarea',
-                    'description' => __( 'Eröffne ein Konto auf <a href="https://sqrip.ch" target="_blank">https://sqrip.ch</a>, erstelle einen API Schlüssel, kopiere ihn und füge ihn hier ein. Fertig!', 'sqrip' ),
+                    'description' => __( 'Eröffne ein Konto auf <a href="https://sqrip.ch" target="_blank">https://sqrip.ch</a>, erstelle einen API Schlüssel, kopiere und füge ihn hier ein. Fertig!', 'sqrip' ),
                 ),
                 'title' => array(
                     'title'       => __( 'Name der Zahlungsmethode', 'sqrip' ),
@@ -208,8 +208,7 @@ function sqrip_init_gateway_class()
                 'product' => array(
                     'title'         => __( 'in der Bestätigungs-E-Mail', 'sqrip' ),
                     'type'          => 'select',
-                    'description'   => __( 'Produkt auswählen', 'sqrip' ),
-                    'desc_tip'      => true,
+                    'description' => __( 'Form auswählen', 'sqrip' ),
                     'options'       => array(
                         'Full A4'   => __('auf einem leeren A4-PDF', 'sqrip' ),
                         'Invoice Slip' => __('nur den A6-Zahlungsteil als PDF', 'sqrip' ),
@@ -355,7 +354,7 @@ function sqrip_init_gateway_class()
             $response   = sqrip_remote_request($endpoint, $body, 'POST');  
 
             /**
-             * Do something after Update Iban | Example API Response
+             * Do something after Update IBAN | Example API Response
              * 'message' => 'IBAN updated.
              * 'type' => 'qr'
              * 'confirmation_type' => 'active'
@@ -422,7 +421,7 @@ function sqrip_init_gateway_class()
                 ],
                 "payable_by" =>
                 [
-                    "name"          => "ABC und XYZ GmbH",
+                    "name"          => "Sophie Mustermann",
                     "street"        => "Max Muster, Laurenzenvorstadt 11",
                     "postal_code"   => 5000,
                     "town"          => "Aarau",
@@ -495,8 +494,8 @@ function sqrip_init_gateway_class()
                 $sqrip_qr_png_path = get_attached_file($sqrip_qr_png_attachment_id);
 
                 $to = get_option('admin_email');
-                $subject = 'E-Mail-Test von sqrip';
-                $body = 'E-Mail-Test von sqrip – Swiss QR Invoice';
+                $subject = 'Test E-Mail von sqrip.ch';
+                $body = 'Hier das eingestellte Resultat:';
                 $attachments = [];
 
                 $headers[] = 'From: the Admin-E-Mail <'.$to.'>';
@@ -522,7 +521,7 @@ function sqrip_init_gateway_class()
                 if ( $wp_mail ) {
                     $settings->add_message( __('Test-E-Mail wurde gesendet!', 'sqrip') );
                 } else {
-                    $settings->add_error( __('Email cannot be sent, please check WP MAIL SMTP', 'sqrip') );
+                    $settings->add_error( __('E-Mail can not be sent, please check WP MAIL SMTP', 'sqrip') );
                 }
             } else {
                 $settings->add_error( 
@@ -603,13 +602,13 @@ function sqrip_init_gateway_class()
             $due_date           = date('Y-m-d', strtotime($date . " + ".$sqrip_due_date." days"));
 
             if ($iban == '') {
-                $err_msg = esc_html( 'Please add IBAN in setting or SQPR dashboard', 'sqrip' );
+                $err_msg = esc_html( 'Please add IBAN in settings or sqrip dashboard', 'sqrip' );
                 wc_add_notice($err_msg, 'error');
                 return false;
             }
 
             if ($product == '') {
-                $err_msg = esc_html( 'Please select product in setting', 'sqrip' );
+                $err_msg = esc_html( 'Please select product in settings', 'sqrip' );
                 wc_add_notice($err_msg, 'error');
                 return false;
             }
@@ -828,7 +827,7 @@ function sqrip_add_admin_notice()
 
         if ( !in_array($currency, $currency_arr) ) {
             $class = 'notice notice-error is-dismissible';
-            $message = __( 'The SQRIP plugin only supports EUR and CHF currencies!', 'sqrip' );
+            $message = __( 'The sqrip plugin only supports EUR and CHF currencies!', 'sqrip' );
 
             printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) );
         }
@@ -981,7 +980,7 @@ function sqrip_add_qrcode_in_email_after_order_table($order, $sent_to_admin, $pl
         $order_id = $order->id;
         $png_file = get_post_meta($order_id, 'sqrip_png_file_url', true);
 
-        echo $png_file ? '<div class="sqrip-qrcode-png"><p>' . esc_html__( 'Verwende die untenstehende QR Rechnung, um den ausstehenden Betrag zu bezahlen.' , 'sqrip') . '</p><img src="' . esc_url($png_file) . '" alt="'.esc_attr('sqrip QR-Code','sqrip').'" width="200"/></div>' : '';
+        echo $png_file ? '<div class="sqrip-qrcode-png"><p>' . esc_html__( 'Verwende die untenstehende QR-Rechnung, um den ausstehenden Betrag zu bezahlen.' , 'sqrip') . '</p><img src="' . esc_url($png_file) . '" alt="'.esc_attr('sqrip QR-Code','sqrip').'" width="200"/></div>' : '';
     }
 }
 
@@ -1059,7 +1058,7 @@ function sqrip_qr_action_order_details_after_order_table($order)
              *  @deprecated
              *  @since 1.1.1
              */
-            // echo '<div class="sqrip-qrcode-png"><p>' . __( 'Verwende die untenstehende QR Rechnung, um den ausstehenden Betrag zu bezahlen.' , 'sqrip') . '</p><a href="' . esc_url($png_file) . '" target="_blank"><img src="' . esc_url($png_file) . '" alt="'.esc_attr('sqrip QR-Code','sqrip').'" width="300" /></a></div>';
+            // echo '<div class="sqrip-qrcode-png"><p>' . __( 'Verwende die untenstehende QR-Rechnung, um den ausstehenden Betrag zu bezahlen.' , 'sqrip') . '</p><a href="' . esc_url($png_file) . '" target="_blank"><img src="' . esc_url($png_file) . '" alt="'.esc_attr('sqrip QR-Code','sqrip').'" width="300" /></a></div>';
 
             // Insert download button PDF
             echo '<div class="sqrip-qrcode-pdf"><p>' . __( 'Verwende die untenstehende QR-Rechnung, um den ausstehenden Betrag zu bezahlen.' , 'sqrip') . '</p><a href="' . esc_url($pdf_file) . '" ><i class="dashicons dashicons-pdf"></i></a></div>';
