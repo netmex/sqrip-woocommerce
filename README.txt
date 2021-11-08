@@ -4,7 +4,7 @@ Donate link: https://sqrip.ch/
 Tags: woocommerce, payment, sqrip, qrcode, qr, scan, swiss qr invoice, QR-Rechnung
 Requires at least: 4.7
 Tested up to: 5.8
-Stable tag: 1.1
+Stable tag: 1.1.4
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -57,7 +57,6 @@ Die auf den QR-Rechnung zu verwendende Sprache (de, fr, it, en) lässt sich pro 
 i) Test E-Mail
 Mit einem Klick testen Sie die Einstellungen und sehen, wie die QR-Rechnung bei Ihren Kunden ankommt.
 
-
 = Anforderungen =
 1. Neben einer aktuellen WordPress und WooCommerce Installation wird ein Konto auf sqrip.ch benötigt. 
 2. Sie benötigen eine (QR-)IBAN einer Schweizer/Liechtensteiner Bank.
@@ -75,7 +74,7 @@ Mit einem Klick testen Sie die Einstellungen und sehen, wie die QR-Rechnung bei 
 - Eine (QR-)IBAN.
 
 = Was kostet mich eine QR-Rechnung? = 
-Wir rechnen nach effektiv genutzten QR-Rechnungen ab. Eine QR-Rechnung kostet 1 Credit. Credits können in Paketen zu 100 Stk. (für CHF 20) bis 20'000 Stk. (für CHF 1'000) – jeweils zzgl. 7.7% MWST – gekauft werden. Der günstigste Preis für eine QR-Rechnung ist somit 5 Rappen (CHF 0.05).
+Wir rechnen nach effektiv genutzten QR-Rechnungen ab. Eine QR-Rechnung kostet 1 Credit. Credits können in Paketen zu 100 Stk. (für CHF 20) bis 20'000 Stk. (für CHF 1'000) – jeweils zzgl. 7.7% MWST – gekauft werden. Der günstigste Preis für eine QR-Rechnung ist somit 5 Rappen (CHF 0.05).
 
 = Kann ich die Lösung kostenlos ausprobieren? =
 Ja. Die Anmeldung (http://api.sqrip.ch/login) ist kostenlos. Es werden keine Kreditkartendetails benötigt. Zum Ausprobieren gibt es 20 Credits. Damit lassen sich alle Funktionen testen (Test E-Mail!). Im Anschluss sind Pakete mit Credits zu kaufen. Wenn Ihnen die Leistung nicht passt, können Sie das Konto einfach wieder löschen.
@@ -84,9 +83,9 @@ Ja. Die Anmeldung (http://api.sqrip.ch/login) ist kostenlos. Es werden keine Kre
 Ja. Wir arbeiten bereits daran, den Abgleich der Aufträge/Bestellungen mit den eingegangenen Zahlungen auf dem Bankkonto zu vergleichen und so den Status einer Bestellung automatisch nachzuführen. Zudem möchten wir die Rückerstattung über den üblichen Bank-Weg ermöglichen. Unser Ziel bleibt: Eine günstige, einfache, vollwertige und verlässliche Zahlungsmethode anzubieten. Ihre Ideen nehmen wir dazu gerne entgegen.
 
 = Welches sind die besten Gründe, sqrip bei unserem Shop einzusetzen? =
-- sqrip ist in 5 Minuten eingerichtet – IT-Kenntnisse sind nicht nötig.
+- sqrip ist in 5 Minuten eingerichtet – IT-Kenntnisse sind nicht nötig.
 - sqrip erkennt, wenn ungebetene Gäste die Zahlungsempfäger-IBAN zu ihren Gunsten änderen.
-- sqrip wurde von Shop-Betreibern entwickelt – wir kennen die Bedürfnisse unserer Kunden.
+- sqrip wurde von Shop-Betreibern entwickelt – wir kennen die Bedürfnisse unserer Kunden.
 - Wir wollen selbst nicht stehen bleiben. Deshalb entwickeln wir sqrip weiter. Die Roadmap steht. 
 - Nur gratis ist noch billiger. Eine QR-Rechnung gibt es ab 5 Rappen. Bei Transaktionen mit Kreditkarte oder Twint sind nur schon die fixen Beträge höher.
 
@@ -100,6 +99,7 @@ Ja. Wir arbeiten bereits daran, den Abgleich der Aufträge/Bestellungen mit den 
 = 1.1 =
 * Validiert API-Schlüssel und Verbindung zu api.sqrip.ch;
 * Integriert Sicherheitsprozess bei Änderung der (QR-)IBAN: Informiert Konto-Inhaber über Änderung die entweder aktiv bestätigt oder passiv zugelassen werden muss. Deaktiviert vorsorglich Zahlungsmethode;
+* Erlaubt Anpassung Adresse Zahlungsempfänger;
 * Prüft (QR-)IBAN und erklärt Unterschied bzw. Vorteile;
 * Ermöglicht (QR-)Referenznummern auf Basis einer zufälligen Nummer oder der Bestellnummer;
 * Vereinfacht Lieferungsoptionen und ergänzt Fälligkeitsdatum;

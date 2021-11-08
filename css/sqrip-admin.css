@@ -48,3 +48,7 @@ table.form-table td .sqrip-notice p{
 .wp-core-ui .button-secondary.sqrip-btn-send-test-email{
     margin-left: 15px;
 }
+
+.sqrip-payment .sqrip-re-generate-qrcode{
+    margin-top: 20px;
+}
