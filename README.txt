@@ -12,7 +12,7 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 sqrip erweitert die Zahlungsmöglichkeiten von WooCommerce für Schweizer Shops und  Kunden um die neuen QR-Zahlungsteile.
 
 == Description ==
-Ende September 2022 werden die traditionellen Einzahlungsscheine (ESR) für Banküberweisungen in der Schweiz verschwinden. Als Ablösung folgt die"QR-Rechnung" (https://www.einfach-zahlen.ch/), welche im Juli 2020 eingeführt wurde. 
+Ende September 2022 werden die traditionellen Einzahlungsscheine (ESR) für Banküberweisungen in der Schweiz verschwinden. Als Ablösung folgt die "QR-Rechnung" (https://www.einfach-zahlen.ch/), welche im Juli 2020 eingeführt wurde. 
 
 Um in Zukunft diese kostengünstige Zahlungsmöglichkeit mit all seinen Vorteilen anzubieten, haben wir sqrip entwickelt. sqrip für WooCommerce besteht aus einer universellen API (http://api.sqrip.ch/) sowie einem WordPress-Plugin, welches sich nahtlos mit WooCommerce verbindet und mit verschiedenen Optionen aufwartet. Das Plugin ist "open source" (https://github.com/netmex/sqrip-woocommerce) und lässt sich so für anderen Shopsysteme anpassen.
 
@@ -96,6 +96,11 @@ Ja. Wir arbeiten bereits daran, den Abgleich der Aufträge/Bestellungen mit den 
 4. sqrip API Schlüssel
 
 == Changelog ==
+= 1.2 =
+* Ermöglicht die QR-Rechnung pro Bestellung zu aktualisieren;
+* Anpassung an Beschreibung und der Bilder;
+* Kleinere Fehlerbehebungen.
+
 = 1.1 =
 * Validiert API-Schlüssel und Verbindung zu api.sqrip.ch;
 * Integriert Sicherheitsprozess bei Änderung der (QR-)IBAN: Informiert Konto-Inhaber über Änderung die entweder aktiv bestätigt oder passiv zugelassen werden muss. Deaktiviert vorsorglich Zahlungsmethode;
