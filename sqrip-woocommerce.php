@@ -1,10 +1,10 @@
 <?php
 
 /**
- * Plugin Name:             sqrip – Swiss QR Invoice
+ * Plugin Name:             sqrip – Swiss QR Invoice Provider
  * Plugin URI:              https://sqrip.ch/
  * Description:             sqrip erweitert die Zahlungsmöglichkeiten von WooCommerce für Schweizer Shops und Schweizer Kunden um die neuen QR-Zahlungsteile.
- * Version:                 1.1.4
+ * Version:                 1.2
  * Author:                  netmex digital gmbh
  * Author URI:              #
  */
@@ -208,7 +208,7 @@ function sqrip_init_gateway_class()
                 'product' => array(
                     'title'         => __( 'in der Bestätigungs-E-Mail', 'sqrip' ),
                     'type'          => 'select',
-                    'description' => __( 'Form auswählen', 'sqrip' ),
+                    'description' => __( 'Format auswählen', 'sqrip' ),
                     'options'       => array(
                         'Full A4'   => __('auf einem leeren A4-PDF', 'sqrip' ),
                         'Invoice Slip' => __('nur den A6-Zahlungsteil als PDF', 'sqrip' ),
@@ -709,7 +709,7 @@ function sqrip_init_gateway_class()
                 $sqrip_qr_png_url = wp_get_attachment_url($sqrip_qr_png_attachment_id);
                 $sqrip_qr_png_path = get_attached_file($sqrip_qr_png_attachment_id);
 
-                $order->add_order_note( __('sqrip payment QR-Code generated.', 'sqrip') );
+                $order->add_order_note( __('sqrip QR-Rechnung erstellt.', 'sqrip') );
 
                 $order->update_meta_data('sqrip_reference_id', $sqrip_reference);
 
@@ -943,7 +943,7 @@ if (!function_exists('sqrip_add_fields_for_order_details')) {
 
             echo $pdf_file ? '<li><b>'.__( 'QR-Code PDF', 'sqrip' ).' :</b> <a target="_blank" href="'.esc_url($pdf_file).'"><span class="dashicons dashicons-media-document"></span></a></li>' : '';
 
-            echo '<li><button class="button button-secondary sqrip-re-generate-qrcode">'.__( 'QR-Rechnung erneuern', 'sqrip' ).'</button><p>'.__('für Referenznummern auf Basis der Bestellnummer noch NICHT verfügbar', 'sqrip').'</p></li>';
+            echo '<li><button class="button button-secondary sqrip-re-generate-qrcode">'.__( 'QR-Rechnung erneuern', 'sqrip' ).'</button><p>'.__('für Referenznummern auf Basis der Bestellnummer demnächst auch verfügbar', 'sqrip').'</p></li>';
 
             echo '</ul>';
         } else {
