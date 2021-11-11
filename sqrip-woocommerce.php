@@ -4,7 +4,7 @@
  * Plugin Name:             sqrip – Swiss QR Invoice
  * Plugin URI:              https://sqrip.ch/
  * Description:             sqrip erweitert die Zahlungsmöglichkeiten von WooCommerce für Schweizer Shops und Schweizer Kunden um die neuen QR-Zahlungsteile.
- * Version:                 1.2.4
+ * Version:                 1.2.5
  * Author:                  netmex digital gmbh
  * Author URI:              #
  */
@@ -638,7 +638,7 @@ function sqrip_init_gateway_class()
 
             // If the user selects "Order Number" the API request will include param "qr_reference"
             if ( $qr_reference == "order_number" ) {
-                $body['payment_information']['qr_reference'] = $order_id;
+                $body['payment_information']['qr_reference'] = strval($order_id);
             }
 
             // if ($address == "sqrip") {
@@ -1190,7 +1190,7 @@ add_filter( 'wp_insert_post_data' , function ( $data , $postarr, $unsanitized_po
                 $sqrip_qr_png_url = wp_get_attachment_url($sqrip_qr_png_attachment_id);
                 $sqrip_qr_png_path = get_attached_file($sqrip_qr_png_attachment_id);
 
-                $order->add_order_note( __('sqrip payment QR-Code are re-generated succesfully', 'sqrip') );
+                $order->add_order_note( __('sqrip payment QR-Code wird erfolgreich neu generiert', 'sqrip') );
 
                 $order->update_meta_data('sqrip_reference_id', $sqrip_reference);
 

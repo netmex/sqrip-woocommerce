@@ -93,7 +93,7 @@ function sqrip_get_user_details($token = "")
 {
 	$endpoint = 'https://api.sqrip.ch/api/details';
 
-    $body_decode   = sqrip_remote_request($endpoint, '', 'GET', $token);      
+    $body_decode   = sqrip_remote_request($endpoint, '', 'GET', $token);  
 
     $address = isset($body_decode->user->address) ? $body_decode->user->address : [];
 
@@ -103,7 +103,7 @@ function sqrip_get_user_details($token = "")
     	$result = array(
     		'city' => $address->city,
     		'country_code' => $address->country_code,
-    		'name' => $address->title,
+    		'name' => $body_decode->user->first_name.' '.$body_decode->user->last_name,
     		'postal_code' => $address->zip,
     		'street' => $address->street,
     	);
