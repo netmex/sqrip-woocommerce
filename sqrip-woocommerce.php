@@ -422,7 +422,7 @@ function sqrip_init_gateway_class()
                 "payable_by" =>
                 [
                     "name"          => "Sophie Mustermann",
-                    "street"        => "Max Muster, Laurenzenvorstadt 11",
+                    "street"        => "Laurenzenvorstadt 11",
                     "postal_code"   => 5000,
                     "town"          => "Aarau",
                     "country_code"  => "CH"
