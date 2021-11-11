@@ -4,7 +4,7 @@
  * Plugin Name:             sqrip – Swiss QR Invoice
  * Plugin URI:              https://sqrip.ch/
  * Description:             sqrip erweitert die Zahlungsmöglichkeiten von WooCommerce für Schweizer Shops und Schweizer Kunden um die neuen QR-Zahlungsteile.
- * Version:                 1.2.3
+ * Version:                 1.2.4
  * Author:                  netmex digital gmbh
  * Author URI:              #
  */
@@ -31,7 +31,7 @@ add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'sqrip_plugin_set
 function sqrip_plugin_settings_page($links)
 {
     $action_links = array(
-        'settings' => '<a href="' . admin_url( 'admin.php?page=wc-settings&tab=checkout&section=sqrip' ) . '" aria-label="' . esc_attr__( 'View sqrip settings', 'sqrip' ) . '">' . esc_html__( 'Settings', 'sqrip' ) . '</a>',
+        'settings' => '<a href="' . admin_url( 'admin.php?page=wc-settings&tab=checkout&section=sqrip' ) . '" aria-label="' . esc_attr__( 'Sqrip-Einstellungen anzeigen', 'sqrip' ) . '">' . esc_html__( 'Einstellungen', 'sqrip' ) . '</a>',
     );
 
     return array_merge( $action_links, $links );
@@ -521,7 +521,7 @@ function sqrip_init_gateway_class()
                 if ( $wp_mail ) {
                     $settings->add_message( __('Test-E-Mail wurde gesendet!', 'sqrip') );
                 } else {
-                    $settings->add_error( __('E-Mail can not be sent, please check WP MAIL SMTP', 'sqrip') );
+                    $settings->add_error( __('E-Mail kann nicht gesendet werden, bitte überprüfen Sie WP MAIL SMTP', 'sqrip') );
                 }
             } else {
                 $settings->add_error( 
@@ -827,7 +827,7 @@ function sqrip_add_admin_notice()
 
         if ( !in_array($currency, $currency_arr) ) {
             $class = 'notice notice-error is-dismissible';
-            $message = __( 'The sqrip plugin only supports EUR and CHF currencies!', 'sqrip' );
+            $message = __( 'Das sqrip-Plugin unterstützt nur die Währungen EUR und CHF!', 'sqrip' );
 
             printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) );
         }
@@ -837,7 +837,7 @@ function sqrip_add_admin_notice()
 
     if ( !array_key_exists('pdf', $allowed_types) ) {
         $class = 'notice notice-error is-dismissible';
-        $message = __( 'Your site is currently unable to upload pdf.', 'sqrip' );
+        $message = __( 'Ihre Website kann derzeit kein PDF hochladen.', 'sqrip' );
 
         printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) );
     }
@@ -914,7 +914,7 @@ add_action('add_meta_boxes', 'sqrip_add_meta_boxes');
 if (!function_exists('sqrip_add_meta_boxes')) {
     function sqrip_add_meta_boxes()
     {
-        add_meta_box('sqrip_detail_fields', __('sqrip Payment', 'sqrip'), 'sqrip_add_fields_for_order_details', 'shop_order', 'side', 'core');
+        add_meta_box('sqrip_detail_fields', __('sqrip Zahlung', 'sqrip'), 'sqrip_add_fields_for_order_details', 'shop_order', 'side', 'core');
     }
 }
 
@@ -947,7 +947,7 @@ if (!function_exists('sqrip_add_fields_for_order_details')) {
 
             echo '</ul>';
         } else {
-            echo __( 'Order not use sqrip method', 'sqrip' );
+            echo __( 'Bestellung nicht mit Sqrip-Methode', 'sqrip' );
         }
     }
 }
