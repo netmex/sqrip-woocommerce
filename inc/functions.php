@@ -79,7 +79,7 @@ function sqrip_get_payable_to_address_txt($address){
     $address_arr = sqrip_get_payable_to_address($address);
 
     if ( !$address_arr ) {
-        return __('No address found!', 'sqrip');
+        return __('Keine Adresse gefunden!', 'sqrip');
     }
 
     return $address_txt = $address_arr['name'].', '.$address_arr['street'].', '.$address_arr['city'].', '.$address_arr['postal_code'].' '.$address_arr['city'];

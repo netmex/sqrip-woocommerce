@@ -602,13 +602,13 @@ function sqrip_init_gateway_class()
             $due_date           = date('Y-m-d', strtotime($date . " + ".$sqrip_due_date." days"));
 
             if ($iban == '') {
-                $err_msg = esc_html( 'Please add IBAN in settings or sqrip dashboard', 'sqrip' );
+                $err_msg = __( 'Bitte IBAN in den Einstellungen oder im sqrip Dashboard hinzufügen', 'sqrip' );
                 wc_add_notice($err_msg, 'error');
                 return false;
             }
 
             if ($product == '') {
-                $err_msg = esc_html( 'Please select product in settings', 'sqrip' );
+                $err_msg = __( 'Bitte Produkt in den Einstellungen auswählen.', 'sqrip' );
                 wc_add_notice($err_msg, 'error');
                 return false;
             }
