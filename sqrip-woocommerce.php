@@ -9,7 +9,7 @@
  * Author URI:              #
  */
 
-defined('ABSPATH') || exit;
+defined( 'SQRIP_QR_CODE_ENDPOINT' ) or define( 'SQRIP_QR_CODE_ENDPOINT', 'https://api.sqrip.ch/api/code' );
 
 // Make sure WooCommerce is active
 if ( !in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_option('active_plugins'))) ) 
@@ -400,7 +400,7 @@ function sqrip_init_gateway_class()
 
         public function send_test_email($post_data)
         {
-            $endpoint       = 'https://api.sqrip.ch/api/code';
+            $endpoint       = SQRIP_QR_CODE_ENDPOINT;
             $token          = $post_data['woocommerce_sqrip_token'];
             $iban           = $post_data['woocommerce_sqrip_iban'];
             $product        = $post_data['woocommerce_sqrip_product'];
@@ -569,7 +569,7 @@ function sqrip_init_gateway_class()
         {
             global $woocommerce;
             // sqrip API URL
-            $endpoint   = 'https://api.sqrip.ch/api/code';
+            $endpoint   = SQRIP_QR_CODE_ENDPOINT;
 
             // we need it to get any order detailes
             $order      = wc_get_order($order_id);
@@ -1083,7 +1083,7 @@ add_filter( 'wp_insert_post_data' , function ( $data , $postarr, $unsanitized_po
     if ( 'shop_order' === $data['post_type'] && isset($postarr['_sqrip_regenerate_qrcode']) )
     {
         // sqrip API URL
-        $endpoint   = 'https://api.sqrip.ch/api/code';
+        $endpoint   = SQRIP_QR_CODE_ENDPOINT;
 
         $order      = wc_get_order($postarr['ID']);
         $order_data = $order->get_data(); // order data
