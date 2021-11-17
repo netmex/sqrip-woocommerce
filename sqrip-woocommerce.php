@@ -498,7 +498,7 @@ function sqrip_init_gateway_class()
                 $body = 'Hier das eingestellte Resultat:';
                 $attachments = [];
 
-                $headers[] = 'From: the Admin-E-Mail <'.$to.'>';
+                $headers[] = 'From: sqrip Test-Mail <'.$to.'>';
                 $headers[] = 'Content-Type: text/html; charset=UTF-8';
 
                 switch ($integration) {
@@ -947,7 +947,7 @@ if (!function_exists('sqrip_add_fields_for_order_details')) {
 
             echo '</ul>';
         } else {
-            echo __( 'Bestellung nicht mit Sqrip-Methode', 'sqrip' );
+            echo __( 'Bezahlung erfolgt nicht mit sqrip.', 'sqrip' );
         }
     }
 }
