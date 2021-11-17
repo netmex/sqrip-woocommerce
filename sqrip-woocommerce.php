@@ -575,15 +575,6 @@ function sqrip_init_gateway_class()
             $order      = wc_get_order($order_id);
             $order_data = $order->get_data(); // order data
 
-            ## BILLING INFORMATION:
-            $order_billing_first_name   = $order_data['billing']['first_name'];
-            $order_billing_last_name    = $order_data['billing']['last_name'];
-            $order_billing_address      = $order_data['billing']['address_1'];
-            $order_billing_address      .= $order_data['billing']['address_2'] ? ', '.$order_data['billing']['address_2'] : "";
-            $order_billing_city         = $order_data['billing']['city'];
-            $order_billing_postcode     = intval($order_data['billing']['postcode']);
-            $order_billing_country      = $order_data['billing']['country'];
-                        
             $currency_symbol    =   $order_data['currency'];
             $amount             =   floatval($order_data['total']);
 
@@ -617,14 +608,6 @@ function sqrip_init_gateway_class()
                 "iban" => [
                     "iban"      => $iban,
                 ],
-                "payable_by" =>
-                [
-                    "name"          => $order_billing_first_name.' '.$order_billing_last_name,
-                    "street"        => $order_billing_address,
-                    "postal_code"   => $order_billing_postcode,
-                    "town"          => $order_billing_city,
-                    "country_code"  => $order_billing_country
-                ],
                 "payment_information" =>
                 [
                     "currency_symbol" => $currency_symbol,
@@ -635,6 +618,8 @@ function sqrip_init_gateway_class()
                 "product" => $product,
                 "source" => "woocommerce"
             ];
+
+            $body["payable_by"] = sqrip_get_billing_address_from_order($order);
 
             // If the user selects "Order Number" the API request will include param "qr_reference"
             if ( $qr_reference == "order_number" ) {

@@ -23,6 +23,26 @@ function sqrip_remote_request( $endpoint, $body = '', $method = 'GET', $token = 
     return json_decode($body);
 }
 
+
+/**
+ * Extracts the billing address from a woocommerce order
+ *
+ * @param WC_Order $order woocommerce order
+ *
+ * @return array Array with the address correctly formatted for the
+*                payable_to / payable_by fields in the sqrip API
+ */
+function sqrip_get_billing_address_from_order($order) {
+	$order_data = $order->get_data();
+	$billing_address = array(
+		'name' => $order_data['billing']['first_name'] . ' ' . $order_data['billing']['last_name'],
+		'street' => $order_data['billing']['address_1'] . $order_data['billing']['address_2'] ? ', ' . $order_data['billing']['address_2'] : "",
+		'postal_code' => intval($order_data['billing']['postcode']),
+		'town' => $order_data['billing']['city'],
+		'country_code' => $order_data['billing']['country']
+	);
+	return $billing_address;
+}
 /*
  *  Get payable to address
  */
