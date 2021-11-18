@@ -4,7 +4,7 @@
  * Plugin Name:             sqrip – Swiss QR Invoice
  * Plugin URI:              https://sqrip.ch/
  * Description:             sqrip erweitert die Zahlungsmöglichkeiten von WooCommerce für Schweizer Shops und Schweizer Kunden um die neuen QR-Zahlungsteile.
- * Version:                 1.2.5
+ * Version:                 1.2.6
  * Author:                  netmex digital gmbh
  * Author URI:              #
  */
@@ -109,6 +109,18 @@ function sqrip_init_gateway_class()
         {
             $address_woocommerce = sqrip_get_payable_to_address_txt('woocommerce');
             $address_sqrip = sqrip_get_payable_to_address_txt('sqrip');
+
+            $address_options = [];
+
+            if ($address_sqrip) {
+                $address_options['sqrip'] = __( 'vom sqrip-Konto: '.esc_attr($address_sqrip) , 'sqrip' );
+            }
+
+            if ($address_woocommerce) {
+                $address_options['woocommerce'] = __( 'aus WooCommerce: '.esc_attr($address_woocommerce) , 'sqrip' );
+            }
+
+            $address_options['individual'] = __( 'Drittadresse' , 'sqrip' );
             
             $this->form_fields = array(
                 'enabled' => array(
@@ -144,11 +156,7 @@ function sqrip_init_gateway_class()
                     'title' => __( 'Adresse', 'sqrip' ),
                     'type' => 'select',
                     'description' => __( 'Die auf der QR-Rechnung zu erscheinende Adresse', 'sqrip' ),
-                    'options' => array(
-                        'sqrip'         => __( 'vom sqrip-Konto: '.esc_attr($address_sqrip) , 'sqrip' ),
-                        'woocommerce'   => __( 'aus WooCommerce: '.esc_attr($address_woocommerce) , 'sqrip' ),
-                        'individual'    => __( 'Drittadresse' , 'sqrip' ),
-                    )
+                    'options' => $address_options
                 ),
                 'address_name' => array(
                     'title' => __( 'Name', 'sqrip' ),
