@@ -36,24 +36,33 @@ function sqrip_get_payable_to_address($address)
     		break;
     	
     	case 'woocommerce':
-    		// The country/state
-		    $store_raw_country = get_option( 'woocommerce_default_country' );
 
-		    // Split the country/state
-		    $split_country = explode( ":", $store_raw_country );
+            if ( empty(get_option( 'woocommerce_store_address' )) || empty(get_option( 'woocommerce_store_address_2' )) ) {
 
-		    // Country and state separated:
-		    $store_country = $split_country[0];
-            $address = get_option( 'woocommerce_store_address' );
-            $address .= get_option( 'woocommerce_store_address_2' ) ? ', '.get_option( 'woocommerce_store_address_2' ) : "";
-            
-		    $result = array(
-		        'name' => get_bloginfo('name'),
-		        'street' => $address,
-		        'city' => get_option( 'woocommerce_store_city' ),
-		        'postal_code' => get_option( 'woocommerce_store_postcode' ),
-		        'country_code' => $store_country,
-		    );
+                $result = [];
+                
+            } else {
+
+        		// The country/state
+    		    $store_raw_country = get_option( 'woocommerce_default_country' );
+
+    		    // Split the country/state
+    		    $split_country = explode( ":", $store_raw_country );
+
+    		    // Country and state separated:
+    		    $store_country = $split_country[0];
+                $address = get_option( 'woocommerce_store_address' );
+                $address .= get_option( 'woocommerce_store_address_2' ) ? ' / '.get_option( 'woocommerce_store_address_2' ) : "";
+                
+    		    $result = array(
+    		        'name' => get_bloginfo('name'),
+    		        'street' => $address,
+    		        'city' => get_option( 'woocommerce_store_city' ),
+    		        'postal_code' => get_option( 'woocommerce_store_postcode' ),
+    		        'country_code' => $store_country,
+    		    );
+
+            }
     		break;
 
         case 'individual':
@@ -79,10 +88,10 @@ function sqrip_get_payable_to_address_txt($address){
     $address_arr = sqrip_get_payable_to_address($address);
 
     if ( !$address_arr ) {
-        return __('Keine Adresse gefunden!', 'sqrip');
+        return false;
     }
 
-    return $address_txt = $address_arr['name'].', '.$address_arr['street'].', '.$address_arr['city'].', '.$address_arr['postal_code'].' '.$address_arr['city'];
+    return $address_txt = $address_arr['name'].', '.$address_arr['street'].', '.$address_arr['city'].' '.$address_arr['postal_code'];
 }
 
 
@@ -97,13 +106,15 @@ function sqrip_get_user_details($token = "")
 
     $address = isset($body_decode->user->address) ? $body_decode->user->address : [];
 
+    $name = $address->title ? $address->title : $body_decode->user->first_name.' '.$body_decode->user->last_name;
+
     $result = [];
 
     if ($address) {
     	$result = array(
     		'city' => $address->city,
     		'country_code' => $address->country_code,
-    		'name' => $body_decode->user->first_name.' '.$body_decode->user->last_name,
+    		'name' => $name,
     		'postal_code' => $address->zip,
     		'street' => $address->street,
     	);
