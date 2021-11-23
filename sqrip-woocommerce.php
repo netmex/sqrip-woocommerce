@@ -97,7 +97,14 @@ function sqrip_init_gateway_class()
             $this->token = $this->get_option('token');
             $this->product = $this->get_option('product');
             $this->address      = $this->get_option('address');
-         
+            $this->return_enabled = $this->get_option('return_enabled');
+            $this->return_token = $this->get_option('return_token');
+
+            // Add support for refunds if option is set
+            if($this->return_enabled == "yes") {
+                $this->supports[] = 'refunds';
+            }
+
             // This action hook saves the settings
             add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
         }
@@ -230,6 +237,22 @@ function sqrip_init_gateway_class()
                     'type'        => 'checkbox',
                     'default'     => 'no',
                     'css'         => 'visibility: hidden'  
+                ),
+                'section_return_settings' => array(
+	                'title' => __('Rückerstattungen', 'sqrip'),
+	                'type'        => 'section',
+                ),
+                'return_enabled' => array(
+	                'title'       => __( 'Rückerstattungen Aktivieren/Deaktivieren', 'sqrip' ),
+	                'label'       => __( 'Aktiviere QR-Rechnungen für Rückerstattungen mit der sqrip API', 'sqrip' ),
+	                'type'        => 'checkbox',
+	                'description' => 'Wenn du diese Option aktivierst, generiert die sqrip API im Fall einer Rückerstattung per WooCommerce einen QR Code, welchen du für die Überweisung des Betrags an den Kunden verwenden kannst.',
+	                'default'     => 'no'
+                ),
+                'return_token' => array(
+	                'title'       => __( 'API Schlüssel für Rückerstattungen' , 'sqrip' ),
+	                'type'        => 'textarea',
+	                'description' => __( 'Aus Sicherheitsgründen muss für die Rückerstattungen zwingend ein sqrip API Schlüssel verwendet werden, bei welchem die IBAN Überprüfung <strong>deaktiviert</strong> ist.', 'sqrip' ),
                 ),
                 
             );
