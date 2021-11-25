@@ -9,7 +9,7 @@ Requires PHP: 7.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-sqrip extends WooCommerce payment options for Swiss stores and customers with the new QR payment parts.Priority: high
+sqrip extends WooCommerce payment options for Swiss stores and customers with the new QR payment parts.
 
 == Description ==
 At the end of September 2022, the traditional inpayment slips (ISR) for bank transfers in Switzerland will disappear. The replacement will be the "QR bill" (https://www.einfach-zahlen.ch/), which was introduced in July 2020.
