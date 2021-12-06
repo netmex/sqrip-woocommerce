@@ -188,5 +188,4 @@ jQuery( document ).ready(function($){
             btn_save.trigger('click');
         });
     }
-
 });

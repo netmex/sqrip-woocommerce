@@ -19,5 +19,18 @@ jQuery( document ).ready(function($){
         
     });
 
+    // returns
+    // show / hide QR code in returns
+    $(".woocommerce_sqrip_toggle_qr").on("click", function(e) {
+        e.preventDefault();
+        qr_div = $(this).closest('.woocommerce_sqrip_qr_wrapper');
+        console.log(qr_div);
+        // check visibility
+        if( qr_div.is(":visible") ) {
+            qr_div.show();
+        } else {
+            qr_div.hide();
+        }
+    });
 
 });
