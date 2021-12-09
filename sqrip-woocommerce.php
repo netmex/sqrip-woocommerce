@@ -728,7 +728,7 @@ function sqrip_init_gateway_class()
 
                 wc_add_notice( 
                     sprintf( 
-                        __( 'Error: %s', 'sqrip' ), 
+                        __( 'sqrip Payment Error: %s', 'sqrip' ),
                         esc_html( $err_msg ) ), 
                     'error' 
                 );
@@ -736,7 +736,7 @@ function sqrip_init_gateway_class()
                 // Add note to the order for your reference
                 $order->add_order_note( 
                     sprintf( 
-                        __( 'Error: %s', 'sqrip' ), 
+                        __( 'sqrip Payment Error: %s', 'sqrip' ),
                         esc_html($err_msg) 
                     ) 
                 );
