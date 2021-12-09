@@ -702,16 +702,18 @@ function sqrip_init_gateway_class()
             // sqrip API URL
             $endpoint   = SQRIP_QR_CODE_ENDPOINT;
 
-            // we need it to get any order detailes
+            // we need it to get any order details
             $order      = wc_get_order($order_id);
             $order_data = $order->get_data(); // order data
 
             $currency_symbol    =   $order_data['currency'];
             $amount             =   floatval($order_data['total']);
 
+            $address = sqrip_get_plugin_option('address');
+
             $body = sqrip_prepare_qr_code_request_body($currency_symbol, $amount, strval($order_id));
             $body["payable_by"] = sqrip_get_billing_address_from_order($order);
-            $body['payable_to'] = sqrip_get_payable_to_address();
+            $body['payable_to'] = sqrip_get_payable_to_address($address);
 
 	        $args = sqrip_prepare_remote_args($body, 'POST');
 	        $response = wp_remote_post(SQRIP_QR_CODE_ENDPOINT, $args);
@@ -1159,7 +1161,7 @@ add_filter( 'wp_insert_post_data' , function ( $data , $postarr, $unsanitized_po
 		    "country_code"  => $order_billing_country
 	    ];
 
-        $body['payable_to'] = sqrip_get_payable_to_address();
+        $body['payable_to'] = sqrip_get_payable_to_address('woocommerce');
 
         $args = sqrip_prepare_remote_args($body, 'POST');
 

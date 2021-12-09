@@ -124,7 +124,7 @@ function sqrip_prepare_qr_code_request_body($currency_symbol, $amount, $order_nu
 /*
  *  Get payable to address
  */
-function sqrip_get_payable_to_address($address = null)
+function sqrip_get_payable_to_address($address = 'woocommerce')
 {
 	if(!$address) {
 		return false;
