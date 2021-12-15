@@ -927,6 +927,8 @@ add_action( 'admin_enqueue_scripts', function (){
         wp_localize_script( 'sqrip-order', 'sqrip',
             array( 
                 'ajax_url' => admin_url( 'admin-ajax.php' ),
+                'ajax_refund_paid_nonce' => wp_create_nonce( 'sqrip-mark-refund-paid' ),
+                'ajax_refund_unpaid_nonce' => wp_create_nonce( 'sqrip-mark-refund-unpaid' )
             )
         );
     }
@@ -1232,18 +1234,42 @@ add_filter( 'wp_insert_post_data' , function ( $data , $postarr, $unsanitized_po
 add_action('woocommerce_after_order_refund_item_name', "sqrip_display_refund_qr_code", 10,1);
 
 /**
+ * Displays UI for marking a sqrip refund as completed within the WooCommerce UI
  * @param $refund WC_Order_Refund
  */
 function sqrip_display_refund_qr_code($refund) {
 
 	$refund_qr_attachment_id = $refund->get_meta('sqrip_refund_qr_attachment_id');
-	$refund_qr_pdf_url = wp_get_attachment_url($refund_qr_attachment_id);
-	$refund_qr_pdf_path = get_attached_file($refund_qr_attachment_id);
 
+	if (!$refund_qr_attachment_id) {
+		return;
+	}
+    
+    $refund_qr_pdf_url = wp_get_attachment_url($refund_qr_attachment_id);
+	$refund_qr_pdf_path = get_attached_file($refund_qr_attachment_id);
+    $refund_id = $refund->get_id();
     $title = __("QR Code anzeigen",'sqrip');
-    echo "<br/><a class='woocommerce_sqrip_toggle_qr' href='$refund_qr_pdf_url' title='$title' target='_blank'>$title</a>";
-    echo "<div class='woocommerce_sqrip_qr_wrapper'>";
-    echo    "<img src='$refund_qr_pdf_url' />";
+    $hidden_title = __("QR Code verbergen",'sqrip');
+
+    $paid_title = __("Als bezahlt markieren", 'sqrip');
+    $unpaid_title = __("Als unbezahlt markieren", 'sqrip');
+
+	$paid_status = __("bezahlt am", 'sqrip');
+	$unpaid_status = __("unbezahlt", 'sqrip');
+
+    $paid = $refund->get_meta('sqrip_refund_paid');
+    $status = $paid ? $paid_status." $paid" : $unpaid_status;
+
+    $hide_paid_action_css = !$paid ?: 'display: none';
+	$hide_unpaid_action_css = $paid ?: 'display: none';
+
+    echo "<span class='woocommerce_sqrip_refund_status' data-paid='$paid_status' data-unpaid='$unpaid_status'>[$status]</span>";
+    echo "<br/>";
+    echo "<a class='woocommerce_sqrip_toggle_qr' href='$refund_qr_pdf_url' title='$title' target='_blank' data-title-hide='$hidden_title' data-title='$title' style='margin-right: 10px; $hide_paid_action_css'>$title</a>";
+    echo "<a class='woocommerce_sqrip_refund_paid' href='#' title='$paid_title' style='margin-right: 10px; color: green; $hide_paid_action_css' data-refund='$refund_id'>$paid_title</a>";
+	echo "<a class='woocommerce_sqrip_refund_unpaid' href='#' title='$unpaid_title' style='color: darkred; $hide_unpaid_action_css' data-refund='$refund_id'>$unpaid_title</a>";
+    echo "<div class='woocommerce_sqrip_qr_wrapper' style='display:none; margin: 5px;'>";
+    echo    "<img src='$refund_qr_pdf_url' width='300' height='300'/>";
     echo "</div>";
 
 }
