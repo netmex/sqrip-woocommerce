@@ -1244,7 +1244,7 @@ function sqrip_display_refund_qr_code($refund) {
 	if (!$refund_qr_attachment_id) {
 		return;
 	}
-    
+
     $refund_qr_pdf_url = wp_get_attachment_url($refund_qr_attachment_id);
 	$refund_qr_pdf_path = get_attached_file($refund_qr_attachment_id);
     $refund_id = $refund->get_id();
@@ -1306,4 +1306,55 @@ function action_woocommerce_order_refunded( $order_id, $refund_id ) {
 	$refund->update_meta_data('sqrip_refund_qr_attachment_id', $refund_qr_attachment_id);
 
     $refund->save();
+}
+
+
+add_action( 'show_user_profile', 'sqrip_extra_user_profile_fields' );
+add_action( 'edit_user_profile', 'sqrip_extra_user_profile_fields' );
+
+/**
+ * Displays extra field in user profile page to set iban for refund
+ * @param $user
+ * @return void
+ */
+function sqrip_extra_user_profile_fields( $user ) {
+
+    $sqrip_return_enabled = sqrip_get_plugin_option('return_enabled');
+
+    if($sqrip_return_enabled) {
+        ?>
+        <h3><?php _e("Sqrip Refund Information", "blank"); ?></h3>
+        <table class="form-table">
+            <tr>
+                <th><label for="iban"><?php _e("IBAN"); ?></label></th>
+                <td>
+                    <input type="text" name="iban" id="iban" value="<?php echo esc_attr( sqrip_get_customer_iban($user)); ?>" class="regular-text" /><br />
+                    <span class="description"><?php _e("This iban will be used to generate a sqrip qr code in case of a refund."); ?></span>
+                </td>
+            </tr>
+        </table>
+        <?php
+    }
+}
+
+add_action( 'personal_options_update', 'sqrip_save_extra_user_profile_fields' );
+add_action( 'edit_user_profile_update', 'sqrip_save_extra_user_profile_fields' );
+
+/**
+ * Saves extra user profile fields required by sqrip for refunds
+ * @param $user_id
+ * @return false|void
+ */
+function sqrip_save_extra_user_profile_fields( $user_id ) {
+    if ( empty( $_POST['_wpnonce'] ) || ! wp_verify_nonce( $_POST['_wpnonce'], 'update-user_' . $user_id ) ) {
+        return;
+    }
+
+    if ( !current_user_can( 'edit_user', $user_id ) ) {
+        return false;
+    }
+
+    $user = get_user_by('id', $user_id);
+    sqrip_set_customer_iban($user, $_POST['iban']);
+
 }
