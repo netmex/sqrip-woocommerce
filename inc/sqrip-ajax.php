@@ -146,6 +146,10 @@ function sqrip_mark_refund_paid()
 	$refund->update_meta_data('sqrip_refund_paid', $date);
 	$refund->save();
 
+    // add woocommerce message to original order
+    $order = wc_get_order($refund->get_parent_id());
+    $order->add_order_note( __('sqrip Rückerstattung wurde als \'bezahlt\' markiert', 'sqrip') );
+
 	wp_send_json(['date' => $date, 'result' => 'success']);
 
 	die();
@@ -167,6 +171,10 @@ function sqrip_mark_refund_unpaid()
 
 	$refund->delete_meta_data('sqrip_refund_paid');
 	$refund->save();
+
+    // add woocommerce message to original order
+    $order = wc_get_order($refund->get_parent_id());
+    $order->add_order_note( __('sqrip Rückerstattung wurde als \'unbezahlt\' markiert', 'sqrip') );
 
 	wp_send_json(['result' => 'success']);
 
