@@ -267,3 +267,14 @@ function sqrip_get_customer_iban($user) {
 	// TODO: make the field key customizable in the sqrip options
 	return get_user_meta($user->ID, 'iban_num', true);
 }
+
+/**
+ * Sets the iban number stored in customer meta
+ * @param $user WP_User
+ * @param $iban string
+ * @return bool|int
+ */
+function sqrip_set_customer_iban($user, $iban) {
+    // TODO: make the field key customizable in the sqrip options
+    return update_user_meta($user->ID, 'iban_num', $iban);
+}
