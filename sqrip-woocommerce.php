@@ -4,7 +4,7 @@
  * Plugin Name:             sqrip – Swiss QR Invoice
  * Plugin URI:              https://sqrip.ch/
  * Description:             sqrip extends WooCommerce payment options for Swiss stores and Swiss customers with the new QR payment parts.
- * Version:                 1.3
+ * Version:                 1.2.7
  * Author:                  netmex digital gmbh
  * Author URI:              #
  */
@@ -441,6 +441,7 @@ function sqrip_init_gateway_class()
                 ],
                 "lang" => $lang,
                 "product" => $product,
+                'file_type' => 'pdf',
                 "source" => "woocommerce"
             ];
 
@@ -486,18 +487,18 @@ function sqrip_init_gateway_class()
 
             if (isset($response_body->reference)) {
                 $sqrip_pdf       =    $response_body->pdf_file;
-                $sqrip_png       =    $response_body->png_file;
+                // $sqrip_png       =    $response_body->png_file;
                 $sqrip_reference =    $response_body->reference;
 
                 // TODO: replace with attachment ID and store this in meta instead of actual file
                 $sqrip_qr_pdf_attachment_id = $this->file_upload($sqrip_pdf, '.pdf', $token);
-                $sqrip_qr_png_attachment_id = $this->file_upload($sqrip_png, '.png', $token);
+                // $sqrip_qr_png_attachment_id = $this->file_upload($sqrip_png, '.png', $token);
 
                 $sqrip_qr_pdf_url = wp_get_attachment_url($sqrip_qr_pdf_attachment_id);
                 $sqrip_qr_pdf_path = get_attached_file($sqrip_qr_pdf_attachment_id);
 
-                $sqrip_qr_png_url = wp_get_attachment_url($sqrip_qr_png_attachment_id);
-                $sqrip_qr_png_path = get_attached_file($sqrip_qr_png_attachment_id);
+                // $sqrip_qr_png_url = wp_get_attachment_url($sqrip_qr_png_attachment_id);
+                // $sqrip_qr_png_path = get_attached_file($sqrip_qr_png_attachment_id);
 
                 $to = get_option('admin_email');
                 $subject = 'Test E-Mail von sqrip.ch';
@@ -507,20 +508,22 @@ function sqrip_init_gateway_class()
                 $headers[] = 'From: sqrip Test-Mail <'.$to.'>';
                 $headers[] = 'Content-Type: text/html; charset=UTF-8';
 
-                switch ($integration) {
-                    case 'body':
-                        $body .= '<img src="'.$sqrip_qr_png_url.'" />';
-                        break;
+                $attachments[] = $sqrip_qr_pdf_path;
 
-                    case 'attachment':
-                        $attachments[] = $sqrip_qr_pdf_path;
-                        break;
+                // switch ($integration) {
+                //     case 'body':
+                //         $body .= '<img src="'.$sqrip_qr_png_url.'" />';
+                //         break;
+
+                //     case 'attachment':
+                //         $attachments[] = $sqrip_qr_pdf_path;
+                //         break;
                     
-                    default:
-                        $body = '<img src="'.$sqrip_qr_png_url.'" />';
-                        $attachments[] = $sqrip_qr_pdf_path;
-                        break;
-                }
+                //     default:
+                //         $body = '<img src="'.$sqrip_qr_png_url.'" />';
+                //         $attachments[] = $sqrip_qr_pdf_path;
+                //         break;
+                // }
                  
                 $wp_mail = wp_mail( $to, $subject, $body, $headers, $attachments );
                 
@@ -639,6 +642,7 @@ function sqrip_init_gateway_class()
                 ],
                 "lang" => $lang,
                 "product" => $product,
+                'file_type' => 'pdf',
                 "source" => "woocommerce"
             ];
 
@@ -702,18 +706,18 @@ function sqrip_init_gateway_class()
 
             if (isset($response_body->reference)) {
                 $sqrip_pdf       =    $response_body->pdf_file;
-                $sqrip_png       =    $response_body->png_file;
+                // $sqrip_png       =    $response_body->png_file;
                 $sqrip_reference =    $response_body->reference;
 
                 // TODO: replace with attachment ID and store this in meta instead of actual file
                 $sqrip_qr_pdf_attachment_id = $this->file_upload($sqrip_pdf, '.pdf');
-                $sqrip_qr_png_attachment_id = $this->file_upload($sqrip_png, '.png');
+                // $sqrip_qr_png_attachment_id = $this->file_upload($sqrip_png, '.png');
 
                 $sqrip_qr_pdf_url = wp_get_attachment_url($sqrip_qr_pdf_attachment_id);
                 $sqrip_qr_pdf_path = get_attached_file($sqrip_qr_pdf_attachment_id);
 
-                $sqrip_qr_png_url = wp_get_attachment_url($sqrip_qr_png_attachment_id);
-                $sqrip_qr_png_path = get_attached_file($sqrip_qr_png_attachment_id);
+                // $sqrip_qr_png_url = wp_get_attachment_url($sqrip_qr_png_attachment_id);
+                // $sqrip_qr_png_path = get_attached_file($sqrip_qr_png_attachment_id);
 
                 $order->add_order_note( __('sqrip QR Invoice created.', 'sqrip') );
 
@@ -722,8 +726,8 @@ function sqrip_init_gateway_class()
                 $order->update_meta_data('sqrip_pdf_file_url', $sqrip_qr_pdf_url);
                 $order->update_meta_data('sqrip_pdf_file_path', $sqrip_qr_pdf_path);
 
-                $order->update_meta_data('sqrip_png_file_url', $sqrip_qr_png_url);
-                $order->update_meta_data('sqrip_png_file_path', $sqrip_qr_png_path);
+                // $order->update_meta_data('sqrip_png_file_url', $sqrip_qr_png_url);
+                // $order->update_meta_data('sqrip_png_file_path', $sqrip_qr_png_path);
 
                 // Update order status
                 $order->update_status('on-hold');
@@ -1055,7 +1059,7 @@ function sqrip_qr_action_order_details_after_order_table($order)
 
         $integration_order = array_key_exists('integration_order', $plugin_options) ? $plugin_options['integration_order'] : '';
 
-        $png_file = get_post_meta($order_id, 'sqrip_png_file_url', true);
+        // $png_file = get_post_meta($order_id, 'sqrip_png_file_url', true);
         $pdf_file = get_post_meta($order_id, 'sqrip_pdf_file_url', true);
 
         echo '<div class="sqrip-order-details">';
@@ -1142,6 +1146,7 @@ add_filter( 'wp_insert_post_data' , function ( $data , $postarr, $unsanitized_po
                 "due_date" => $due_date,
             ],
             "lang" => $lang,
+            'file_type' => 'pdf',
             "product" => $product,
             "source" => "woocommerce"
         ];
@@ -1184,20 +1189,20 @@ add_filter( 'wp_insert_post_data' , function ( $data , $postarr, $unsanitized_po
 
             if (isset($response_body->reference)) {
                 $sqrip_pdf       =    $response_body->pdf_file;
-                $sqrip_png       =    $response_body->png_file;
+                // $sqrip_png       =    $response_body->png_file;
                 $sqrip_reference =    $response_body->reference;
 
                 // TODO: replace with attachment ID and store this in meta instead of actual file
                 $sqrip_class_payment = new WC_Sqrip_Payment_Gateway;
 
                 $sqrip_qr_pdf_attachment_id = $sqrip_class_payment->file_upload($sqrip_pdf, '.pdf');
-                $sqrip_qr_png_attachment_id = $sqrip_class_payment->file_upload($sqrip_png, '.png');
+                // $sqrip_qr_png_attachment_id = $sqrip_class_payment->file_upload($sqrip_png, '.png');
 
                 $sqrip_qr_pdf_url = wp_get_attachment_url($sqrip_qr_pdf_attachment_id);
                 $sqrip_qr_pdf_path = get_attached_file($sqrip_qr_pdf_attachment_id);
 
-                $sqrip_qr_png_url = wp_get_attachment_url($sqrip_qr_png_attachment_id);
-                $sqrip_qr_png_path = get_attached_file($sqrip_qr_png_attachment_id);
+                // $sqrip_qr_png_url = wp_get_attachment_url($sqrip_qr_png_attachment_id);
+                // $sqrip_qr_png_path = get_attached_file($sqrip_qr_png_attachment_id);
 
                 $order->add_order_note( __('sqrip payment QR code is successfully regenerated', 'sqrip') );
 
@@ -1206,8 +1211,8 @@ add_filter( 'wp_insert_post_data' , function ( $data , $postarr, $unsanitized_po
                 $order->update_meta_data('sqrip_pdf_file_url', $sqrip_qr_pdf_url);
                 $order->update_meta_data('sqrip_pdf_file_path', $sqrip_qr_pdf_path);
 
-                $order->update_meta_data('sqrip_png_file_url', $sqrip_qr_png_url);
-                $order->update_meta_data('sqrip_png_file_path', $sqrip_qr_png_path);
+                // $order->update_meta_data('sqrip_png_file_url', $sqrip_qr_png_url);
+                // $order->update_meta_data('sqrip_png_file_path', $sqrip_qr_png_path);
 
                 $order->save();
 
