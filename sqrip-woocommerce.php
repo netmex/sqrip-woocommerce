@@ -9,7 +9,7 @@
  * Author URI:              #
  */
 
-defined('ABSPATH') || exit;
+defined( 'SQRIP_QR_CODE_ENDPOINT' ) or define( 'SQRIP_QR_CODE_ENDPOINT', 'https://api.sqrip.ch/api/code' );
 
 // Make sure WooCommerce is active
 if ( !in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_option('active_plugins'))) ) 
@@ -97,7 +97,14 @@ function sqrip_init_gateway_class()
             $this->token = $this->get_option('token');
             $this->product = $this->get_option('product');
             $this->address      = $this->get_option('address');
-         
+            $this->return_enabled = $this->get_option('return_enabled');
+            $this->return_token = $this->get_option('return_token');
+
+            // Add support for refunds if option is set
+            if($this->return_enabled == "yes") {
+                $this->supports[] = 'refunds';
+            }
+
             // This action hook saves the settings
             add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
         }
@@ -236,6 +243,22 @@ function sqrip_init_gateway_class()
                     'type'        => 'checkbox',
                     'default'     => 'no',
                     'css'         => 'visibility: hidden'  
+                ),
+                'section_return_settings' => array(
+	                'title' => __('Rückerstattungen', 'sqrip'),
+	                'type'        => 'section',
+                ),
+                'return_enabled' => array(
+	                'title'       => __( 'Rückerstattungen Aktivieren/Deaktivieren', 'sqrip' ),
+	                'label'       => __( 'Aktiviere QR-Rechnungen für Rückerstattungen mit der sqrip API', 'sqrip' ),
+	                'type'        => 'checkbox',
+	                'description' => 'Wenn du diese Option aktivierst, generiert die sqrip API im Fall einer Rückerstattung per WooCommerce einen QR Code, welchen du für die Überweisung des Betrags an den Kunden verwenden kannst.',
+	                'default'     => 'no'
+                ),
+                'return_token' => array(
+	                'title'       => __( 'API Schlüssel für Rückerstattungen' , 'sqrip' ),
+	                'type'        => 'textarea',
+	                'description' => __( 'Aus Sicherheitsgründen muss für die Rückerstattungen zwingend ein sqrip API Schlüssel verwendet werden, bei welchem die IBAN Überprüfung <strong>deaktiviert</strong> ist.', 'sqrip' ),
                 ),
                 
             );
@@ -406,7 +429,7 @@ function sqrip_init_gateway_class()
 
         public function send_test_email($post_data)
         {
-            $endpoint       = 'https://api.sqrip.ch/api/code';
+            $endpoint       = SQRIP_QR_CODE_ENDPOINT;
             $token          = $post_data['woocommerce_sqrip_token'];
             $iban           = $post_data['woocommerce_sqrip_iban'];
             $product        = $post_data['woocommerce_sqrip_product'];
@@ -571,6 +594,114 @@ function sqrip_init_gateway_class()
         {
         }
 
+	    /**
+         * Process the refund by creating another qr code that the owner of the
+         * shop can use to refund the money to the customer
+	     *
+         * @param int $order_id
+	     * @param null $amount
+	     * @param string $reason
+	     *
+	     * @return bool|WP_Error
+	     */
+	    public function process_refund($order_id, $amount = null, $reason = "") {
+
+	        global $woocommerce;
+	        $order      = wc_get_order($order_id);
+	        $order_data = $order->get_data(); // order data
+
+	        $currency_symbol    =   $order_data['currency'];
+
+	        $body = sqrip_prepare_qr_code_request_body($currency_symbol, $amount, "");
+
+            // change product to Credit to just get QR Code
+            $body['product'] = 'Credit';
+
+            // replace sqrip IBAN with IBAN of customer
+            $user = $order->get_user();
+            $iban = sqrip_get_customer_iban($user);
+
+            if(!$iban) {
+	            // Add note to the order for your reference
+	            $order->add_order_note(
+		            __( "IBAN des Kunden wurde nicht gefunden. Stelle sicher, dass sie im Meta-Feld 'iban_num' hinterlegt ist.", 'sqrip' )
+	            );
+	            return false;
+            }
+
+            // TODO: do we need to handle QR ibans and simple ibans differently?
+            $body['iban']['iban'] = $iban;
+
+	        // we need to switch payable_to and payable_by addresses
+	        $payable_by = sqrip_get_payable_to_address('woocommerce');
+	        $payable_to = sqrip_get_billing_address_from_order($order);
+
+	        // since the two addresses have different names for the
+	        // city / town field we need to switch them
+	        $payable_by['town'] = $payable_by['city'];
+	        unset($payable_by['city']);
+
+	        $payable_to['city'] = $payable_to['town'];
+	        unset($payable_to['town']);
+
+	        $body['payable_by'] = $payable_by;
+	        $body['payable_to'] = $payable_to;
+
+		    $token = sqrip_get_plugin_option('return_token');
+		    if(!$token) {
+			    $order->add_order_note(
+				    __( 'Error: Es wurde kein API Schlüssel für die Rückerstattungen angegeben. Bitte ergänze dies in den sqrip Plugin Einstellungen.', 'sqrip' )
+			    );
+			    return false;
+		    }
+
+	        $args = sqrip_prepare_remote_args($body, 'POST', $token);
+	        $response = wp_remote_post(SQRIP_QR_CODE_ENDPOINT, $args);
+
+	        $status_code = $response['response']['code'];
+
+	        if ($status_code !== 200) {
+		        // Transaction was not successful
+		        $err_msg = explode(",", $response['body']);
+		        $err_msg = trim(strstr($err_msg[0], ':'), ': "');
+
+		        // Add note to the order for your reference
+		        $order->add_order_note(
+			        sprintf(
+				        __( 'Error: %s', 'sqrip' ),
+				        esc_html($err_msg)
+			        )
+		        );
+
+		        return false;
+	        }
+
+	        $response_body = wp_remote_retrieve_body($response);
+	        $response_body = json_decode($response_body);
+
+	        if (isset($response_body->reference)) {
+		        $sqrip_png       =    $response_body->png_file;
+                $sqrip_qr_png_attachment_id = $this->file_upload($sqrip_png, '.png');
+
+		        $order->add_order_note( __('sqrip QR-Code für Rückerstattung erstellt.', 'sqrip') );
+
+		        $order->update_meta_data('sqrip_refund_qr_attachment_id', $sqrip_qr_png_attachment_id);
+		        $order->save(); // without calling save() the meta data is not updated
+
+		        return true;
+	        } else {
+		        // Add note to the order for your reference
+		        $order->add_order_note(
+			        sprintf(
+				        __( 'Error: %s', 'sqrip' ),
+				        esc_html( $response_body->message )
+			        )
+		        );
+
+		        return false;
+	        }
+        }
+
         /*
          *  Processing payment
          */
@@ -578,102 +709,23 @@ function sqrip_init_gateway_class()
         {
             global $woocommerce;
             // sqrip API URL
-            $endpoint   = 'https://api.sqrip.ch/api/code';
+            $endpoint   = SQRIP_QR_CODE_ENDPOINT;
 
-            // we need it to get any order detailes
+            // we need it to get any order details
             $order      = wc_get_order($order_id);
             $order_data = $order->get_data(); // order data
 
-            ## BILLING INFORMATION:
-            $order_billing_first_name   = $order_data['billing']['first_name'];
-            $order_billing_last_name    = $order_data['billing']['last_name'];
-            $order_billing_address      = $order_data['billing']['address_1'];
-            $order_billing_address      .= $order_data['billing']['address_2'] ? ', '.$order_data['billing']['address_2'] : "";
-            $order_billing_city         = $order_data['billing']['city'];
-            $order_billing_postcode     = intval($order_data['billing']['postcode']);
-            $order_billing_country      = $order_data['billing']['country'];
-                        
             $currency_symbol    =   $order_data['currency'];
             $amount             =   floatval($order_data['total']);
 
-            $plugin_options     = get_option('woocommerce_sqrip_settings', array());
+            $address = sqrip_get_plugin_option('address');
 
-            $sqrip_due_date     = $plugin_options['due_date'];
-            $token              = $plugin_options['token'];
-            $iban               = $plugin_options['iban'];
-            
-            $product            = $plugin_options['product'];
-            $qr_reference       = $plugin_options['qr_reference'];
-            $address            = $plugin_options['address'];
-            $lang               = $plugin_options['lang'] ? $plugin_options['lang'] : "de";
-
-            $date               = date('Y-m-d');
-            $due_date           = date('Y-m-d', strtotime($date . " + ".$sqrip_due_date." days"));
-
-            if ($iban == '') {
-                $err_msg = __( 'Please add IBAN in settings or sqrip dashboard', 'sqrip' );
-                wc_add_notice($err_msg, 'error');
-                return false;
-            }
-
-            if ($product == '') {
-                $err_msg = __( 'Please select product in settings', 'sqrip' );
-                wc_add_notice($err_msg, 'error');
-                return false;
-            }
-
-            $body = [
-                "iban" => [
-                    "iban"      => $iban,
-                ],
-                "payable_by" =>
-                [
-                    "name"          => $order_billing_first_name.' '.$order_billing_last_name,
-                    "street"        => $order_billing_address,
-                    "postal_code"   => $order_billing_postcode,
-                    "town"          => $order_billing_city,
-                    "country_code"  => $order_billing_country
-                ],
-                "payment_information" =>
-                [
-                    "currency_symbol" => $currency_symbol,
-                    "amount" => $amount,
-                    "due_date" => $due_date,
-                ],
-                "lang" => $lang,
-                "product" => $product,
-                'file_type' => 'pdf',
-                "source" => "woocommerce"
-            ];
-
-            // If the user selects "Order Number" the API request will include param "qr_reference"
-            if ( $qr_reference == "order_number" ) {
-                $body['payment_information']['qr_reference'] = strval($order_id);
-            }
-
-            // if ($address == "sqrip") {
-            //     $body['payable_to'] = []; 
-            // } else{
-
+            $body = sqrip_prepare_qr_code_request_body($currency_symbol, $amount, strval($order_id));
+            $body["payable_by"] = sqrip_get_billing_address_from_order($order);
             $body['payable_to'] = sqrip_get_payable_to_address($address);
-            
-            // }
 
-
-            $body = wp_json_encode($body);
-
-            $args = [
-                'method'      => 'POST',
-                'headers'     => [
-                    'Content-Type' => 'application/json',
-                    'Authorization' => 'Bearer '.$token,
-                    'Accept' => 'application/json'
-                ],
-                'body'        => $body,
-                'data_format' => 'body',
-            ];
-
-            $response = wp_remote_post($endpoint, $args);
+	        $args = sqrip_prepare_remote_args($body, 'POST');
+	        $response = wp_remote_post(SQRIP_QR_CODE_ENDPOINT, $args);
 
             $status_code = $response['response']['code'];
 
@@ -685,7 +737,7 @@ function sqrip_init_gateway_class()
 
                 wc_add_notice( 
                     sprintf( 
-                        __( 'Error: %s', 'sqrip' ), 
+                        __( 'sqrip Payment Error: %s', 'sqrip' ),
                         esc_html( $err_msg ) ), 
                     'error' 
                 );
@@ -693,7 +745,7 @@ function sqrip_init_gateway_class()
                 // Add note to the order for your reference
                 $order->add_order_note( 
                     sprintf( 
-                        __( 'Error: %s', 'sqrip' ), 
+                        __( 'sqrip Payment Error: %s', 'sqrip' ),
                         esc_html($err_msg) 
                     ) 
                 );
@@ -887,6 +939,8 @@ add_action( 'admin_enqueue_scripts', function (){
         wp_localize_script( 'sqrip-order', 'sqrip',
             array( 
                 'ajax_url' => admin_url( 'admin-ajax.php' ),
+                'ajax_refund_paid_nonce' => wp_create_nonce( 'sqrip-mark-refund-paid' ),
+                'ajax_refund_unpaid_nonce' => wp_create_nonce( 'sqrip-mark-refund-unpaid' )
             )
         );
     }
@@ -1095,8 +1149,6 @@ add_filter( 'wp_insert_post_data' , function ( $data , $postarr, $unsanitized_po
     
     if ( 'shop_order' === $data['post_type'] && isset($postarr['_sqrip_regenerate_qrcode']) )
     {
-        // sqrip API URL
-        $endpoint   = 'https://api.sqrip.ch/api/code';
 
         $order      = wc_get_order($postarr['ID']);
         $order_data = $order->get_data(); // order data
@@ -1113,65 +1165,21 @@ add_filter( 'wp_insert_post_data' , function ( $data , $postarr, $unsanitized_po
         $currency_symbol    =   $order_data['currency'];
         $amount             =   floatval($order_data['total']);
 
-        $plugin_options     = get_option('woocommerce_sqrip_settings', array());
+        $body = sqrip_prepare_qr_code_request_body($currency_symbol, $amount, $data['ID']);
 
-        $sqrip_due_date     = $plugin_options['due_date'];
-        $token              = $plugin_options['token'];
-        $iban               = $plugin_options['iban'];
-        
-        $qr_reference       = $plugin_options['qr_reference'];
-        $address            = $plugin_options['address'];
-        $product            = $plugin_options['product'];
-        $lang               = $plugin_options['lang'] ? $plugin_options['lang'] : "de";
+        $body["payable_by"] = [
+		      "name"          => $order_billing_first_name.' '.$order_billing_last_name,
+		      "street"        => $order_billing_address,
+		      "postal_code"   => $order_billing_postcode,
+		      "town"          => $order_billing_city,
+		      "country_code"  => $order_billing_country
+	      ];
 
-        $date               = date('Y-m-d');
-        $due_date           = date('Y-m-d', strtotime($date . " + ".$sqrip_due_date." days"));
+        $body['payable_to'] = sqrip_get_payable_to_address('woocommerce');
 
-        $body = [
-            "iban" => [
-                "iban"      => $iban,
-            ],
-            "payable_by" =>
-            [
-                "name"          => $order_billing_first_name.' '.$order_billing_last_name,
-                "street"        => $order_billing_address,
-                "postal_code"   => $order_billing_postcode,
-                "town"          => $order_billing_city,
-                "country_code"  => $order_billing_country
-            ],
-            "payment_information" =>
-            [
-                "currency_symbol" => $currency_symbol,
-                "amount" => $amount,
-                "due_date" => $due_date,
-            ],
-            "lang" => $lang,
-            'file_type' => 'pdf',
-            "product" => $product,
-            "source" => "woocommerce"
-        ];
+        $args = sqrip_prepare_remote_args($body, 'POST');
 
-        // If the user selects "Order Number" the API request will include param "qr_reference"
-        if ( $qr_reference == "order_number" ) {
-            $body['payment_information']['qr_reference'] = $data['ID'];
-        }
-
-        $body['payable_to'] = sqrip_get_payable_to_address($address);
-        
-        $body = wp_json_encode($body);
-
-        $args = [
-            'method'      => 'POST',
-            'headers'     => [
-                'Content-Type' => 'application/json',
-                'Authorization' => 'Bearer '.$token,
-                'Accept' => 'application/json'
-            ],
-            'body'        => $body,
-            'data_format' => 'body',
-        ];
-
-        $response = wp_remote_post($endpoint, $args);
+        $response = wp_remote_post(SQRIP_QR_CODE_ENDPOINT, $args);
 
         $response_body = wp_remote_retrieve_body($response);
         $response_body = json_decode($response_body);
@@ -1235,3 +1243,130 @@ add_filter( 'wp_insert_post_data' , function ( $data , $postarr, $unsanitized_po
 
 }, 99, 3);
 
+add_action('woocommerce_after_order_refund_item_name', "sqrip_display_refund_qr_code", 10,1);
+
+/**
+ * Displays UI for marking a sqrip refund as completed within the WooCommerce UI
+ * @param $refund WC_Order_Refund
+ */
+function sqrip_display_refund_qr_code($refund) {
+
+	$refund_qr_attachment_id = $refund->get_meta('sqrip_refund_qr_attachment_id');
+
+	if (!$refund_qr_attachment_id) {
+		return;
+	}
+
+    $refund_qr_pdf_url = wp_get_attachment_url($refund_qr_attachment_id);
+	$refund_qr_pdf_path = get_attached_file($refund_qr_attachment_id);
+    $refund_id = $refund->get_id();
+    $title = __("QR Code anzeigen",'sqrip');
+    $hidden_title = __("QR Code verbergen",'sqrip');
+
+    $paid_title = __("Als bezahlt markieren", 'sqrip');
+    $unpaid_title = __("Als unbezahlt markieren", 'sqrip');
+
+	$paid_status = __("bezahlt am", 'sqrip');
+	$unpaid_status = __("unbezahlt", 'sqrip');
+
+    $paid = $refund->get_meta('sqrip_refund_paid');
+    $status = $paid ? $paid_status." $paid" : $unpaid_status;
+
+    $hide_paid_action_css = !$paid ?: 'display: none';
+	$hide_unpaid_action_css = $paid ?: 'display: none';
+
+    echo "<span class='woocommerce_sqrip_refund_status' data-paid='$paid_status' data-unpaid='$unpaid_status'>[$status]</span>";
+    echo "<br/>";
+    echo "<a class='woocommerce_sqrip_toggle_qr' href='$refund_qr_pdf_url' title='$title' target='_blank' data-title-hide='$hidden_title' data-title='$title' style='margin-right: 10px; $hide_paid_action_css'>$title</a>";
+    echo "<a class='woocommerce_sqrip_refund_paid' href='#' title='$paid_title' style='margin-right: 10px; color: green; $hide_paid_action_css' data-refund='$refund_id'>$paid_title</a>";
+	echo "<a class='woocommerce_sqrip_refund_unpaid' href='#' title='$unpaid_title' style='color: darkred; $hide_unpaid_action_css' data-refund='$refund_id'>$unpaid_title</a>";
+    echo "<div class='woocommerce_sqrip_qr_wrapper' style='display:none; margin: 5px;'>";
+    echo    "<img src='$refund_qr_pdf_url' width='300' height='300'/>";
+    echo "</div>";
+
+}
+
+add_action( 'woocommerce_order_refunded', 'action_woocommerce_order_refunded', 10, 2 );
+
+/**
+ * Called when an order is refunded using WooCommerce
+ * @param $order_id int
+ * @param $refund_id int
+ */
+function action_woocommerce_order_refunded( $order_id, $refund_id ) {
+
+	$order = wc_get_order($order_id);
+
+	/**
+	 * @var WC_Order_Refund
+	 */
+    $refund = wc_get_order($refund_id);
+
+	if ( !method_exists($order,'get_payment_method') ) {
+		return;
+	}
+
+	$payment_method = $order->get_payment_method();
+
+	if ($payment_method !== 'sqrip') {
+        return;
+	}
+
+    // attach meta values to refund instead of order
+    // because a single order can potentially have multiple refunds
+    $refund_qr_attachment_id = $order->get_meta('sqrip_refund_qr_attachment_id');
+	$refund->update_meta_data('sqrip_refund_qr_attachment_id', $refund_qr_attachment_id);
+
+    $refund->save();
+}
+
+
+add_action( 'show_user_profile', 'sqrip_extra_user_profile_fields' );
+add_action( 'edit_user_profile', 'sqrip_extra_user_profile_fields' );
+
+/**
+ * Displays extra field in user profile page to set iban for refund
+ * @param $user
+ * @return void
+ */
+function sqrip_extra_user_profile_fields( $user ) {
+
+    $sqrip_return_enabled = sqrip_get_plugin_option('return_enabled');
+
+    if($sqrip_return_enabled) {
+        ?>
+        <h3><?php _e("Sqrip Refund Information", "blank"); ?></h3>
+        <table class="form-table">
+            <tr>
+                <th><label for="iban"><?php _e("IBAN"); ?></label></th>
+                <td>
+                    <input type="text" name="iban" id="iban" value="<?php echo esc_attr( sqrip_get_customer_iban($user)); ?>" class="regular-text" /><br />
+                    <span class="description"><?php _e("This iban will be used to generate a sqrip qr code in case of a refund."); ?></span>
+                </td>
+            </tr>
+        </table>
+        <?php
+    }
+}
+
+add_action( 'personal_options_update', 'sqrip_save_extra_user_profile_fields' );
+add_action( 'edit_user_profile_update', 'sqrip_save_extra_user_profile_fields' );
+
+/**
+ * Saves extra user profile fields required by sqrip for refunds
+ * @param $user_id
+ * @return false|void
+ */
+function sqrip_save_extra_user_profile_fields( $user_id ) {
+    if ( empty( $_POST['_wpnonce'] ) || ! wp_verify_nonce( $_POST['_wpnonce'], 'update-user_' . $user_id ) ) {
+        return;
+    }
+
+    if ( !current_user_can( 'edit_user', $user_id ) ) {
+        return false;
+    }
+
+    $user = get_user_by('id', $user_id);
+    sqrip_set_customer_iban($user, $_POST['iban']);
+
+}

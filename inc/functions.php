@@ -1,18 +1,36 @@
-<?php 
+<?php
+
+function sqrip_get_plugin_option($key) {
+	$plugin_options     = get_option('woocommerce_sqrip_settings', array());
+	if($plugin_options && array_key_exists($key, $plugin_options)) {
+		return $plugin_options[$key];
+	}
+	return null;
+}
+
+function sqrip_prepare_remote_args($body, $method, $token = null) {
+	$plugin_options     = get_option('woocommerce_sqrip_settings', array());
+	$token              = $token ? $token : $plugin_options['token'];
+
+	$args = [];
+	$args['method'] = $method;
+	$args['headers'] = [
+		'Content-Type'  => 'application/json',
+		'Authorization' => 'Bearer '.$token,
+		'Accept'        => 'application/json'
+	];
+
+	if(!is_string($body)) {
+		$body = json_encode($body);
+	}
+
+	$args['body'] = $body;
+	return $args;
+}
 
 function sqrip_remote_request( $endpoint, $body = '', $method = 'GET', $token = "" )
 {
-    $plugin_options     = get_option('woocommerce_sqrip_settings', array());
-    $token              = $token ? $token : $plugin_options['token'];
-
-    $args = [];
-    $args['method'] = $method;
-    $args['headers'] = [
-        'Content-Type'  => 'application/json',
-        'Authorization' => 'Bearer '.$token,
-        'Accept'        => 'application/json'
-    ];
-    $args['body'] = $body;
+    $args = sqrip_prepare_remote_args($body, $method, $token);
 
     $response = wp_remote_request($endpoint, $args);
 
@@ -23,12 +41,94 @@ function sqrip_remote_request( $endpoint, $body = '', $method = 'GET', $token = 
     return json_decode($body);
 }
 
+
+/**
+ * Extracts the billing address from a woocommerce order
+ *
+ * @param WC_Order $order woocommerce order
+ *
+ * @return array Array with the address correctly formatted for the
+*                payable_to / payable_by fields in the sqrip API
+ */
+function sqrip_get_billing_address_from_order($order) {
+	$order_data = $order->get_data();
+	$billing_address = array(
+		'name' => $order_data['billing']['first_name'] . ' ' . $order_data['billing']['last_name'],
+		'street' => $order_data['billing']['address_1'] . ($order_data['billing']['address_2'] ? ', ' . $order_data['billing']['address_2'] : ""),
+		'postal_code' => intval($order_data['billing']['postcode']),
+		'town' => $order_data['billing']['city'],
+		'country_code' => $order_data['billing']['country']
+	);
+	return $billing_address;
+}
+
+
+
+/**
+ * Prepares the request body based on the plugin options
+ *
+ * @param string $currency_symbol
+ * @param float $amount
+ * @param string $order_number
+ *
+ * @return array|false
+ */
+function sqrip_prepare_qr_code_request_body($currency_symbol, $amount, $order_number) {
+	$plugin_options     = get_option('woocommerce_sqrip_settings', array());
+	$sqrip_due_date     = $plugin_options['due_date'];
+	$iban               = $plugin_options['iban'];
+
+	$product            = $plugin_options['product'];
+	$qr_reference       = $plugin_options['qr_reference'];
+	$address            = $plugin_options['address'];
+	$lang               = $plugin_options['lang'] ? $plugin_options['lang'] : "de";
+
+	$date               = date('Y-m-d');
+	$due_date           = date('Y-m-d', strtotime($date . " + ".$sqrip_due_date." days"));
+
+	if ($iban == '') {
+		$err_msg = __( 'Bitte IBAN in den Einstellungen oder im sqrip Dashboard hinzufügen', 'sqrip' );
+		wc_add_notice($err_msg, 'error');
+		return false;
+	}
+
+	if ($product == '') {
+		$err_msg = __( 'Bitte Produkt in den Einstellungen auswählen.', 'sqrip' );
+		wc_add_notice($err_msg, 'error');
+		return false;
+	}
+
+	$body = [
+		"iban" => [
+			"iban"      => $iban,
+		],
+		"payment_information" =>
+			[
+				"currency_symbol" => $currency_symbol,
+				"amount" => $amount,
+				"due_date" => $due_date,
+			],
+		"lang" => $lang,
+		"product" => $product,
+		"source" => "woocommerce"
+	];
+
+	// If the user selects "Order Number" the API request will include param "qr_reference"
+	if ( $qr_reference == "order_number" ) {
+		$body['payment_information']['qr_reference'] = $order_number;
+	}
+
+	return $body;
+}
+
 /*
  *  Get payable to address
  */
-function sqrip_get_payable_to_address($address)
+function sqrip_get_payable_to_address($address = 'woocommerce')
 {
-    if ( !$address ) return;
+	if(!$address) {
+		return false;
+	}
 
     switch ($address) {
     	case 'sqrip':
@@ -166,4 +266,26 @@ function sqrip_verify_token($token)
     $res_decode  = sqrip_remote_request($endpoint, $body, $method = 'POST', $token);   
     
     return $res_decode;
+}
+
+/**
+ * Returns the iban number stored in the customer meta
+ * @param $user
+ *
+ * @return mixed
+ */
+function sqrip_get_customer_iban($user) {
+	// TODO: make the field key customizable in the sqrip options
+	return get_user_meta($user->ID, 'iban_num', true);
+}
+
+/**
+ * Sets the iban number stored in customer meta
+ * @param $user WP_User
+ * @param $iban string
+ * @return bool|int
+ */
+function sqrip_set_customer_iban($user, $iban) {
+    // TODO: make the field key customizable in the sqrip options
+    return update_user_meta($user->ID, 'iban_num', $iban);
 }

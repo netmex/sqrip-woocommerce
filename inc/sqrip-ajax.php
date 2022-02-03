@@ -127,4 +127,56 @@ function sqrip_validation_token_ajax()
 }
 
 
+add_action( 'wp_ajax_sqrip_mark_refund_paid', 'sqrip_mark_refund_paid' );
 
+/**
+ * Ajax action to mark a sqrip refund as paid
+ */
+function sqrip_mark_refund_paid()
+{
+	check_ajax_referer('sqrip-mark-refund-paid', 'security');
+
+	$refund_id = isset( $_POST['refund_id'] ) ? absint( $_POST['refund_id'] ) : 0;
+	$refund    = wc_get_order( $refund_id );
+
+	if ( !$refund ) { return; }
+
+	// stores the current date and time
+	$date = date('Y-m-d H:i:s');
+	$refund->update_meta_data('sqrip_refund_paid', $date);
+	$refund->save();
+
+    // add woocommerce message to original order
+    $order = wc_get_order($refund->get_parent_id());
+    $order->add_order_note( __('sqrip Rückerstattung wurde als \'bezahlt\' markiert', 'sqrip') );
+
+	wp_send_json(['date' => $date, 'result' => 'success']);
+
+	die();
+}
+
+add_action( 'wp_ajax_sqrip_mark_refund_unpaid', 'sqrip_mark_refund_unpaid' );
+
+/**
+ * Ajax action to mark a sqrip refund as unpaid
+ */
+function sqrip_mark_refund_unpaid()
+{
+	check_ajax_referer('sqrip-mark-refund-unpaid', 'security');
+
+	$refund_id = isset( $_POST['refund_id'] ) ? absint( $_POST['refund_id'] ) : 0;
+	$refund    = wc_get_order( $refund_id );
+
+	if ( !$refund ) { return; }
+
+	$refund->delete_meta_data('sqrip_refund_paid');
+	$refund->save();
+
+    // add woocommerce message to original order
+    $order = wc_get_order($refund->get_parent_id());
+    $order->add_order_note( __('sqrip Rückerstattung wurde als \'unbezahlt\' markiert', 'sqrip') );
+
+	wp_send_json(['result' => 'success']);
+
+	die();
+}
