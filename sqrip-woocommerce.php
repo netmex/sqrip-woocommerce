@@ -140,7 +140,6 @@ function sqrip_init_gateway_class()
                     'type'        => 'text',
                     'description' => __( 'Swiss QR invoices with sqrip', 'sqrip' ),
                     'default'     => 'QR-Rechnung',
-                    'desc_tip'    => true,
                 ),
                 'description' => array(
                     'title'       => __( 'Description', 'sqrip' ),
