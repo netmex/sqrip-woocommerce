@@ -73,20 +73,20 @@ function sqrip_validation_iban_ajax()
     switch ($response->message) {
         case 'Valid simple IBAN':
             $result['result'] = true;
-            $result['message'] = __( "validiert" , "sqrip" );
-            $result['description'] = __('Das ist eine normale IBAN. Der Kunde kann Einzahlungen ohne Vermerk der Referenznummer (RF...) tätigen. Der automatische Abgleich mit den Bestellungen ist daher nicht durchgehend gewährleistet. Eine manuelle Bearbeitung kann nötig sein. Für den automatischen Abgleich ist eine QR-IBAN notwendig. Diese ist für die gleiche Kontoverbindung verfügbar. Informationen dazu gibt es bei deiner Bank.', 'sqrip');
+            $result['message'] = __( "validated" , "sqrip" );
+            $result['description'] = __('This is a normal IBAN. The customer can make deposits without noting the reference number (RF...). Therefore, automatic matching with orders is not guaranteed throughout. Manual processing may be necessary. A QR-IBAN is required for automatic matching. This is available for the same bank account. Information about this is available from your bank.', 'sqrip');
             break;
         
         case 'Valid qr IBAN':
             $result['result'] = true;
-            $result['message'] = __( "validiert" , "sqrip" );
-            $result['description'] = __('Das ist eine QR-IBAN. Der Kunde kann Zahlungen nur mit Angabe einer QR-Referenz(nummer) ausführen. Du kannst die Einzahlung eindeutig einem Kunden / einer Bestellung zuweisen. Damit wird der automatische Abgleich der eingegangenen Zahlungen mit den Bestellungen möglich. Möchtest du diesen Schritt automatisieren? Kontaktiere uns <a href="mailto:info@sqrip.ch">info@sqrip.ch</a>.', 'sqrip');
+            $result['message'] = __( "validated" , "sqrip" );
+            $result['description'] = __('This is a QR IBAN. The customer can make payments only by specifying a QR reference (number). You can uniquely assign the deposit to a customer / order. This enables automatic matching of payments received with orders. Want to automate this step? Contact us <a href="mailto:info@sqrip.ch">info@sqrip.ch</a>.', 'sqrip');
             break;
 
         default:
             $result['result'] = false;
-            $result['message'] = __( "fehlerhaft" , "sqrip" );
-            $result['description'] = __('Die (QR-)IBAN deines Kontos, auf das die Überweisung erfolgen soll, ist FEHLERHAFT.', 'sqrip');
+            $result['message'] = __( "incorrect" , "sqrip" );
+            $result['description'] = __('The (QR-)IBAN of your account to which the transfer should be made is ERROR.', 'sqrip');
             break;
     }
 
@@ -110,15 +110,15 @@ function sqrip_validation_token_ajax()
     $response = sqrip_get_user_details( $_POST['token'] );
 
     if ($response) {
-        $address_txt = __('vom sqrip-Konto: ','sqrip');
+        $address_txt = __('from sqrip account: ','sqrip');
         $address_txt .= $response['name'].', '.$response['street'].', '.$response['city'].', '.$response['postal_code'].' '.$response['city'];
 
         $result['result'] = true;
-        $result['message'] = __("API Schlüssel bestätigt", "sqrip");
+        $result['message'] = __("API key confirmed", "sqrip");
         $result['address'] = $address_txt;
     } else {
         $result['result'] = false;
-        $result['message'] = __("API Schlüssel NICHT bestätigt", "sqrip");
+        $result['message'] = __("API key NOT confirmed", "sqrip");
     }
 
     wp_send_json($result);
