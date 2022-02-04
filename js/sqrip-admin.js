@@ -77,9 +77,9 @@ jQuery( document ).ready(function($){
 
     function init_individual_address(_val){
         if (_val == 'individual') {
-            $('input.sqrip-address-individual').closest('tr').show();
+            $('.sqrip-address-individual').prop('required', true).closest('tr').show();
         } else {
-            $('input.sqrip-address-individual').closest('tr').hide();
+            $('.sqrip-address-individual').prop('required', false).closest('tr').hide();
         }
     }
 

@@ -244,7 +244,7 @@ function sqrip_validation_iban($iban, $tokens)
 
 /*
  *  sqrip validation Token
- *  @deprecated since v1.0.3 | User sqrip_get_user_details instead
+ *  @deprecated since v1.0.3 | Use sqrip_get_user_details instead
  */
 function sqrip_verify_token($token)
 {
