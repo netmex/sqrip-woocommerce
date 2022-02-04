@@ -4,7 +4,7 @@
  * Plugin Name:             sqrip – Swiss QR Invoice
  * Plugin URI:              https://sqrip.ch/
  * Description:             sqrip extends WooCommerce payment options for Swiss stores and Swiss customers with the new QR payment parts.
- * Version:                 1.2.7
+ * Version:                 1.3
  * Author:                  netmex digital gmbh
  * Author URI:              #
  */
@@ -114,6 +114,8 @@ function sqrip_init_gateway_class()
          */
         public function init_form_fields()
         {
+            require ('inc/countries-array.php');
+
             $address_woocommerce = sqrip_get_payable_to_address_txt('woocommerce');
             $address_sqrip = sqrip_get_payable_to_address_txt('sqrip');
 
@@ -185,8 +187,9 @@ function sqrip_init_gateway_class()
                 ),
                 'address_country' => array(
                     'title' => __( 'Country code', 'sqrip' ),
-                    'type' => 'text',
+                    'type' => 'select',
                     'class' => 'sqrip-address-individual',
+                    'options' => $countries_list
                 ),
                 'iban' => array(
                     'title' => __( '(QR-)IBAN', 'sqrip' ),
@@ -297,7 +300,7 @@ function sqrip_init_gateway_class()
                                 $checked = (string) $option_key == esc_attr($value) ? "checked" : "";
                                 ?>
                                 <div class="sqrip-radio-field <?php echo esc_attr( $data['class'] ); ?>">
-                                <input id="<?php echo esc_attr($ip_id); ?>" type="radio" name="<?php echo esc_attr( $field_key ); ?>" value="<?php echo esc_attr( $option_key ); ?>" <?php echo esc_attr($checked); ?> />
+                                <input id="<?php echo esc_attr($ip_id); ?>" type="radio" name="<?php echo esc_attr( $field_key ); ?>" value="<?php echo esc_attr( $option_key ); ?>" <?php echo esc_attr($checked); ?> required="required" />
                                 <label for="<?php echo esc_attr($ip_id); ?>"><?php echo esc_html( $option_value ); ?></label>
                                 </div>
                             <?php endforeach; ?>
@@ -612,7 +615,7 @@ function sqrip_init_gateway_class()
 
 	        $currency_symbol    =   $order_data['currency'];
 
-	        $body = sqrip_prepare_qr_code_request_body($currency_symbol, $amount, "");
+	        $body = sqrip_prepare_qr_code_request_body($currency_symbol, $amount, strval($order_id));
 
             // change product to Credit to just get QR Code
             $body['product'] = 'Credit';
@@ -633,7 +636,8 @@ function sqrip_init_gateway_class()
             $body['iban']['iban'] = $iban;
 
 	        // we need to switch payable_to and payable_by addresses
-	        $payable_by = sqrip_get_payable_to_address('woocommerce');
+            $address = sqrip_get_plugin_option('address');
+	        $payable_by = sqrip_get_payable_to_address($address);
 	        $payable_to = sqrip_get_billing_address_from_order($order);
 
 	        // since the two addresses have different names for the
@@ -903,6 +907,16 @@ function sqrip_add_admin_notice()
 
         printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) );
     }
+
+    if ( false !== ( $msg = get_transient( "sqrip_regenerate_qrcode_errors" ) ) && $msg) {
+
+        $class = 'notice notice-error is-dismissible';
+
+        printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), $msg );
+       
+        delete_transient( "sqrip_regenerate_qrcode_errors" );
+    }
+
 }
 
 /**
@@ -1175,7 +1189,9 @@ add_filter( 'wp_insert_post_data' , function ( $data , $postarr, $unsanitized_po
 		      "country_code"  => $order_billing_country
 	      ];
 
-        $body['payable_to'] = sqrip_get_payable_to_address('woocommerce');
+        $address = sqrip_get_plugin_option('address');
+
+        $body['payable_to'] = sqrip_get_payable_to_address($address);
 
         $args = sqrip_prepare_remote_args($body, 'POST');
 
@@ -1226,11 +1242,26 @@ add_filter( 'wp_insert_post_data' , function ( $data , $postarr, $unsanitized_po
 
             } else {
 
+                $errors_output = "";
+                
+                if (isset($response_body->errors)) {
+                    $errors_output = json_encode($response_body->errors, JSON_PRETTY_PRINT); 
+                    $error_goto = 'Please add correct your address at <a href="' . admin_url( 'admin.php?page=wc-settings&tab=checkout&section=sqrip' ) . '" aria-label="' . esc_attr__( 'sqrip settings', 'sqrip' ) . '">' . esc_html__( 'sqrip Settings', 'sqrip' ) . '</a>';
+
+                    set_transient('sqrip_regenerate_qrcode_errors', sprintf( 
+                        __( '<b>Renew QR Invoice error:</b> %s <p>%s</p><p>%s</p>', 'sqrip' ), 
+                        esc_html( $response_body->message ),
+                        esc_html( $errors_output ),
+                        $error_goto
+                    ), 60);
+                }
+
                 $order->add_order_note( 
                     sprintf( 
-                        __( 'sqrip Error: %s', 'sqrip' ), 
-                        esc_html( $response_body->message ) 
-                    ) 
+                        __( 'Renew QR Invoice error: %s <p>%s</p>', 'sqrip' ), 
+                        esc_html( $response_body->message ),
+                        esc_html( $errors_output )
+                    )
                 );
 
             }
@@ -1335,7 +1366,7 @@ function sqrip_extra_user_profile_fields( $user ) {
 
     if($sqrip_return_enabled) {
         ?>
-        <h3><?php _e("Sqrip Refund Information", "blank"); ?></h3>
+        <h3><?php _e("Sqrip Refund Information", "sqrip"); ?></h3>
         <table class="form-table">
             <tr>
                 <th><label for="iban"><?php _e("IBAN"); ?></label></th>
