@@ -97,7 +97,7 @@ Yes. We are already working on comparing the reconciliation of orders/purchases 
 
 == Changelog ==
 
-= 1.2.7 =
+= 1.3 =
 * Public Beta: Refunds;
 * Multiple bug fixes.
 
