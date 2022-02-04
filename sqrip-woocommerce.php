@@ -636,8 +636,8 @@ function sqrip_init_gateway_class()
             $body['iban']['iban'] = $iban;
 
 	        // we need to switch payable_to and payable_by addresses
-            $address = sqrip_get_plugin_option('address');
-	        $payable_by = sqrip_get_payable_to_address($address);
+            // $address = sqrip_get_plugin_option('address');
+	        $payable_by = sqrip_get_payable_to_address('woocommerce');
 	        $payable_to = sqrip_get_billing_address_from_order($order);
 
 	        // since the two addresses have different names for the
