@@ -97,6 +97,10 @@ Yes. We are already working on comparing the reconciliation of orders/purchases 
 
 == Changelog ==
 
+= 1.3.1 =
+* Plugin is now available in German;
+* Adjustments in text strings.
+
 = 1.3 =
 * Public Beta: Refunds;
 * Multiple bug fixes.
