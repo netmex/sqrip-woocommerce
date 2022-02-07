@@ -87,13 +87,13 @@ function sqrip_prepare_qr_code_request_body($currency_symbol, $amount, $order_nu
 	$due_date           = date('Y-m-d', strtotime($date . " + ".$sqrip_due_date." days"));
 
 	if ($iban == '') {
-		$err_msg = __( 'Bitte IBAN in den Einstellungen oder im sqrip Dashboard hinzufügen', 'sqrip' );
+		$err_msg = __( 'Please add IBAN in the settings of your webshop or on the sqrip dashboard', 'sqrip-swiss-qr-invoice' );
 		wc_add_notice($err_msg, 'error');
 		return false;
 	}
 
 	if ($product == '') {
-		$err_msg = __( 'Bitte Produkt in den Einstellungen auswählen.', 'sqrip' );
+		$err_msg = __( 'Please select a product in the settings..', 'sqrip-swiss-qr-invoice' );
 		wc_add_notice($err_msg, 'error');
 		return false;
 	}

@@ -74,19 +74,19 @@ function sqrip_validation_iban_ajax()
         case 'Valid simple IBAN':
             $result['result'] = true;
             $result['message'] = __( "validated" , "sqrip" );
-            $result['description'] = __('This is a normal IBAN. The customer can make deposits without noting the reference number (RF...). Therefore, automatic matching with orders is not guaranteed throughout. Manual processing may be necessary. A QR-IBAN is required for automatic matching. This is available for the same bank account. Information about this is available from your bank.', 'sqrip');
+            $result['description'] = __('This is a normal IBAN. The customer can make deposits without noting the reference number (RF...). Therefore, automatic matching with orders is not guaranteed throughout. Manual processing may be necessary. A QR-IBAN is required for automatic matching. This is available for the same bank account. Information about this is available from your bank.', 'sqrip-swiss-qr-invoice');
             break;
         
         case 'Valid qr IBAN':
             $result['result'] = true;
             $result['message'] = __( "validated" , "sqrip" );
-            $result['description'] = __('This is a QR IBAN. The customer can make payments only by specifying a QR reference (number). You can uniquely assign the deposit to a customer / order. This enables automatic matching of payments received with orders. Want to automate this step? Contact us <a href="mailto:info@sqrip.ch">info@sqrip.ch</a>.', 'sqrip');
+            $result['description'] = __('This is a QR IBAN. The customer can make payments only by specifying a QR reference (number). You can uniquely assign the deposit to a customer / order. This enables automatic matching of payments received with orders. Want to automate this step? Contact us <a href="mailto:info@sqrip.ch">info@sqrip.ch</a>.', 'sqrip-swiss-qr-invoice');
             break;
 
         default:
             $result['result'] = false;
             $result['message'] = __( "incorrect" , "sqrip" );
-            $result['description'] = __('The (QR-)IBAN of your account to which the transfer should be made is ERROR.', 'sqrip');
+            $result['description'] = __('The (QR-)IBAN of your account to which the transfer should be made is ERROR.', 'sqrip-swiss-qr-invoice');
             break;
     }
 
@@ -110,7 +110,7 @@ function sqrip_validation_token_ajax()
     $response = sqrip_get_user_details( $_POST['token'] );
 
     if ($response) {
-        $address_txt = __('from sqrip account: ','sqrip');
+        $address_txt = __('from sqrip account: ','sqrip-swiss-qr-invoice');
         $address_txt .= $response['name'].', '.$response['street'].', '.$response['city'].', '.$response['postal_code'].' '.$response['city'];
 
         $result['result'] = true;
@@ -148,7 +148,7 @@ function sqrip_mark_refund_paid()
 
     // add woocommerce message to original order
     $order = wc_get_order($refund->get_parent_id());
-    $order->add_order_note( __('sqrip Rückerstattung wurde als \'bezahlt\' markiert', 'sqrip') );
+    $order->add_order_note( __('sqrip refund was marked as \'paid\'', 'sqrip-swiss-qr-invoice') );
 
 	wp_send_json(['date' => $date, 'result' => 'success']);
 
@@ -174,7 +174,7 @@ function sqrip_mark_refund_unpaid()
 
     // add woocommerce message to original order
     $order = wc_get_order($refund->get_parent_id());
-    $order->add_order_note( __('sqrip Rückerstattung wurde als \'unbezahlt\' markiert', 'sqrip') );
+    $order->add_order_note( __('sqrip refund was marked as \'unbezahlt\'', 'sqrip-swiss-qr-invoice') );
 
 	wp_send_json(['result' => 'success']);
 
