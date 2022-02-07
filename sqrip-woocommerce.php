@@ -1291,14 +1291,14 @@ function sqrip_display_refund_qr_code($refund) {
     $refund_qr_pdf_url = wp_get_attachment_url($refund_qr_attachment_id);
 	$refund_qr_pdf_path = get_attached_file($refund_qr_attachment_id);
     $refund_id = $refund->get_id();
-    $title = __("QR Code anzeigen",'sqrip');
-    $hidden_title = __("QR Code verbergen",'sqrip');
+    $title = __("Show QR Code",'sqrip');
+    $hidden_title = __("Hide QR Code",'sqrip');
 
-    $paid_title = __("Als bezahlt markieren", 'sqrip');
-    $unpaid_title = __("Als unbezahlt markieren", 'sqrip');
+    $paid_title = __("Mark as paid", 'sqrip');
+    $unpaid_title = __("Mark as unpaid", 'sqrip');
 
-	$paid_status = __("bezahlt am", 'sqrip');
-	$unpaid_status = __("unbezahlt", 'sqrip');
+	$paid_status = __("paid on", 'sqrip');
+	$unpaid_status = __("unpaid", 'sqrip');
 
     $paid = $refund->get_meta('sqrip_refund_paid');
     $status = $paid ? $paid_status." $paid" : $unpaid_status;
@@ -1366,7 +1366,7 @@ function sqrip_extra_user_profile_fields( $user ) {
 
     if($sqrip_return_enabled) {
         ?>
-        <h3><?php _e("Sqrip Refund Information", "sqrip"); ?></h3>
+        <h3><?php _e("Rückerstattung mit sqrip", "sqrip"); ?></h3>
         <table class="form-table">
             <tr>
                 <th><label for="iban"><?php _e("IBAN"); ?></label></th>
