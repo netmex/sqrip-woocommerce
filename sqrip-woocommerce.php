@@ -248,20 +248,20 @@ function sqrip_init_gateway_class()
                     'css'         => 'visibility: hidden'  
                 ),
                 'section_return_settings' => array(
-	                'title' => __('Rückerstattungen', 'sqrip'),
+	                'title' => __('Refunds', 'sqrip'),
 	                'type'        => 'section',
                 ),
                 'return_enabled' => array(
-	                'title'       => __( 'Rückerstattungen Aktivieren/Deaktivieren', 'sqrip' ),
-	                'label'       => __( 'Aktiviere QR-Rechnungen für Rückerstattungen mit der sqrip API', 'sqrip' ),
+	                'title'       => __( 'activate/deactivate Refunds', 'sqrip' ),
+	                'label'       => __( 'Activate sqrip for Refunds', 'sqrip' ),
 	                'type'        => 'checkbox',
-	                'description' => 'Wenn du diese Option aktivierst, generiert die sqrip API im Fall einer Rückerstattung per WooCommerce einen QR Code, welchen du für die Überweisung des Betrags an den Kunden verwenden kannst.',
+	                'description' => 'If activated, sqrip creates for each refund a QR-code that can be scanned with the banking app to initiate a bank transfer to the client.',
 	                'default'     => 'no'
                 ),
                 'return_token' => array(
-	                'title'       => __( 'API Schlüssel für Rückerstattungen' , 'sqrip' ),
+	                'title'       => __( 'API key for Refunds' , 'sqrip' ),
 	                'type'        => 'textarea',
-	                'description' => __( 'Aus Sicherheitsgründen muss für die Rückerstattungen zwingend ein sqrip API Schlüssel verwendet werden, bei welchem die IBAN Überprüfung <strong>deaktiviert</strong> ist.', 'sqrip' ),
+	                'description' => __( 'For security reasons, a separate API key with <strong>deactived</strong> confirmation is needed for the Refund function.', 'sqrip' ),
                 ),
                 
             );
