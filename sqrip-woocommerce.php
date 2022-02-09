@@ -99,13 +99,13 @@ function sqrip_add_admin_notice()
         printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) );
     }
 
-    if ( false !== ( $msg = get_transient( "sqrip_regenerate_qrcode_errors" ) ) && $msg) {
+    if ( false !== ( $msg = get_transient( "sqrip_admin_action_errors" ) ) && $msg) {
 
         $class = 'notice notice-error is-dismissible';
 
         printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), $msg );
        
-        delete_transient( "sqrip_regenerate_qrcode_errors" );
+        delete_transient( "sqrip_admin_action_errors" );
     }
 
 }
@@ -218,8 +218,12 @@ if (!function_exists('sqrip_add_fields_for_order_details')) {
             echo '<li><button class="button button-secondary sqrip-re-generate-qrcode">'.__( 'Renew QR Invoice', 'sqrip-swiss-qr-invoice' ).'</button><p>'.__('for reference numbers based on the order number soon also available', 'sqrip-swiss-qr-invoice').'</p></li>';
 
             echo '</ul>';
+
         } else {
-            echo __( 'Payment is not made with sqrip.', 'sqrip-swiss-qr-invoice' );
+
+            echo '<p>'.__( 'Payment is not made with sqrip.', 'sqrip-swiss-qr-invoice' ).'</p>';
+
+            echo '<button class="button button-secondary sqrip-initiate-payment">'.__( 'Initiate sqrip payment now', 'sqrip-swiss-qr-invoice' ).'</button>';
         }
     }
 }
@@ -352,9 +356,14 @@ function sqrip_qr_action_order_details_after_order_table($order)
 
 add_filter( 'wp_insert_post_data' , function ( $data , $postarr, $unsanitized_postarr ) {
     
-    if ( 'shop_order' === $data['post_type'] && isset($postarr['_sqrip_regenerate_qrcode']) )
+    if ( 
+        'shop_order' === $data['post_type'] && 
+        ( 
+            isset($postarr['_sqrip_regenerate_qrcode']) ||
+            isset($postarr['_sqrip_initiate_payment']) 
+        )
+    )
     {
-
         $order      = wc_get_order($postarr['ID']);
         $order_data = $order->get_data(); // order data
 
@@ -373,12 +382,12 @@ add_filter( 'wp_insert_post_data' , function ( $data , $postarr, $unsanitized_po
         $body = sqrip_prepare_qr_code_request_body($currency_symbol, $amount, strval($postarr['ID']));
 
         $body["payable_by"] = [
-		      "name"          => $order_billing_first_name.' '.$order_billing_last_name,
-		      "street"        => $order_billing_address,
-		      "postal_code"   => $order_billing_postcode,
-		      "town"          => $order_billing_city,
-		      "country_code"  => $order_billing_country
-	      ];
+	      "name"          => $order_billing_first_name.' '.$order_billing_last_name,
+	      "street"        => $order_billing_address,
+	      "postal_code"   => $order_billing_postcode,
+	      "town"          => $order_billing_city,
+	      "country_code"  => $order_billing_country
+	   ];
 
         $address = sqrip_get_plugin_option('address');
 
@@ -403,11 +412,22 @@ add_filter( 'wp_insert_post_data' , function ( $data , $postarr, $unsanitized_po
 
         } else  {
 
+            if ( isset($postarr['_sqrip_regenerate_qrcode']) ) {
+                $order_notes = __('sqrip payment QR code is successfully regenerated', 'sqrip-swiss-qr-invoice');
+                $error_title = __( 'Renew QR Invoice error:', 'sqrip-swiss-qr-invoice' );
+            }
+
+            elseif ( isset($postarr['_sqrip_initiate_payment']) ) {
+                $error_title = __( 'Initiate sqrip payment error:', 'sqrip-swiss-qr-invoice' );
+                $order_notes = __('sqrip payment initiation is successfully', 'sqrip-swiss-qr-invoice');
+                $order->set_payment_method('sqrip');
+            }
+
             if (isset($response_body->reference)) {
 
                 $pdf_file_old = get_post_meta($postarr['ID'], 'sqrip_pdf_file_url', true);
 
-                if ($pdf_file_old) {
+                if ( $pdf_file_old && isset($postarr['_sqrip_regenerate_qrcode']) ) {
 
                     $pdf_file_old_id = attachment_url_to_postid($pdf_file_old);
 
@@ -437,7 +457,7 @@ add_filter( 'wp_insert_post_data' , function ( $data , $postarr, $unsanitized_po
                 // $sqrip_qr_png_url = wp_get_attachment_url($sqrip_qr_png_attachment_id);
                 // $sqrip_qr_png_path = get_attached_file($sqrip_qr_png_attachment_id);
 
-                $order->add_order_note( __('sqrip payment QR code is successfully regenerated', 'sqrip-swiss-qr-invoice') );
+                $order->add_order_note( $order_notes );
 
                 $order->update_meta_data('sqrip_reference_id', $sqrip_reference);
 
@@ -459,24 +479,23 @@ add_filter( 'wp_insert_post_data' , function ( $data , $postarr, $unsanitized_po
 
                 } 
 
-                set_transient('sqrip_regenerate_qrcode_errors', sprintf( 
-                    __( '<b>Renew QR Invoice error:</b> %s</br>%s', 'sqrip-swiss-qr-invoice' ), 
+                set_transient('sqrip_admin_action_errors', sprintf( 
+                    __( '<b>%s</b> %s</br>%s', 'sqrip-swiss-qr-invoice' ), 
+                    $error_title,
                     esc_html( $response_body->message ),
                     esc_html( $errors_output )
                 ), 60);
 
                 $order->add_order_note( 
                     sprintf( 
-                        __( 'Renew QR Invoice error: %s <p>%s</p>', 'sqrip-swiss-qr-invoice' ), 
+                        __( '%s %s <p>%s</p>', 'sqrip-swiss-qr-invoice' ), 
+                        $error_title,
                         esc_html( $response_body->message ),
                         esc_html( $errors_output )
                     )
                 );
-
             }
-
         }
-        
     }
 
     return $data;

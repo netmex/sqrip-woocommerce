@@ -19,6 +19,25 @@ jQuery( document ).ready(function($){
         
     });
 
+    btn_initiate_payment = $('button.sqrip-initiate-payment');
+
+    btn_initiate_payment.on('click', function(e){
+
+        e.preventDefault();
+
+        _form = $('form#post');
+
+        $('body').addClass('sqrip-loading');
+  
+        if ( _form.length ) {
+
+            _form.prepend('<input type="hidden" id="_sqrip_initiate_payment" name="_sqrip_initiate_payment" value="1">');
+            _form.trigger('submit');
+
+        }
+        
+    });
+
     // returns
     // show / hide QR code in returns
     $(".woocommerce_sqrip_toggle_qr").on("click", function(e) {
