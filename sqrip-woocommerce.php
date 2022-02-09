@@ -17,7 +17,7 @@ if ( !in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', ge
     return;
 }
 
-define( 'SQRIP_ENDPOINT', 'https://api.sqrip.madebycolorelephant.com/api/' );
+define( 'SQRIP_ENDPOINT', 'https://api.sqrip.ch/api/' );
 define( 'SQRIP_PLUGIN_BASENAME', plugin_basename(__FILE__) );
 
 require_once __DIR__ . '/inc/functions.php';
