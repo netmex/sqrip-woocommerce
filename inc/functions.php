@@ -32,7 +32,7 @@ function sqrip_remote_request( $endpoint, $body = '', $method = 'GET', $token = 
 {
     $args = sqrip_prepare_remote_args($body, $method, $token);
 
-    $response = wp_remote_request($endpoint, $args);
+    $response = wp_remote_request(SQRIP_ENDPOINT.$endpoint, $args);
 
     if ( is_wp_error($response) ) return;
 
@@ -87,13 +87,13 @@ function sqrip_prepare_qr_code_request_body($currency_symbol, $amount, $order_nu
 	$due_date           = date('Y-m-d', strtotime($date . " + ".$sqrip_due_date." days"));
 
 	if ($iban == '') {
-		$err_msg = __( 'Please add IBAN in the settings of your webshop or on the sqrip dashboard', 'sqrip-swiss-qr-invoice' );
+		$err_msg = __( 'Please add IBAN in the settings of your webshop or on the sqrip dashboard.', 'sqrip-swiss-qr-invoice' );
 		wc_add_notice($err_msg, 'error');
 		return false;
 	}
 
 	if ($product == '') {
-		$err_msg = __( 'Please select a product in the settings..', 'sqrip-swiss-qr-invoice' );
+		$err_msg = __( 'Please select a product in the settings.', 'sqrip-swiss-qr-invoice' );
 		wc_add_notice($err_msg, 'error');
 		return false;
 	}
@@ -200,24 +200,38 @@ function sqrip_get_payable_to_address_txt($address){
  */
 function sqrip_get_user_details($token = "")
 {
-	$endpoint = 'https://api.sqrip.ch/api/details';
+	$endpoint = 'details';
 
-    $body_decode   = sqrip_remote_request($endpoint, '', 'GET', $token);  
+    $body_decode   = sqrip_remote_request($endpoint, '', 'GET', $token); 
 
-    $address = isset($body_decode->user->address) ? $body_decode->user->address : [];
+    $result = []; 
 
-    $name = $address->title ? $address->title : $body_decode->user->first_name.' '.$body_decode->user->last_name;
+    if ($body_decode) {
 
-    $result = [];
+        $address = isset($body_decode->user->address) ? $body_decode->user->address : [];
 
-    if ($address) {
-    	$result = array(
-    		'city' => $address->city,
-    		'country_code' => $address->country_code,
-    		'name' => $name,
-    		'postal_code' => $address->zip,
-    		'street' => $address->street,
-    	);
+        $name = "";
+
+        if (isset($address->title)) {
+
+            $name = $address->title;
+
+        } elseif (isset($body_decode->user)) {
+
+            $name = $body_decode->user->first_name.' '.$body_decode->user->last_name;
+
+        }
+        
+        if ($address) {
+            $result = array(
+                'city' => $address->city,
+                'country_code' => $address->country_code,
+                'name' => $name,
+                'postal_code' => $address->zip,
+                'street' => $address->street,
+            );
+        }
+
     }
 
     return $result;
@@ -228,7 +242,7 @@ function sqrip_get_user_details($token = "")
  */
 function sqrip_validation_iban($iban, $tokens)
 {
-    $endpoint = 'https://api.sqrip.ch/api/validate-iban';
+    $endpoint = 'validate-iban';
 
     $body = '{
         "iban": {
@@ -252,7 +266,7 @@ function sqrip_verify_token($token)
         return;
     }
 
-    $endpoint = 'https://api.sqrip.ch/api/validate-iban';
+    $endpoint = 'validate-iban';
     $iban = 'CH5604835012345678009';
     $iban_type = 'simple';
 
@@ -288,4 +302,17 @@ function sqrip_get_customer_iban($user) {
 function sqrip_set_customer_iban($user, $iban) {
     // TODO: make the field key customizable in the sqrip options
     return update_user_meta($user->ID, 'iban_num', $iban);
+}
+
+function sqrip_get_wc_emails(){
+    $emails = wc()->mailer()->get_emails();
+    $options = [];
+
+    if ($emails && is_array($emails)) {
+        foreach ($emails as $email) {
+            $options[$email->id] =  $email->title;
+        }
+    }
+
+    return $options;
 }
