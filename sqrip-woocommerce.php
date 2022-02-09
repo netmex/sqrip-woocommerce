@@ -369,7 +369,7 @@ add_filter( 'wp_insert_post_data' , function ( $data , $postarr, $unsanitized_po
                     
         $currency_symbol    =   $order_data['currency'];
         $amount             =   floatval($order_data['total']);
-
+   
         $body = sqrip_prepare_qr_code_request_body($currency_symbol, $amount, strval($postarr['ID']));
 
         $body["payable_by"] = [
@@ -404,6 +404,23 @@ add_filter( 'wp_insert_post_data' , function ( $data , $postarr, $unsanitized_po
         } else  {
 
             if (isset($response_body->reference)) {
+
+                $pdf_file_old = get_post_meta($postarr['ID'], 'sqrip_pdf_file_url', true);
+
+                if ($pdf_file_old) {
+
+                    $pdf_file_old_id = attachment_url_to_postid($pdf_file_old);
+
+                    if ($pdf_file_old_id) {
+
+                        require_once( ABSPATH . 'wp-settings.php' );
+
+                        wp_delete_attachment($pdf_file_old_id, true);
+
+                    }
+
+                }
+
                 $sqrip_pdf       =    $response_body->pdf_file;
                 // $sqrip_png       =    $response_body->png_file;
                 $sqrip_reference =    $response_body->reference;
@@ -438,15 +455,15 @@ add_filter( 'wp_insert_post_data' , function ( $data , $postarr, $unsanitized_po
                 
                 if (isset($response_body->errors)) {
                     $errors_output = json_encode($response_body->errors, JSON_PRETTY_PRINT); 
-                    $error_goto = 'Please add correct your address at <a href="' . admin_url( 'admin.php?page=wc-settings&tab=checkout&section=sqrip' ) . '" aria-label="' . esc_attr__( 'sqrip settings', 'sqrip-swiss-qr-invoice' ) . '">' . esc_html__( 'sqrip Settings', 'sqrip-swiss-qr-invoice' ) . '</a>';
+                    // $error_goto = 'Please add correct your address at <a href="' . admin_url( 'admin.php?page=wc-settings&tab=checkout&section=sqrip' ) . '" aria-label="' . esc_attr__( 'sqrip settings', 'sqrip-swiss-qr-invoice' ) . '">' . esc_html__( 'sqrip settings', 'sqrip-swiss-qr-invoice' ) . '</a>';
 
-                    set_transient('sqrip_regenerate_qrcode_errors', sprintf( 
-                        __( '<b>Renew QR Invoice error:</b> %s <p>%s</p><p>%s</p>', 'sqrip-swiss-qr-invoice' ), 
-                        esc_html( $response_body->message ),
-                        esc_html( $errors_output ),
-                        $error_goto
-                    ), 60);
-                }
+                } 
+
+                set_transient('sqrip_regenerate_qrcode_errors', sprintf( 
+                    __( '<b>Renew QR Invoice error:</b> %s</br>%s', 'sqrip-swiss-qr-invoice' ), 
+                    esc_html( $response_body->message ),
+                    esc_html( $errors_output )
+                ), 60);
 
                 $order->add_order_note( 
                     sprintf( 

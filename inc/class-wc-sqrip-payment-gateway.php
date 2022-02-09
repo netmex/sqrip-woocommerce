@@ -711,6 +711,23 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         $response_body = json_decode($response_body);
 
         if (isset($response_body->reference)) {
+
+            $pdf_file_old = get_post_meta($order_id, 'sqrip_pdf_file_url', true);
+
+            if ($pdf_file_old) {
+
+                $pdf_file_old_id = attachment_url_to_postid($pdf_file_old);
+
+                if ($pdf_file_old_id) {
+
+                    require_once( ABSPATH . 'wp-settings.php' );
+
+                    wp_delete_attachment($pdf_file_old_id, true);
+
+                }
+
+            }
+
             $sqrip_pdf       =    $response_body->pdf_file;
             // $sqrip_png       =    $response_body->png_file;
             $sqrip_reference =    $response_body->reference;
