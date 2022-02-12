@@ -379,7 +379,7 @@ add_filter( 'wp_insert_post_data' , function ( $data , $postarr, $unsanitized_po
         $currency_symbol    =   $order_data['currency'];
         $amount             =   floatval($order_data['total']);
    
-        $body = sqrip_prepare_qr_code_request_body($currency_symbol, $amount, strval($postarr['ID']));
+        $body = sqrip_prepare_qr_code_request_body($currency_symbol, $amount, $postarr['ID']);
 
         $body["payable_by"] = [
 	      "name"          => $order_billing_first_name.' '.$order_billing_last_name,

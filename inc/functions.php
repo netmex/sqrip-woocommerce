@@ -115,7 +115,7 @@ function sqrip_prepare_qr_code_request_body($currency_symbol, $amount, $order_nu
 
 	// If the user selects "Order Number" the API request will include param "qr_reference"
 	if ( $qr_reference == "order_number" ) {
-		$body['payment_information']['qr_reference'] = $order_number;
+		$body['payment_information']['qr_reference'] = strval($order_number);
 	}
 
 	return $body;
