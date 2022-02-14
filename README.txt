@@ -52,10 +52,18 @@ The QR invoice can be enclosed with the e-mail in two ways:
 - only the payment section (formerly "payment slip") in A6 format.
 
 h) Language
-The language to be used on the QR invoice (de, fr, it, en) can be set per store.
+- The language to be used on the QR invoice (de, fr, it, en) can be set per store.
+- WPML is supported.
 
 i) Test e-mail
 With one click, you can test the settings and see how the QR invoice is received by your customers.
+
+j) Add sqrip payment method manually
+When adding orders manually in WooCommerce you can set the payment method to sqrip manually
+
+k) Define order status
+Define the order status that will add the qr-invoice to the outgoing e-mail.
+
 
 = Requirements =
 1. Besides a current WordPress and WooCommerce installation, an account on sqrip.ch is required.
@@ -80,7 +88,7 @@ We charge according to actually used QR invoices. One QR invoice costs 1 credit.
 Yes. Registration (http://api.sqrip.ch/login) is free of charge. No credit card details are required. There are 20 credits to try it out. With this you can test all functions (test e-mail!). Afterwards you can buy packages with credits. If you do not like the service, you can simply delete the account again.
 
 = Will the service be developed further? =
-Yes. We are already working on comparing the reconciliation of orders/purchases with the payments received on the bank account, thus automatically tracking the status of an order. In addition, we would like to enable reimbursement through the usual bank channel. Our goal remains: To offer a cheap, simple, full-value and reliable payment method. We are happy to receive your ideas for this.
+Yes. We are already working on comparing the reconciliation of orders/purchases with the payments received on the bank account, thus automatically tracking the status of an order. In addition, we would like to enable automatic reimbursement through the usual bank channel. Our goal remains: To offer a cheap, simple, full-value and reliable payment method. We are happy to receive your ideas for this.
 
 = What are the best reasons to use sqrip with our store? =
 - sqrip is set up in 5 minutes - IT knowledge is not necessary.
@@ -96,6 +104,12 @@ Yes. We are already working on comparing the reconciliation of orders/purchases 
 4. sqrip API Key
 
 == Changelog ==
+
+= 1.4 =
+* Allow adding sqrip payment method to manually added orders;
+* Define the order status that will add the qr-invoice to the outgoing e-mail;
+* Support for WPML;
+* Minor bug fixes.
 
 = 1.3.1 =
 * Plugin is now available in German;
