@@ -44,7 +44,8 @@ e) Due date
 The time given to the payer to settle the invoice may be communicated as text on the payment part.
 
 f) Integration
-The created QR invoice will be attached to the confirmation email. It can also be offered for download on the confirmation page.
+Define the e-mail to which the qr-invoice will be attached to.
+It can also be offered for download on the confirmation page.
 
 g) E-mail enclosure
 The QR invoice can be enclosed with the e-mail in two ways:
@@ -59,10 +60,8 @@ i) Test e-mail
 With one click, you can test the settings and see how the QR invoice is received by your customers.
 
 j) Add sqrip payment method manually
-When adding orders manually in WooCommerce you can set the payment method to sqrip manually
+Add sqrip as payment method for manually created orders.
 
-k) Define order status
-Define the order status that will add the qr-invoice to the outgoing e-mail.
 
 
 = Requirements =
