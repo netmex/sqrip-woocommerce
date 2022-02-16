@@ -475,7 +475,7 @@ add_filter( 'wp_insert_post_data' , function ( $data , $postarr, $unsanitized_po
                 
                 if (isset($response_body->errors)) {
                     $errors_output = json_encode($response_body->errors, JSON_PRETTY_PRINT); 
-                    // $error_goto = 'Please add correct your address at <a href="' . admin_url( 'admin.php?page=wc-settings&tab=checkout&section=sqrip' ) . '" aria-label="' . esc_attr__( 'sqrip settings', 'sqrip-swiss-qr-invoice' ) . '">' . esc_html__( 'sqrip settings', 'sqrip-swiss-qr-invoice' ) . '</a>';
+                    // $error_goto = 'Please add your address correctly at <a href="' . admin_url( 'admin.php?page=wc-settings&tab=checkout&section=sqrip' ) . '" aria-label="' . esc_attr__( 'sqrip settings', 'sqrip-swiss-qr-invoice' ) . '">' . esc_html__( 'sqrip settings', 'sqrip-swiss-qr-invoice' ) . '</a>';
 
                 } 
 
