@@ -114,11 +114,11 @@ function sqrip_validation_token_ajax()
         $address_txt .= $response['name'].', '.$response['street'].', '.$response['city'].', '.$response['postal_code'].' '.$response['city'];
 
         $result['result'] = true;
-        $result['message'] = __("API key confirmed", "sqrip");
+        $result['message'] = __("API key confirmed", "sqrip-swiss-qr-invoice");
         $result['address'] = $address_txt;
     } else {
         $result['result'] = false;
-        $result['message'] = __("API key NOT confirmed", "sqrip");
+        $result['message'] = __("API key NOT confirmed", "sqrip-swiss-qr-invoice");
     }
 
     wp_send_json($result);
