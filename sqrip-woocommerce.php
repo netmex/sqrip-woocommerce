@@ -594,7 +594,7 @@ function sqrip_extra_user_profile_fields( $user ) {
 
     if($sqrip_return_enabled) {
         ?>
-        <h3><?php _e("Rückerstattung mit sqrip", "sqrip"); ?></h3>
+        <h3><?php _e("Refunds with sqrip", "sqrip"); ?></h3>
         <table class="form-table">
             <tr>
                 <th><label for="iban"><?php _e("IBAN"); ?></label></th>
