@@ -202,8 +202,8 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'title'       => __( 'Activate/Deactivate Refunds', 'sqrip-swiss-qr-invoice' ),
                 'label'       => __( 'Activate sqrip for Refunds', 'sqrip-swiss-qr-invoice' ),
                 'type'        => 'checkbox',
-                'description' => 'If activated, sqrip makes refunding easier by creating a QR-code that can be scanned with the banking app to initiate a bank transfer to the client.',
-                'default'     => 'no'
+                'description' => __( 'If activated, sqrip makes refunding easier by creating a QR-code that can be scanned with the banking app to initiate a bank transfer to the client.', 'sqrip-swiss-qr-invoice' ),
+  	        'default'     => 'no'
             ),
             'return_token' => array(
                 'title'       => __( 'API key for Refunds' , 'sqrip-swiss-qr-invoice' ),
