@@ -151,12 +151,6 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'default'     => 30,
                 'css'         => "width:70px"
             ),
-            'email_attached' => array(
-                'title' => __( 'Order Email', 'sqrip-swiss-qr-invoice' ),
-                'description' => __( 'The order email template to which the QR-invoice should be attached.', 'sqrip-swiss-qr-invoice' ),
-                'type' => 'select',
-                'options' => sqrip_get_wc_emails()
-            ),
             'section_invoice_settings' => array(
                 'title' => __('QR Invoice Display', 'sqrip-swiss-qr-invoice'),
                 'type'        => 'section',
@@ -168,10 +162,16 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'description' => '',
                 'default'     => 'yes'
             ),
+            'email_attached' => array(
+                'title' => __( 'Attach QR-Invoice to', 'sqrip-swiss-qr-invoice' ),
+                'description' => __( 'Select email template to which the QR-invoice is attached.', 'sqrip-swiss-qr-invoice' ),
+                'type' => 'select',
+                'options' => sqrip_get_wc_emails()
+            ),
             'product' => array(
-                'title'         => __( 'in the confirmation e-mail', 'sqrip-swiss-qr-invoice' ),
+                'title'         => __( 'Format', 'sqrip-swiss-qr-invoice' ),
                 'type'          => 'select',
-                'description' => __( 'Select format', 'sqrip-swiss-qr-invoice' ),
+                'description' => '',
                 'options'       => array(
                     'Full A4'   => __('on a blank A4 PDF', 'sqrip-swiss-qr-invoice' ),
                     'Invoice Slip' => __('only the A6 payment part as PDF', 'sqrip-swiss-qr-invoice' ),
@@ -199,10 +199,10 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'type'        => 'section',
             ),
             'return_enabled' => array(
-                'title'       => __( 'activate/deactivate Refunds', 'sqrip-swiss-qr-invoice' ),
+                'title'       => __( 'Activate/Deactivate Refunds', 'sqrip-swiss-qr-invoice' ),
                 'label'       => __( 'Activate sqrip for Refunds', 'sqrip-swiss-qr-invoice' ),
                 'type'        => 'checkbox',
-                'description' => 'If activated, sqrip creates for each refund a QR-code that can be scanned with the banking app to initiate a bank transfer to the client.',
+                'description' => 'If activated, sqrip makes refunding easier by creating a QR-code that can be scanned with the banking app to initiate a bank transfer to the client.',
                 'default'     => 'no'
             ),
             'return_token' => array(
