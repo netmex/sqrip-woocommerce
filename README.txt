@@ -62,6 +62,8 @@ With one click, you can test the settings and see how the QR invoice is received
 j) Add sqrip payment method manually
 Add sqrip as payment method for manually created orders.
 
+k) Use sqrip QR-Codes for Refunds
+Scan the QR-Code with your Banking App to initiate refunds. Remember: IBAN of client required!
 
 
 = Requirements =
