@@ -89,7 +89,7 @@ We charge according to actually used QR invoices. One QR invoice costs 1 credit.
 Yes. Registration (http://api.sqrip.ch/login) is free of charge. No credit card details are required. There are 20 credits to try it out. With this you can test all functions (test e-mail!). Afterwards you can buy packages with credits. If you do not like the service, you can simply delete the account again.
 
 = Will the service be developed further? =
-Yes. We are already working on comparing the reconciliation of orders/purchases with the payments received on the bank account, thus automatically tracking the status of an order. In addition, we would like to enable automatic reimbursement through the usual bank channel. Our goal remains: To offer a cheap, simple, full-value and reliable payment method. We are happy to receive your ideas for this.
+Yes. We are already working on comparing the reconciliation of orders/purchases with the payments received on the bank account, thus automatically tracking the status of an order. Our goal remains: To offer a cheap, simple, full-value and reliable payment method. We are happy to receive your ideas for this.
 
 = What are the best reasons to use sqrip with our store? =
 - sqrip is set up in 5 minutes - IT knowledge is not necessary.
