@@ -413,13 +413,13 @@ add_filter( 'wp_insert_post_data' , function ( $data , $postarr, $unsanitized_po
         } else  {
 
             if ( isset($postarr['_sqrip_regenerate_qrcode']) ) {
-                $order_notes = __('sqrip payment QR code is successfully regenerated', 'sqrip-swiss-qr-invoice');
+                $order_notes = __('sqrip payment QR code was successfully regenerated', 'sqrip-swiss-qr-invoice');
                 $error_title = __( 'Renew QR Invoice error:', 'sqrip-swiss-qr-invoice' );
             }
 
             elseif ( isset($postarr['_sqrip_initiate_payment']) ) {
                 $error_title = __( 'Initiate sqrip payment error:', 'sqrip-swiss-qr-invoice' );
-                $order_notes = __('sqrip payment initiation is successfully', 'sqrip-swiss-qr-invoice');
+                $order_notes = __('sqrip payment initiation was successful', 'sqrip-swiss-qr-invoice');
                 $order->set_payment_method('sqrip');
             }
 
