@@ -4,7 +4,7 @@ Donate link: https://sqrip.ch/
 Tags: woocommerce, payment, sqrip, qrcode, qr, scan, swiss qr invoice, QR-Rechnung
 Requires at least: 4.7
 Tested up to: 5.9
-Stable tag: 1.4
+Stable tag: 1.4.1
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -105,6 +105,10 @@ Yes. We are already working on comparing the reconciliation of orders/purchases 
 4. sqrip API Key
 
 == Changelog ==
+
+= 1.4.1 =
+* Refunds;
+* Text adjustments.
 
 = 1.4 =
 * Allow adding sqrip payment method to manually added orders;
