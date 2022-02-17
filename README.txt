@@ -107,13 +107,16 @@ Yes. We are already working on comparing the reconciliation of orders/purchases 
 == Changelog ==
 
 = 1.4.1 =
-* Refunds;
-* Text adjustments.
+* Text adjustments;
+* Minor bug fixes.
 
 = 1.4 =
+* Refunds;
 * Allow adding sqrip payment method to manually added orders;
 * Define the order status that will add the qr-invoice to the outgoing e-mail;
+* PDF files are replaced with new version when QR-invoice is renewed;
 * Support for WPML;
+* Plugin in available in French and Italian;
 * Minor bug fixes.
 
 = 1.3.1 =
