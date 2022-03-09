@@ -1,7 +1,7 @@
 === sqrip – Swiss QR Invoice ===
 Contributors: sqrip
 Donate link: https://sqrip.ch/
-Tags: woocommerce, payment, sqrip, qrcode, qr, scan, swiss qr invoice, QR-Rechnung
+Tags: woocommerce, payment, sqrip, qrcode, qr, scan, swiss qr invoice, QR-Rechnung, EBICS, QR-facture, bulletins de versement, Einzahlungsschein, QR-Einzahlungsschein, bulletins de versement, Swiss QR Code, code QR, QR-fattura, polizze di versamento
 Requires at least: 4.7
 Tested up to: 5.9
 Stable tag: 1.4.1
@@ -9,7 +9,7 @@ Requires PHP: 7.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-sqrip extends WooCommerce payment options for Swiss stores and customers with the new QR payment parts.
+sqrip – Modern and clever WooCommerce tools for the most widely used payment method in Switzerland: the bank transfers. 
 
 == Description ==
 At the end of September 2022, the traditional inpayment slips (ISR) for bank transfers in Switzerland will disappear. The replacement will be the "QR bill" (https://www.einfach-zahlen.ch/), which was introduced in July 2020.
