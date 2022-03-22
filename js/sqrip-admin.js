@@ -6,7 +6,12 @@ jQuery( document ).ready(function($){
     ip_iban = $('#woocommerce_sqrip_iban'),
     ip_iban_type = $('#woocommerce_sqrip_iban_type'),
     ip_token = $('#woocommerce_sqrip_token'),
-    btn_save = $('button.woocommerce-save-button');
+    btn_save = $('button.woocommerce-save-button'),
+    tab = $('.sqrip-tab'),
+    tab_active = $('.sqrip-tabs').find('.sqrip-tab.active'),
+    cn_service = $('#woocommerce_sqrip_ebics_service'),
+    pm_frequence = $('#woocommerce_sqrip_payment_frequence'),
+    rem_creds = $('#woocommerce_sqrip_remaining_credits');
 
     if (ip_token.length) {
         bt_check_token_html = '<button id="btn_sqrip_check_token" class="button-secondary sqrip-btn-validate-token">'+sqrip.txt_check_connection+'</button>';
@@ -73,15 +78,6 @@ jQuery( document ).ready(function($){
             ip_itgr_email.find('option[value="both"]').hide();
         }
     });
-
-
-    function init_individual_address(_val){
-        if (_val == 'individual') {
-            $('.sqrip-address-individual').prop('required', true).closest('tr').show();
-        } else {
-            $('.sqrip-address-individual').prop('required', false).closest('tr').hide();
-        }
-    }
 
     init_individual_address(ip_address.val());
 
@@ -188,4 +184,128 @@ jQuery( document ).ready(function($){
             btn_save.trigger('click');
         });
     }
+   
+
+    tab.on('click', function(e){
+        e.preventDefault();
+        tab.removeClass('active');
+        $(this).addClass('active');
+        sqrip_tab_init($(this).data('tab'));
+
+    })
+
+
+    if ( cn_service.length ) {
+
+        if (cn_service.is(':checked')) {
+
+            // cn_service.prop('disabled', true);
+
+        } else {
+
+            cn_sv_row = cn_service.closest('tr');
+            cn_sv_label = cn_sv_row.find('th label');
+            cn_sv_label.hide();
+            cn_sv_row.find('td > fieldset').hide();
+
+            bt_cn_sv_html = '<button id="btn_sqrip_connect_service" class="button-connect-service">'+cn_sv_label.text()+'</button>';
+
+            cn_sv_row.find('th').append(bt_cn_sv_html);
+
+            bt_cn_sv = $('#btn_sqrip_connect_service');
+            bt_cn_sv.on('click', function(e){
+                e.preventDefault();
+
+                _this = $(this);
+                _output = cn_sv_row.find('td.forminp');
+                _output.find('.sqrip-notice').remove();
+
+                if( ip_token.val().trim().length < 1 ) {
+                    ip_token.focus();
+                    return; 
+                }
+
+                $.ajax({
+                    type : "post", 
+                    url : sqrip.ajax_url, 
+                    data : {
+                        action: "sqrip_connect_ebics_service", 
+                        token: ip_token.val()
+                    },
+                    beforeSend: function(){
+                       $('body').addClass('sqrip-loading');
+                    },
+                    success: function(response) {
+                        if(response) {
+                            result = "updated";
+                            cn_service.prop('checked', true);
+                            message = response.message;
+
+                            if (response.remaining_credits) {
+                                rem_creds.val(response.remaining_credits);
+                            } 
+
+                        } else {
+                            result = "error";
+                            cn_service.prop('checked', false);
+                            message = 'Error';
+                        }
+
+
+                        output_html = '<div class="sqrip-notice '+result+'">';
+                        output_html += '<p>'+message+'</p>';
+                        output_html += '</div>';
+                        _output.append(output_html);
+
+                        sqrip_tab_init('comparison');
+                    },
+                    error: function( jqXHR, textStatus, errorThrown ){
+                        console.log( 'The following error occured: ' + textStatus, errorThrown );
+                    },
+                    complete: function(){
+                        $('body').removeClass('sqrip-loading');
+                    }
+                })
+            })
+        }
+    }
+
+    sqrip_tab_init(tab_active.data('tab'));
+
+    function init_individual_address(_val){
+        if (_val == 'individual') {
+            $('.sqrip-address-individual').prop('required', true).closest('tr').show();
+        } else {
+            $('.sqrip-address-individual').prop('required', false).closest('tr').hide();
+        }
+    }
+
+    function sqrip_tab_init(data){
+
+        tab_des = $('.sqrip-tabs-description');
+
+        tab_des.find('.sqrip-tab-description').hide();
+        tab_des.find('.sqrip-tab-description[data-tab="'+data+'"]').show();
+
+        table = $('.sqrip-tabs').siblings('.form-table');
+        table.find('tr').hide();
+        table.find('.'+data+'-tab').closest('tr').show();
+
+        if (data == "qrinvoice") {
+            init_individual_address(ip_address.val());
+        }
+
+        else if (data == "comparison") {
+            init_comparison_tab(cn_service, table);
+        }
+    }
+
+    function init_comparison_tab(connect, table) {
+        _val = connect.is(':checked');
+        if (_val === false) {
+            table.find('tr').hide();
+            connect.closest('tr').show();
+        }
+    }
+
 });

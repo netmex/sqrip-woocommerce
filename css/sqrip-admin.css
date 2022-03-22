@@ -26,7 +26,6 @@ body.sqrip-loading{
 .sqrip-notice{
     font-weight: bold;
     display: inline-block;
-    margin: 0 0 0 15px!important;
     line-height: 1;
     height: 25px;
 }
@@ -51,4 +50,81 @@ table.form-table td .sqrip-notice p{
 
 .sqrip-payment .sqrip-re-generate-qrcode{
     margin-top: 20px;
+}
+
+.sqrip-tabs{
+    display: flex;
+}
+
+.sqrip-tab{
+    display: block;
+    float: left;
+    margin-right: 15px;
+    cursor: pointer;
+    border-bottom: 3px solid #9b9b9b;
+}
+
+.sqrip-tab h2{
+    color: #747474;
+    margin: 0.7em 0;
+}
+
+
+.sqrip-tab.active{
+    border-color: #6558F5;
+}
+
+.sqrip-tab.active h2{
+    color: #6558F5;
+}
+
+.sqrip-tabs-description{
+    display: block;
+    max-width: 900px;
+    margin: 20px 0 10px;
+}
+
+/*.sqrip-tabs ~ .form-table tr{
+    display: none!important;
+}
+
+.sqrip-tabs ~ .form-table tr.active{
+    display: table-row!important;
+}*/
+
+.button-connect-service{
+    background-color: #6558f5;
+    padding: 10px 20px;
+    display: inline-block;
+    border-radius: 6px;
+    color: #fff;
+    line-height: 1;
+    border: 0;
+    cursor: pointer;
+    margin-top: 5px;
+}
+
+.wp-core-ui .button-secondary.sqrip-btn-validate-token{
+    margin: 10px 10px 15px 0;
+}
+
+table.form-table tr td label[for="woocommerce_sqrip_ebics_service"]{
+    color: #6558f5;
+    font-weight: 600;
+}
+
+table.form-table tr td label[for="woocommerce_sqrip_ebics_service"]:before{
+    content: "\f147";
+    font: normal 20px/1 dashicons;
+    border: 2px solid;
+    border-radius: 50%;
+    vertical-align: middle;
+    margin-right: 5px;
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+}
+
+#woocommerce_sqrip_ebics_service{
+    display: none;
 }

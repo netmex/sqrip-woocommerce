@@ -180,3 +180,34 @@ function sqrip_mark_refund_unpaid()
 
 	die();
 }
+
+
+/**
+ * sqrip Active EBICS Service
+ *
+ * @since 2.0
+ */
+
+add_action( 'wp_ajax_sqrip_connect_ebics_service', 'sqrip_connect_ebics_service_ajax' );
+
+function sqrip_connect_ebics_service_ajax()
+{
+    if ( !$_POST['token'] ) return;   
+
+    $endpoint = 'activate-ebics-connection';
+
+    $response   = sqrip_remote_request($endpoint, '', 'GET', $token); 
+
+    if($response){
+
+        // update_option('woocommerce_sqrip_ebics_service', true);
+
+        // $rem_credits = isset($response['remaining_credits']) && !empty($response['remaining_credits']) ? update_option('woocommerce_sqrip_remaining_credits', $response['remaining_credits']) : "";
+
+    }
+
+    wp_send_json($response);
+      
+    die();
+}
+
