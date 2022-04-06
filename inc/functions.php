@@ -84,12 +84,13 @@ function sqrip_prepare_qr_code_request_body($currency_symbol, $amount, $order_nu
 	$lang                   = $plugin_options['lang'] ? $plugin_options['lang'] : "de";
 
 	$date                   = date('Y-m-d');
-	$due_date               = date('Y-m-d', strtotime($date . " + ".$sqrip_due_date." days"));
+	$due_date_raw           = strtotime($date . " + ".$sqrip_due_date." days");
+    $due_date               = date('Y-m-d', $due_date_raw);
 
     $additional_information = $plugin_options['additional_information'];
 
     if($additional_information) {
-        $additional_information = sqrip_additional_information_shortcodes($additional_information,$due_date, $order_number);
+        $additional_information = sqrip_additional_information_shortcodes($additional_information, $lang, $due_date_raw, $order_number);
     }
 
 	if ($iban == '') {
@@ -325,8 +326,49 @@ function sqrip_get_wc_emails(){
 }
 
 
-function sqrip_additional_information_shortcodes($additional_information,$due_date, $order_number) {
-    $additional_information = str_replace("[due_date]", $due_date, $additional_information);
+function sqrip_additional_information_shortcodes($additional_information, $lang, $due_date, $order_number) {
+
+    // get current language from WPML
+    $current_lang = apply_filters( 'wpml_current_language', NULL );
+
+    // get current language from plugin options
+    if(!$current_lang) {
+        $current_lang = sqrip_get_locale_by_lang($lang);
+    }
+    setlocale(LC_TIME, $current_lang);
+
+    $date_shortcodes = [];
+    // finds [due_date format="{format}"]
+    preg_match_all('/\[due_date format="(.*)"\]/', $additional_information, $date_shortcodes);
+    foreach($date_shortcodes[0] as $index=>$date_shortcode) {
+        $format = $date_shortcodes[1][$index];
+        $due_date_format = strftime($format, $due_date);
+        if(!$due_date_format) {
+            continue;
+        }
+        $additional_information = str_replace($date_shortcode, $due_date_format, $additional_information);
+    }
+
+    // replace [order_number] with order number
     $additional_information = str_replace("[order_number]", $order_number, $additional_information);
     return $additional_information;
+}
+
+/**
+ * Maps the language string used in the sqrip plugin to valid locale values for PHP / Wordpress / WPML
+ * @param $lang
+ * @return void
+ */
+function sqrip_get_locale_by_lang($lang) {
+    $locales = [
+        'de' => 'de_DE',
+        'fr' => 'fr_FR',
+        'it' => 'it_IT',
+        'en' => 'en_US'
+    ];
+    $locale = $locales[$lang];
+    if(!$locale) {
+        $locale = $lang;
+    }
+    return $locale;
 }
