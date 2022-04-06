@@ -6,7 +6,8 @@ jQuery( document ).ready(function($){
     ip_iban = $('#woocommerce_sqrip_iban'),
     ip_iban_type = $('#woocommerce_sqrip_iban_type'),
     ip_token = $('#woocommerce_sqrip_token'),
-    btn_save = $('button.woocommerce-save-button');
+    btn_save = $('button.woocommerce-save-button'),
+    sqrip_additional_information = $('#woocommerce_sqrip_additional_information');
 
     if (ip_token.length) {
         bt_check_token_html = '<button id="btn_sqrip_check_token" class="button-secondary sqrip-btn-validate-token">'+sqrip.txt_check_connection+'</button>';
@@ -187,5 +188,10 @@ jQuery( document ).ready(function($){
 
             btn_save.trigger('click');
         });
+    }
+
+    if(sqrip_additional_information.length) {
+        sqrip_additional_information.attr("maxlength",140);
+        sqrip_additional_information.attr("rows", 4);
     }
 });

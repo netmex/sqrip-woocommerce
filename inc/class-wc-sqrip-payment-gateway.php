@@ -145,15 +145,15 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                     'order_number' => __('Order number', 'sqrip-swiss-qr-invoice' ),
                 ),
             ),
+            'section_invoice_settings' => array(
+                'title' => __('QR Invoice Display', 'sqrip-swiss-qr-invoice'),
+                'type'        => 'section',
+            ),
             'due_date' => array(
                 'title'       => __( 'Maturity (Today in x days)', 'sqrip-swiss-qr-invoice' ),
                 'type'        => 'number',
                 'default'     => 30,
                 'css'         => "width:70px"
-            ),
-            'section_invoice_settings' => array(
-                'title' => __('QR Invoice Display', 'sqrip-swiss-qr-invoice'),
-                'type'        => 'section',
             ),
             'integration_order' => array(
                 'title'       => __( 'on the confirmation page', 'sqrip-swiss-qr-invoice' ),
@@ -187,6 +187,14 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                     'en'    => __( 'English', 'sqrip-swiss-qr-invoice' )
                 ),
                 'default' => 'de'
+            ),
+            'additional_information' => array(
+                'title'       => __( 'Additional Information' , 'sqrip-swiss-qr-invoice' ),
+                'type'        => 'textarea',
+                'class'       => 'sqrip-additional-information',
+                'maxlength'   => 140,
+                'default'     => __("Due date: [due_date]\nOrder: #[order_number]\nThank you for your purchase!","sqrip-swiss-qr-invoice"),
+                'description' => __( 'Will be displayed on the QR invoice in the section “Additional information”. <br>The following short codes are available:<br>[due_date] to insert the due date of the invoice<br>[order_number] the order number.', 'sqrip-swiss-qr-invoice' ),
             ),
             'test_email' => array(
                 'title'       => '',

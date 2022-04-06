@@ -74,17 +74,23 @@ function sqrip_get_billing_address_from_order($order) {
  * @return array|false
  */
 function sqrip_prepare_qr_code_request_body($currency_symbol, $amount, $order_number) {
-	$plugin_options     = get_option('woocommerce_sqrip_settings', array());
-	$sqrip_due_date     = $plugin_options['due_date'];
-	$iban               = $plugin_options['iban'];
+	$plugin_options         = get_option('woocommerce_sqrip_settings', array());
+	$sqrip_due_date         = $plugin_options['due_date'];
+	$iban                   = $plugin_options['iban'];
 
-	$product            = $plugin_options['product'];
-	$qr_reference       = $plugin_options['qr_reference'];
-	$address            = $plugin_options['address'];
-	$lang               = $plugin_options['lang'] ? $plugin_options['lang'] : "de";
+	$product                = $plugin_options['product'];
+	$qr_reference           = $plugin_options['qr_reference'];
+	$address                = $plugin_options['address'];
+	$lang                   = $plugin_options['lang'] ? $plugin_options['lang'] : "de";
 
-	$date               = date('Y-m-d');
-	$due_date           = date('Y-m-d', strtotime($date . " + ".$sqrip_due_date." days"));
+	$date                   = date('Y-m-d');
+	$due_date               = date('Y-m-d', strtotime($date . " + ".$sqrip_due_date." days"));
+
+    $additional_information = $plugin_options['additional_information'];
+
+    if($additional_information) {
+        $additional_information = sqrip_additional_information_shortcodes($additional_information,$due_date, $order_number);
+    }
 
 	if ($iban == '') {
 		$err_msg = __( 'Please add IBAN in the settings of your webshop or on the sqrip dashboard.', 'sqrip-swiss-qr-invoice' );
@@ -100,17 +106,18 @@ function sqrip_prepare_qr_code_request_body($currency_symbol, $amount, $order_nu
 
 	$body = [
 		"iban" => [
-			"iban"      => $iban,
+			"iban"  => $iban,
 		],
 		"payment_information" =>
 			[
-				"currency_symbol" => $currency_symbol,
-				"amount" => $amount,
-				"due_date" => $due_date,
+				"currency_symbol"   => $currency_symbol,
+				"amount"            => $amount,
+				"due_date"          => $due_date, // TODO: remove this param
+                "message"           => $additional_information
 			],
-		"lang" => $lang,
-		"product" => $product,
-		"source" => "woocommerce"
+		"lang"      => $lang,
+		"product"   => $product,
+		"source"    => "woocommerce"
 	];
 
 	// If the user selects "Order Number" the API request will include param "qr_reference"
@@ -315,4 +322,11 @@ function sqrip_get_wc_emails(){
     }
 
     return $options;
+}
+
+
+function sqrip_additional_information_shortcodes($additional_information,$due_date, $order_number) {
+    $additional_information = str_replace("[due_date]", $due_date, $additional_information);
+    $additional_information = str_replace("[order_number]", $order_number, $additional_information);
+    return $additional_information;
 }
