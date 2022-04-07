@@ -40,8 +40,12 @@ The bank account to which the invoice amount should be transferred. If this acco
 d) (QR) reference number
 The reference number is either created randomly or calculated on the basis of the order number. It automatically adapts to the IBAN format used.
 
-e) Due date
-The time given to the payer to settle the invoice may be communicated as text on the payment part.
+e) additional information
+On up to three lines additional information can be added to the QR invoice. This includes 
+- the due date (The time given to the payer to settle the invoice may be communicated as text on the payment part.).
+- the order number
+- any additional text (e.g. URL of webshop, thank you message)
+This fiels supports WPML.
 
 f) Integration
 Define the e-mail to which the qr-invoice will be attached to.
@@ -53,8 +57,8 @@ The QR invoice can be enclosed with the e-mail in two ways:
 - only the payment section (formerly "payment slip") in A6 format.
 
 h) Language
-- The language to be used on the QR invoice (de, fr, it, en) can be set per store.
-- WPML is supported.
+- The default language to be used on the QR invoice (de, fr, it, en) can be set per store.
+- WPML is supported. For multilanguage sites, it's possible to display the QR invoice in the language selected by the customer.
 
 i) Test e-mail
 With one click, you can test the settings and see how the QR invoice is received by your customers.
@@ -107,6 +111,7 @@ Yes. We are already working on comparing the reconciliation of orders/purchases 
 == Changelog ==
 
 = 1.4.1 =
+* more flexibility with additional information on the QR invoice;
 * Text adjustments;
 * Minor bug fixes.
 
