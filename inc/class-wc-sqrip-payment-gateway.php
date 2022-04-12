@@ -55,23 +55,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
     {
 
         require __DIR__ . '/countries-array.php';
-
-
-        $address_woocommerce = sqrip_get_payable_to_address_txt('woocommerce');
-        $address_sqrip = sqrip_get_payable_to_address_txt('sqrip');
-
-        $address_options = [];
-
-        if ($address_sqrip) {
-            $address_options['sqrip'] = __( 'from sqrip account: '.esc_attr($address_sqrip) , 'sqrip-swiss-qr-invoice' );
-        }
-
-        if ($address_woocommerce) {
-            $address_options['woocommerce'] = __( 'from WooCommerce: '.esc_attr($address_woocommerce) , 'sqrip-swiss-qr-invoice' );
-        }
-
-        $address_options['individual'] = __( 'Third address' , 'sqrip-swiss-qr-invoice' );
-        
+    
         $this->form_fields = array(
             'tabs' => array(
                 'type'  => 'tab',
@@ -85,6 +69,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                         'id' => 'reminders',
                         'title' => __('Reminders', 'sqrip-swiss-qr-invoice'),
                         'class' => '',
+                        'description' => __( 'If an invoice has not been paid within the defined time, you can send a reminder to the client', 'sqrip-swiss-qr-invoice'),
                     ],
                     [
                         'id' => 'comparison',
@@ -141,7 +126,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'title' => __( 'Address', 'sqrip-swiss-qr-invoice' ),
                 'type' => 'select',
                 'description' => __( 'The address to appear on the QR invoice', 'sqrip-swiss-qr-invoice' ),
-                'options' => $address_options,
+                'options'     => $this->get_address_options(),
                 'class'       => 'qrinvoice-tab'  
             ),
             'address_name' => array(
@@ -240,20 +225,49 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'default'     => 'no',
                 'css'         => 'visibility: hidden'  
             ),
-            'ebics_service' => array(
-                'title'       => __( 'Connect services', 'sqrip-swiss-qr-invoice' ),
-                'label'       => __( 'You have EBICS service active', 'sqrip-swiss-qr-invoice'),
+
+            'enabled_reminder' => array(
+                'title'       => __( 'Turn on/off Reminders', 'sqrip-swiss-qr-invoice' ),
+                'label'       => __( 'Active', 'sqrip-swiss-qr-invoice' ),
                 'type'        => 'checkbox',
-                'description' => '',
-                'disabled'  => false,
                 'default'     => 'no',
+                'class'       => 'reminders-tab'  
+            ),
+            'status_reminders' => array(
+                'title'         => __( 'Status of awaiting payment orders', 'sqrip-swiss-qr-invoice' ),
+                'type'          => 'select',
+                'options'       => wc_get_order_statuses(),
+                'default' => 'wc-pending',
+                'description' => __('What is the order status that waits for confirmation of made payment to your bank account?
+                We will only check for payments at the bank account for these statuses.', 'sqrip-swiss-qr-invoice' ),
+                'class'       => 'reminders-tab'  
+            ),
+
+            'due_reminder' => array(
+                'title'       => __( 'Pas Due Reminder', 'sqrip-swiss-qr-invoice' ),
+                'type'        => 'number',
+                'default'     => 1,
+                'description' => __( 'How many days after the due date (see Tab "QR-Invoice", "Maturity") an e-mail should be send to the client.', 'sqrip-swiss-qr-invoice' ),
+                'css'         => "width:70px",
+                'class'       => 'reminders-tab'  
+            ),
+            'email_reminder' => array(
+                'title' => __( 'Email Template', 'sqrip-swiss-qr-invoice' ),
+                'description' => __( 'Choose the e-mail template to be used as reminder.', 'sqrip-swiss-qr-invoice' ),
+                'type' => 'select',
+                'options' => sqrip_get_wc_emails(),
+                'class'       => 'reminders-tab'  
+            ),
+            'active_service' => array(
+                'title'       => __( 'Connect services', 'sqrip-swiss-qr-invoice' ),
+                'type'        => 'info',
+                'label'       => $this->get_active_service('active_service_txt'),
                 'class'       => 'comparison-tab' 
             ),
             'remaining_credits' => array(
                 'title'       => __( 'Remaining Credits', 'sqrip-swiss-qr-invoice' ),
-                'type'        => 'text',
-                'description' => '',
-                'disabled'     => true,
+                'type'        => 'info',
+                'label'       => $this->get_active_service('remaining_credits'),
                 'class'       => 'comparison-tab' 
             ),
             'section_general_settings' => array(
@@ -261,7 +275,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'type'          => 'section',
                 'class'       => 'comparison-tab' 
             ),
-            'status_awating' => array(
+            'status_awaiting' => array(
                 'title'         => __( 'Status of awaiting payment orders', 'sqrip-swiss-qr-invoice' ),
                 'type'          => 'select',
                 'options'       => wc_get_order_statuses(),
@@ -284,7 +298,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'type'          => 'section',
                 'class'       => 'comparison-tab' 
             ),
-            'enabled_manual_comparison' => array(
+            'camt_service' => array(
                 'title'       => __( 'Enable/Disable', 'sqrip-swiss-qr-invoice' ),
                 'label'       => __( 'Enable camt053 files', 'sqrip-swiss-qr-invoice' ),
                 'type'        => 'checkbox',
@@ -294,18 +308,17 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             ),
             'camt053_file' => array(
                 'title'       => __( 'Upload camt053 File', 'sqrip-swiss-qr-invoice' ),
-                'label'       => __( 'Upload camt053 File', 'sqrip-swiss-qr-invoice' ),
                 'type'        => 'file',
                 'description' => __('Download from your online banking your latest camt053-file of your bank account that receives client payments. Be sure that it reaches back before the last day you did this comparison.', 'sqrip-swiss-qr-invoice' ),
                 'default'     => 'no',
-                'class'       => 'comparison-tab'  
+                'class'       => 'comparison-tab camt-service'  
             ),
             'section_automatic_comparison' => array(
                 'title'         => __('Automatic Comparaison - EBICS', 'sqrip-swiss-qr-invoice' ),
                 'type'          => 'section',
                 'class'       => 'comparison-tab' 
             ),
-            'enabled_automatic_comparison' => array(
+            'ebics_service' => array(
                 'title'       => __( 'Payment verification', 'sqrip-swiss-qr-invoice' ),
                 'label'       => __( 'Enable Payment Verification', 'sqrip-swiss-qr-invoice' ),
                 'type'        => 'checkbox',
@@ -328,7 +341,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 ),
                 
                 'desc_tip' => __('Based on your selection, your weekly cost for this service is X credits.', 'sqrip-swiss-qr-invoice'),
-                'class'       => 'comparison-tab'  
+                'class'       => 'comparison-tab ebics-service'  
             ),
             'payment_frequence_time' => array(
                 'type'        => 'select',
@@ -342,15 +355,18 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 ),
                 'description'       => __( 'Select the days and the time when sqrip should execute a comparison of the awaiting payment orders with your bank account.</br>
                     We charge your account for every comparison made.', 'sqrip-swiss-qr-invoice' ),
-                'class'       => 'comparison-tab'  
+                'class'       => 'comparison-tab ebics-service'  
             ),
 
             'forward_payments' => array(
                 'title'       => __( 'Forward Payments', 'sqrip-swiss-qr-invoice' ),
-                'type'        => 'checkbox',
-                'label'        => __('You forward your payments to IBAN xxxx xxxx xxxx xxxx', 'sqrip-swiss-qr-invoice' ),
+                'type'        => 'info',
+                'label'        => sprintf( 
+                    __( 'You forward your payments to %s', 'sqrip-swiss-qr-invoice' ), 
+                    $this->get_active_service('iban'),
+                ),
                 'description'       => __( 'In order to forward the payments from your incoming bank account to your main bank account, please configure this service on sqrip.ch', 'sqrip-swiss-qr-invoice' ),
-                'class'       => 'comparison-tab',
+                'class'       => 'comparison-tab ebics-service',
                 'default'     => 'yes',
                 'disabled'    => true,
             ),
@@ -360,7 +376,15 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'type'        => 'checkbox',
                 'description' => 'Get an e-mail with a report for every comparison executed.',
                 'default'     => 'no',
-                'class'       => 'comparison-tab'  
+                'class'       => 'comparison-tab ebics-service'  
+            ),
+            'compare_btn' => array(
+                'title'       => __( 'Start Comparisson', 'sqrip-swiss-qr-invoice' ),
+                'label'       => __( 'Compare Now' ),
+                'type'        => 'info',
+                'description' => 'Initiate and test the service.',
+                'default'     => 'no',
+                'class'       => 'comparison-tab ebics-service'  
             ),
             
             'return_enabled' => array(
@@ -379,6 +403,63 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             ),
             
         );
+    }
+
+
+    public function get_active_service($param = ""){
+        $endpoint   = 'get-active-service-type';
+
+        $service = [
+            "iban"                  => "XXXX XXXX XXXX XXXX",
+            "remaining_credits"     => "0",
+            "active_service"        => "none",
+            "active_service_txt"    => __('No service active', 'sqrip-swiss-qr-invoice')
+        ];
+
+        $response = sqrip_remote_request($endpoint);  
+
+        if ( isset($response->active_service) ) {
+
+            $service['iban'] = $response->iban;
+            $service['remaining_credits'] = $response->remaining_credits;
+            $service['active_service'] = $response->active_service;
+
+            switch ($response->active_service) {
+                case 'camt_upload_service':
+                    $service['active_service_txt'] = __('You have CAMT File upload service active', 'sqrip-swiss-qr-invoice');
+                    break;
+
+                case 'ebics_service':
+                    $service['active_service_txt'] = __('You have EBICS service active', 'sqrip-swiss-qr-invoice');
+                    break;
+                
+                default:
+                    $service['active_service_txt'] = __('No service active', 'sqrip-swiss-qr-invoice');
+                    break;
+            }
+
+        }  
+
+        return !empty($param) ? $service[$param] : $service;
+    }
+
+    public function get_address_options(){
+        $address_woocommerce = sqrip_get_payable_to_address_txt('woocommerce');
+        $address_sqrip = sqrip_get_payable_to_address_txt('sqrip');
+
+        $address_options = [];
+
+        if ($address_sqrip) {
+            $address_options['sqrip'] = __( 'from sqrip account: '.esc_attr($address_sqrip) , 'sqrip-swiss-qr-invoice' );
+        }
+
+        if ($address_woocommerce) {
+            $address_options['woocommerce'] = __( 'from WooCommerce: '.esc_attr($address_woocommerce) , 'sqrip-swiss-qr-invoice' );
+        }
+
+        $address_options['individual'] = __( 'Third address' , 'sqrip-swiss-qr-invoice' );
+
+        return $address_options;
     }
 
     public function generate_radio_html($key, $data)
@@ -494,6 +575,40 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         }
         ?>
         <?php
+
+        return ob_get_clean();
+    }
+
+    public function generate_info_html($key, $data)
+    {
+        $field_key = $this->get_field_key( $key );
+        $defaults  = array(
+          'title'             => '',
+          'label'             => '',
+          'disabled'          => false,
+          'class'             => '',
+          'css'               => '',
+          'placeholder'       => '',
+          'type'              => 'text',
+          'desc_tip'          => false,
+          'description'       => '',
+          'custom_attributes' => array(),
+        );
+
+        $data = wp_parse_args( $data, $defaults );
+
+        ob_start();
+        ?>
+            <tr valign="top">
+                <th scope="row" class="titledesc <?php echo esc_attr($data['class']); ?>">
+                    <label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?></label>
+                </th>
+                <td class="forminp">
+                    <label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['label'] ); ?></label>
+                    <?php echo $this->get_description_html( $data ); // WPCS: XSS ok. ?>
+                </td>
+            </tr>
+            <?php
 
         return ob_get_clean();
     }
@@ -889,6 +1004,8 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         $response = wp_remote_post(SQRIP_ENDPOINT.$endpoint, $args);
 
         $status_code = $response['response']['code'];
+
+        // var_dump($response);
 
         if ($status_code !== 200) {
             // Transaction was not succesful

@@ -17,12 +17,11 @@ if ( !in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', ge
     return;
 }
 
-
 define( 'SQRIP_ENDPOINT', 'https://beta.sqrip.ch/api/' );
 define( 'SQRIP_PLUGIN_BASENAME', plugin_basename(__FILE__) );
 
 require_once __DIR__ . '/inc/functions.php';
-require_once __DIR__ . '/inc/sqrip-ajax.php';
+require_once __DIR__ . '/inc/class-sqrip-ajax.php';
 
 /**
  * Add plugin Settings link
@@ -50,6 +49,7 @@ add_filter('woocommerce_payment_gateways', 'sqrip_add_gateway_class');
 function sqrip_add_gateway_class($gateways)
 {
     $gateways[] = 'WC_Sqrip_Payment_Gateway'; // your class name is here
+
     return $gateways;
 }
 
@@ -64,11 +64,21 @@ add_action('plugins_loaded', 'sqrip_init_gateway_class');
 function sqrip_init_gateway_class()
 {
     require_once __DIR__ . '/inc/class-wc-sqrip-payment-gateway.php';
-
-    // new WC_Sqrip_Payment_Gateway();
 }
 
 
+add_action('init', 'sqrip_plugin_init');
+
+function sqrip_plugin_init()
+{
+    $enabled_reminder = sqrip_get_plugin_option('enabled_reminder');
+
+    if ($enabled_reminder == "yes") {
+        
+        require_once __DIR__ . '/inc/class-sqrip-orders-reminder.php';
+        
+    }
+}
 
 /**
  *  Add admin notices
@@ -127,6 +137,7 @@ add_action( 'admin_enqueue_scripts', function (){
         wp_localize_script( 'sqrip-admin', 'sqrip',
             array( 
                 'ajax_url' => admin_url( 'admin-ajax.php' ),
+                'ajax_nonce' => wp_create_nonce( 'sqrip-admin-settings' ),
                 'txt_check_connection' => __( 'Connection test', 'sqrip-swiss-qr-invoice' ),
                 'txt_validate_iban' => __( 'Check', 'sqrip-swiss-qr-invoice' ),
                 'txt_send_test_email' => sprintf( 
@@ -629,4 +640,11 @@ function sqrip_save_extra_user_profile_fields( $user_id ) {
     $user = get_user_by('id', $user_id);
     sqrip_set_customer_iban($user, $_POST['iban']);
 
+}
+
+add_filter('upload_mimes', 'sqrip_custom_upload_xml');
+ 
+function sqrip_custom_upload_xml($mimes) {
+    $mimes = array_merge($mimes, array('xml' => 'application/xml'));
+    return $mimes;
 }

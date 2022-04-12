@@ -1,5 +1,5 @@
-.sqrip-preview-address{
-	max-width: 368px;
+.sqrip-preview-address {
+    max-width: 368px;
     border: 1px solid #ccc;
     border-radius: 3px;
     padding: 5px 15px 10px;
@@ -7,56 +7,56 @@
     background-color: #fff;
 }
 
-.sqrip-preview-address > h4{
+.sqrip-preview-address>h4 {
     margin: 5px 0 10px;
     padding-bottom: 5px;
     border-bottom: 1px solid #ccc;
 }
 
-body.sqrip-loading{
+body.sqrip-loading {
     opacity: 0.5;
     pointer-events: none;
     cursor: wait;
 }
 
-.forminp .sqrip-btn-validate{
+.forminp .sqrip-btn-validate {
     margin-left: 10px;
 }
 
-.sqrip-notice{
+.sqrip-notice {
     font-weight: bold;
     display: inline-block;
     line-height: 1;
     height: 25px;
 }
 
-table.form-table td .sqrip-notice p{
+table.form-table td .sqrip-notice p {
     margin: 0;
     line-height: 22px;
 }
 
-.sqrip-radio-field{
+.sqrip-radio-field {
     display: inline-block;
     margin-right: 15px;
 }
 
-.sqrip-radio-field input{
+.sqrip-radio-field input {
     vertical-align: -webkit-baseline-middle;
 }
 
-.wp-core-ui .button-secondary.sqrip-btn-send-test-email{
+.wp-core-ui .button-secondary.sqrip-btn-send-test-email {
     margin-left: 15px;
 }
 
-.sqrip-payment .sqrip-re-generate-qrcode{
+.sqrip-payment .sqrip-re-generate-qrcode {
     margin-top: 20px;
 }
 
-.sqrip-tabs{
+.sqrip-tabs {
     display: flex;
 }
 
-.sqrip-tab{
+.sqrip-tab {
     display: block;
     float: left;
     margin-right: 15px;
@@ -64,21 +64,21 @@ table.form-table td .sqrip-notice p{
     border-bottom: 3px solid #9b9b9b;
 }
 
-.sqrip-tab h2{
+.sqrip-tab h2 {
     color: #747474;
     margin: 0.7em 0;
 }
 
 
-.sqrip-tab.active{
+.sqrip-tab.active {
     border-color: #6558F5;
 }
 
-.sqrip-tab.active h2{
+.sqrip-tab.active h2 {
     color: #6558F5;
 }
 
-.sqrip-tabs-description{
+.sqrip-tabs-description {
     display: block;
     max-width: 900px;
     margin: 20px 0 10px;
@@ -92,7 +92,9 @@ table.form-table td .sqrip-notice p{
     display: table-row!important;
 }*/
 
-.button-connect-service{
+table.form-table tr td label[for="woocommerce_sqrip_compare_btn"],
+table.form-table tr th label[for="woocommerce_sqrip_active_service"],
+.sqrip-btn {
     background-color: #6558f5;
     padding: 10px 20px;
     display: inline-block;
@@ -101,19 +103,15 @@ table.form-table td .sqrip-notice p{
     line-height: 1;
     border: 0;
     cursor: pointer;
-    margin-top: 5px;
 }
 
-.wp-core-ui .button-secondary.sqrip-btn-validate-token{
-    margin: 10px 10px 15px 0;
+table.form-table tr td label[for="woocommerce_sqrip_forward_payments"],
+table.form-table tr td label[for="woocommerce_sqrip_active_service"] {
+    font-weight: 700;
 }
 
-table.form-table tr td label[for="woocommerce_sqrip_ebics_service"]{
-    color: #6558f5;
-    font-weight: 600;
-}
-
-table.form-table tr td label[for="woocommerce_sqrip_ebics_service"]:before{
+table.form-table tr td label[for="woocommerce_sqrip_forward_payments"]:before,
+table.form-table tr td label[for="woocommerce_sqrip_active_service"]:before {
     content: "\f147";
     font: normal 20px/1 dashicons;
     border: 2px solid;
@@ -123,8 +121,48 @@ table.form-table tr td label[for="woocommerce_sqrip_ebics_service"]:before{
     width: 20px;
     height: 20px;
     display: inline-block;
+    color: #1AAE9F;
 }
 
-#woocommerce_sqrip_ebics_service{
-    display: none;
+table.form-table tr td label[for="woocommerce_sqrip_remaining_credits"] {
+    opacity: 0.6;
+    font-weight: bold;
+    width: 150px;
+    margin: 0;
+    box-sizing: border-box;
+    line-height: 32px;
+    vertical-align: top;
+    border: 1px solid;
+    display: block;
+    padding: 0 6px;
+    background-color: rgb(221 221 221);
+    border-radius: 4px;
+}
+
+.wp-core-ui .button-secondary.sqrip-btn-validate-token {
+    margin: 10px 10px 15px 0;
+}
+
+table.sqrip-table {
+    max-width: 900px;
+}
+
+table.sqrip-table thead tr th {
+    font-weight: bold;
+}
+
+table.sqrip-table thead tr th,
+table.sqrip-table tbody tr td {
+    padding: 10px;
+    border: 1px solid #7a7a7a;
+}
+
+.sqrip-table-results h3 {
+    color: #1AAE9F;
+    font-weight: bold;
+}
+
+.sqrip-table-results h3 span.dashicons {
+    border: 2px solid;
+    border-radius: 50%;
 }

@@ -8,13 +8,15 @@ jQuery( document ).ready(function($){
     ip_token = $('#woocommerce_sqrip_token'),
     btn_save = $('button.woocommerce-save-button'),
     tab = $('.sqrip-tab'),
-    tab_active = $('.sqrip-tabs').find('.sqrip-tab.active'),
-    cn_service = $('#woocommerce_sqrip_ebics_service'),
+    ebics_service = $('#woocommerce_sqrip_ebics_service'),
+    camt_service = $('#woocommerce_sqrip_camt_service'),
     pm_frequence = $('#woocommerce_sqrip_payment_frequence'),
-    rem_creds = $('#woocommerce_sqrip_remaining_credits');
+    rem_creds = $('#woocommerce_sqrip_remaining_credits'),
+    up_camt = $('#woocommerce_sqrip_camt053_file'),
+    btn_compare = $('label[for="woocommerce_sqrip_compare_btn"]');
 
     if (ip_token.length) {
-        bt_check_token_html = '<button id="btn_sqrip_check_token" class="button-secondary sqrip-btn-validate-token">'+sqrip.txt_check_connection+'</button>';
+        bt_check_token_html = '<button id="btn_sqrip_check_token" class="sqrip-btn sqrip-btn-validate-token">'+sqrip.txt_check_connection+'</button>';
         ip_token.siblings('.description').after(bt_check_token_html);
 
         bt_check_token = $('#btn_sqrip_check_token');
@@ -184,93 +186,15 @@ jQuery( document ).ready(function($){
             btn_save.trigger('click');
         });
     }
-   
-
+    
+    tab_active = window.location.hash.slice(1);
+    if (!tab_active) tab_active = "qrinvoice";
+    sqrip_tab_init(tab_active);
+    
     tab.on('click', function(e){
         e.preventDefault();
-        tab.removeClass('active');
-        $(this).addClass('active');
         sqrip_tab_init($(this).data('tab'));
-
-    })
-
-
-    if ( cn_service.length ) {
-
-        if (cn_service.is(':checked')) {
-
-            // cn_service.prop('disabled', true);
-
-        } else {
-
-            cn_sv_row = cn_service.closest('tr');
-            cn_sv_label = cn_sv_row.find('th label');
-            cn_sv_label.hide();
-            cn_sv_row.find('td > fieldset').hide();
-
-            bt_cn_sv_html = '<button id="btn_sqrip_connect_service" class="button-connect-service">'+cn_sv_label.text()+'</button>';
-
-            cn_sv_row.find('th').append(bt_cn_sv_html);
-
-            bt_cn_sv = $('#btn_sqrip_connect_service');
-            bt_cn_sv.on('click', function(e){
-                e.preventDefault();
-
-                _this = $(this);
-                _output = cn_sv_row.find('td.forminp');
-                _output.find('.sqrip-notice').remove();
-
-                if( ip_token.val().trim().length < 1 ) {
-                    ip_token.focus();
-                    return; 
-                }
-
-                $.ajax({
-                    type : "post", 
-                    url : sqrip.ajax_url, 
-                    data : {
-                        action: "sqrip_connect_ebics_service", 
-                        token: ip_token.val()
-                    },
-                    beforeSend: function(){
-                       $('body').addClass('sqrip-loading');
-                    },
-                    success: function(response) {
-                        if(response) {
-                            result = "updated";
-                            cn_service.prop('checked', true);
-                            message = response.message;
-
-                            if (response.remaining_credits) {
-                                rem_creds.val(response.remaining_credits);
-                            } 
-
-                        } else {
-                            result = "error";
-                            cn_service.prop('checked', false);
-                            message = 'Error';
-                        }
-
-
-                        output_html = '<div class="sqrip-notice '+result+'">';
-                        output_html += '<p>'+message+'</p>';
-                        output_html += '</div>';
-                        _output.append(output_html);
-
-                        sqrip_tab_init('comparison');
-                    },
-                    error: function( jqXHR, textStatus, errorThrown ){
-                        console.log( 'The following error occured: ' + textStatus, errorThrown );
-                    },
-                    complete: function(){
-                        $('body').removeClass('sqrip-loading');
-                    }
-                })
-            })
-        }
-    }
-
-    sqrip_tab_init(tab_active.data('tab'));
+    })    
 
     function init_individual_address(_val){
         if (_val == 'individual') {
@@ -281,9 +205,10 @@ jQuery( document ).ready(function($){
     }
 
     function sqrip_tab_init(data){
-
+        window.location.hash = data;
+        tab.removeClass('active');
+        $('.sqrip-tab[data-tab="'+data+'"]').addClass('active');
         tab_des = $('.sqrip-tabs-description');
-
         tab_des.find('.sqrip-tab-description').hide();
         tab_des.find('.sqrip-tab-description[data-tab="'+data+'"]').show();
 
@@ -296,7 +221,8 @@ jQuery( document ).ready(function($){
         }
 
         else if (data == "comparison") {
-            init_comparison_tab(cn_service, table);
+            toggle_service_options(ebics_service.is(':checked'), $('.ebics-service'));
+            toggle_service_options(camt_service.is(':checked'), $('.camt-service'));
         }
     }
 
@@ -307,5 +233,160 @@ jQuery( document ).ready(function($){
             connect.closest('tr').show();
         }
     }
+
+    if (up_camt.length) {
+        btn_upcamt_html = '<button id="btn_sqrip_upload_camt" class="sqrip-btn sqrip-btn-upload-camt-file">Upload & Update</button>';
+
+        r_camt = up_camt.closest('tr');
+        r_camt.find('>td').append(btn_upcamt_html);
+
+        btn_upcamt = $('#btn_sqrip_upload_camt');
+
+        btn_upcamt.on('click', function(e){
+            e.preventDefault();
+            wrap = $(this).closest('td.forminp');
+            wrap.find('.sqrip-notice').remove();
+            wrap.find('.sqrip-table-results').remove();
+            file_data = up_camt.prop('files')[0];
+            form_data = new FormData();
+            form_data.append('file', file_data);
+            form_data.append('token', ip_token.val());
+            form_data.append('action', 'sqrip_upload_camt_file');
+            form_data.append('nonce', sqrip.ajax_nonce);
+
+            if (!file_data) return;
+
+            $.ajax({
+                type : "post", 
+                url : sqrip.ajax_url, 
+                contentType: false,
+                processData: false,
+                data : form_data,
+                beforeSend: function(){
+                   $('body').addClass('sqrip-loading');
+                },
+                success: function(response) {
+                    if (response.success) {
+                        notice = response.html;
+                    } else {
+                        notice = sqrip_notice('Error 404', true);
+                    }
+
+                    wrap.append(notice);
+                },
+                error: function( jqXHR, textStatus, errorThrown ){
+                    notice = sqrip_notice('Error 404', true);
+                    wrap.append(notice);
+                },
+                complete: function(){
+                    $('body').removeClass('sqrip-loading');
+                }
+            })
+        })
+    }
+
+    if (btn_compare.length) {
+        btn_compare.on('click', function(e){
+            e.preventDefault();
+            wrap = $(this).closest('td.forminp');
+            wrap.find('.sqrip-notice').remove();
+            wrap.find('.sqrip-table-results').remove();
+            form_data = new FormData();
+            form_data.append('token', ip_token.val());
+            form_data.append('action', 'sqrip_compare_ebics');
+            form_data.append('nonce', sqrip.ajax_nonce);
+
+            $.ajax({
+                type : "post", 
+                url : sqrip.ajax_url, 
+                contentType: false,
+                processData: false,
+                data : form_data,
+                beforeSend: function(){
+                   $('body').addClass('sqrip-loading');
+                },
+                success: function(response) {
+                    if (response.success) {
+                        notice = response.html;
+                    } else {
+                        notice = sqrip_notice('Error 404', true);
+                    }
+
+                    wrap.append(notice);
+                },
+                error: function( jqXHR, textStatus, errorThrown ){
+                    notice = sqrip_notice('Error 404', true);
+                    wrap.append(notice);
+                },
+                complete: function(){
+                    $('body').removeClass('sqrip-loading');
+                }
+            })
+        })
+    }
+
+    if (camt_service.length) {
+        camt_service.on('change', function(e){
+            toggle_service_options($(this).is(':checked'), $('.camt-service'));
+        })
+    }
+
+    if (ebics_service.length) {
+        ebics_service.on('change', function(){
+            toggle_service_options($(this).is(':checked'), $('.ebics-service'));
+        })
+    }
+
+    function sqrip_ajax(form_data, element){
+        element.find('.sqrip-notice').remove();
+        $.ajax({
+            type : "post", 
+            url : sqrip.ajax_url, 
+            contentType: false,
+            processData: false,
+            data : form_data,
+            beforeSend: function(){
+               $('body').addClass('sqrip-loading');
+            },
+            success: function(response) {
+                if (response) {
+                    notice = sqrip_notice(response.message);
+                } else {
+                    notice = sqrip_notice('Error 301', true);
+                }
+                element.append(notice);
+            },
+            error: function( jqXHR, textStatus, errorThrown ){
+                notice = sqrip_notice('Error 404', true);
+                element.append(notice);
+            },
+            complete: function(){
+                $('body').removeClass('sqrip-loading');
+            }
+        })
+    }
+
+    function sqrip_notice(message, error){
+        _class = "";
+
+        if (error) {
+            _class = "error"; 
+        }
+
+        output_html = '<div class="sqrip-notice '+_class+'">';
+        output_html += '<p>'+message+'</p>';
+        output_html += '</div>';
+        
+        return output_html;
+    }
+
+    function toggle_service_options(enable, element){
+        if (enable) {
+            element.closest('tr').show();
+        } else {
+            element.closest('tr').hide();
+        }
+    }
+
 
 });
