@@ -23,11 +23,12 @@ body.sqrip-loading {
     margin-left: 10px;
 }
 
-.sqrip-notice {
+table.form-table .sqrip-notice {
     font-weight: bold;
     display: inline-block;
     line-height: 1;
     height: 25px;
+    margin-left: 15px;
 }
 
 table.form-table td .sqrip-notice p {
@@ -105,6 +106,10 @@ table.form-table tr th label[for="woocommerce_sqrip_active_service"],
     cursor: pointer;
 }
 
+.sqrip-btn{
+    margin-top: 10px;
+}
+
 table.form-table tr td label[for="woocommerce_sqrip_forward_payments"],
 table.form-table tr td label[for="woocommerce_sqrip_active_service"] {
     font-weight: 700;
@@ -165,4 +170,13 @@ table.sqrip-table tbody tr td {
 .sqrip-table-results h3 span.dashicons {
     border: 2px solid;
     border-radius: 50%;
+}
+
+.sqrip-tabs ~ table.form-table tr td {
+    vertical-align: top;
+    padding: 20px;
+} 
+
+.sqrip-tabs ~ table.form-table tr td input.camt-service{
+    padding: 0!important;
 }

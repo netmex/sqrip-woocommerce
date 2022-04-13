@@ -74,17 +74,24 @@ function sqrip_get_billing_address_from_order($order) {
  * @return array|false
  */
 function sqrip_prepare_qr_code_request_body($currency_symbol, $amount, $order_number) {
-	$plugin_options     = get_option('woocommerce_sqrip_settings', array());
-	$sqrip_due_date     = $plugin_options['due_date'];
-	$iban               = $plugin_options['iban'];
+    $plugin_options         = get_option('woocommerce_sqrip_settings', array());
+    $sqrip_due_date         = $plugin_options['due_date'];
+    $iban                   = $plugin_options['iban'];
 
-	$product            = $plugin_options['product'];
-	$qr_reference       = $plugin_options['qr_reference'];
-	$address            = $plugin_options['address'];
-	$lang               = $plugin_options['lang'] ? $plugin_options['lang'] : "de";
+    $product                = $plugin_options['product'];
+    $qr_reference           = $plugin_options['qr_reference'];
+    $address                = $plugin_options['address'];
+    $lang                   = $plugin_options['lang'] ? $plugin_options['lang'] : "de";
 
-	$date               = date('Y-m-d');
-	$due_date           = date('Y-m-d', strtotime($date . " + ".$sqrip_due_date." days"));
+    $date                   = date('Y-m-d');
+    $due_date_raw           = strtotime($date . " + ".$sqrip_due_date." days");
+    $due_date               = date('Y-m-d', $due_date_raw);
+
+    $additional_information = $plugin_options['additional_information'];
+
+    if($additional_information) {
+        $additional_information = sqrip_additional_information_shortcodes($additional_information, $lang, $due_date_raw, $order_number);
+    }
 
 	if ($iban == '') {
 		$err_msg = __( 'Please add IBAN in the settings of your webshop or on the sqrip dashboard.', 'sqrip-swiss-qr-invoice' );
@@ -100,17 +107,18 @@ function sqrip_prepare_qr_code_request_body($currency_symbol, $amount, $order_nu
 
 	$body = [
 		"iban" => [
-			"iban"      => $iban,
+			"iban" => $iban,
 		],
 		"payment_information" =>
 			[
 				"currency_symbol" => $currency_symbol,
-				"amount" => $amount,
-				"due_date" => $due_date,
+				"amount"    => $amount,
+				"due_date"  => $due_date,
+                "message"   => $additional_information
 			],
-		"lang" => $lang,
+		"lang"    => $lang,
 		"product" => $product,
-		"source" => "woocommerce"
+		"source"  => "woocommerce"
 	];
 
 	// If the user selects "Order Number" the API request will include param "qr_reference"
@@ -315,4 +323,90 @@ function sqrip_get_wc_emails(){
     }
 
     return $options;
+}
+
+
+function sqrip_additional_information_shortcodes($additional_information, $lang, $due_date, $order_number) {
+
+    // get current language from WPML
+    $current_lang = apply_filters( 'wpml_current_language', NULL );
+
+    // get current language from plugin options
+    if(!$current_lang) {
+        $current_lang = sqrip_get_locale_by_lang($lang);
+    }
+    setlocale(LC_TIME, $current_lang);
+
+    $date_shortcodes = [];
+    // finds [due_date format="{format}"]
+    preg_match_all('/\[due_date format="(.*)"\]/', $additional_information, $date_shortcodes);
+    foreach($date_shortcodes[0] as $index=>$date_shortcode) {
+        $format = $date_shortcodes[1][$index];
+        $due_date_format = strftime($format, $due_date);
+        if(!$due_date_format) {
+            continue;
+        }
+        $additional_information = str_replace($date_shortcode, $due_date_format, $additional_information);
+    }
+
+    // replace [order_number] with order number
+    $additional_information = str_replace("[order_number]", $order_number, $additional_information);
+    return $additional_information;
+}
+
+/**
+ * Maps the language string used in the sqrip plugin to valid locale values for PHP / Wordpress / WPML
+ * @param $lang
+ * @return void
+ */
+function sqrip_get_locale_by_lang($lang) {
+    $locales = [
+        'de' => 'de_DE',
+        'fr' => 'fr_FR',
+        'it' => 'it_IT',
+        'en' => 'en_US'
+    ];
+    $locale = $locales[$lang];
+    if(!$locale) {
+        $locale = $lang;
+    }
+    return $locale;
+}
+
+
+function sqrip_get_active_service($param = ""){
+    $endpoint   = 'get-active-service-type';
+
+    $service = [
+        "iban"                  => "XXXX XXXX XXXX XXXX",
+        "remaining_credits"     => "0",
+        "active_service"        => "none",
+        "active_service_txt"    => __('No service active', 'sqrip-swiss-qr-invoice')
+    ];
+
+    $response = sqrip_remote_request($endpoint);  
+
+    if ( isset($response->active_service) ) {
+
+        $service['iban'] = $response->iban;
+        $service['remaining_credits'] = $response->remaining_credits;
+        $service['active_service'] = $response->active_service;
+
+        switch ($response->active_service) {
+            case 'camt_upload_service':
+                $service['active_service_txt'] = __('You have CAMT File upload service active', 'sqrip-swiss-qr-invoice');
+                break;
+
+            case 'ebics_service':
+                $service['active_service_txt'] = __('You have EBICS service active', 'sqrip-swiss-qr-invoice');
+                break;
+            
+            default:
+                $service['active_service_txt'] = __('No service active', 'sqrip-swiss-qr-invoice');
+                break;
+        }
+
+    }  
+
+    return !empty($param) ? $service[$param] : $service;
 }

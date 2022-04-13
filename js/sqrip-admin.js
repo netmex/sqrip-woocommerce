@@ -13,7 +13,9 @@ jQuery( document ).ready(function($){
     pm_frequence = $('#woocommerce_sqrip_payment_frequence'),
     rem_creds = $('#woocommerce_sqrip_remaining_credits'),
     up_camt = $('#woocommerce_sqrip_camt053_file'),
-    btn_compare = $('label[for="woocommerce_sqrip_compare_btn"]');
+    btn_compare = $('label[for="woocommerce_sqrip_compare_btn"]'),
+    sqrip_additional_information = $('#woocommerce_sqrip_additional_information'),
+    ip_send_rp = $('#woocommerce_sqrip_comparison_report');
 
     if (ip_token.length) {
         bt_check_token_html = '<button id="btn_sqrip_check_token" class="sqrip-btn sqrip-btn-validate-token">'+sqrip.txt_check_connection+'</button>';
@@ -293,6 +295,7 @@ jQuery( document ).ready(function($){
             wrap.find('.sqrip-table-results').remove();
             form_data = new FormData();
             form_data.append('token', ip_token.val());
+            form_data.append('send_report', ip_send_rp.is(':checked'));
             form_data.append('action', 'sqrip_compare_ebics');
             form_data.append('nonce', sqrip.ajax_nonce);
 
@@ -327,7 +330,7 @@ jQuery( document ).ready(function($){
 
     if (camt_service.length) {
         camt_service.on('change', function(e){
-            toggle_service_options($(this).is(':checked'), $('.camt-service'));
+            toggle_service_options($(this).is('::checked'), $('.camt-service'));
         })
     }
 
@@ -386,6 +389,17 @@ jQuery( document ).ready(function($){
         } else {
             element.closest('tr').hide();
         }
+    }
+
+    $('.sqrip-tabs').siblings('table.form-table').find('td p.description').each(function(i, e){
+        wrap = $(this).closest('tr').find('th');
+        
+        wrap.append($(this));
+    })
+
+    if(sqrip_additional_information.length) {
+        sqrip_additional_information.attr("maxlength",140);
+        sqrip_additional_information.attr("rows", 4);
     }
 
 

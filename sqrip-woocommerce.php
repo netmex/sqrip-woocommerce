@@ -78,6 +78,14 @@ function sqrip_plugin_init()
         require_once __DIR__ . '/inc/class-sqrip-orders-reminder.php';
         
     }
+
+    $ebics_service = sqrip_get_plugin_option('ebics_service');
+
+    if ($ebics_service == "yes") {
+        
+        require_once __DIR__ . '/inc/class-sqrip-payment-verification.php';
+        
+    }
 }
 
 /**

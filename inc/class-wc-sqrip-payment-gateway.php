@@ -163,12 +163,17 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             ),
             'qr_reference' => array(
                 'title' => __( 'Basis of the (QR) reference number', 'sqrip-swiss-qr-invoice' ),
-                'type' => 'radio',
+                'type'  => 'radio',
                 'options' => array(
-                    'random' => __( 'random number', 'sqrip-swiss-qr-invoice' ),
-                    'order_number' => __('Order number', 'sqrip-swiss-qr-invoice' ),
+                    'random'        => __( 'random number', 'sqrip-swiss-qr-invoice' ),
+                    'order_number'  => __('Order number', 'sqrip-swiss-qr-invoice' ),
                 ),
-                'class'       => 'qrinvoice-tab'  
+                'class' => 'qrinvoice-tab'  
+            ),
+            'section_qr_invoice' => array(
+                'title'        => __('QR Invoice Display', 'sqrip-swiss-qr-invoice' ),
+                'type'         => 'section',
+                'class'        => 'qrinvoice-tab' 
             ),
             'due_date' => array(
                 'title'       => __( 'Maturity (Today in x days)', 'sqrip-swiss-qr-invoice' ),
@@ -176,11 +181,6 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'default'     => 30,
                 'css'         => "width:70px",
                 'class'       => 'qrinvoice-tab'  
-            ),
-            'section_qr_invoice' => array(
-                'title'         => __('QR Invoice Display', 'sqrip-swiss-qr-invoice' ),
-                'type'          => 'section',
-                'class'       => 'qrinvoice-tab' 
             ),
             'integration_order' => array(
                 'title'       => __( 'on the confirmation page', 'sqrip-swiss-qr-invoice' ),
@@ -190,17 +190,25 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'default'     => 'yes',
                 'class'       => 'qrinvoice-tab'  
             ),
+            'additional_information' => array(
+                'title'       => __( 'Additional Information' , 'sqrip-swiss-qr-invoice' ),
+                'type'        => 'textarea',
+                'class'       => 'qrinvoice-tab sqrip-additional-information',
+                'maxlength'   => 140,
+                'default'     => __("Due date: [due_date format=\"%Y-%m-%d\"]\nOrder: #[order_number]\nThank you for your purchase!","sqrip-swiss-qr-invoice"),
+                'description' => __( 'Will be displayed on the QR invoice in the section “Additional information”. <br>The following short codes are available:<br>[order_number] the order number.<br>[due_date format="%Y-%m-%d"] to insert the due date of the invoice.<br><a href="https://www.php.net/strftime" target="_blank">Supported formats</a> are:<br>%Y-%m-%d -> 2022-04-06<br>%m.%d.%y -> 06.31.22<br>%d. %B %Y -> 06. April 2022<br>%e. %b %Y -> 6. Apr 2022', 'sqrip-swiss-qr-invoice' ),
+            ),
             'email_attached' => array(
-                'title' => __( 'Attach QR-Invoice to', 'sqrip-swiss-qr-invoice' ),
-                'description' => __( 'Select email template to which the QR-invoice is attached.', 'sqrip-swiss-qr-invoice' ),
-                'type' => 'select',
-                'options' => sqrip_get_wc_emails(),
-                'class'       => 'qrinvoice-tab'  
+                'title'         => __( 'Attach QR-Invoice to', 'sqrip-swiss-qr-invoice' ),
+                'description'   => __( 'Select email template to which the QR-invoice is attached.', 'sqrip-swiss-qr-invoice' ),
+                'type'          => 'select',
+                'options'       => sqrip_get_wc_emails(),
+                'class'         => 'qrinvoice-tab'  
             ),
             'product' => array(
                 'title'         => __( 'Format', 'sqrip-swiss-qr-invoice' ),
                 'type'          => 'select',
-                'description' => '',
+                'description'   => '',
                 'options'       => array(
                     'Full A4'   => __('on a blank A4 PDF', 'sqrip-swiss-qr-invoice' ),
                     'Invoice Slip' => __('only the A6 payment part as PDF', 'sqrip-swiss-qr-invoice' ),
@@ -225,7 +233,6 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'default'     => 'no',
                 'css'         => 'visibility: hidden'  
             ),
-
             'enabled_reminder' => array(
                 'title'       => __( 'Turn on/off Reminders', 'sqrip-swiss-qr-invoice' ),
                 'label'       => __( 'Active', 'sqrip-swiss-qr-invoice' ),
@@ -326,35 +333,47 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'default'     => 'no',
                 'class'       => 'comparison-tab'  
             ),
-
-            'payment_frequence_days' => array(
+            'payment_frequence' => array(
                 'title'       => __( 'Payment Fréquence', 'sqrip-swiss-qr-invoice' ),
-                'type'        => 'multiselect',
+                'type'        => 'select',
                 'options'       => array(
-                    'monday'      => __( 'Monday' , 'sqrip-swiss-qr-invoice' ),
-                    'tuesday'      => __( 'Tuesday' , 'sqrip-swiss-qr-invoice' ),
-                    'wednesday'      => __( 'Wednesday' , 'sqrip-swiss-qr-invoice' ),
-                    'thursday'      => __( 'Thursday' , 'sqrip-swiss-qr-invoice' ),
-                    'friday'      => __( 'Friday' , 'sqrip-swiss-qr-invoice' ),
-                    'saturday'      => __( 'Saturday' , 'sqrip-swiss-qr-invoice' ),
-                    'sunday'      => __( 'Sunday' , 'sqrip-swiss-qr-invoice' ),
+                    'twicedaily' => __( 'Twice Daily' , 'sqrip-swiss-qr-invoice' ),
+                    'daily'      => __( 'Daily' , 'sqrip-swiss-qr-invoice' ),
+                    'weekly'     => __( 'Weekly' , 'sqrip-swiss-qr-invoice' ),
                 ),
-                
-                'desc_tip' => __('Based on your selection, your weekly cost for this service is X credits.', 'sqrip-swiss-qr-invoice'),
-                'class'       => 'comparison-tab ebics-service'  
+                'class'         => 'comparison-tab ebics-service'  
             ),
             'payment_frequence_time' => array(
                 'type'        => 'select',
-                'options'       => array(
-                    '00:00'      => __( '00:00' , 'sqrip-swiss-qr-invoice' ),
-                    '01:00'      => __( '01:00' , 'sqrip-swiss-qr-invoice' ),
-                    '02:00'      => __( '02:00' , 'sqrip-swiss-qr-invoice' ),
-                    '03:00'      => __( '03:00' , 'sqrip-swiss-qr-invoice' ),
-                    '04:00'      => __( '04:00' , 'sqrip-swiss-qr-invoice' ),
-                    '05:00'      => __( '05:00' , 'sqrip-swiss-qr-invoice' ),
+                'options'     => array(
+                    '00:00:00'      => '00:00',
+                    '01:00:00'      => '01:00',
+                    '02:00:00'      => '02:00',
+                    '03:00:00'      => '03:00',
+                    '04:00:00'      => '04:00',
+                    '05:00:00'      => '05:00',
+                    '06:00:00'      => '06:00',
+                    '07:00:00'      => '07:00',
+                    '08:00:00'      => '08:00',
+                    '09:00:00'      => '09:00',
+                    '10:00:00'      => '10:00',
+                    '11:00:00'      => '11:00',
+                    '12:00:00'      => '12:00',
+                    '13:00:00'      => '13:00',
+                    '14:00:00'      => '14:00',
+                    '15:00:00'      => '15:00',
+                    '16:00:00'      => '16:00',
+                    '17:00:00'      => '17:00',
+                    '18:00:00'      => '18:00',
+                    '19:00:00'      => '19:00',
+                    '20:00:00'      => '20:00',
+                    '21:00:00'      => '21:00',
+                    '22:00:00'      => '22:00',
+                    '23:00:00'      => '23:00',
                 ),
-                'description'       => __( 'Select the days and the time when sqrip should execute a comparison of the awaiting payment orders with your bank account.</br>
+                 'description'   => __( 'Select the days and the time when sqrip should execute a comparison of the awaiting payment orders with your bank account.</br>
                     We charge your account for every comparison made.', 'sqrip-swiss-qr-invoice' ),
+                'desc_tip'      => __('Based on your selection, your weekly cost for this service is X credits.', 'sqrip-swiss-qr-invoice'),
                 'class'       => 'comparison-tab ebics-service'  
             ),
 
@@ -696,6 +715,14 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 
         }
 
+        if ( isset($post_data['woocommerce_sqrip_ebics_service']) ) {
+
+            $Sqrip_Payment_Verification = new Sqrip_Payment_Verification();
+            $Sqrip_Payment_Verification->refresh_cron();
+            
+        }
+
+
         return parent::process_admin_options();
     }
 
@@ -796,8 +823,8 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             // $sqrip_qr_png_path = get_attached_file($sqrip_qr_png_attachment_id);
 
             $to = get_option('admin_email');
-            $subject = 'Test E-Mail von sqrip.ch';
-            $body = 'Hier das eingestellte Resultat:';
+            $subject = __('Test E-Mail von sqrip.ch', 'sqrip-swiss-qr-invoice');
+            $body = __('Hier das eingestellte Resultat:', 'sqrip-swiss-qr-invoice');
             $attachments = [];
 
             $headers[] = 'From: sqrip Test-Mail <'.$to.'>';

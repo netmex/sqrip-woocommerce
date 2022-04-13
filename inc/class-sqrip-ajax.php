@@ -368,8 +368,13 @@ class Sqrip_Ajax {
         	$response = sqrip_remote_request( $endpoint, $body, 'POST' );
 
         	if ($response) {
+        		$send_report = isset($_POST['send_report']) ? $_POST['send_report'] : false;
 
         		$html = $this->get_table_results($response, $orders);
+
+        		if ( $send_report === "true" ) {
+   	 				$this->send_report($html);
+   	 			}
 
         		wp_send_json(array(
 					'html' => $html,
@@ -384,7 +389,6 @@ class Sqrip_Ajax {
 
         	}
 
-        	
         } else {
 
         	wp_send_json(array(
@@ -502,6 +506,21 @@ class Sqrip_Ajax {
 		$html .= '</div>';
 
 		return $html;
+	}
+
+	function send_report($html) {
+		if ( !$html ) return;
+
+		$to = get_option('admin_email');
+        $subject = __('Report E-Mail from sqrip.ch', 'sqrip-swiss-qr-invoice');
+        $body = __('Automatic Comparaison - EBICS Results:', 'sqrip-swiss-qr-invoice');
+        $body = $html;
+        $attachments = [];
+
+        $headers[] = 'From: sqrip E-Mail <'.$to.'>';
+        $headers[] = 'Content-Type: text/html; charset=UTF-8';
+
+        $wp_mail = wp_mail( $to, $subject, $body, $headers );
 	}
 
 
