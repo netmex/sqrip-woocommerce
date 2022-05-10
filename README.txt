@@ -3,7 +3,7 @@ Contributors: sqrip
 Donate link: https://sqrip.ch/
 Tags: woocommerce, payment, sqrip, qrcode, qr, scan, swiss qr invoice, QR-Rechnung, EBICS, QR-facture, bulletins de versement, Einzahlungsschein, QR-Einzahlungsschein, bulletins de versement, Swiss QR Code, code QR, QR-fattura, polizze di versamento
 Requires at least: 4.7
-Tested up to: 5.9
+Tested up to: 6.0
 Stable tag: 1.4.1
 Requires PHP: 7.0
 License: GPLv2 or later
