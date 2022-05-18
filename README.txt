@@ -43,7 +43,7 @@ The reference number is either created randomly or calculated on the basis of th
 e) additional information
 On up to three lines additional information can be added to the QR invoice. This includes 
 - the due date (The time given to the payer to settle the invoice may be communicated as text on the payment part.).
-- the order number
+- the order number (Be aware: sqrip not use the order# of the plugin "WoCommerce Sequential Order Numbers")
 - any additional text (e.g. URL of webshop, thank you message)
 This fiels supports WPML.
 
