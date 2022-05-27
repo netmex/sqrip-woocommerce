@@ -689,6 +689,17 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         $args = sqrip_prepare_remote_args($body, 'POST');
         $response = wp_remote_post(SQRIP_ENDPOINT.$endpoint, $args);
 
+        if (is_wp_error($response)) {
+            wc_add_notice( 
+                sprintf( 
+                    __( 'sqrip Payment Error: %s', 'sqrip-swiss-qr-invoice' ),
+                    esc_html( 'Something went wrong!' ) ), 
+                'error' 
+            );
+
+            return;
+        }
+
         $status_code = $response['response']['code'];
 
         if ($status_code !== 200) {
