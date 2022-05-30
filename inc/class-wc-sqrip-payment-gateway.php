@@ -149,12 +149,6 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'title' => __('QR Invoice Display', 'sqrip-swiss-qr-invoice'),
                 'type'        => 'section',
             ),
-            'due_date' => array(
-                'title'       => __( 'Maturity (Today in x days)', 'sqrip-swiss-qr-invoice' ),
-                'type'        => 'number',
-                'default'     => 30,
-                'css'         => "width:70px"
-            ),
             'integration_order' => array(
                 'title'       => __( 'on the confirmation page', 'sqrip-swiss-qr-invoice' ),
                 'label'       => __( 'Offer QR invoice for download', 'sqrip-swiss-qr-invoice' ),
@@ -187,6 +181,12 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                     'en'    => __( 'English', 'sqrip-swiss-qr-invoice' )
                 ),
                 'default' => 'de'
+            ),
+            'due_date' => array(
+                'title'       => __( 'Maturity (Today in x days)', 'sqrip-swiss-qr-invoice' ),
+                'type'        => 'number',
+                'default'     => 30,
+                'css'         => "width:70px"
             ),
             'additional_information' => array(
                 'title'       => __( 'Additional Information' , 'sqrip-swiss-qr-invoice' ),
