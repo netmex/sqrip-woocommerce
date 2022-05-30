@@ -15,7 +15,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         $this->icon = ''; // URL of the icon that will be displayed on checkout page near your gateway name
         $this->has_fields = true; // in case you need a custom credit card form
         $this->method_title = __( 'sqrip – Swiss QR-Invoice API' , 'sqrip-swiss-qr-invoice' );
-        $this->method_description = __( 'sqrip creates QR codes, A6 QR payment parts and A4 QR invoices for billing in Switzerland', 'sqrip-swiss-qr-invoice' ); // will be displayed on the options page
+        $this->method_description = __( 'sqrip – Modern and clever WooCommerce tools for the most widely used payment method in Switzerland: the bank transfer.', 'sqrip-swiss-qr-invoice' ); // will be displayed on the options page
 
         // gateways can support subscriptions, refunds, saved payment methods,
         // but in this tutorial we begin with simple payments
