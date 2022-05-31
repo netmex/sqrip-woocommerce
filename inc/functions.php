@@ -1,11 +1,42 @@
 <?php
 
+/**
+ * Gets a single option and uses the setting default if the value has not been set yet
+ * @param $key
+ * @return mixed|string|null
+ */
 function sqrip_get_plugin_option($key) {
-	$plugin_options     = get_option('woocommerce_sqrip_settings', array());
-	if($plugin_options && array_key_exists($key, $plugin_options)) {
+	$plugin_options = get_option('woocommerce_sqrip_settings', array());
+
+	// option exists in DB
+    if($plugin_options && array_key_exists($key, $plugin_options)) {
 		return $plugin_options[$key];
 	}
+
+    $gateway = new WC_Sqrip_Payment_Gateway();
+    $form_fields = $gateway->get_form_fields();
+
+    // Get option default from form fields if possible.
+    if ( isset( $form_fields[ $key ] ) ) {
+        return $gateway->get_field_default( $form_fields[ $key ] );
+    }
+
 	return null;
+}
+
+/**
+ * Gets all the plugin options and uses the setting defaults if values have not been set yet
+ * @return false|mixed
+ */
+function sqrip_get_plugin_options() {
+    $plugin_options = get_option('woocommerce_sqrip_settings', array());
+    $gateway = new WC_Sqrip_Payment_Gateway();
+    $form_fields = $gateway->get_form_fields();
+    $missing_settings = array_diff_key($form_fields, $plugin_options);
+    foreach($missing_settings as $key => $missing_setting) {
+        $plugin_options[$key] = isset( $form_fields[ $key ] ) ? $gateway->get_field_default( $form_fields[ $key ] ) : null;
+    }
+    return $plugin_options;
 }
 
 function sqrip_prepare_remote_args($body, $method, $token = null) {
@@ -81,7 +112,7 @@ function sqrip_get_billing_address_from_order($order) {
  * @return array|false
  */
 function sqrip_prepare_qr_code_request_body($currency_symbol, $amount, $order_number) {
-	$plugin_options         = get_option('woocommerce_sqrip_settings', array());
+	$plugin_options         = sqrip_get_plugin_options();
 	$sqrip_due_date         = $plugin_options['due_date'];
 	$iban                   = $plugin_options['iban'];
 
