@@ -52,13 +52,24 @@ function sqrip_remote_request( $endpoint, $body = '', $method = 'GET', $token = 
  */
 function sqrip_get_billing_address_from_order($order) {
 	$order_data = $order->get_data();
+    $company = isset($order_data['billing']['company']) ? $order_data['billing']['company'] : "";
+
 	$billing_address = array(
-		'name' => $order_data['billing']['first_name'] . ' ' . $order_data['billing']['last_name'],
-		'street' => $order_data['billing']['address_1'] . ($order_data['billing']['address_2'] ? ', ' . $order_data['billing']['address_2'] : ""),
-		'postal_code' => intval($order_data['billing']['postcode']),
-		'town' => $order_data['billing']['city'],
-		'country_code' => $order_data['billing']['country']
-	);
+        'name' => $order_data['billing']['first_name'] . ' ' . $order_data['billing']['last_name'],
+        'street' => $order_data['billing']['address_1'] . ($order_data['billing']['address_2'] ? ', ' . $order_data['billing']['address_2'] : ""),
+        'postal_code' => intval($order_data['billing']['postcode']),
+        'name'            => $order_data['billing']['first_name'] . ' ' . $order_data['billing']['last_name'],
+        'street'          => $order_data['billing']['address_1'] . ($order_data['billing']['address_2'] ? ', ' . $order_data['billing']['address_2'] : ""),
+        'postal_code'     => intval($order_data['billing']['postcode']),
+        'town' => $order_data['billing']['city'],
+        'country_code' => $order_data['billing']['country']
+        'country_code'    => $order_data['billing']['country']
+    );
+
+    if ( !empty($company) ) {
+        $billing_address['company'] = $company;
+    }
+
 	return $billing_address;
 }
 
@@ -113,7 +124,6 @@ function sqrip_prepare_qr_code_request_body($currency_symbol, $amount, $order_nu
 			[
 				"currency_symbol" => $currency_symbol,
 				"amount"    => $amount,
-				"due_date"  => $due_date,
                 "message"   => $additional_information
 			],
 		"lang"    => $lang,
