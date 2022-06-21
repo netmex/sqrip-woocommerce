@@ -193,7 +193,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'type'        => 'textarea',
                 'class'       => 'sqrip-additional-information',
                 'maxlength'   => 140,
-                'default'     => __("Due date: [due_date format=\"%Y-%m-%d\"]\nOrder: #[order_number]\nThank you for your purchase!","sqrip-swiss-qr-invoice"),
+                'default'     => __("Due date: [due_date format=\"%Y-%m-%d\"]\nOrder: [order_number]\nThank you for your purchase!","sqrip-swiss-qr-invoice"),
                 'description' => __( 'Will be displayed on the QR invoice in the section “Additional information”. <br>The following short codes are available:<br>[order_number] the order number.<br>[due_date format="%Y-%m-%d"] to insert the due date of the invoice.<br><a href="https://www.php.net/strftime" target="_blank">Supported formats</a> are:<br>%Y-%m-%d -> 2022-04-06<br>%m.%d.%y -> 04.06.22<br>%d. %B %Y -> 06. April 2022<br>%e. %b %Y -> 6. Apr 2022', 'sqrip-swiss-qr-invoice' ),
             ),
             'test_email' => array(
