@@ -63,7 +63,6 @@ function sqrip_get_billing_address_from_order($order) {
         'postal_code'     => intval($order_data['billing']['postcode']),
         'town' => $order_data['billing']['city'],
         'country_code' => $order_data['billing']['country']
-        'country_code'    => $order_data['billing']['country']
     );
 
     if ( !empty($company) ) {
