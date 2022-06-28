@@ -79,13 +79,13 @@ function sqrip_plugin_init()
         
     }
 
-    $ebics_service = sqrip_get_plugin_option('ebics_service');
+    // $ebics_service = sqrip_get_plugin_option('ebics_service');
 
-    if ($ebics_service == "yes") {
+    // if ($ebics_service == "yes") {
         
         require_once __DIR__ . '/inc/class-sqrip-payment-verification.php';
         
-    }
+    // }
 }
 
 /**
