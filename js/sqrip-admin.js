@@ -136,6 +136,7 @@ jQuery( document ).ready(function($){
             _this = $(this);
             _output = _this.closest('td.forminp');
             _output.find('.sqrip-notice').remove();
+            _output.find('.sqrip-description').remove();
 
             $.ajax({
                 type : "post", 
@@ -157,9 +158,9 @@ jQuery( document ).ready(function($){
                         }
                         output_html = '<div class="sqrip-notice '+result+'">';
                         output_html += '<p>'+response.message+'</p>';
-                        output_html += '</div>';
+                        output_html += '</div><p class="sqrip-description"></p>';
                         _this.after(output_html);
-                        _this.siblings('.description').html(response.description);
+                        _this.siblings('.sqrip-description').html(response.description);
                     }
                 },
                 error: function( jqXHR, textStatus, errorThrown ){
