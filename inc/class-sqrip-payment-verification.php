@@ -14,9 +14,36 @@ class Sqrip_Payment_Verification {
 
         $recurrence = sqrip_get_plugin_option('payment_frequence');
         $time = sqrip_get_plugin_option('payment_frequence_time');
+        $time_arr = explode(':', $time);
 
+        if (!is_array($recurrence)) {
+            return;
+        }
+
+        $hour = 0;
+        $min = 0;
+
+        if (is_array($time_arr)) {
+            $hour = $time_arr[0];
+            $min = $time_arr[1];
+        }
+
+        $setup_cron = false;
+        foreach ($recurrence as $day) {
+            $date = new DateTime('next '.$day);
+            $date->setTime($time_arr[0], $time_arr[1]);
+            $timestamp = $date->getTimestamp();
+
+            $setup_cron = $this->setup_cron($timestamp);
+
+        }    
+
+        return $setup_cron;    
+    }
+
+    public function setup_cron($timestamp){
         // Add schedule event
-        return wp_schedule_event(strtotime($time), $recurrence, $this->cron_hook);
+        return wp_schedule_event($timestamp, 'weekly', $this->cron_hook);
     }
 
     public function verify() {
@@ -49,6 +76,13 @@ class Sqrip_Payment_Verification {
             $response = sqrip_remote_request( $endpoint, $body, 'POST' );
 
             if ($response) {
+
+                if (isset($response->orders_unmatched) && isset($response->orders_matched)) {
+                    $orders = array_merge($response->orders_unmatched, $response->orders_matched);
+
+                    $this->update_order_status($orders);
+                }
+
                 $send_report = sqrip_get_plugin_option('comparison_report');
                 
                 if ( $send_report === "true" ) {
@@ -62,6 +96,25 @@ class Sqrip_Payment_Verification {
 
         }
 
+    }
+
+    public function update_order_status($orders){
+
+        if (!$orders) {
+            return;
+        }
+
+        $status_completed = sqrip_get_plugin_option('status_completed');
+
+        foreach ($orders as $order) {
+
+            if ($order['paid_amount'] >= $order['amount']) {
+                $order_id = $order['order_id'];
+                $order = new WC_Order($order_id);
+                $order->update_status($status_completed);
+            }
+            
+        }
     }
 
 } 

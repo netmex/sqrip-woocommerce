@@ -9,7 +9,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
      * Class constructor add payment gateway information
      */
     public function __construct()
-    {
+    {   
 
         $this->id = 'sqrip'; // payment gateway plugin ID
         $this->icon = ''; // URL of the icon that will be displayed on checkout page near your gateway name
@@ -115,6 +115,14 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'title'       => __( 'Description', 'sqrip-swiss-qr-invoice' ),
                 'type'        => 'textarea',
                 'description' => __( 'Description of what the customer can expect from this payment option.', 'sqrip-swiss-qr-invoice' ),
+                'class'       => 'qrinvoice-tab'  
+            ),
+            'expired_date' => array(
+                'title'       => __( 'Delete QR-Invoices automatically (after X days)', 'sqrip-swiss-qr-invoice' ),
+                'type'        => 'number',
+                'description' => __( 'When after creation a invoice will be deleted and then deleted from the media library.', 'sqrip-swiss-qr-invoice' ),
+                'default'     => 30,
+                'css'         => "width:70px",
                 'class'       => 'qrinvoice-tab'  
             ),
             'section_payee' => array(
@@ -335,41 +343,46 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             ),
             'payment_frequence' => array(
                 'title'       => __( 'Payment Fréquence', 'sqrip-swiss-qr-invoice' ),
-                'type'        => 'select',
+                'type'        => 'multiselect',
                 'options'       => array(
-                    'twicedaily' => __( 'Twice Daily' , 'sqrip-swiss-qr-invoice' ),
-                    'daily'      => __( 'Daily' , 'sqrip-swiss-qr-invoice' ),
-                    'weekly'     => __( 'Weekly' , 'sqrip-swiss-qr-invoice' ),
+                    'monday'        => __( 'Monday' , 'sqrip-swiss-qr-invoice' ),
+                    'tuesday'       => __( 'Tuesday' , 'sqrip-swiss-qr-invoice' ),
+                    'wednesday'     => __( 'Wednesday' , 'sqrip-swiss-qr-invoice' ),
+                    'thursday'      => __( 'Thursday' , 'sqrip-swiss-qr-invoice' ),
+                    'friday'        => __( 'Friday' , 'sqrip-swiss-qr-invoice' ),
+                    'saturday'      => __( 'Saturday' , 'sqrip-swiss-qr-invoice' ),
+                    'sunday'        => __( 'Sunday' , 'sqrip-swiss-qr-invoice' ),
+                    
                 ),
                 'class'         => 'comparison-tab ebics-service'  
             ),
             'payment_frequence_time' => array(
                 'type'        => 'select',
                 'options'     => array(
-                    '00:00:00'      => '00:00',
-                    '01:00:00'      => '01:00',
-                    '02:00:00'      => '02:00',
-                    '03:00:00'      => '03:00',
-                    '04:00:00'      => '04:00',
-                    '05:00:00'      => '05:00',
-                    '06:00:00'      => '06:00',
-                    '07:00:00'      => '07:00',
-                    '08:00:00'      => '08:00',
-                    '09:00:00'      => '09:00',
-                    '10:00:00'      => '10:00',
-                    '11:00:00'      => '11:00',
-                    '12:00:00'      => '12:00',
-                    '13:00:00'      => '13:00',
-                    '14:00:00'      => '14:00',
-                    '15:00:00'      => '15:00',
-                    '16:00:00'      => '16:00',
-                    '17:00:00'      => '17:00',
-                    '18:00:00'      => '18:00',
-                    '19:00:00'      => '19:00',
-                    '20:00:00'      => '20:00',
-                    '21:00:00'      => '21:00',
-                    '22:00:00'      => '22:00',
-                    '23:00:00'      => '23:00',
+                    '00:00'      => '00:00',
+                    '01:00'      => '01:00',
+                    '02:00'      => '02:00',
+                    '03:00'      => '03:00',
+                    '04:00'      => '04:00',
+                    '05:00'      => '05:00',
+                    '06:00'      => '06:00',
+                    '07:00'      => '07:00',
+                    '08:00'      => '08:00',
+                    '09:00'      => '09:00',
+                    '10:00'      => '10:00',
+                    '11:00'      => '11:00',
+                    '12:00'      => '12:00',
+                    '13:00'      => '13:00',
+                    '14:00'      => '14:00',
+                    '15:00'      => '15:00',
+                    '16:00'      => '16:00',
+                    '17:00'      => '17:00',
+                    '18:00'      => '18:00',
+                    '19:00'      => '19:00',
+                    '20:00'      => '20:00',
+                    '21:00'      => '21:00',
+                    '22:00'      => '22:00',
+                    '23:00'      => '23:00',
                 ),
                  'description'   => __( 'Select the days and the time when sqrip should execute a comparison of the awaiting payment orders with your bank account.</br>
                     We charge your account for every comparison made.', 'sqrip-swiss-qr-invoice' ),
@@ -382,7 +395,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'type'        => 'info',
                 'label'        => sprintf( 
                     __( 'You forward your payments to %s', 'sqrip-swiss-qr-invoice' ), 
-                    $this->get_active_service('iban'),
+                    $this->get_fund_management('main_account'),
                 ),
                 'description'       => __( 'In order to forward the payments from your incoming bank account to your main bank account, please configure this service on sqrip.ch', 'sqrip-swiss-qr-invoice' ),
                 'class'       => 'comparison-tab ebics-service',
@@ -424,6 +437,35 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         );
     }
 
+    public function get_fund_management($param = ""){
+        $endpoint   = 'get-fund-management-details';
+
+        $service = [
+            "main_account"  => "XXXX XXXX XXXX XXXX",
+            "debit_account" => "XXXX XXXX XXXX XXXX",
+            "trigger_level" => "XXX"
+        ];
+
+        if (!isset($service[$param])) {
+            return;
+        }
+
+        $response = sqrip_remote_request($endpoint);  
+
+        // var_dump($response); exit;
+
+
+        if ( isset($response->main_account) ) {
+
+            $service['main_account'] = $response->main_account;
+            $service['debit_account'] = $response->debit_account;
+            $service['trigger_level'] = $response->trigger_level;
+
+        }  
+
+        return !empty($param) ? $service[$param] : $service;
+    }
+
 
     public function get_active_service($param = ""){
         $endpoint   = 'get-active-service-type';
@@ -436,6 +478,8 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         ];
 
         $response = sqrip_remote_request($endpoint);  
+
+        // var_dump($response); exit;
 
         if ( isset($response->active_service) ) {
 
@@ -1161,8 +1205,9 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
     {
         include_once(ABSPATH . 'wp-admin/includes/image.php');
 
+        $prefix = 'sqrip_invoice_';
         $uniq_name = date('dmY') . '' . (int) microtime(true);
-        $filename = $uniq_name . $type;
+        $filename = $prefix . $uniq_name . $type;
 
         // Get the path to the upload directory.
         $uploaddir = wp_upload_dir();
