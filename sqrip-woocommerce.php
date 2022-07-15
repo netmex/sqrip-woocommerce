@@ -4,7 +4,7 @@
  * Plugin Name:             sqrip – Swiss QR Invoice
  * Plugin URI:              https://sqrip.ch/
  * Description:             sqrip – Modern and clever WooCommerce tools for the most widely used payment method in Switzerland: the bank transfers. 
- * Version:                 1.5.1
+ * Version:                 1.5.2
  * Author:                  netmex digital gmbh
  * Author URI:              https://sqrip.ch/
  */
@@ -64,7 +64,7 @@ function sqrip_init_gateway_class()
 {
     require_once __DIR__ . '/inc/class-wc-sqrip-payment-gateway.php';
 
-    // new WC_Sqrip_Payment_Gateway();
+    require_once __DIR__ . '/inc/class-sqrip-media-cleaner.php';
 }
 
 
