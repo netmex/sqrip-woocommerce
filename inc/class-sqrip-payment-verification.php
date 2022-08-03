@@ -1,5 +1,11 @@
 <?php 
+/**
+ * Sqrip Payment verification class
+ *
+ * @package sqrip
+ */
 class Sqrip_Payment_Verification {
+
     public $cron_hook;
 
     public function __construct() {
@@ -13,9 +19,8 @@ class Sqrip_Payment_Verification {
         $clear = wp_clear_scheduled_hook($this->cron_hook);
 
         $recurrence = sqrip_get_plugin_option('payment_frequence');
-        $time = sqrip_get_plugin_option('payment_frequence_time');
-        $time_arr = explode(':', $time);
-
+        $times = sqrip_get_plugin_option('payment_frequence_time');
+        
         if (!is_array($recurrence)) {
             return;
         }
@@ -23,19 +28,23 @@ class Sqrip_Payment_Verification {
         $hour = 0;
         $min = 0;
 
-        if (is_array($time_arr)) {
-            $hour = $time_arr[0];
-            $min = $time_arr[1];
-        }
-
         $setup_cron = false;
         foreach ($recurrence as $day) {
             $date = new DateTime('next '.$day);
-            $date->setTime($time_arr[0], $time_arr[1]);
-            $timestamp = $date->getTimestamp();
 
-            $setup_cron = $this->setup_cron($timestamp);
+            foreach ($times as $time) {
+                $time_arr = explode(':', $time);
 
+                if (is_array($time_arr)) {
+                    $hour = $time_arr[0];
+                    $min = $time_arr[1];
+                }
+
+                $date->setTime($hour, $min);
+                $timestamp = $date->getTimestamp();
+
+                $setup_cron = $this->setup_cron($timestamp);
+            }
         }    
 
         return $setup_cron;    

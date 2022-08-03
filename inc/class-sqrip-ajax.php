@@ -373,7 +373,8 @@ class Sqrip_Ajax {
         		$html = $this->get_table_results($response, $orders);
 
         		if ( $send_report === "true" ) {
-   	 				$this->send_report($html);
+        			$email_html = $this->get_table_results($response, $orders, true);
+   	 				$this->send_report($email_html);
    	 			}
 
         		wp_send_json(array(
@@ -401,22 +402,51 @@ class Sqrip_Ajax {
 		die;
 	}
 
+	public function get_order_status($status) {
+		$order_statuses = array(
+			'wc-pending'    => _x( 'Pending payment', 'Order status', 'woocommerce' ),
+			'wc-processing' => _x( 'Processing', 'Order status', 'woocommerce' ),
+			'wc-on-hold'    => _x( 'On hold', 'Order status', 'woocommerce' ),
+			'wc-completed'  => _x( 'Completed', 'Order status', 'woocommerce' ),
+			'wc-cancelled'  => _x( 'Cancelled', 'Order status', 'woocommerce' ),
+			'wc-refunded'   => _x( 'Refunded', 'Order status', 'woocommerce' ),
+			'wc-failed'     => _x( 'Failed', 'Order status', 'woocommerce' ),
+		);
 
-	function get_table_results($data = [], $uploaded = []){
+		return isset($order_statuses[$status]) ? $order_statuses[$status] : $status;
+	}
+
+
+	function get_table_results($data = [], $uploaded = [], $email = false){
 		$orders_matched = isset($data->orders_matched) && !empty($data->orders_matched) ? $data->orders_matched : [];
 		$orders_unmatched = isset($data->orders_unmatched) && !empty($data->orders_unmatched) ? $data->orders_unmatched : [];
 		$orders_not_found = isset($data->orders_not_found) && !empty($data->orders_not_found) ? $data->orders_not_found : [];
 
 		$html = '<div class="sqrip-table-results">';
-		$html .= '<h3><span class="dashicons dashicons-yes"></span> Orders status successfully updated</h3>';
 
+		if ($email) {
+			$status_completed = sqrip_get_plugin_option('status_completed');
+
+			$status_txt = $this->get_order_status($status_completed);
+
+			$html .= '<h3>'.sprintf(
+				__('%s orders updated to %s', 'sqrip-swiss-qr-invoice'), 
+				count($orders_matched),
+				$status_txt
+			).'</h3>';
+
+		} else {
+
+			$html .= '<h3><span class="dashicons dashicons-yes"></span>'.__(' Orders status successfully updated', 'sqrip-swiss-qr-invoice').'</h3>';
+		}
+		
 		$html .= '<h4>'.sprintf(
-			__('%s unpaid orders uploaded', 'sqrip-swiss-qr-invoice'), 
+			__('- %s unpaid orders uploaded', 'sqrip-swiss-qr-invoice'), 
 			count($uploaded)
 		).'</h4>';
 
 		$html .= '<h4>'.sprintf(
-			__('%s paid order found and status updated', 'sqrip-swiss-qr-invoice'), 
+			__('- %s paid orders found and status updated', 'sqrip-swiss-qr-invoice'), 
 			count($orders_matched)
 		).'</h4>';
 
@@ -432,19 +462,24 @@ class Sqrip_Ajax {
 				</thead>
 				<tbody>';
 				foreach ($orders_matched as $order_matched) {
+					$order_id = $order_matched->order_id;
+					$customer_name = $this->get_customer_name($order_id);
+
 					$html .= '<tr>
-						<td>#'.$order_matched->order_id.'</td>
+						<td>#'.$order_id.'</td>
 						<td>'.$order_matched->date.'</td>
-						<td>'.$order_matched->reference.'</td>
+						<td>'.$customer_name.'</td>
 						<td>'.wc_price($order_matched->amount).'</td>
 					</tr>';
 				}
 			$html .= '</tbody>
 			</table>';
+
+			$this->update_order_status($orders_matched);
 		}
 
 		$html .= '<h4>'.sprintf(
-			__('%s transaction with unmatching amount', 'sqrip-swiss-qr-invoice'), 
+			__('- %s transactions with unmatching amount', 'sqrip-swiss-qr-invoice'), 
 			count($orders_unmatched)
 		).'</h4>';
 
@@ -463,10 +498,13 @@ class Sqrip_Ajax {
 				<tbody>';
 
 				foreach ($orders_unmatched as $order_unmatched) {
+					$order_id = $order_unmatched->order_id;
+					$customer_name = $this->get_customer_name($order_id);
+
 					$html .= '<tr>
-						<td>#'.$order_unmatched->order_id.'</td>
+						<td>#'.$order_id.'</td>
 						<td>'.$order_unmatched->date.'</td>
-						<td>'.$order_unmatched->reference.'</td>
+						<td>'.$customer_name.'</td>
 						<td>'.wc_price($order_unmatched->amount).'</td>
 						<td>'.wc_price(0).'</td>
 						<td><a class="sqrip-approve" href="#" data-order="'.$order_unmatched->order_id.'">Approve</a></td>
@@ -477,7 +515,7 @@ class Sqrip_Ajax {
 		}
 
 		$html .= '<h4>'.sprintf(
-			__('%s payments not found', 'sqrip-swiss-qr-invoice'), 
+			__('- %s payments not found', 'sqrip-swiss-qr-invoice'), 
 			count($orders_not_found)
 		).'</h4>';
 
@@ -487,15 +525,18 @@ class Sqrip_Ajax {
 				<thead>
 					<tr>
 						<th>Order ID</th>
-						<th>Ref.-Nr</th>
+						<th>Customer Name</th>
 						<th>Amount</th>
 					</tr>
 				</thead>
 				<tbody>';
 				foreach ($orders_not_found as $order_not_found) {
+					$order_id = $order_not_found->order_id;
+					$customer_name = $this->get_customer_name($order_id);
+
 					$html .= '<tr>
-						<td>#'.$order_not_found->order_id.'</td>
-						<td>'.$order_not_found->reference.'</td>
+						<td>#'.$order_id.'</td>
+						<td>'.$customer_name.'</td>
 						<td>'.wc_price($order_not_found->amount).'</td>
 					</tr>';
 				}
@@ -506,6 +547,33 @@ class Sqrip_Ajax {
 		$html .= '</div>';
 
 		return $html;
+	}
+
+	public function update_order_status($orders_matched){
+		if (!$orders_matched || !is_array($orders_matched)) return;
+
+		$status_completed = sqrip_get_plugin_option('status_completed');
+
+		foreach ($orders_matched as $order_matched) {
+			$order_id = $order_matched->order_id;
+			// Get an instance of the WC_Order Object from the Order ID (if required)
+			$order = new WC_Order($order_id);
+	        $order->update_status($status_completed);
+	    }
+    }
+
+	public function get_customer_name($order_id){
+		// Get an instance of the WC_Order Object from the Order ID (if required)
+		$order = wc_get_order( $order_id );
+
+		if (!$order) return;
+
+		// Customer billing information details
+		$billing_first_name = $order->get_billing_first_name();
+		$billing_last_name  = $order->get_billing_last_name();
+		$customer_name = $billing_first_name.' '.$billing_last_name;
+
+		return $customer_name;
 	}
 
 	function send_report($html) {

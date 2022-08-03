@@ -80,7 +80,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 
                         b) Automatic: By using a direct, safe connection to your bank account via EBICS.
 
-                        <p>In order to activate one of these services, please go to your account on sqrip.ch for further details.</p>', 'sqrip-swiss-qr-invoice' ),
+                        <p>In order to activate one of these services, please go to your account on <a href="https://sqrip.ch" target="_blank">sqrip.ch</a> for further details.</p>', 'sqrip-swiss-qr-invoice' ),
                         'class' => '',
                     ],
                     [
@@ -277,7 +277,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'title'       => __( 'Connect services', 'sqrip-swiss-qr-invoice' ),
                 'type'        => 'info',
                 'label'       => $this->get_active_service('active_service_txt'),
-                'class'       => 'comparison-tab' 
+                'class'       => 'comparison-tab '.$this->get_active_service('active_service'), 
             ),
             'remaining_credits' => array(
                 'title'       => __( 'Remaining Credits', 'sqrip-swiss-qr-invoice' ),
@@ -357,32 +357,13 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'class'         => 'comparison-tab ebics-service'  
             ),
             'payment_frequence_time' => array(
-                'type'        => 'select',
+                'type'        => 'multiselect',
                 'options'     => array(
-                    '00:00'      => '00:00',
-                    '01:00'      => '01:00',
-                    '02:00'      => '02:00',
-                    '03:00'      => '03:00',
                     '04:00'      => '04:00',
-                    '05:00'      => '05:00',
-                    '06:00'      => '06:00',
-                    '07:00'      => '07:00',
                     '08:00'      => '08:00',
-                    '09:00'      => '09:00',
-                    '10:00'      => '10:00',
-                    '11:00'      => '11:00',
-                    '12:00'      => '12:00',
                     '13:00'      => '13:00',
-                    '14:00'      => '14:00',
-                    '15:00'      => '15:00',
-                    '16:00'      => '16:00',
-                    '17:00'      => '17:00',
                     '18:00'      => '18:00',
-                    '19:00'      => '19:00',
-                    '20:00'      => '20:00',
                     '21:00'      => '21:00',
-                    '22:00'      => '22:00',
-                    '23:00'      => '23:00',
                 ),
                  'description'   => __( 'Select the days and the time when sqrip should execute a comparison of the awaiting payment orders with your bank account.</br>
                     We charge your account for every comparison made.', 'sqrip-swiss-qr-invoice' ),

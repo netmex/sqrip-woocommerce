@@ -55,6 +55,7 @@ table.form-table td .sqrip-notice p {
 }
 
 .sqrip-tabs {
+    margin-top: 30px;
     display: flex;
 }
 
@@ -95,7 +96,6 @@ table.form-table td .sqrip-notice p {
 }*/
 
 table.form-table tr td label[for="woocommerce_sqrip_compare_btn"],
-table.form-table tr th label[for="woocommerce_sqrip_active_service"],
 .sqrip-btn {
     background-color: #6558f5;
     padding: 10px 20px;
@@ -131,18 +131,9 @@ table.form-table tr td label[for="woocommerce_sqrip_active_service"]:before {
 }
 
 table.form-table tr td label[for="woocommerce_sqrip_remaining_credits"] {
-    opacity: 0.6;
     font-weight: bold;
-    width: 150px;
-    margin: 0;
-    box-sizing: border-box;
-    line-height: 32px;
     vertical-align: top;
-    border: 1px solid;
-    display: block;
-    padding: 0 6px;
-    background-color: rgb(221 221 221);
-    border-radius: 4px;
+    line-height: 1;
 }
 
 .wp-core-ui .button-secondary.sqrip-btn-validate-token {
@@ -180,4 +171,21 @@ table.sqrip-table tbody tr td {
 
 .sqrip-tabs ~ table.form-table tr td input.camt-service{
     padding: 0!important;
+}
+
+.sqrip-tabs ~ table.form-table tr th.comparison-tab.none ~ td label:before{
+    display: none;
+}
+
+.sqrip-table-results .sqrip-table{
+    border-spacing: 0;
+}
+
+.sqrip-table-results .sqrip-table thead tr th{
+    background-color: #fff;
+}
+
+.sqrip-table-results .sqrip-table tbody tr td {
+    padding: 10px;
+    background-color: #fff;
 }
