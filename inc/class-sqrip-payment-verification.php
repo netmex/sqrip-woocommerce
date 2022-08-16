@@ -16,7 +16,7 @@ class Sqrip_Payment_Verification {
     }
 
     public function refresh_cron() {   
-        $clear = wp_clear_scheduled_hook($this->cron_hook);
+        $clear = $this->clear_cron();
 
         $recurrence = sqrip_get_plugin_option('payment_frequence');
         $times = sqrip_get_plugin_option('payment_frequence_time');
@@ -55,7 +55,15 @@ class Sqrip_Payment_Verification {
         return wp_schedule_event($timestamp, 'weekly', $this->cron_hook);
     }
 
+    public function clear_cron(){
+        $clear = wp_clear_scheduled_hook($this->cron_hook);
+
+        return $clear;
+    }
+
     public function verify() {
+
+        $logs = '[Sqrip_Payment_Verification] is starting...';
 
         $status_awaiting = sqrip_get_plugin_option('status_awaiting');
 
@@ -82,14 +90,18 @@ class Sqrip_Payment_Verification {
             $body['orders'] = $orders;
             $endpoint = 'confirm-order';
 
+            $logs .= 'Starting request to sqrip to confirm order...';
             $response = sqrip_remote_request( $endpoint, $body, 'POST' );
+            $logs .= print_r($response, true);
 
             if ($response) {
 
                 if (isset($response->orders_unmatched) && isset($response->orders_matched)) {
                     $orders = array_merge($response->orders_unmatched, $response->orders_matched);
 
-                    $this->update_order_status($orders);
+                    $updated = $this->update_order_status($orders);
+
+                    $logs .= print_r($updated, true);
                 }
 
                 $send_report = sqrip_get_plugin_option('comparison_report');
@@ -99,12 +111,20 @@ class Sqrip_Payment_Verification {
 
                     $html = $Sqrip_Ajax->get_table_results($response, $orders);
                     $Sqrip_Ajax->send_report($html);
-                }
 
+                    $logs .= 'Sent report to Admin email! \r\n';
+                }
             } 
+
+        } else {
+
+            $logs .= sprintf('No order with %s status found!', $status_awaiting);
 
         }
 
+        $logs .= 'Finished!';
+
+        error_log($logs);
     }
 
     public function update_order_status($orders){
@@ -115,18 +135,22 @@ class Sqrip_Payment_Verification {
 
         $status_completed = sqrip_get_plugin_option('status_completed');
 
+        $updated  = [];
+
         foreach ($orders as $order) {
 
             if ($order['paid_amount'] >= $order['amount']) {
                 $order_id = $order['order_id'];
                 $order = new WC_Order($order_id);
-                $order->update_status($status_completed);
+               
+                $updated[$order_id] =  $order->update_status($status_completed);
             }
             
         }
+
+        return $updated;
     }
 
 } 
 
 new Sqrip_Payment_Verification;
-

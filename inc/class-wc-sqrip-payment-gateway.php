@@ -740,13 +740,17 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 
         }
 
+        $Sqrip_Payment_Verification = new Sqrip_Payment_Verification();
+
         if ( isset($post_data['woocommerce_sqrip_ebics_service']) ) {
-
-            $Sqrip_Payment_Verification = new Sqrip_Payment_Verification();
-            $Sqrip_Payment_Verification->refresh_cron();
             
-        }
+            $Sqrip_Payment_Verification->refresh_cron();
 
+        }  else {
+
+            $Sqrip_Payment_Verification->clear_cron();
+
+        }
 
         return parent::process_admin_options();
     }
