@@ -19,6 +19,8 @@ class Sqrip_Ajax {
 
 		add_action( 'wp_ajax_sqrip_mark_refund_unpaid',  array( $this, 'mark_refund_unpaid' ) );
 
+		add_action( 'wp_ajax_sqrip_refund_valiation',  array( $this, 'refund_valiation' ) );
+
 		/**
 		 * @deprecated
 		 * Active/Deactive service
@@ -340,25 +342,8 @@ class Sqrip_Ajax {
 
 	function compare_ebics(){
 		check_ajax_referer('sqrip-admin-settings', 'nonce');
-		$status_awaiting = sqrip_get_plugin_option('status_awaiting');
 
-		$awaiting_orders = (array) wc_get_orders( array(
-            'limit'         => -1,
-            'status'        => $status_awaiting,
-        ) );
-
-        $orders = [];
-
-		if ( sizeof($awaiting_orders) > 0 ) {
-            foreach ( $awaiting_orders as $aw_order ) {
-            	$order['order_id'] 	= $aw_order->get_id();
-            	$order['amount'] 	= $aw_order->get_total();
-            	$order['reference'] = $aw_order->get_meta('sqrip_reference_id');
-            	$order['date'] 		= $aw_order->get_date_created()->date('Y-m-d H:i:s');
-
-            	array_push($orders, $order);
-            }
-        }
+        $orders = sqrip_get_awaiting_orders();
 
         if ($orders) {
         	$body = [];
@@ -451,16 +436,14 @@ class Sqrip_Ajax {
 		).'</h4>';
 
 		if ($orders_matched) {
-			$html .= '<table class="sqrip-table">
-				<thead>
-					<tr>
-						<th>Order ID</th>
-						<th>Payment Date</th>
-						<th>Customer Name</th>
-						<th>Amount</th>
-					</tr>
-				</thead>
-				<tbody>';
+			$html .= '<table class="sqrip-table">';
+			$html .= '<thead><tr>';
+			$html .= '<th>'.__('Order ID', 'sqrip-swiss-qr-invoice').'</th>';
+			$html .= '<th>'.__('Payment Date', 'sqrip-swiss-qr-invoice').'</th>';
+			$html .= '<th>'.__('Customer Name', 'sqrip-swiss-qr-invoice').'</th>';
+			$html .= '<th>'.__('Amount', 'sqrip-swiss-qr-invoice').'</th>';
+			$html .= '</tr></thead><tbody>';
+
 				foreach ($orders_matched as $order_matched) {
 					$order_id = $order_matched->order_id;
 					$customer_name = $this->get_customer_name($order_id);
@@ -472,6 +455,7 @@ class Sqrip_Ajax {
 						<td>'.wc_price($order_matched->amount).'</td>
 					</tr>';
 				}
+
 			$html .= '</tbody>
 			</table>';
 
@@ -484,18 +468,15 @@ class Sqrip_Ajax {
 		).'</h4>';
 
 		if ($orders_unmatched) {
-			$html .= '<table class="sqrip-table">
-				<thead>
-					<tr>
-						<th>Order ID</th>
-						<th>Payment Date</th>
-						<th>Customer Name</th>
-						<th>Amount</th>
-						<th>Paid Amount</th>
-						<th>Action</th>
-					</tr>
-				</thead>
-				<tbody>';
+			$html .= '<table class="sqrip-table">';
+			$html .= '<thead><tr>';
+			$html .= '<th>'.__('Order ID', 'sqrip-swiss-qr-invoice').'</th>';
+			$html .= '<th>'.__('Payment Date', 'sqrip-swiss-qr-invoice').'</th>';
+			$html .= '<th>'.__('Customer Name', 'sqrip-swiss-qr-invoice').'</th>';
+			$html .= '<th>'.__('Amount', 'sqrip-swiss-qr-invoice').'</th>';
+			$html .= '<th>'.__('Paid Amount', 'sqrip-swiss-qr-invoice').'</th>';
+			$html .= '<th>'.__('Action', 'sqrip-swiss-qr-invoice').'</th>';
+			$html .= '</tr></thead><tbody>';
 
 				foreach ($orders_unmatched as $order_unmatched) {
 					$order_id = $order_unmatched->order_id;
@@ -521,21 +502,20 @@ class Sqrip_Ajax {
 
 
 		if ( $orders_not_found ) {
-			$html .= '<table class="sqrip-table">
-				<thead>
-					<tr>
-						<th>Order ID</th>
-						<th>Customer Name</th>
-						<th>Amount</th>
-					</tr>
-				</thead>
-				<tbody>';
+			$html .= '<table class="sqrip-table">';
+			$html .= '<thead><tr>';
+			$html .= '<th>'.__('Order ID', 'sqrip-swiss-qr-invoice').'</th>';
+			$html .= '<th>'.__('Customer Name', 'sqrip-swiss-qr-invoice').'</th>';
+			$html .= '<th>'.__('Amount', 'sqrip-swiss-qr-invoice').'</th>';
+			$html .= '</tr></thead><tbody>';
+
+
 				foreach ($orders_not_found as $order_not_found) {
 					$order_id = $order_not_found->order_id;
 					$customer_name = $this->get_customer_name($order_id);
 
 					$html .= '<tr>
-						<td>#'.$order_id.'</td>
+						<td><a href="'.get_edit_post_link($order_id).'" target="_blank">#'.$order_id.'</a></td>
 						<td>'.$customer_name.'</td>
 						<td>'.wc_price($order_not_found->amount).'</td>
 					</tr>';
@@ -604,7 +584,25 @@ class Sqrip_Ajax {
 		}
 	}
 
+	function refund_valiation(){
+		$user = wp_get_current_user();
+		$iban = sqrip_get_customer_iban($user);
 
+		$status = false;
+		$message = __('Please enter IBAN to generate QR-Code.', 'sqrip-swiss-qr-invoice');
+
+		if ($iban) {
+			$status = true;
+			$message = "Success";
+		} 
+
+		wp_send_json(array(
+    		'status' => $status,
+    		'message' => $message,
+    	));
+
+		wp_die();
+	}
 }
 
 new Sqrip_Ajax;

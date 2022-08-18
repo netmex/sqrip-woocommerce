@@ -23,6 +23,9 @@ define( 'SQRIP_PLUGIN_BASENAME', plugin_basename(__FILE__) );
 require_once __DIR__ . '/inc/functions.php';
 require_once __DIR__ . '/inc/class-sqrip-ajax.php';
 
+
+
+
 /**
  * Add plugin Settings link
  *

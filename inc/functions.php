@@ -419,3 +419,30 @@ function sqrip_get_active_service($param = ""){
 
     return !empty($param) ? $service[$param] : $service;
 }
+
+function sqrip_get_awaiting_orders(){
+    $status_awaiting = sqrip_get_plugin_option('status_awaiting');
+
+    $awaiting_orders = (array) wc_get_orders( array(
+        'limit'         => -1,
+        'status'        => $status_awaiting,
+        'meta_key'          => 'sqrip_reference_id', 
+        'meta_compare'      => '!=', 
+        'meta_value'        => ' ',
+    ) );
+
+    $orders = [];
+
+    if ( sizeof($awaiting_orders) > 0 ) {
+        foreach ( $awaiting_orders as $aw_order ) {
+            $order['order_id']  = $aw_order->get_id();
+            $order['amount']    = $aw_order->get_total();
+            $order['reference'] = $aw_order->get_meta('sqrip_reference_id');
+            $order['date']      = $aw_order->get_date_created()->date('Y-m-d H:i:s');
+
+            array_push($orders, $order);
+        }
+    } 
+
+    return $orders;
+}

@@ -28,16 +28,16 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 
         // Load the settings.
         $this->init_settings();
-        $this->title = $this->get_option('title');
-        $this->description = $this->get_option('description');
-        $this->enabled = $this->get_option('enabled');
-        $this->due_date = $this->get_option('due_date');
-        $this->iban = $this->get_option('iban');
-        $this->token = $this->get_option('token');
-        $this->product = $this->get_option('product');
-        $this->address      = $this->get_option('address');
-        $this->return_enabled = $this->get_option('return_enabled');
-        $this->return_token = $this->get_option('return_token');
+        $this->title            = $this->get_option('title');
+        $this->description      = $this->get_option('description');
+        $this->enabled          = $this->get_option('enabled');
+        $this->due_date         = $this->get_option('due_date');
+        $this->iban             = $this->get_option('iban');
+        $this->token            = $this->get_option('token');
+        $this->product          = $this->get_option('product');
+        $this->address          = $this->get_option('address');
+        $this->return_enabled   = $this->get_option('return_enabled');
+        $this->return_token     = $this->get_option('return_token');
 
         // Add support for refunds if option is set
         if($this->return_enabled == "yes") {
@@ -46,6 +46,12 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 
         // This action hook saves the settings
         add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
+    }
+
+    public function show_tab($option){
+        $value =  sqrip_get_plugin_option($option);
+
+        return (!$value || $value == null || $value == "no") ? "hide" : $value;
     }
 
     /**
@@ -61,48 +67,152 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'type'  => 'tab',
                 'tabs' => [
                     [
-                        'id' => 'qrinvoice',
-                        'title' => __( 'QR-Invoice', 'sqrip-swiss-qr-invoice' ),
+                        'id' => 'services',
+                        'title' => __( 'Services', 'sqrip-swiss-qr-invoice' ),
                         'class' => 'active',
                     ],
                     [
-                        'id' => 'reminders',
-                        'title' => __('Reminders', 'sqrip-swiss-qr-invoice'),
-                        'class' => '',
-                        'description' => __( 'If an invoice has not been paid within the defined time, you can send a reminder to the client', 'sqrip-swiss-qr-invoice'),
+                        'id' => 'qrinvoice',
+                        'title' => __( 'QR-Invoice', 'sqrip-swiss-qr-invoice' ),
+                        'class' => $this->show_tab('enabled'),
                     ],
                     [
                         'id' => 'comparison',
                         'title' => __( 'Payment Comparison', 'sqrip-swiss-qr-invoice' ),
-                        'description' => __('<p>sqrip offers two ways to synchronize customer made payments to your bank account with your WooCommerce store:</p>
-
-                        a) Manually: By uploading the camt053-file which has been downloaded by you from your online-banking; </br>
-
-                        b) Automatic: By using a direct, safe connection to your bank account via EBICS.
-
-                        <p>In order to activate one of these services, please go to your account on <a href="https://sqrip.ch" target="_blank">sqrip.ch</a> for further details.</p>', 'sqrip-swiss-qr-invoice' ),
+                        'description' => '',
                         'class' => '',
+                    ],
+                    [
+                        'id' => 'fund-management',
+                        'title' => __( 'Fund Management', 'sqrip-swiss-qr-invoice' ),
+                        'class' => '',
+                    ],
+                    [
+                        'id' => 'reminders',
+                        'title' => __('Reminders', 'sqrip-swiss-qr-invoice'),
+                        'class' => $this->show_tab('enabled_reminder'),
+                        'description' => '',
                     ],
                     [
                         'id' => 'refunds',
                         'title' => __('Refunds', 'sqrip-swiss-qr-invoice'),
-                        'class' => '',
+                        'class' => $this->show_tab('return_enabled')
                     ]
                 ]
             ),
-            'enabled' => array(
-                'title'       => __( 'Enable/Disable', 'sqrip-swiss-qr-invoice' ),
-                'label'       => __( 'Enable QR invoices with sqrip API', 'sqrip-swiss-qr-invoice' ),
-                'type'        => 'checkbox',
-                'description' => '',
-                'default'     => 'no',
-                'class'       => 'qrinvoice-tab'  
+            'section_connection' => array(
+                'title'         => __('Connection', 'sqrip-swiss-qr-invoice' ),
+                'type'          => 'section',
+                'class'       => 'services-tab' 
             ),
             'token' => array(
                 'title'       => __( 'API key' , 'sqrip-swiss-qr-invoice' ),
                 'type'        => 'textarea',
                 'description' => __( 'Open an account at <a href="https://sqrip.ch" target="_blank">https://sqrip.ch</a>, create an API key, copy and paste it here. Done!', 'sqrip-swiss-qr-invoice' ),
-                'class'       => 'qrinvoice-tab'  
+                'class'       => 'services-tab'  
+            ),
+            'remaining_credits' => array(
+                'title'       => __( 'Remaining Credits', 'sqrip-swiss-qr-invoice' ),
+                'type'        => 'info',
+                'label'       => $this->get_active_service('remaining_credits'),
+                'class'       => 'services-tab' 
+            ),
+            'section_qr_invoices' => array(
+                'title'         => __('QR-Invoices', 'sqrip-swiss-qr-invoice' ),
+                'type'          => 'section',
+                'class'       => 'services-tab' 
+            ),
+            'enabled' => array(
+                'title'       => __( 'QR invoices with sqrip API', 'sqrip-swiss-qr-invoice' ),
+                'label'       => __( 'Enable/Disable ', 'sqrip-swiss-qr-invoice' ),
+                'type'        => 'checkbox',
+                'description' => '',
+                'default'     => 'no',
+                'class'       => 'services-tab',
+                'custom_attributes' => ['data-enable' => 'qrinvoice']
+            ),
+            'section_payment_camparison' => array(
+                'title'         => __('Payment Comparison', 'sqrip-swiss-qr-invoice' ),
+                'type'          => 'section',
+                'description'   => __('<p>sqrip offers two ways to synchronize customer made payments to your bank account with your WooCommerce store:</p>
+
+                    a) Manually: By uploading the camt053-file which has been downloaded by you from your online-banking; </br>
+
+                    b) Automatic: By using a direct, safe connection to your bank account via EBICS.
+
+                    <p>In order to activate one of these services, please go to your account on <a href="https://sqrip.ch" target="_blank">sqrip.ch</a> for further details.</p>', 
+
+                    'sqrip-swiss-qr-invoice' 
+                ),
+                'class'       => 'services-tab',
+            ),
+            'camt_service' => array(
+                'title'       => __( 'Manual Comparison - camt053', 'sqrip-swiss-qr-invoice' ),
+                'label'       => __( 'Enable/Disable', 'sqrip-swiss-qr-invoice' ),
+                'type'        => 'checkbox',
+                'description' => '',
+                'default'     => 'no',
+                'class'       => 'services-tab'  
+            ),
+            'ebics_service' => array(
+                'title'       => __( 'Automatic Comparaison - EBICS', 'sqrip-swiss-qr-invoice' ),
+                'label'       => __( 'Enable/Disable', 'sqrip-swiss-qr-invoice' ),
+                'type'        => 'checkbox',
+                'description' => '',
+                'default'     => 'no',
+                'class'       => 'services-tab'  
+            ),
+            'active_service' => array(
+                'title'       => __( 'Connected services', 'sqrip-swiss-qr-invoice' ),
+                'type'        => 'info',
+                'label'       => $this->get_active_service('active_service_txt'),
+                'class'       => 'services-tab '.$this->get_active_service('active_service'), 
+            ),
+            'section_fund_management' => array(
+                'title'         => __('Fund Management', 'sqrip-swiss-qr-invoice' ),
+                'type'          => 'section',
+                'class'       => 'services-tab' 
+            ),
+            'forward_payments' => array(
+                'title'       => __( 'Forward Payments', 'sqrip-swiss-qr-invoice' ),
+                'type'        => 'info',
+                'label'        => sprintf( 
+                    __( 'You forward your payments to %s', 'sqrip-swiss-qr-invoice' ), 
+                    $this->get_fund_management('main_account'),
+                ),
+                'description'       => __( 'In order to forward the payments from your incoming bank account to your main bank account, please configure this service on sqrip.ch', 'sqrip-swiss-qr-invoice' ),
+                'class'       => 'services-tab ebics-service',
+                'default'     => 'yes',
+                'disabled'    => true,
+            ),
+            'section_reminders' => array(
+                'title'         => __('Reminders', 'sqrip-swiss-qr-invoice' ),
+                'type'          => 'section',
+                'description'   => __( 'If an invoice has not been paid within the defined time, you can send a reminder to the client', 'sqrip-swiss-qr-invoice'),
+                'class'       => 'services-tab' 
+            ),
+            'enabled_reminder' => array(
+                'title'       => __( 'Reminders', 'sqrip-swiss-qr-invoice' ),
+                'label'       => __( 'Turn On/Off', 'sqrip-swiss-qr-invoice' ),
+                'type'        => 'checkbox',
+                'default'     => 'no',
+                'class'       => 'services-tab',
+                'custom_attributes' => ['data-enable' => 'reminders']
+            ),
+            'section_refund' => array(
+                'title'         => __('Refunds', 'sqrip-swiss-qr-invoice' ),
+                'type'          => 'section',
+                'description'   => __( 'If activated, sqrip makes refunding easier by creating a QR-code that can be scanned with the banking app to initiate a bank transfer to the client.'),
+                'class'       => 'services-tab' 
+            ),
+            'return_enabled' => array(
+                'title'       => __( 'Refunds', 'sqrip-swiss-qr-invoice' ),
+                'label'       => __( 'Activate/Deactivate', 'sqrip-swiss-qr-invoice' ),
+                'type'        => 'checkbox',
+                'description' => '',
+                'default'     => 'no',
+                'class'       => 'services-tab',
+                'custom_attributes' => ['data-enable' => 'refunds']
             ),
             'title' => array(
                 'title'       => __( 'Payment method name', 'sqrip-swiss-qr-invoice' ),
@@ -236,17 +346,15 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'class'       => 'qrinvoice-tab'  
             ),
             'test_email' => array(
-                'title'       => '',
+                'title'       => __( 'Test email', 'sqrip-swiss-qr-invoice' ),
                 'type'        => 'checkbox',
+                'label'       => sprintf( 
+                    __( 'Send test to %s', 'sqrip-swiss-qr-invoice' ), 
+                    esc_html( get_option('admin_email') ) 
+                ),
                 'default'     => 'no',
-                'css'         => 'visibility: hidden'  
-            ),
-            'enabled_reminder' => array(
-                'title'       => __( 'Turn on/off Reminders', 'sqrip-swiss-qr-invoice' ),
-                'label'       => __( 'Active', 'sqrip-swiss-qr-invoice' ),
-                'type'        => 'checkbox',
-                'default'     => 'no',
-                'class'       => 'reminders-tab'  
+                'css'         => 'visibility: hidden; position: absolute',
+                'class'       => 'qrinvoice-tab' 
             ),
             'status_reminders' => array(
                 'title'         => __( 'Status of awaiting payment orders', 'sqrip-swiss-qr-invoice' ),
@@ -273,18 +381,8 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'options' => sqrip_get_wc_emails(),
                 'class'       => 'reminders-tab'  
             ),
-            'active_service' => array(
-                'title'       => __( 'Connect services', 'sqrip-swiss-qr-invoice' ),
-                'type'        => 'info',
-                'label'       => $this->get_active_service('active_service_txt'),
-                'class'       => 'comparison-tab '.$this->get_active_service('active_service'), 
-            ),
-            'remaining_credits' => array(
-                'title'       => __( 'Remaining Credits', 'sqrip-swiss-qr-invoice' ),
-                'type'        => 'info',
-                'label'       => $this->get_active_service('remaining_credits'),
-                'class'       => 'comparison-tab' 
-            ),
+
+           
             'section_general_settings' => array(
                 'title'         => __('General Settings', 'sqrip-swiss-qr-invoice' ),
                 'type'          => 'section',
@@ -313,14 +411,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'type'          => 'section',
                 'class'       => 'comparison-tab' 
             ),
-            'camt_service' => array(
-                'title'       => __( 'Enable/Disable', 'sqrip-swiss-qr-invoice' ),
-                'label'       => __( 'Enable camt053 files', 'sqrip-swiss-qr-invoice' ),
-                'type'        => 'checkbox',
-                'description' => '',
-                'default'     => 'no',
-                'class'       => 'comparison-tab'  
-            ),
+            
             'camt053_file' => array(
                 'title'       => __( 'Upload camt053 File', 'sqrip-swiss-qr-invoice' ),
                 'type'        => 'file',
@@ -333,14 +424,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'type'          => 'section',
                 'class'       => 'comparison-tab' 
             ),
-            'ebics_service' => array(
-                'title'       => __( 'Payment verification', 'sqrip-swiss-qr-invoice' ),
-                'label'       => __( 'Enable Payment Verification', 'sqrip-swiss-qr-invoice' ),
-                'type'        => 'checkbox',
-                'description' => '',
-                'default'     => 'no',
-                'class'       => 'comparison-tab'  
-            ),
+           
             'payment_frequence' => array(
                 'title'       => __( 'Payment Fréquence', 'sqrip-swiss-qr-invoice' ),
                 'type'        => 'multiselect',
@@ -371,18 +455,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'class'       => 'comparison-tab ebics-service'  
             ),
 
-            'forward_payments' => array(
-                'title'       => __( 'Forward Payments', 'sqrip-swiss-qr-invoice' ),
-                'type'        => 'info',
-                'label'        => sprintf( 
-                    __( 'You forward your payments to %s', 'sqrip-swiss-qr-invoice' ), 
-                    $this->get_fund_management('main_account'),
-                ),
-                'description'       => __( 'In order to forward the payments from your incoming bank account to your main bank account, please configure this service on sqrip.ch', 'sqrip-swiss-qr-invoice' ),
-                'class'       => 'comparison-tab ebics-service',
-                'default'     => 'yes',
-                'disabled'    => true,
-            ),
+            
             'comparison_report' => array(
                 'title'       => __( 'Send report to Admin E-Mail', 'sqrip-swiss-qr-invoice' ),
                 'label'       => __( 'Send report by email', 'sqrip-swiss-qr-invoice' ),
@@ -398,15 +471,6 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'description' => 'Initiate and test the service.',
                 'default'     => 'no',
                 'class'       => 'comparison-tab ebics-service'  
-            ),
-            
-            'return_enabled' => array(
-                'title'       => __( 'Activate/Deactivate Refunds', 'sqrip-swiss-qr-invoice' ),
-                'label'       => __( 'Activate sqrip for Refunds', 'sqrip-swiss-qr-invoice' ),
-                'type'        => 'checkbox',
-                'description' => __( 'If activated, sqrip makes refunding easier by creating a QR-code that can be scanned with the banking app to initiate a bank transfer to the client.', 'sqrip-swiss-qr-invoice' ),
-  	            'default'     => 'no',
-                'class'       => 'refunds-tab'
             ),
             'return_token' => array(
                 'title'       => __( 'API key for Refunds' , 'sqrip-swiss-qr-invoice' ),
@@ -572,10 +636,13 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 
         ob_start();
         ?>
-            <tr valign="top sqrip-section">
+            <tr valign="top" class="sqrip-section">
                 <th scope="row" class="titledesc <?php echo esc_attr($data['class']); ?>"  colspan="2">
-                    <h3><?php echo wp_kses_post( $data['title'] ); ?> <?php echo $this->get_tooltip_html( $data ); // WPCS: XSS ok. ?></h3>
-                    <?php echo $this->get_description_html( $data ); // WPCS: XSS ok. ?>
+                    <h3><?php echo wp_kses_post( $data['title'] ); ?> <?php echo $this->get_tooltip_html( $data ); ?></h3>
+                    <div class="description">
+                        <?php echo wp_kses_post( $data['description'] ); ?>
+                    </div>
+                    
                 </th>
             </tr>
         <?php

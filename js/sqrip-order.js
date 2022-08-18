@@ -1,6 +1,7 @@
 jQuery( document ).ready(function($){
 
-    btn_regenerate_qrcode = $('button.sqrip-re-generate-qrcode');
+    var btn_regenerate_qrcode = $('button.sqrip-re-generate-qrcode'),
+    btn_refund = $('button.do-api-refund');
 
     btn_regenerate_qrcode.on('click', function(e){
 
@@ -145,6 +146,38 @@ jQuery( document ).ready(function($){
             }
         })
     });
+
+    if (btn_refund.length) {
+        ib_checked = false;
+
+        btn_refund.on('click', function(e){
+            var _this = $(this);
+
+            if (!ib_checked) {
+                e.stopImmediatePropagation();
+
+                $.ajax({
+                    type : "post",
+                    url : sqrip.ajax_url,
+                    data : {
+                        action: "sqrip_refund_valiation",
+                    },
+                    success: function(response) {
+                        if (response.status) {
+                            ib_checked = true;
+
+                            setTimeout(function(){ 
+                                _this.trigger('click'); 
+                            }, 700);
+                            
+                        } else {
+                            alert(response.message);
+                        }
+                    }
+                })
+            }
+        })
+    }
 
 });
 

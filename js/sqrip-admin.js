@@ -15,7 +15,8 @@ jQuery( document ).ready(function($){
     up_camt = $('#woocommerce_sqrip_camt053_file'),
     btn_compare = $('label[for="woocommerce_sqrip_compare_btn"]'),
     sqrip_additional_information = $('#woocommerce_sqrip_additional_information'),
-    ip_send_rp = $('#woocommerce_sqrip_comparison_report');
+    ip_send_rp = $('#woocommerce_sqrip_comparison_report'),
+    enable_service = $('input[data-enable]');
 
     if (ip_token.length) {
         bt_check_token_html = '<button id="btn_sqrip_check_token" class="sqrip-btn sqrip-btn-validate-token">'+sqrip.txt_check_connection+'</button>';
@@ -175,23 +176,23 @@ jQuery( document ).ready(function($){
 
     ip_test_email = $('#woocommerce_sqrip_test_email');
 
-    ip_test_email.closest('tr').hide();
+    // ip_test_email.closest('tr').hide();
 
-    if (btn_save.length){
-        bt_test_email_html = '<button id="btn_test_email" class="button-secondary sqrip-btn-send-test-email">'+sqrip.txt_send_test_email+'</button>';
-        btn_save.after(bt_test_email_html);
+    if (ip_test_email.length){
+        // bt_test_email_html = '<button id="btn_test_email" class="button-secondary sqrip-btn-send-test-email qrinvoice-tab">'+sqrip.txt_send_test_email+'</button>';
+        // ip_test_email.after(bt_test_email_html);
 
-        bt_test_email = $("#btn_test_email");
+        bt_test_email = $('label[for="woocommerce_sqrip_test_email"]');
         bt_test_email.on('click', function(e){
             e.preventDefault();
-            $('#woocommerce_sqrip_test_email').prop('checked', true);
+            ip_test_email.prop('checked', true);
 
             btn_save.trigger('click');
         });
     }
     
     tab_active = window.location.hash.slice(1);
-    if (!tab_active) tab_active = "qrinvoice";
+    if (!tab_active) tab_active = $('.sqrip-tab.active').data('tab');
     sqrip_tab_init(tab_active);
     
     tab.on('click', function(e){
@@ -209,7 +210,8 @@ jQuery( document ).ready(function($){
 
     function sqrip_tab_init(data){
         window.location.hash = data;
-        tab.removeClass('active');
+        // console.log(tab);
+        $('.sqrip-tab').removeClass('active');
         $('.sqrip-tab[data-tab="'+data+'"]').addClass('active');
         tab_des = $('.sqrip-tabs-description');
         tab_des.find('.sqrip-tab-description').hide();
@@ -403,5 +405,14 @@ jQuery( document ).ready(function($){
         sqrip_additional_information.attr("rows", 4);
     }
 
+    enable_service.on('change', function(){
+        checked = $(this).is(":checked");
+        tab = $(this).data('enable');
+        if (checked) {
+            $('.sqrip-tab[data-tab="'+tab+'"]').show();
+        } else {
+            $('.sqrip-tab[data-tab="'+tab+'"]').hide();
+        }
+    })
 
 });
