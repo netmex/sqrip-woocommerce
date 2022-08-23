@@ -406,6 +406,7 @@ class Sqrip_Ajax {
 		$orders_matched = isset($data->orders_matched) && !empty($data->orders_matched) ? $data->orders_matched : [];
 		$orders_unmatched = isset($data->orders_unmatched) && !empty($data->orders_unmatched) ? $data->orders_unmatched : [];
 		$orders_not_found = isset($data->orders_not_found) && !empty($data->orders_not_found) ? $data->orders_not_found : [];
+		$payments_made_more_than_once = isset($data->payments_made_more_than_once) && !empty($data->payments_made_more_than_once) ? $data->payments_made_more_than_once : [];
 
 		$html = '<div class="sqrip-table-results">';
 
@@ -519,6 +520,39 @@ class Sqrip_Ajax {
 						<td>'.$customer_name.'</td>
 						<td>'.wc_price($order_not_found->amount).'</td>
 					</tr>';
+				}
+				$html .= '</tbody>
+			</table>';
+		}
+
+		$html .= '<h4>'.sprintf(
+			__('- %s payments paid more then once', 'sqrip-swiss-qr-invoice'), 
+			count($payments_made_more_than_once)
+		).'</h4>';
+
+		if ( $payments_made_more_than_once ) {
+			$html .= '<table class="sqrip-table">';
+			$html .= '<thead><tr>';
+			$html .= '<th>'.__('Customer Name', 'sqrip-swiss-qr-invoice').'</th>';
+			$html .= '<th>'.__('(QR-)IBAN', 'sqrip-swiss-qr-invoice').'</th>';
+			$html .= '<th>'.__('Amount and QR-Ref#', 'sqrip-swiss-qr-invoice').'</th>';
+			$html .= '<th>'.__('Payment Dates', 'sqrip-swiss-qr-invoice').'</th>';
+			$html .= '<th>'.__('Action', 'sqrip-swiss-qr-invoice').'</th>';
+			$html .= '</tr></thead><tbody>';
+
+
+				foreach ($payments_made_more_than_once as $payment) {
+					$order_id = $payment->order_id;
+					$customer_name = $this->get_customer_name($order_id);
+					$png_file = get_post_meta($order_id, 'sqrip_png_file_url', true);
+
+					$html .= '<tr>';
+					$html .= '<td>'.$customer_name.'</td>';
+					$html .= '<td><img src="' . esc_url($png_file) . '" alt="'.esc_attr('sqrip QR-Code','sqrip-swiss-qr-invoice').'" width="200"/></td>';
+					$html .= '<td>'.wc_price($payment->amount).' - #'.$payment->reference.'</td>';
+					$html .= '<td>'.$payment->dates.'</td>';
+					$html .= '<td><a href="'.get_edit_post_link($order_id).'" target="_blank">#'.__('Refund', 'sqrip-swiss-qr-invoice').'</a></td>';
+					$html .= '</tr>';
 				}
 				$html .= '</tbody>
 			</table>';

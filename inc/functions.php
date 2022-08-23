@@ -57,10 +57,9 @@ function sqrip_get_billing_address_from_order($order) {
 	$billing_address = array(
         'name' => $order_data['billing']['first_name'] . ' ' . $order_data['billing']['last_name'],
         'street' => $order_data['billing']['address_1'] . ($order_data['billing']['address_2'] ? ', ' . $order_data['billing']['address_2'] : ""),
-        'postal_code' => intval($order_data['billing']['postcode']),
+        'postal_code' => $order_data['billing']['postcode'],
         'name'            => $order_data['billing']['first_name'] . ' ' . $order_data['billing']['last_name'],
         'street'          => $order_data['billing']['address_1'] . ($order_data['billing']['address_2'] ? ', ' . $order_data['billing']['address_2'] : ""),
-        'postal_code'     => intval($order_data['billing']['postcode']),
         'town' => $order_data['billing']['city'],
         'country_code' => $order_data['billing']['country']
     );
