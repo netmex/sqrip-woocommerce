@@ -113,6 +113,8 @@ Yes. We are already working on comparing the reconciliation of orders/purchases 
 = 1.5.2 =
 * New pictures added to wordpress entry.
 * deleted the hash # in the default field after report of problems with certain banking Apps.
+* ZIP-Codes with initial "CH-" are now possible.
+* Added company field to payee address.
 
 = 1.5.1 =
 * Use default settings if sqrip WC options have not been set before.
