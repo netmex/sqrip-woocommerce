@@ -4,7 +4,7 @@
  * Plugin Name:             sqrip – Swiss QR Invoice
  * Plugin URI:              https://sqrip.ch/
  * Description:             sqrip – Modern and clever WooCommerce tools for the most widely used payment method in Switzerland: the bank transfers. 
- * Version:                 1.5.2
+ * Version:                 1.5.3
  * Author:                  netmex digital gmbh
  * Author URI:              https://sqrip.ch/
  */
@@ -373,7 +373,7 @@ add_filter( 'wp_insert_post_data' , function ( $data , $postarr, $unsanitized_po
         $order_billing_address      = $postarr['_billing_address_1'];
         $order_billing_address      .= $postarr['_billing_address_2'] ? ', '.$postarr['_billing_address_2'] : "";
         $order_billing_city         = $postarr['_billing_city'];
-        $order_billing_postcode     = intval($postarr['_billing_postcode']);
+        $order_billing_postcode     = $postarr['_billing_postcode'];
         $order_billing_country      = $postarr['_billing_country'];
                     
         $currency_symbol    =   $order_data['currency'];
@@ -629,3 +629,6 @@ function sqrip_save_extra_user_profile_fields( $user_id ) {
     sqrip_set_customer_iban($user, $_POST['iban']);
 
 }
+
+// Disable the Zip/postcode validation 
+add_filter( 'woocommerce_validate_postcode' , '__return_true' );
