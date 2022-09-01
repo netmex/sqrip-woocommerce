@@ -173,6 +173,10 @@ table.form-table tr td label[for="woocommerce_sqrip_active_service"]:before {
     color: #1AAE9F;
 }
 
+table.form-table tr label[for="woocommerce_sqrip_payment_frequence_time"] ~ p.description{
+    margin-top: -70px;
+}
+
 table.form-table tr td label[for="woocommerce_sqrip_remaining_credits"] {
     font-weight: bold;
     vertical-align: middle;

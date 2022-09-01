@@ -129,17 +129,20 @@ class Sqrip_Ajax {
 
 	    $response = sqrip_validation_iban($iban, $token);
 	    $result = [];
+	    $bank = isset($response->bank_data->bank) ? $response->bank_data->bank : '';
 	    switch ($response->message) {
 	        case 'Valid simple IBAN':
 	            $result['result'] = true;
 	            $result['message'] = __( "validated" , "sqrip" );
 	            $result['description'] = __('This is a normal IBAN. The customer can make deposits without noting the reference number (RF...). Therefore, automatic matching with orders is not guaranteed throughout. Manual processing may be necessary. A QR-IBAN is required for automatic matching. This is available for the same bank account. Information about this is available from your bank.', 'sqrip-swiss-qr-invoice');
+	            $result['bank'] = sprintf('Bank: <b>%s</b>', $bank);
 	            break;
 	        
 	        case 'Valid qr IBAN':
 	            $result['result'] = true;
 	            $result['message'] = __( "validated" , "sqrip" );
 	            $result['description'] = __('This is a QR IBAN. The customer can make payments only by specifying a QR reference (number). You can uniquely assign the deposit to a customer / order. This enables automatic matching of payments received with orders. Want to automate this step? Contact us <a href="mailto:info@sqrip.ch">info@sqrip.ch</a>.', 'sqrip-swiss-qr-invoice');
+	            $result['bank'] = sprintf('Bank: <b>%s</b>', $bank);
 	            break;
 
 	        default:
@@ -350,6 +353,9 @@ class Sqrip_Ajax {
         	$body['orders'] = $orders;
         	$endpoint = 'confirm-order';
 
+        	$rp_options = isset($_POST['send_report_options']) ? $_POST['send_report_options'] : false;
+        	$rp_options = explode(',', $rp_options);
+
         	$response = sqrip_remote_request( $endpoint, $body, 'POST' );
 
         	if ($response) {
@@ -358,7 +364,7 @@ class Sqrip_Ajax {
         		$html = $this->get_table_results($response, $orders);
 
         		if ( $send_report === "true" ) {
-        			$email_html = $this->get_table_results($response, $orders, true);
+        			$email_html = $this->get_table_results($response, $orders, true, $rp_options);
    	 				$this->send_report($email_html);
    	 			}
 
@@ -402,7 +408,7 @@ class Sqrip_Ajax {
 	}
 
 
-	function get_table_results($data = [], $uploaded = [], $email = false){
+	function get_table_results($data = [], $uploaded = [], $email = false, $rp_options = ''){
 		$orders_matched = isset($data->orders_matched) && !empty($data->orders_matched) ? $data->orders_matched : [];
 		$orders_unmatched = isset($data->orders_unmatched) && !empty($data->orders_unmatched) ? $data->orders_unmatched : [];
 		$orders_not_found = isset($data->orders_not_found) && !empty($data->orders_not_found) ? $data->orders_not_found : [];
@@ -431,12 +437,17 @@ class Sqrip_Ajax {
 			count($uploaded)
 		).'</h4>';
 
-		$html .= '<h4>'.sprintf(
-			__('- %s paid orders found and status updated', 'sqrip-swiss-qr-invoice'), 
-			count($orders_matched)
-		).'</h4>';
+		$show_order_matched = !$email || in_array('orders_matched', $rp_options);
+		$show_orders_not_found = !$email || in_array('orders_not_found', $rp_options);
+		$show_orders_unmatched = !$email || in_array('orders_unmatched', $rp_options);
+		$show_payments_made_more_than_once = !$email || in_array('payments_made_more_than_once', $rp_options);
 
-		if ($orders_matched) {
+		if ($orders_matched && $show_order_matched) {
+			$html .= '<h4>'.sprintf(
+				__('- %s paid orders found and status updated', 'sqrip-swiss-qr-invoice'), 
+				count($orders_matched)
+			).'</h4>';
+
 			$html .= '<table class="sqrip-table">';
 			$html .= '<thead><tr>';
 			$html .= '<th>'.__('Order ID', 'sqrip-swiss-qr-invoice').'</th>';
@@ -463,12 +474,12 @@ class Sqrip_Ajax {
 			$this->update_order_status($orders_matched);
 		}
 
-		$html .= '<h4>'.sprintf(
-			__('- %s transactions with unmatching amount', 'sqrip-swiss-qr-invoice'), 
-			count($orders_unmatched)
-		).'</h4>';
+		if ($orders_unmatched && $show_orders_unmatched) {
+			$html .= '<h4>'.sprintf(
+				__('- %s transactions with unmatching amount', 'sqrip-swiss-qr-invoice'), 
+				count($orders_unmatched)
+			).'</h4>';
 
-		if ($orders_unmatched) {
 			$html .= '<table class="sqrip-table">';
 			$html .= '<thead><tr>';
 			$html .= '<th>'.__('Order ID', 'sqrip-swiss-qr-invoice').'</th>';
@@ -496,13 +507,12 @@ class Sqrip_Ajax {
 			</table>';
 		}
 
-		$html .= '<h4>'.sprintf(
-			__('- %s payments not found', 'sqrip-swiss-qr-invoice'), 
-			count($orders_not_found)
-		).'</h4>';
+		if ( $orders_not_found && $show_orders_not_found ) {
+			$html .= '<h4>'.sprintf(
+				__('- %s payments not found', 'sqrip-swiss-qr-invoice'), 
+				count($orders_not_found)
+			).'</h4>';
 
-
-		if ( $orders_not_found ) {
 			$html .= '<table class="sqrip-table">';
 			$html .= '<thead><tr>';
 			$html .= '<th>'.__('Order ID', 'sqrip-swiss-qr-invoice').'</th>';
@@ -525,12 +535,12 @@ class Sqrip_Ajax {
 			</table>';
 		}
 
-		$html .= '<h4>'.sprintf(
-			__('- %s payments paid more then once', 'sqrip-swiss-qr-invoice'), 
-			count($payments_made_more_than_once)
-		).'</h4>';
+		if ( $payments_made_more_than_once && $show_payments_made_more_than_once) {
+			$html .= '<h4>'.sprintf(
+				__('- %s payments paid more then once', 'sqrip-swiss-qr-invoice'), 
+				count($payments_made_more_than_once)
+			).'</h4>';
 
-		if ( $payments_made_more_than_once ) {
 			$html .= '<table class="sqrip-table">';
 			$html .= '<thead><tr>';
 			$html .= '<th>'.__('Customer Name', 'sqrip-swiss-qr-invoice').'</th>';

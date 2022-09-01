@@ -16,7 +16,8 @@ jQuery( document ).ready(function($){
     btn_compare = $('label[for="woocommerce_sqrip_compare_btn"]'),
     sqrip_additional_information = $('#woocommerce_sqrip_additional_information'),
     ip_send_rp = $('#woocommerce_sqrip_comparison_report'),
-    enable_service = $('input[data-enable]');
+    enable_service = $('input[data-enable]'),
+    send_report_options = $('#woocommerce_sqrip_comparison_report_options'); 
 
     if (ip_token.length) {
         bt_check_token_html = '<button id="btn_sqrip_check_token" class="sqrip-btn sqrip-btn-validate-token">'+sqrip.txt_check_connection+'</button>';
@@ -138,6 +139,7 @@ jQuery( document ).ready(function($){
             _output = _this.closest('td.forminp');
             _output.find('.sqrip-notice').remove();
             _output.find('.sqrip-description').remove();
+            _output.find('.sqrip-bank').remove();
 
             $.ajax({
                 type : "post", 
@@ -159,9 +161,10 @@ jQuery( document ).ready(function($){
                         }
                         output_html = '<div class="sqrip-notice '+result+'">';
                         output_html += '<p>'+response.message+'</p>';
-                        output_html += '</div><p class="sqrip-description"></p>';
+                        output_html += '</div><p class="sqrip-bank"></p><p class="sqrip-description"></p>';
                         _this.after(output_html);
                         _this.siblings('.sqrip-description').html(response.description);
+                        _this.siblings('.sqrip-bank').html(response.bank);
                     }
                 },
                 error: function( jqXHR, textStatus, errorThrown ){
@@ -299,6 +302,7 @@ jQuery( document ).ready(function($){
             form_data = new FormData();
             form_data.append('token', ip_token.val());
             form_data.append('send_report', ip_send_rp.is(':checked'));
+            form_data.append('send_report_options', send_report_options.val());
             form_data.append('action', 'sqrip_compare_ebics');
             form_data.append('nonce', sqrip.ajax_nonce);
 
@@ -331,17 +335,17 @@ jQuery( document ).ready(function($){
         })
     }
 
-    if (camt_service.length) {
-        camt_service.on('change', function(e){
-            toggle_service_options($(this).is('::checked'), $('.camt-service'));
-        })
-    }
+    // if (camt_service.length) {
+    //     camt_service.on('change', function(e){
+    //         toggle_service_options($(this).is('::checked'), $('.camt-service'));
+    //     })
+    // }
 
-    if (ebics_service.length) {
-        ebics_service.on('change', function(){
-            toggle_service_options($(this).is(':checked'), $('.ebics-service'));
-        })
-    }
+    // if (ebics_service.length) {
+    //     ebics_service.on('change', function(){
+    //         toggle_service_options($(this).is(':checked'), $('.ebics-service'));
+    //     })
+    // }
 
     function sqrip_ajax(form_data, element){
         element.find('.sqrip-notice').remove();

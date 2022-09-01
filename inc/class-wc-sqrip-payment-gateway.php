@@ -181,7 +181,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                     $this->get_fund_management('main_account'),
                 ),
                 'description'       => __( 'In order to forward the payments from your incoming bank account to your main bank account, please configure this service on sqrip.ch', 'sqrip-swiss-qr-invoice' ),
-                'class'       => 'services-tab ebics-service',
+                'class'       => 'services-tab',
                 'default'     => 'yes',
                 'disabled'    => true,
             ),
@@ -409,7 +409,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             'section_manual_comparison' => array(
                 'title'         => __('Manual Comparison - camt053', 'sqrip-swiss-qr-invoice' ),
                 'type'          => 'section',
-                'class'       => 'comparison-tab' 
+                'class'       => 'comparison-tab camt-service' 
             ),
             
             'camt053_file' => array(
@@ -422,7 +422,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             'section_automatic_comparison' => array(
                 'title'         => __('Automatic Comparaison - EBICS', 'sqrip-swiss-qr-invoice' ),
                 'type'          => 'section',
-                'class'       => 'comparison-tab' 
+                'class'       => 'comparison-tab ebics-service' 
             ),
            
             'payment_frequence' => array(
@@ -455,7 +455,6 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'class'       => 'comparison-tab ebics-service'  
             ),
 
-            
             'comparison_report' => array(
                 'title'       => __( 'Send report to Admin E-Mail', 'sqrip-swiss-qr-invoice' ),
                 'label'       => __( 'Send report by email', 'sqrip-swiss-qr-invoice' ),
@@ -463,6 +462,18 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'description' => 'Get an e-mail with a report for every comparison executed.',
                 'default'     => 'no',
                 'class'       => 'comparison-tab ebics-service'  
+            ),
+            'comparison_report_options' => array(
+                'title'       => __( 'Comparison report', 'sqrip-swiss-qr-invoice' ),
+                'type'        => 'multiselect',
+                'options'       => array(
+                    'orders_not_found'        => __( 'Orders not found' , 'sqrip-swiss-qr-invoice' ),
+                    'orders_matched'       => __( 'Order matched' , 'sqrip-swiss-qr-invoice' ),
+                    'orders_unmatched'     => __( 'Orders unmatched' , 'sqrip-swiss-qr-invoice' ),
+                    'payments_made_more_than_once'      => __( 'Payment made more than once' , 'sqrip-swiss-qr-invoice' ),                    
+                ),
+                'description'   => __( 'Choose if the want to have an e-mail report for every single comparison or only for those with actions needed', 'sqrip-swiss-qr-invoice' ),
+                'class'         => 'comparison-tab ebics-service'  
             ),
             'compare_btn' => array(
                 'title'       => __( 'Start Comparisson', 'sqrip-swiss-qr-invoice' ),
