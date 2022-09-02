@@ -34,6 +34,10 @@ class Sqrip_Ajax {
 		add_action( 'wp_ajax_sqrip_upload_camt_file', array( $this, 'upload_camt_file' ));
 
 		add_action( 'wp_ajax_sqrip_compare_ebics', array( $this, 'compare_ebics' ));
+
+		add_action( 'wp_ajax_sqrip_transfer',  array( $this, 'transfer' ) );
+
+		add_action( 'wp_ajax_sqrip_approve_order',  array( $this, 'approve_order' ) );
 	}
 
 	/**
@@ -505,7 +509,7 @@ class Sqrip_Ajax {
 							<td>'.$customer_name.'</td>
 							<td>'.wc_price($order_unmatched->amount).'</td>
 							<td>'.wc_price(0).'</td>
-							<td><a class="sqrip-approve" href="#" data-order="'.$order_unmatched->order_id.'">Approve</a></td>
+							<td><a class="sqrip-approve" href="#" data-reference="'.$order_unmatched->reference.'">Approve</a></td>
 						</tr>';
 					}
 				$html .= '</tbody>
@@ -682,6 +686,65 @@ class Sqrip_Ajax {
     	));
 
 		wp_die();
+	}
+
+	/**
+	 * sqrip transfer
+	 *
+	 * @since 2.0.0
+	 */
+
+	function transfer()
+	{
+	    if ( !$_POST['token'] ) return;   
+
+	    $endpoint = 'update-transfer';
+
+	    $response = sqrip_remote_request( $endpoint, '', 'GET' );
+
+	    if ($response) {
+	        $result['result'] = true;
+	        $result['message'] = $response->message;
+	        $result['amount'] = sprintf(__('Amount : %s', 'sqrip-swiss-qr-invoice'), '<b>'.$response->amount.'</b>');
+	    } else {
+	        $result['result'] = false;
+	        $result['message'] = $response->message;
+	    }
+
+	    wp_send_json($result);
+	      
+	    die();
+	}
+
+	/**
+	 * sqrip approve order
+	 *
+	 * @since 2.0.0
+	 */
+
+	function approve_order()
+	{
+	    if ( !$_POST['reference'] ) return;   
+
+	    $endpoint = 'approved-order';
+
+	    $body = '{
+		    "reference": "'.$_POST['reference'].'"
+		}';
+
+	    $response = sqrip_remote_request( $endpoint, $body, 'POST' );
+
+	    if ($response) {
+	        $result['result'] = true;
+	        $result['message'] = $response->message;
+	    } else {
+	        $result['result'] = false;
+	        $result['message'] = __('Error', 'sqrip-swiss-qr-invoice');
+	    }
+
+	    wp_send_json($result);
+	      
+	    die();
 	}
 }
 

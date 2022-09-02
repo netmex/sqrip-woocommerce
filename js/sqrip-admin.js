@@ -17,7 +17,9 @@ jQuery( document ).ready(function($){
     sqrip_additional_information = $('#woocommerce_sqrip_additional_information'),
     ip_send_rp = $('#woocommerce_sqrip_comparison_report'),
     enable_service = $('input[data-enable]'),
-    send_report_options = $('#woocommerce_sqrip_comparison_report_options'); 
+    send_report_options = $('#woocommerce_sqrip_comparison_report_options'),
+    btn_transfer = $('label[for="woocommerce_sqrip_btn_transfer"]'),
+    btn_approve = $('.sqrip-approve');
 
     if (ip_token.length) {
         bt_check_token_html = '<button id="btn_sqrip_check_token" class="sqrip-btn sqrip-btn-validate-token">'+sqrip.txt_check_connection+'</button>';
@@ -326,6 +328,81 @@ jQuery( document ).ready(function($){
                 error: function( jqXHR, textStatus, errorThrown ){
                     notice = sqrip_notice('Error 404', true);
                     wrap.append(notice);
+                },
+                complete: function(){
+                    $('body').removeClass('sqrip-loading');
+                }
+            })
+        })
+    }
+
+    if (btn_transfer.length) {
+        btn_transfer.on('click', function(e){
+            e.preventDefault();
+            _this = $(this);
+            _output = _this.closest('td.forminp');
+            _output.find('.sqrip-notice').remove();
+  
+            _output.find('.sqrip-amount').remove();
+
+            $.ajax({
+                type : "post", 
+                url : sqrip.ajax_url, 
+                data : {
+                    action: "sqrip_transfer", 
+                    token: ip_token.val()
+                },
+                beforeSend: function(){
+                   $('body').addClass('sqrip-loading');
+                },
+                success: function(response) {
+                    if(response) {
+                        if (response.result) {
+                            result = "updated";
+                        } else {
+                            result = "error";
+                        }
+                        output_html = '<div class="sqrip-notice '+result+'">';
+                        output_html += '<p>'+response.message+'</p>';
+                        output_html += '</div><p class="sqrip-amount"></p>';
+                        _this.after(output_html);
+         
+                        _this.siblings('.sqrip-amount').html(response.amount);
+                    }
+                },
+                error: function( jqXHR, textStatus, errorThrown ){
+                    console.log( 'The following error occured: ' + textStatus, errorThrown );
+                },
+                complete: function(){
+                    $('body').removeClass('sqrip-loading');
+                }
+            })
+        })
+    }
+
+    if (btn_approve.length) {
+        btn_approve.on('click', function(e){
+            e.preventDefault();
+            _this = $(this);
+            reference = _this.data('reference');
+  
+            $.ajax({
+                type : "post", 
+                url : sqrip.ajax_url, 
+                data : {
+                    action: "sqrip_approve_order", 
+                    reference: reference
+                },
+                beforeSend: function(){
+                   $('body').addClass('sqrip-loading');
+                },
+                success: function(response) {
+                    if(response) {
+                        _this.html(response.message);
+                    }
+                },
+                error: function( jqXHR, textStatus, errorThrown ){
+                    console.log( 'The following error occured: ' + textStatus, errorThrown );
                 },
                 complete: function(){
                     $('body').removeClass('sqrip-loading');
