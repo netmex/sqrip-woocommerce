@@ -96,7 +96,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                     [
                         'id' => 'fund-management',
                         'title' => __( 'Fund Management', 'sqrip-swiss-qr-invoice' ),
-                        'class' => '',
+                        'class' => $this->show_tab('enabled_fund_management'),
                     ],
                     [
                         'id' => 'reminders',
@@ -186,6 +186,15 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'type'          => 'section',
                 'class'       => 'services-tab' 
             ),
+            'enabled_fund_management' => array(
+                'title'       => __( 'Fund Management', 'sqrip-swiss-qr-invoice' ),
+                'label'       => __( 'Turn On/Off', 'sqrip-swiss-qr-invoice' ),
+                'type'        => 'checkbox',
+                'description' => '',
+                'default'     => 'no',
+                'class'       => 'services-tab',
+                'custom_attributes' => ['data-enable' => 'fund-management']
+            ),
             'forward_payments' => array(
                 'title'       => __( 'Forward Payments', 'sqrip-swiss-qr-invoice' ),
                 'type'        => 'info',
@@ -195,8 +204,6 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 ),
                 'description'       => __( 'In order to forward the payments from your incoming bank account to your main bank account, please configure this service on sqrip.ch', 'sqrip-swiss-qr-invoice' ),
                 'class'       => 'services-tab',
-                'default'     => 'yes',
-                'disabled'    => true,
             ),
             'section_reminders' => array(
                 'title'         => __('Reminders', 'sqrip-swiss-qr-invoice' ),
@@ -378,7 +385,6 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 We will only check for payments at the bank account for these statuses.', 'sqrip-swiss-qr-invoice' ),
                 'class'       => 'reminders-tab'  
             ),
-
             'due_reminder' => array(
                 'title'       => __( 'Pas Due Reminder', 'sqrip-swiss-qr-invoice' ),
                 'type'        => 'number',
@@ -395,7 +401,6 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'class'       => 'reminders-tab'  
             ),
 
-           
             'section_general_settings' => array(
                 'title'         => __('General Settings', 'sqrip-swiss-qr-invoice' ),
                 'type'          => 'section',
@@ -496,6 +501,50 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'default'     => 'no',
                 'class'       => 'comparison-tab ebics-service'  
             ),
+            'account_qr_iban' => array(
+                'title'       => __( 'Account (QR-)IBAN', 'sqrip-swiss-qr-invoice' ),
+                'type'        => 'info',
+                'label'        => $this->get_fund_management('account_iban'),
+                'class'       => 'fund-management-tab',
+            ),
+            'account_balance' => array(
+                'title'       => __( 'Account Balance', 'sqrip-swiss-qr-invoice' ),
+                'type'        => 'info',
+                'label'        => sprintf( 
+                    __( '%s as per %s', 'sqrip-swiss-qr-invoice' ), 
+                    $this->get_fund_management('account_balance'),
+                    current_time('d.m.Y h:i')
+                ),
+                'class'       => 'fund-management-tab',
+            ),
+            'trigger_level' => array(
+                'title'       => __( 'Trigger Level', 'sqrip-swiss-qr-invoice' ),
+                'type'        => 'info',
+                'label'        => $this->get_fund_management('trigger_level'),
+                'class'       => 'fund-management-tab',
+            ),
+            'trigger_periodicity' => array(
+                'title'       => __( 'Trigger periodicity', 'sqrip-swiss-qr-invoice' ),
+                'type'        => 'info',
+                'label'        => $this->get_fund_management('trigger_periodicity'),
+                'class'       => 'fund-management-tab',
+            ),
+            'fund_forward_payments' => array(
+                'title'       => __( 'Forward Payments', 'sqrip-swiss-qr-invoice' ),
+                'type'        => 'info',
+                'label'        => sprintf( 
+                    __( 'You forward your payments to %s', 'sqrip-swiss-qr-invoice' ), 
+                    $this->get_fund_management('main_account'),
+                ),
+                'class'       => 'fund-management-tab',
+            ),
+            'btn_transfer' => array(
+                'title'       => __( 'Executes transfer', 'sqrip-swiss-qr-invoice' ),
+                'label'       => __( 'Update & Transfer' ),
+                'type'        => 'info',
+                'class'       => 'fund-management-tab btn-transfer'  
+            ),
+
             'return_token' => array(
                 'title'       => __( 'API key for Refunds' , 'sqrip-swiss-qr-invoice' ),
                 'type'        => 'textarea',
@@ -510,9 +559,12 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         $endpoint   = 'get-fund-management-details';
 
         $service = [
+            "account_iban" => "XXXX XXXX XXXX XXXX",
             "main_account"  => "XXXX XXXX XXXX XXXX",
             "debit_account" => "XXXX XXXX XXXX XXXX",
-            "trigger_level" => "XXX"
+            "trigger_level" => "XXX",
+            "account_balance" => "XXX.XXX",
+            "trigger_periodicity"=> '', 
         ];
 
         if (!isset($service[$param])) {
@@ -523,12 +575,35 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 
         // var_dump($response); exit;
 
-
         if ( isset($response->main_account) ) {
 
             $service['main_account'] = $response->main_account;
             $service['debit_account'] = $response->debit_account;
             $service['trigger_level'] = $response->trigger_level;
+            $service['account_balance'] = $response->account_balance;
+            $service['account_iban'] = $response->account_iban;
+
+            if (isset($response->trigger_periodicity)) {
+                $weeksday = '';
+                $periodicity = $response->trigger_periodicity;
+                $periodes = $periodicity->week_days;
+                $time = $periodicity->hours.':'.$periodicity->minutes;
+
+                $count = 0;
+                if (is_array($periodes)) {
+                    foreach ($periodes as $periode) {
+                        $count++;
+                        $weeksday .= $count > 1 ? ', ' : '';
+                        $weeksday .= $periode['label'];
+                    }
+
+                    $service['trigger_periodicity'] = sprintf( 
+                        __( 'Weekly on %s at %s', 'sqrip-swiss-qr-invoice' ), 
+                        $weeksday,
+                        $time
+                    );
+                }                
+            }
 
         }  
 
