@@ -182,8 +182,7 @@ jQuery( document ).ready(function($){
     // ip_test_email.closest('tr').hide();
 
     if (ip_test_email.length){
-        // bt_test_email_html = '<button id="btn_test_email" class="button-secondary sqrip-btn-send-test-email qrinvoice-tab">'+sqrip.txt_send_test_email+'</button>';
-        // ip_test_email.after(bt_test_email_html);
+        ip_test_email.closest('tr').find('th').attr('colspan', 2).css('padding-bottom', 0);
 
         bt_test_email = $('label[for="woocommerce_sqrip_test_email"]');
         bt_test_email.on('click', function(e){
@@ -409,9 +408,19 @@ jQuery( document ).ready(function($){
         sqrip_additional_information.attr("rows", 4);
     }
 
-    enable_service.on('change', function(){
-        checked = $(this).is(":checked");
+    $('table.form-table').on('change', 'input[data-enable]', function(){
         tab = $(this).data('enable');
+
+        if (tab == "comparison") {
+            if ($('input[data-enable="comparison"]:checked').length == 0) {
+                checked = false;
+            } else {
+                checked = true;
+            }
+        } else {
+            checked = $(this).is(":checked");
+        }
+
         if (checked) {
             $('.sqrip-tab[data-tab="'+tab+'"]').show();
         } else {

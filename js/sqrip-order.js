@@ -171,12 +171,40 @@ jQuery( document ).ready(function($){
                             }, 700);
                             
                         } else {
-                            alert(response.message);
+                            iban = prompt(response.message, "");
+
+                            if (iban == null || iban == "") {
+
+                            } else {
+                                sqrip_save_iban(iban, _this);
+                            }
                         }
                     }
                 })
             }
         })
+
+        function sqrip_save_iban(iban, $btn){
+            $.ajax({
+                type : "post",
+                url : sqrip.ajax_url,
+                data : {
+                    action: "sqrip_save_refund_iban",
+                    iban: iban
+                },
+                success: function(response) {
+                    if (response.status) {
+
+                        setTimeout(function(){ 
+                            $btn.trigger('click'); 
+                        }, 700);
+                        
+                    } else {
+                        alert(response.message);
+                    }
+                }
+            })
+        }
     }
 
 });

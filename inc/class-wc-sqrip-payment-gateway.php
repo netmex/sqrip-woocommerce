@@ -48,10 +48,21 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
     }
 
-    public function show_tab($option){
-        $value =  sqrip_get_plugin_option($option);
+    public function show_tab($options){
+        $options = explode(',', $options);
+        $show = false;
 
-        return (!$value || $value == null || $value == "no") ? "hide" : $value;
+        foreach ($options as $option) {
+            $value = sqrip_get_plugin_option($option);
+
+            if ($value == "yes") {
+                $show = true; 
+                break;
+            }
+        }
+
+
+        return $show ? "" : "hide";
     }
 
     /**
@@ -80,7 +91,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                         'id' => 'comparison',
                         'title' => __( 'Payment Comparison', 'sqrip-swiss-qr-invoice' ),
                         'description' => '',
-                        'class' => '',
+                        'class' => $this->show_tab('ebics_service,camt_service'),
                     ],
                     [
                         'id' => 'fund-management',
@@ -152,7 +163,8 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'type'        => 'checkbox',
                 'description' => '',
                 'default'     => 'no',
-                'class'       => 'services-tab'  
+                'class'       => 'services-tab',
+                'custom_attributes' => ['data-enable' => 'comparison']
             ),
             'ebics_service' => array(
                 'title'       => __( 'Automatic Comparaison - EBICS', 'sqrip-swiss-qr-invoice' ),
@@ -160,7 +172,8 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'type'        => 'checkbox',
                 'description' => '',
                 'default'     => 'no',
-                'class'       => 'services-tab'  
+                'class'       => 'services-tab',
+                'custom_attributes' => ['data-enable' => 'comparison']
             ),
             'active_service' => array(
                 'title'       => __( 'Connected services', 'sqrip-swiss-qr-invoice' ),
@@ -346,12 +359,12 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'class'       => 'qrinvoice-tab'  
             ),
             'test_email' => array(
-                'title'       => __( 'Test email', 'sqrip-swiss-qr-invoice' ),
-                'type'        => 'checkbox',
-                'label'       => sprintf( 
+                'title'       => sprintf( 
                     __( 'Send test to %s', 'sqrip-swiss-qr-invoice' ), 
                     esc_html( get_option('admin_email') ) 
                 ),
+                'type'        => 'checkbox',
+                'label'       => ' ',
                 'default'     => 'no',
                 'css'         => 'visibility: hidden; position: absolute',
                 'class'       => 'qrinvoice-tab' 

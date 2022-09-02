@@ -21,6 +21,8 @@ class Sqrip_Ajax {
 
 		add_action( 'wp_ajax_sqrip_refund_valiation',  array( $this, 'refund_valiation' ) );
 
+		add_action( 'wp_ajax_sqrip_save_refund_iban',  array( $this, 'save_refund_iban' ) );
+
 		/**
 		 * @deprecated
 		 * Active/Deactive service
@@ -442,130 +444,138 @@ class Sqrip_Ajax {
 		$show_orders_unmatched = !$email || in_array('orders_unmatched', $rp_options);
 		$show_payments_made_more_than_once = !$email || in_array('payments_made_more_than_once', $rp_options);
 
-		if ($orders_matched && $show_order_matched) {
+		if ($show_order_matched) {
 			$html .= '<h4>'.sprintf(
 				__('- %s paid orders found and status updated', 'sqrip-swiss-qr-invoice'), 
 				count($orders_matched)
 			).'</h4>';
 
-			$html .= '<table class="sqrip-table">';
-			$html .= '<thead><tr>';
-			$html .= '<th>'.__('Order ID', 'sqrip-swiss-qr-invoice').'</th>';
-			$html .= '<th>'.__('Payment Date', 'sqrip-swiss-qr-invoice').'</th>';
-			$html .= '<th>'.__('Customer Name', 'sqrip-swiss-qr-invoice').'</th>';
-			$html .= '<th>'.__('Amount', 'sqrip-swiss-qr-invoice').'</th>';
-			$html .= '</tr></thead><tbody>';
+			if ($orders_matched) {
+				$html .= '<table class="sqrip-table" border="1" cellpadding="3px">';
+				$html .= '<thead><tr>';
+				$html .= '<th>'.__('Order ID', 'sqrip-swiss-qr-invoice').'</th>';
+				$html .= '<th>'.__('Payment Date', 'sqrip-swiss-qr-invoice').'</th>';
+				$html .= '<th>'.__('Customer Name', 'sqrip-swiss-qr-invoice').'</th>';
+				$html .= '<th>'.__('Amount', 'sqrip-swiss-qr-invoice').'</th>';
+				$html .= '</tr></thead><tbody>';
 
-				foreach ($orders_matched as $order_matched) {
-					$order_id = $order_matched->order_id;
-					$customer_name = $this->get_customer_name($order_id);
+					foreach ($orders_matched as $order_matched) {
+						$order_id = $order_matched->order_id;
+						$customer_name = $this->get_customer_name($order_id);
 
-					$html .= '<tr>
-						<td>#'.$order_id.'</td>
-						<td>'.$order_matched->date.'</td>
-						<td>'.$customer_name.'</td>
-						<td>'.wc_price($order_matched->amount).'</td>
-					</tr>';
-				}
+						$html .= '<tr>
+							<td>#'.$order_id.'</td>
+							<td>'.$order_matched->date.'</td>
+							<td>'.$customer_name.'</td>
+							<td>'.wc_price($order_matched->amount).'</td>
+						</tr>';
+					}
 
-			$html .= '</tbody>
-			</table>';
+				$html .= '</tbody>
+				</table>';
 
-			$this->update_order_status($orders_matched);
+				$this->update_order_status($orders_matched);
+			}
 		}
 
-		if ($orders_unmatched && $show_orders_unmatched) {
+		if ($show_orders_unmatched) {
 			$html .= '<h4>'.sprintf(
 				__('- %s transactions with unmatching amount', 'sqrip-swiss-qr-invoice'), 
 				count($orders_unmatched)
 			).'</h4>';
 
-			$html .= '<table class="sqrip-table">';
-			$html .= '<thead><tr>';
-			$html .= '<th>'.__('Order ID', 'sqrip-swiss-qr-invoice').'</th>';
-			$html .= '<th>'.__('Payment Date', 'sqrip-swiss-qr-invoice').'</th>';
-			$html .= '<th>'.__('Customer Name', 'sqrip-swiss-qr-invoice').'</th>';
-			$html .= '<th>'.__('Amount', 'sqrip-swiss-qr-invoice').'</th>';
-			$html .= '<th>'.__('Paid Amount', 'sqrip-swiss-qr-invoice').'</th>';
-			$html .= '<th>'.__('Action', 'sqrip-swiss-qr-invoice').'</th>';
-			$html .= '</tr></thead><tbody>';
+			if ($orders_unmatched) {
+				$html .= '<table class="sqrip-table" border="1" cellpadding="3px">';
+				$html .= '<thead><tr>';
+				$html .= '<th>'.__('Order ID', 'sqrip-swiss-qr-invoice').'</th>';
+				$html .= '<th>'.__('Payment Date', 'sqrip-swiss-qr-invoice').'</th>';
+				$html .= '<th>'.__('Customer Name', 'sqrip-swiss-qr-invoice').'</th>';
+				$html .= '<th>'.__('Amount', 'sqrip-swiss-qr-invoice').'</th>';
+				$html .= '<th>'.__('Paid Amount', 'sqrip-swiss-qr-invoice').'</th>';
+				$html .= '<th>'.__('Action', 'sqrip-swiss-qr-invoice').'</th>';
+				$html .= '</tr></thead><tbody>';
 
-				foreach ($orders_unmatched as $order_unmatched) {
-					$order_id = $order_unmatched->order_id;
-					$customer_name = $this->get_customer_name($order_id);
+					foreach ($orders_unmatched as $order_unmatched) {
+						$order_id = $order_unmatched->order_id;
+						$customer_name = $this->get_customer_name($order_id);
 
-					$html .= '<tr>
-						<td>#'.$order_id.'</td>
-						<td>'.$order_unmatched->date.'</td>
-						<td>'.$customer_name.'</td>
-						<td>'.wc_price($order_unmatched->amount).'</td>
-						<td>'.wc_price(0).'</td>
-						<td><a class="sqrip-approve" href="#" data-order="'.$order_unmatched->order_id.'">Approve</a></td>
-					</tr>';
-				}
-			$html .= '</tbody>
-			</table>';
+						$html .= '<tr>
+							<td>#'.$order_id.'</td>
+							<td>'.$order_unmatched->date.'</td>
+							<td>'.$customer_name.'</td>
+							<td>'.wc_price($order_unmatched->amount).'</td>
+							<td>'.wc_price(0).'</td>
+							<td><a class="sqrip-approve" href="#" data-order="'.$order_unmatched->order_id.'">Approve</a></td>
+						</tr>';
+					}
+				$html .= '</tbody>
+				</table>';
+			}
 		}
 
-		if ( $orders_not_found && $show_orders_not_found ) {
+		if ($show_orders_not_found) {
 			$html .= '<h4>'.sprintf(
 				__('- %s payments not found', 'sqrip-swiss-qr-invoice'), 
 				count($orders_not_found)
 			).'</h4>';
 
-			$html .= '<table class="sqrip-table">';
-			$html .= '<thead><tr>';
-			$html .= '<th>'.__('Order ID', 'sqrip-swiss-qr-invoice').'</th>';
-			$html .= '<th>'.__('Customer Name', 'sqrip-swiss-qr-invoice').'</th>';
-			$html .= '<th>'.__('Amount', 'sqrip-swiss-qr-invoice').'</th>';
-			$html .= '</tr></thead><tbody>';
+			if ( $orders_not_found ) {
+				$html .= '<table class="sqrip-table" border="1" cellpadding="3px">';
+				$html .= '<thead><tr>';
+				$html .= '<th>'.__('Order ID', 'sqrip-swiss-qr-invoice').'</th>';
+				$html .= '<th>'.__('Customer Name', 'sqrip-swiss-qr-invoice').'</th>';
+				$html .= '<th>'.__('Amount', 'sqrip-swiss-qr-invoice').'</th>';
+				$html .= '</tr></thead><tbody>';
 
 
-				foreach ($orders_not_found as $order_not_found) {
-					$order_id = $order_not_found->order_id;
-					$customer_name = $this->get_customer_name($order_id);
+					foreach ($orders_not_found as $order_not_found) {
+						$order_id = $order_not_found->order_id;
+						$customer_name = $this->get_customer_name($order_id);
 
-					$html .= '<tr>
-						<td><a href="'.get_edit_post_link($order_id).'" target="_blank">#'.$order_id.'</a></td>
-						<td>'.$customer_name.'</td>
-						<td>'.wc_price($order_not_found->amount).'</td>
-					</tr>';
-				}
-				$html .= '</tbody>
-			</table>';
+						$html .= '<tr>
+							<td><a href="'.get_edit_post_link($order_id).'" target="_blank">#'.$order_id.'</a></td>
+							<td>'.$customer_name.'</td>
+							<td>'.wc_price($order_not_found->amount).'</td>
+						</tr>';
+					}
+					$html .= '</tbody>
+				</table>';
+			}
 		}
 
-		if ( $payments_made_more_than_once && $show_payments_made_more_than_once) {
+
+		if ($show_payments_made_more_than_once) {
 			$html .= '<h4>'.sprintf(
 				__('- %s payments paid more then once', 'sqrip-swiss-qr-invoice'), 
 				count($payments_made_more_than_once)
 			).'</h4>';
+			if ( $payments_made_more_than_once ) {
+				$html .= '<table class="sqrip-table" border="1" cellpadding="3px">';
+				$html .= '<thead><tr>';
+				$html .= '<th>'.__('Customer Name', 'sqrip-swiss-qr-invoice').'</th>';
+				$html .= '<th>'.__('(QR-)IBAN', 'sqrip-swiss-qr-invoice').'</th>';
+				$html .= '<th>'.__('Amount and QR-Ref#', 'sqrip-swiss-qr-invoice').'</th>';
+				$html .= '<th>'.__('Payment Dates', 'sqrip-swiss-qr-invoice').'</th>';
+				$html .= '<th>'.__('Action', 'sqrip-swiss-qr-invoice').'</th>';
+				$html .= '</tr></thead><tbody>';
 
-			$html .= '<table class="sqrip-table">';
-			$html .= '<thead><tr>';
-			$html .= '<th>'.__('Customer Name', 'sqrip-swiss-qr-invoice').'</th>';
-			$html .= '<th>'.__('(QR-)IBAN', 'sqrip-swiss-qr-invoice').'</th>';
-			$html .= '<th>'.__('Amount and QR-Ref#', 'sqrip-swiss-qr-invoice').'</th>';
-			$html .= '<th>'.__('Payment Dates', 'sqrip-swiss-qr-invoice').'</th>';
-			$html .= '<th>'.__('Action', 'sqrip-swiss-qr-invoice').'</th>';
-			$html .= '</tr></thead><tbody>';
+					foreach ($payments_made_more_than_once as $payment) {
+						$order_id = $payment->order_id;
+						$customer_name = $this->get_customer_name($order_id);
+						$png_file = get_post_meta($order_id, 'sqrip_png_file_url', true);
 
+						$html .= '<tr>';
+						$html .= '<td>'.$customer_name.'</td>';
+						$html .= '<td><img src="' . esc_url($png_file) . '" alt="'.esc_attr('sqrip QR-Code','sqrip-swiss-qr-invoice').'" width="200"/></td>';
+						$html .= '<td>'.wc_price($payment->amount).' - #'.$payment->reference.'</td>';
+						$html .= '<td>'.$payment->dates.'</td>';
+						$html .= '<td><a href="'.get_edit_post_link($order_id).'" target="_blank">#'.__('Refund', 'sqrip-swiss-qr-invoice').'</a></td>';
+						$html .= '</tr>';
+					}
 
-				foreach ($payments_made_more_than_once as $payment) {
-					$order_id = $payment->order_id;
-					$customer_name = $this->get_customer_name($order_id);
-					$png_file = get_post_meta($order_id, 'sqrip_png_file_url', true);
-
-					$html .= '<tr>';
-					$html .= '<td>'.$customer_name.'</td>';
-					$html .= '<td><img src="' . esc_url($png_file) . '" alt="'.esc_attr('sqrip QR-Code','sqrip-swiss-qr-invoice').'" width="200"/></td>';
-					$html .= '<td>'.wc_price($payment->amount).' - #'.$payment->reference.'</td>';
-					$html .= '<td>'.$payment->dates.'</td>';
-					$html .= '<td><a href="'.get_edit_post_link($order_id).'" target="_blank">#'.__('Refund', 'sqrip-swiss-qr-invoice').'</a></td>';
-					$html .= '</tr>';
-				}
-				$html .= '</tbody>
-			</table>';
+					$html .= '</tbody>
+				</table>';
+			}
 		}
 
 		$html .= '</div>';
@@ -636,6 +646,32 @@ class Sqrip_Ajax {
 		$message = __('Please enter IBAN to generate QR-Code.', 'sqrip-swiss-qr-invoice');
 
 		if ($iban) {
+			$status = true;
+			$message = "Success";
+		} 
+
+		wp_send_json(array(
+    		'status' => $status,
+    		'message' => $message,
+    	));
+
+		wp_die();
+	}
+
+	function save_refund_iban(){
+		$user = get_current_user_id();
+		$iban = $_POST['iban'];
+
+		if (!$iban || !$user) {
+			return;
+		}
+
+		$updated = update_user_meta( $user, 'iban_num', $iban );
+
+		$status = false;
+		$message = __('Update IBAN failed!', 'sqrip-swiss-qr-invoice');
+
+		if ($updated) {
 			$status = true;
 			$message = "Success";
 		} 
