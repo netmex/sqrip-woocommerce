@@ -659,14 +659,14 @@ class Sqrip_Ajax {
 	}
 
 	function save_refund_iban(){
-		$user = get_current_user_id();
+		$user = wp_get_current_user();
 		$iban = $_POST['iban'];
 
 		if (!$iban || !$user) {
 			return;
 		}
 
-		$updated = update_user_meta( $user, 'iban_num', $iban );
+		$updated = sqrip_set_customer_iban($user, $iban);
 
 		$status = false;
 		$message = __('Update IBAN failed!', 'sqrip-swiss-qr-invoice');

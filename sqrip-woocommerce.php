@@ -300,7 +300,7 @@ function sqrip_attach_qrcode_pdf_to_email($attachments, $email_id, $order)
 
     $payment_method = $order->get_payment_method();
 
-    $plugin_options = get_option('woocommerce_sqrip_settings', array());
+    // $plugin_options = get_option('woocommerce_sqrip_settings', array());
 
     // $integration_email = array_key_exists('integration_email', $plugin_options) ? $plugin_options['integration_email'] : '';
 
@@ -342,10 +342,7 @@ function sqrip_qr_action_order_details_after_order_table($order)
 
     if ($payment_method === 'sqrip') {
         $order_id = $order->get_id(); 
-
-        $plugin_options = get_option('woocommerce_sqrip_settings', array());
-
-        $integration_order = array_key_exists('integration_order', $plugin_options) ? $plugin_options['integration_order'] : '';
+        $integration_order = sqrip_get_plugin_option('integration_order');
 
         // $png_file = get_post_meta($order_id, 'sqrip_png_file_url', true);
         $pdf_file = get_post_meta($order_id, 'sqrip_pdf_file_url', true);
@@ -398,7 +395,7 @@ add_filter( 'wp_insert_post_data' , function ( $data , $postarr, $unsanitized_po
         $order_billing_address      = $postarr['_billing_address_1'];
         $order_billing_address      .= $postarr['_billing_address_2'] ? ', '.$postarr['_billing_address_2'] : "";
         $order_billing_city         = $postarr['_billing_city'];
-        $order_billing_postcode     = intval($postarr['_billing_postcode']);
+        $order_billing_postcode     = $postarr['_billing_postcode'];
         $order_billing_country      = $postarr['_billing_country'];
                     
         $currency_symbol    =   $order_data['currency'];
@@ -622,9 +619,9 @@ function sqrip_extra_user_profile_fields( $user ) {
         <h3><?php _e("Refunds with sqrip", "sqrip"); ?></h3>
         <table class="form-table">
             <tr>
-                <th><label for="iban"><?php _e("IBAN"); ?></label></th>
+                <th><label for="iban_num"><?php _e("IBAN"); ?></label></th>
                 <td>
-                    <input type="text" name="iban" id="iban" value="<?php echo esc_attr( sqrip_get_customer_iban($user)); ?>" class="regular-text" /><br />
+                    <input type="text" name="iban_num" id="iban_num" value="<?php echo esc_attr( sqrip_get_customer_iban($user)); ?>" class="regular-text" /><br />
                     <span class="description"><?php _e("This iban will be used to generate a sqrip qr code in case of a refund."); ?></span>
                 </td>
             </tr>
@@ -651,7 +648,7 @@ function sqrip_save_extra_user_profile_fields( $user_id ) {
     }
 
     $user = get_user_by('id', $user_id);
-    sqrip_set_customer_iban($user, $_POST['iban']);
+    sqrip_set_customer_iban($user, $_POST['iban_num']);
 
 }
 
@@ -661,3 +658,6 @@ function sqrip_custom_upload_xml($mimes) {
     $mimes = array_merge($mimes, array('xml' => 'application/xml'));
     return $mimes;
 }
+
+// Disable the Zip/postcode validation 
+add_filter( 'woocommerce_validate_postcode' , '__return_true' );
