@@ -210,6 +210,12 @@ table.sqrip-table tbody tr td {
     border: 1px solid #7a7a7a;
 }
 
+table.sqrip-table td p.sqrip-note {
+    display: block;
+    margin-top: 2px;
+    font-size: 12px;
+}
+
 .sqrip-table-results h3 {
     color: #1AAE9F;
     font-weight: bold;

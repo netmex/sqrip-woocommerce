@@ -468,7 +468,7 @@ class Sqrip_Ajax {
 						$customer_name = $this->get_customer_name($order_id);
 
 						$html .= '<tr>
-							<td>#'.$order_id.'</td>
+							<td><a href="'.get_edit_post_link($order_id).'" target="_blank">#'.$order_id.'</a></td>
 							<td>'.$order_matched->date.'</td>
 							<td>'.$customer_name.'</td>
 							<td>'.wc_price($order_matched->amount).'</td>
@@ -504,7 +504,7 @@ class Sqrip_Ajax {
 						$customer_name = $this->get_customer_name($order_id);
 
 						$html .= '<tr>
-							<td>#'.$order_id.'</td>
+							<td><a href="'.get_edit_post_link($order_id).'" target="_blank">#'.$order_id.'</a></td>
 							<td>'.$order_unmatched->date.'</td>
 							<td>'.$customer_name.'</td>
 							<td>'.wc_price($order_unmatched->amount).'</td>

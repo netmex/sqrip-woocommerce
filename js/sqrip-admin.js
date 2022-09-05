@@ -380,36 +380,38 @@ jQuery( document ).ready(function($){
         })
     }
 
-    if (btn_approve.length) {
-        btn_approve.on('click', function(e){
-            e.preventDefault();
-            _this = $(this);
-            reference = _this.data('reference');
-  
-            $.ajax({
-                type : "post", 
-                url : sqrip.ajax_url, 
-                data : {
-                    action: "sqrip_approve_order", 
-                    reference: reference
-                },
-                beforeSend: function(){
-                   $('body').addClass('sqrip-loading');
-                },
-                success: function(response) {
-                    if(response) {
-                        _this.html(response.message);
-                    }
-                },
-                error: function( jqXHR, textStatus, errorThrown ){
-                    console.log( 'The following error occured: ' + textStatus, errorThrown );
-                },
-                complete: function(){
-                    $('body').removeClass('sqrip-loading');
+
+    $('.form-table').on('click', '.sqrip-approve', function(e){
+        e.preventDefault();
+        _this = $(this);
+        reference = _this.data('reference');
+        _output = _this.closest('td');
+        _output.find('.sqrip-note').remove();
+
+        $.ajax({
+            type : "post", 
+            url : sqrip.ajax_url, 
+            data : {
+                action: "sqrip_approve_order", 
+                reference: reference
+            },
+            beforeSend: function(){
+               $('body').addClass('sqrip-loading');
+            },
+            success: function(response) {
+                if(response) {
+                    _this.after('<p clas="sqrip-note">'+response.message+'</p>');
                 }
-            })
+            },
+            error: function( jqXHR, textStatus, errorThrown ){
+                console.log( 'The following error occured: ' + textStatus, errorThrown );
+            },
+            complete: function(){
+                $('body').removeClass('sqrip-loading');
+            }
         })
-    }
+    })
+    
 
     // if (camt_service.length) {
     //     camt_service.on('change', function(e){
