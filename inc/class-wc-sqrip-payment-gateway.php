@@ -599,8 +599,13 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             if (isset($response->trigger_periodicity)) {
                 $weeksday = '';
                 $periodicity = $response->trigger_periodicity;
+
+                $periode = $periodicity->period;
                 $periodes = $periodicity->week_days;
-                $time = $periodicity->hours.':'.$periodicity->minutes;
+                $time = isset($periodicity->hours) ? $periodicity->hours.':'.$periodicity->minutes : '';
+
+        
+                $trigger_periodicity = $periode ? $periode : '';
 
                 $count = 0;
                 if (is_array($periodes)) {
@@ -610,12 +615,18 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                         $weeksday .= $periode['label'];
                     }
 
-                    $service['trigger_periodicity'] = sprintf( 
-                        __( 'Weekly on %s at %s', 'sqrip-swiss-qr-invoice' ), 
+                    $trigger_periodicity .= sprintf( 
+                        __( ' on %s', 'sqrip-swiss-qr-invoice' ),
                         $weeksday,
-                        $time
                     );
-                }                
+                }
+
+                $trigger_periodicity .= sprintf( 
+                    __( ' at %s', 'sqrip-swiss-qr-invoice' ),
+                    $time
+                );
+
+                $service['trigger_periodicity'] = $trigger_periodicity;
             }
 
         }  
