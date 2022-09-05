@@ -62,7 +62,8 @@ class Sqrip_Payment_Verification {
     }
 
     public function verify() {
-        $logs = '[Sqrip_Payment_Verification] is starting...';
+        $logs = array();
+        $logs[] = '[Sqrip_Payment_Verification] is starting...';
 
         $orders = sqrip_get_awaiting_orders();
 
@@ -71,9 +72,11 @@ class Sqrip_Payment_Verification {
             $body['orders'] = $orders;
             $endpoint = 'confirm-order';
 
-            $logs .= 'Starting request to sqrip to confirm order...';
+            $logs[] = 'Starting request to sqrip to confirm order...';
             $response = sqrip_remote_request( $endpoint, $body, 'POST' );
-            $logs .= print_r($response, true);
+
+            $logs[] = 'SQRIP response:';
+            $logs[] = print_r($response, true);
 
             if ($response) {
 
@@ -82,30 +85,32 @@ class Sqrip_Payment_Verification {
 
                     $updated = $this->update_order_status($orders);
 
-                    $logs .= print_r($updated, true);
+                    $logs[] = $updated ? print_r($updated, true) : 'No order status updated!';
                 }
 
                 $send_report = sqrip_get_plugin_option('comparison_report');
-                
-                if ( $send_report === "true" ) {
+
+                $logs[] = 'Checking Comparison Report setting: '.$send_report;
+
+                if ( $send_report == "yes" || $send_report == "true" ) {
                     $Sqrip_Ajax = new Sqrip_Ajax;
 
                     $html = $Sqrip_Ajax->get_table_results($response, $orders);
-                    $Sqrip_Ajax->send_report($html);
+                    $email_sent = $Sqrip_Ajax->send_report($html);
 
-                    $logs .= 'Sent report to Admin email! \r\n';
+                    $logs[] = $email_sent ? 'Sent report to '.$email_sent.'! ' : 'Email failed to send. Please check your Email SMTP settings.';
                 }
             } 
 
         } else {
 
-            $logs .= sprintf('No order with %s status found!', $status_awaiting);
+            $logs[] = sprintf('No order with %s status found!', $status_awaiting);
 
         }
 
-        $logs .= 'Finished!';
+        $logs[] = '[Sqrip_Payment_Verification] Finished!';
 
-        error_log($logs);
+        error_log(print_r($logs, true));
     }
 
     public function update_order_status($orders){

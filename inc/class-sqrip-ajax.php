@@ -627,6 +627,8 @@ class Sqrip_Ajax {
         $headers[] = 'Content-Type: text/html; charset=UTF-8';
 
         $wp_mail = wp_mail( $to, $subject, $body, $headers );
+
+        return $wp_mail ? $to : false;
 	}
 
 
