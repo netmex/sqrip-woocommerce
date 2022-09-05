@@ -508,7 +508,7 @@ class Sqrip_Ajax {
 							<td>'.$order_unmatched->date.'</td>
 							<td>'.$customer_name.'</td>
 							<td>'.wc_price($order_unmatched->amount).'</td>
-							<td>'.wc_price(0).'</td>
+							<td>'.wc_price($order_unmatched->paid_amount).'</td>
 							<td><a class="sqrip-approve" href="#" data-reference="'.$order_unmatched->reference.'">Approve</a></td>
 						</tr>';
 					}

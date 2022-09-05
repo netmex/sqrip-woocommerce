@@ -247,6 +247,19 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'description' => __( 'Description of what the customer can expect from this payment option.', 'sqrip-swiss-qr-invoice' ),
                 'class'       => 'qrinvoice-tab'  
             ),
+            'status_order' => array(
+                'title'         => __( 'Order status after payment with SQRIP method', 'sqrip-swiss-qr-invoice' ),
+                'type'          => 'select',
+                'options'       => wc_get_order_statuses(),
+                'default'       => 'wc-on-hold',
+                'desc_tip'      => __('How should you pick this?<br>
+                <ol><li>Want to ship the product after the payment clears?</br>
+                Select "Status of Awaiting Payment Orders" to "Pending payment" and "Order status after payment with SQRIP method": "Pending payment"</li>
+                <li>Want to ship the products first and confirm payment later? </br>
+                Select "Status of Awaiting Payment Orders" to "Processing" and "Order status after payment with SQRIP method": "Processing"</li></ul>', 'sqrip-swiss-qr-invoice' )
+                ,
+                'class'       => 'qrinvoice-tab'  
+            ),
             'expired_date' => array(
                 'title'       => __( 'Delete QR-Invoices automatically (after X days)', 'sqrip-swiss-qr-invoice' ),
                 'type'        => 'number',
@@ -467,7 +480,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                     '18:00'      => '18:00',
                     '21:00'      => '21:00',
                 ),
-                 'description'   => __( 'Select the days and the time when sqrip should execute a comparison of the awaiting payment orders with your bank account.</br>
+                'description'   => __( 'Select the days and the time when sqrip should execute a comparison of the awaiting payment orders with your bank account.</br>
                     We charge your account for every comparison made.', 'sqrip-swiss-qr-invoice' ),
                 'desc_tip'      => __('Based on your selection, your weekly cost for this service is X credits.', 'sqrip-swiss-qr-invoice'),
                 'class'       => 'comparison-tab ebics-service'  
@@ -1217,6 +1230,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         $amount             =   floatval($order_data['total']);
 
         $address = sqrip_get_plugin_option('address');
+        $sqrip_order_status =  sqrip_get_plugin_option('status_order') ? sqrip_get_plugin_option('status_order') : 'on-hold';
 
         $body = sqrip_prepare_qr_code_request_body($currency_symbol, $amount, strval($order_id));
         $body["payable_by"] = sqrip_get_billing_address_from_order($order);
@@ -1237,8 +1251,6 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         }
 
         $status_code = $response['response']['code'];
-
-        // var_dump($response);
 
         if ($status_code !== 200) {
             // Transaction was not succesful
@@ -1310,7 +1322,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             // $order->update_meta_data('sqrip_png_file_path', $sqrip_qr_png_path);
 
             // Update order status
-            $order->update_status('on-hold');
+            $order->update_status($sqrip_order_status);
             // Empty the cart (Very important step)
             $woocommerce->cart->empty_cart();
             $order->save();
