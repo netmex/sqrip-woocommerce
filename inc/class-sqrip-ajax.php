@@ -38,6 +38,8 @@ class Sqrip_Ajax {
 		add_action( 'wp_ajax_sqrip_transfer',  array( $this, 'transfer' ) );
 
 		add_action( 'wp_ajax_sqrip_approve_order',  array( $this, 'approve_order' ) );
+
+		add_action( 'wp_ajax_sqrip_validation_refund_token',  array( $this, 'validate_refund_token' ) );
 	}
 
 	/**
@@ -92,7 +94,7 @@ class Sqrip_Ajax {
 	}
 
 	/**
-	 * sqrip validation IBAN
+	 * sqrip Validation Token
 	 *
 	 * @since 1.0.3
 	 */
@@ -745,6 +747,25 @@ class Sqrip_Ajax {
 	    }
 
 	    wp_send_json($result);
+	      
+	    die();
+	}
+
+	/**
+	 * sqrip Validate Refund Token
+	 *
+	 * @since 2.0.0
+	 */
+
+	function validate_refund_token()
+	{
+	    if ( !$_POST['token'] ) return; 
+
+	    $endpoint = 'verify-token';
+
+	    $response = sqrip_remote_request( $endpoint, '', 'GET', $_POST['token'] );
+
+	    wp_send_json($response);
 	      
 	    die();
 	}

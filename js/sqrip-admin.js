@@ -1,5 +1,4 @@
 jQuery( document ).ready(function($){
-
     var ip_file_type = $('#woocommerce_sqrip_file_type'),
     ip_itgr_email = $('#woocommerce_sqrip_integration_email'),
     ip_address = $('#woocommerce_sqrip_address'),
@@ -19,11 +18,12 @@ jQuery( document ).ready(function($){
     enable_service = $('input[data-enable]'),
     send_report_options = $('#woocommerce_sqrip_comparison_report_options'),
     btn_transfer = $('label[for="woocommerce_sqrip_btn_transfer"]'),
-    btn_approve = $('.sqrip-approve');
+    btn_approve = $('.sqrip-approve'),
+    ip_refund_token = $('#woocommerce_sqrip_return_token');
 
     if (ip_token.length) {
         bt_check_token_html = '<button id="btn_sqrip_check_token" class="sqrip-btn sqrip-btn-validate-token">'+sqrip.txt_check_connection+'</button>';
-        ip_token.siblings('.description').after(bt_check_token_html);
+        ip_token.after(bt_check_token_html);
 
         bt_check_token = $('#btn_sqrip_check_token');
         bt_check_token.on('click', function(e){
@@ -506,5 +506,57 @@ jQuery( document ).ready(function($){
             $('.sqrip-tab[data-tab="'+tab+'"]').hide();
         }
     })
+
+
+    if (ip_refund_token.length) {
+        bt_check_refund_token_html = '<button id="btn_sqrip_check_refund_token" class="sqrip-btn sqrip-btn-validate-token">'+sqrip.txt_check_connection+'</button>';
+        ip_refund_token.after(bt_check_refund_token_html);
+
+        bt_check_refund_token = $('#btn_sqrip_check_refund_token');
+        bt_check_refund_token.on('click', function(e){
+            e.preventDefault();
+            _this = $(this);
+            _output = $(this).closest('td.forminp');
+            _output.find('.sqrip-notice').remove();
+
+            if( ip_refund_token.val().trim().length < 1 ) {
+                ip_refund_token.focus();
+                return; 
+            }
+
+            $.ajax({
+                type : "post", 
+                url : sqrip.ajax_url, 
+                data : {
+                    action: "sqrip_validation_refund_token", 
+                    token: ip_refund_token.val()
+                },
+                beforeSend: function(){
+                   $('body').addClass('sqrip-loading');
+                },
+                success: function(response) {
+                    if(response) {
+                        if (response.result) {
+                            result = "updated";
+                        } else {
+                            result = "error";
+                        }
+
+                        output_html = '<div class="sqrip-notice '+result+'">';
+                        output_html += '<p>'+response.message+'</p>';
+                        output_html += '</div>';
+                        _this.after(output_html);
+
+                    }
+                },
+                error: function( jqXHR, textStatus, errorThrown ){
+                    console.log( 'The following error occured: ' + textStatus, errorThrown );
+                },
+                complete: function(){
+                    $('body').removeClass('sqrip-loading');
+                }
+            })
+        })
+    }
 
 });
