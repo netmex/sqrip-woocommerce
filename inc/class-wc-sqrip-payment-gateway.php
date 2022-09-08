@@ -577,7 +577,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             "debit_account" => "XXXX XXXX XXXX XXXX",
             "trigger_level" => "XXX",
             "account_balance" => "XXX.XXX",
-            "trigger_periodicity"=> '', 
+            "trigger_periodicity"=> 'XXX', 
         ];
 
         if (!isset($service[$param])) {
@@ -600,15 +600,13 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 $weeksday = '';
                 $periodicity = $response->trigger_periodicity;
 
-                $periode = $periodicity->period;
-                $periodes = $periodicity->week_days;
-                $time = isset($periodicity->hours) ? $periodicity->hours.':'.$periodicity->minutes : '';
-
-        
-                $trigger_periodicity = $periode ? $periode : '';
+                $periode = isset($periodicity->period) ? $periodicity->period : '';
+                $periodes = isset($periodicity->week_days) ? $periodicity->week_days : '';
+                
+                $trigger_periodicity = $periode;
 
                 $count = 0;
-                if (is_array($periodes)) {
+                if ($periodes && is_array($periodes)) {
                     foreach ($periodes as $periode) {
                         $count++;
                         $weeksday .= $count > 1 ? ', ' : '';
@@ -621,11 +619,16 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                     );
                 }
 
-                $trigger_periodicity .= sprintf( 
-                    __( ' at %s', 'sqrip-swiss-qr-invoice' ),
-                    $time
-                );
+                if (isset($periodicity->hours)) {
+                    $time = $periodicity->hours;
+                    $time .= isset($periodicity->minutes) ? ':'.$periodicity->minutes : '';
 
+                    $trigger_periodicity .= sprintf( 
+                        __( ' at %s', 'sqrip-swiss-qr-invoice' ),
+                        $time
+                    );
+                }
+                
                 $service['trigger_periodicity'] = $trigger_periodicity;
             }
 
