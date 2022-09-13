@@ -591,10 +591,10 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         if ( isset($response->main_account) ) {
 
             $service['main_account'] = $response->main_account;
-            $service['debit_account'] = $response->debit_account;
-            $service['trigger_level'] = $response->trigger_level;
-            $service['account_balance'] = $response->account_balance;
-            $service['account_iban'] = $response->account_iban;
+            $service['debit_account'] = isset($response->debit_account) ? $response->debit_account : '';
+            $service['trigger_level'] = isset($response->trigger_level) ? $response->trigger_level : '';
+            $service['account_balance'] = isset($response->account_balance) ? $response->account_balance : '';
+            $service['account_iban'] = isset($response->account_iban) ? $response->account_iban : '';
 
             if (isset($response->trigger_periodicity)) {
                 $weeksday = '';
@@ -610,7 +610,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                     foreach ($periodes as $periode) {
                         $count++;
                         $weeksday .= $count > 1 ? ', ' : '';
-                        $weeksday .= $periode['label'];
+                        $weeksday .= $periode->label;
                     }
 
                     $trigger_periodicity .= sprintf( 
