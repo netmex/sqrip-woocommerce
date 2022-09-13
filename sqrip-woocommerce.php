@@ -405,13 +405,7 @@ add_filter( 'wp_insert_post_data' , function ( $data , $postarr, $unsanitized_po
    
         $body = sqrip_prepare_qr_code_request_body($currency_symbol, $amount, $postarr['ID']);
 
-        $body["payable_by"] = [
-	      "name"          => $order_billing_first_name.' '.$order_billing_last_name,
-	      "street"        => $order_billing_address,
-	      "postal_code"   => $order_billing_postcode,
-	      "town"          => $order_billing_city,
-	      "country_code"  => $order_billing_country
-	   ];
+        $body["payable_by"] = sqrip_get_billing_address_from_order($order);
 
         $address = sqrip_get_plugin_option('address');
 
@@ -421,6 +415,8 @@ add_filter( 'wp_insert_post_data' , function ( $data , $postarr, $unsanitized_po
 
         $endpoint = 'code';
         $response = wp_remote_post(SQRIP_ENDPOINT.$endpoint, $args);
+
+        // var_dump( $response); exit;
 
         $response_body = wp_remote_retrieve_body($response);
         $response_body = json_decode($response_body);
