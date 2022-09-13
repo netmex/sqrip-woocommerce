@@ -135,6 +135,11 @@ table.form-table td .sqrip-notice p {
 .sqrip-tabs ~ .form-table tr.active{
     display: table-row!important;
 }*/
+
+table.form-table .fund-management-tab ~ td label{
+    cursor: text;
+} 
+
 table.form-table tr td label[for="woocommerce_sqrip_btn_transfer"],
 table.form-table tr th label[for="woocommerce_sqrip_test_email"],
 table.form-table tr td label[for="woocommerce_sqrip_compare_btn"],
