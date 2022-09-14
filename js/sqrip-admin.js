@@ -536,13 +536,13 @@ jQuery( document ).ready(function($){
                 },
                 success: function(response) {
                     if(response) {
-                        if (response.result) {
-                            result = "updated";
+                        if (response.success) {
+                            success = "updated";
                         } else {
-                            result = "error";
+                            success = "error";
                         }
 
-                        output_html = '<div class="sqrip-notice '+result+'">';
+                        output_html = '<div class="sqrip-notice '+success+'">';
                         output_html += '<p>'+response.message+'</p>';
                         output_html += '</div>';
                         _this.after(output_html);
