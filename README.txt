@@ -110,6 +110,9 @@ Yes. We are already working on comparing the reconciliation of orders/purchases 
 
 == Changelog ==
 
+= 1.5.3 =
+* Bug fixes
+
 = 1.5.2 =
 * New pictures added to wordpress entry.
 * deleted the hash # in the default field after report of problems with certain banking Apps.
