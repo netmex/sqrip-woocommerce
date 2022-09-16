@@ -1,0 +1,17 @@
+.sqrip-order-details{
+	margin-bottom: 30px;
+}
+
+.sqrip-order-details .sqrip-qrcode-pdf{
+	margin-bottom: 10px;
+}
+
+.sqrip-order-details .sqrip-qrcode-pdf p {
+	margin-bottom: 5px;
+}
+
+.sqrip-order-details .sqrip-qrcode-pdf .button-sqrip-invoice{
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+}

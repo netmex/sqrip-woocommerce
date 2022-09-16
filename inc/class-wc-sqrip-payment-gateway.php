@@ -121,6 +121,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                     __( 'Delete QR-Invoices automatically after %s days.', 'sqrip-swiss-qr-invoice' ), 
                     $this->get_option('expired_date')
                 ),
+                'description' => __( 'Keep the size of your media library small. sqrip deletes for you all the not anymore needed qr-invoices.',  'sqrip-swiss-qr-invoice' ),
                 'type'        => 'number',
                 'default'     => 10,
                 'css'         => "width:70px",

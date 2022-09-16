@@ -4,7 +4,7 @@
  * Plugin Name:             sqrip – Swiss QR Invoice
  * Plugin URI:              https://sqrip.ch/
  * Description:             sqrip – A comprehensive and clever WooCommerce finance tool for the most widely used payment method in Switzerland: the bank transfers. 
- * Version:                 1.5.3
+ * Version:                 1.5.4
  * Author:                  netmex digital gmbh
  * Author URI:              https://sqrip.ch/
  */
@@ -163,6 +163,8 @@ add_action( 'wp_enqueue_scripts', 'sqrip_enqueue_scripts' );
 
 function sqrip_enqueue_scripts() 
 {
+    wp_enqueue_style( 'sqrip', plugins_url( 'css/sqrip-order.css', __FILE__ ), false);
+    
     wp_enqueue_script( 'sqrip', plugins_url( 'js/sqrip-fe.js', __FILE__ ), array('jquery'), '1.0.3', true);
 
     wp_localize_script( 'sqrip', 'sqrip',
@@ -300,12 +302,12 @@ function sqrip_attach_qrcode_pdf_to_email($attachments, $email_id, $order)
 }
 
 /**
- *  Insert sqrip QR code after customer details
+ *  Insert sqrip QR code after order table
  *  
- *  @since 1.0
+ *  @since 1.5.3
  */
 
-add_action('woocommerce_order_details_after_customer_details', 'sqrip_qr_action_order_details_after_order_table', 10, 1);
+add_action('woocommerce_order_details_after_order_table', 'sqrip_qr_action_order_details_after_order_table', 10, 1);
 
 function sqrip_qr_action_order_details_after_order_table($order)
 {
@@ -337,7 +339,7 @@ function sqrip_qr_action_order_details_after_order_table($order)
             // echo '<div class="sqrip-qrcode-png"><p>' . __( 'Use the QR invoice below to pay the outstanding balance.' , 'sqrip-swiss-qr-invoice') . '</p><a href="' . esc_url($png_file) . '" target="_blank"><img src="' . esc_url($png_file) . '" alt="'.esc_attr('sqrip QR-Code','sqrip-swiss-qr-invoice').'" width="300" /></a></div>';
 
             // Insert download button PDF
-            echo '<div class="sqrip-qrcode-pdf"><p>' . __( 'Use the QR invoice below to pay the outstanding balance.' , 'sqrip-swiss-qr-invoice') . '</p><a href="' . esc_url($pdf_file) . '" ><i class="dashicons dashicons-pdf"></i></a></div>';
+            echo '<div class="sqrip-qrcode-pdf"><p>' . __( 'Use the QR invoice below to pay the outstanding balance.' , 'sqrip-swiss-qr-invoice') . '</p><a class="button button-sqrip-invoice" href="' . esc_url($pdf_file) . '" >'. __('Download Invoice','sqrip-swiss-qr-invoice').' <i class="dashicons dashicons-pdf"></i></a></div>';
         }
 
         if ( is_wc_endpoint_url( 'view-order' ) ) {
