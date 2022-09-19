@@ -263,7 +263,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             'expired_date' => array(
                 'title'       => __( 'Delete QR-Invoices automatically (after X days)', 'sqrip-swiss-qr-invoice' ),
                 'type'        => 'number',
-                'description' => __( 'When after creation a invoice will be deleted and then deleted from the media library.', 'sqrip-swiss-qr-invoice' ),
+                'description' => __( 'Keep the size of your media library small. sqrip deletes for you all the not anymore needed qr-invoices.',  'sqrip-swiss-qr-invoice' ),
                 'default'     => 30,
                 'css'         => "width:70px",
                 'class'       => 'qrinvoice-tab'  

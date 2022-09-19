@@ -385,14 +385,16 @@ jQuery( document ).ready(function($){
         e.preventDefault();
         _this = $(this);
         reference = _this.data('reference');
-        _output = _this.closest('td');
-        _output.find('.sqrip-note').remove();
+        order_id = _this.data('order_id');
+
+        _this.siblings('p').remove();
 
         $.ajax({
             type : "post", 
             url : sqrip.ajax_url, 
             data : {
                 action: "sqrip_approve_order", 
+                order_id : order_id,
                 reference: reference
             },
             beforeSend: function(){
@@ -400,7 +402,13 @@ jQuery( document ).ready(function($){
             },
             success: function(response) {
                 if(response) {
-                    _this.after('<p clas="sqrip-note">'+response.message+'</p>');
+                    if (response.result) {
+                        result = "updated";
+                    } else {
+                        result = "error";
+                    }
+
+                    _this.after('<p clas="sqrip-note '+result+'">'+response.message+'</p>');
                 }
             },
             error: function( jqXHR, textStatus, errorThrown ){

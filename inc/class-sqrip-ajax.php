@@ -511,7 +511,7 @@ class Sqrip_Ajax {
 							<td>'.$customer_name.'</td>
 							<td>'.wc_price($order_unmatched->amount).'</td>
 							<td>'.wc_price($order_unmatched->paid_amount).'</td>
-							<td><a class="sqrip-approve" href="#" data-reference="'.$order_unmatched->reference.'">Approve</a></td>
+							<td><a class="sqrip-approve" href="#" data-reference="'.$order_unmatched->reference.'" data-order_id="'.$order_id.'">Approve</a></td>
 						</tr>';
 					}
 				$html .= '</tbody>
@@ -728,7 +728,7 @@ class Sqrip_Ajax {
 
 	function approve_order()
 	{
-	    if ( !$_POST['reference'] ) return;   
+	    if ( !$_POST['reference'] || !$_POST['order_id'] ) return;   
 
 	    $endpoint = 'approved-order';
 
@@ -738,12 +738,26 @@ class Sqrip_Ajax {
 
 	    $response = sqrip_remote_request( $endpoint, $body, 'POST' );
 
-	    if ($response) {
-	        $result['result'] = true;
-	        $result['message'] = $response->message;
+	   	$result = array(
+	    	'result' => false,
+	    	'message' => __('Something went wrong!', 'sqrip-swiss-qr-invoice')
+	    );
+
+	    if ($response->success) {
+	    	$order_id = $_POST['order_id'];
+	    	$status_completed = sqrip_get_plugin_option('status_completed');
+			$order = new WC_Order($order_id);
+
+			if ($order) {
+		        $order->update_status($status_completed);
+			    
+		        $result['result'] = true;
+		        $result['message'] = $response->message;
+	        }
+
 	    } else {
 	        $result['result'] = false;
-	        $result['message'] = __('Error', 'sqrip-swiss-qr-invoice');
+	        $result['message'] = $response->message;
 	    }
 
 	    wp_send_json($result);
