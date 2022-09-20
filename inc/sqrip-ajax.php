@@ -180,3 +180,24 @@ function sqrip_mark_refund_unpaid()
 
 	die();
 }
+
+/**
+ * sqrip Validate Refund Token
+ *
+ * @since 1.5.5
+ */
+
+add_action( 'wp_ajax_sqrip_validation_refund_token', 'sqrip_validate_refund_token' );
+
+function sqrip_validate_refund_token()
+{
+    if ( !$_POST['token'] ) return; 
+
+    $endpoint = 'verify-token';
+
+    $response = sqrip_remote_request( $endpoint, '', 'GET', $_POST['token'] );
+
+    wp_send_json($response);
+      
+    die();
+}

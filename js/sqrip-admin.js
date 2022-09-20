@@ -8,7 +8,8 @@ jQuery( document ).ready(function($){
     ip_token = $('#woocommerce_sqrip_token'),
     btn_save = $('button.woocommerce-save-button'),
     sqrip_additional_information = $('#woocommerce_sqrip_additional_information'),
-    tab = $('.sqrip-tab');
+    tab = $('.sqrip-tab'),
+    ip_refund_token = $('#woocommerce_sqrip_return_token');
 
     if (ip_token.length) {
         bt_check_token_html = '<button id="btn_sqrip_check_token" class="button-secondary sqrip-btn-validate-token">'+sqrip.txt_check_connection+'</button>';
@@ -230,5 +231,56 @@ jQuery( document ).ready(function($){
             toggle_service_options(ebics_service.is(':checked'), $('.ebics-service'));
             toggle_service_options(camt_service.is(':checked'), $('.camt-service'));
         }
+    }
+
+    if (ip_refund_token.length) {
+        bt_check_refund_token_html = '<button id="btn_sqrip_check_refund_token" class="sqrip-btn sqrip-btn-validate-token">'+sqrip.txt_check_connection+'</button>';
+        ip_refund_token.after(bt_check_refund_token_html);
+
+        bt_check_refund_token = $('#btn_sqrip_check_refund_token');
+        bt_check_refund_token.on('click', function(e){
+            e.preventDefault();
+            _this = $(this);
+            _output = $(this).closest('td.forminp');
+            _output.find('.sqrip-notice').remove();
+
+            if( ip_refund_token.val().trim().length < 1 ) {
+                ip_refund_token.focus();
+                return; 
+            }
+
+            $.ajax({
+                type : "post", 
+                url : sqrip.ajax_url, 
+                data : {
+                    action: "sqrip_validation_refund_token", 
+                    token: ip_refund_token.val()
+                },
+                beforeSend: function(){
+                   $('body').addClass('sqrip-loading');
+                },
+                success: function(response) {
+                    if(response) {
+                        if (response.success) {
+                            success = "updated";
+                        } else {
+                            success = "error";
+                        }
+
+                        output_html = '<div class="sqrip-notice '+success+'">';
+                        output_html += '<p>'+response.message+'</p>';
+                        output_html += '</div>';
+                        _this.after(output_html);
+
+                    }
+                },
+                error: function( jqXHR, textStatus, errorThrown ){
+                    console.log( 'The following error occured: ' + textStatus, errorThrown );
+                },
+                complete: function(){
+                    $('body').removeClass('sqrip-loading');
+                }
+            })
+        })
     }
 });
