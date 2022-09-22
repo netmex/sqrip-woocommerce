@@ -48,23 +48,6 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
     }
 
-    public function show_tab($options){
-        $options = explode(',', $options);
-        $show = false;
-
-        foreach ($options as $option) {
-            $value = sqrip_get_plugin_option($option);
-
-            if ($value == "yes") {
-                $show = true; 
-                break;
-            }
-        }
-
-
-        return $show ? "" : "hide";
-    }
-
     /**
      * Plugin options, we deal with it in Step 3 too
      */
@@ -261,8 +244,9 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'class'       => 'qrinvoice-tab'  
             ),
             'expired_date' => array(
-                'title'       => __( 'Delete QR-Invoices automatically (after X days)', 'sqrip-swiss-qr-invoice' ),
+                'title'       => __( 'Delete QR-Invoices automatically after', 'sqrip-swiss-qr-invoice' ),
                 'type'        => 'number',
+                'label'       => __( 'days.', 'sqrip-swiss-qr-invoice' ),
                 'description' => __( 'Keep the size of your media library small. sqrip deletes for you all the not anymore needed qr-invoices.',  'sqrip-swiss-qr-invoice' ),
                 'default'     => 30,
                 'css'         => "width:70px",
@@ -574,6 +558,22 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         );
     }
 
+    public function show_tab($options){
+        $options = explode(',', $options);
+        $show = false;
+
+        foreach ($options as $option) {
+            $value = sqrip_get_plugin_option($option);
+
+            if ($value == "yes") {
+                $show = true; 
+                break;
+            }
+        }
+
+
+        return $show ? "" : "hide";
+    }
 
     public function show_qr_reference_format()
     {
@@ -765,6 +765,51 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 </td>
             </tr>
             <?php
+
+        return ob_get_clean();
+    }
+
+        /**
+     * Generate Number Input HTML.
+     *
+     * @param string $key Field key.
+     * @param array  $data Field data.
+     * @since  1.0.0
+     * @return string
+     */
+    public function generate_number_html( $key, $data ) {
+        $field_key = $this->get_field_key( $key );
+        $defaults  = array(
+            'title'             => '',
+            'label'             => '',
+            'disabled'          => false,
+            'class'             => '',
+            'css'               => '',
+            'placeholder'       => '',
+            'type'              => 'text',
+            'desc_tip'          => false,
+            'description'       => '',
+            'custom_attributes' => array(),
+        );
+
+        $data = wp_parse_args( $data, $defaults );
+
+        ob_start();
+        ?>
+        <tr valign="top">
+            <th scope="row" class="titledesc">
+                <label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['title'] ); ?> <?php echo $this->get_tooltip_html( $data ); // WPCS: XSS ok. ?></label>
+            </th>
+            <td class="forminp">
+                <fieldset>
+                    <legend class="screen-reader-text"><span><?php echo wp_kses_post( $data['title'] ); ?></span></legend>
+                    <input class="input-text regular-input <?php echo esc_attr( $data['class'] ); ?>" type="<?php echo esc_attr( $data['type'] ); ?>" name="<?php echo esc_attr( $field_key ); ?>" id="<?php echo esc_attr( $field_key ); ?>" style="<?php echo esc_attr( $data['css'] ); ?>" value="<?php echo esc_attr( $this->get_option( $key ) ); ?>" placeholder="<?php echo esc_attr( $data['placeholder'] ); ?>" <?php disabled( $data['disabled'], true ); ?> <?php echo $this->get_custom_attribute_html( $data ); // WPCS: XSS ok. ?> />
+                    <?php echo $this->get_description_html( $data ); // WPCS: XSS ok. ?>
+                    <label for="<?php echo esc_attr( $field_key ); ?>"><?php echo wp_kses_post( $data['label'] ); ?></label>
+                </fieldset>
+            </td>
+        </tr>
+        <?php
 
         return ob_get_clean();
     }
