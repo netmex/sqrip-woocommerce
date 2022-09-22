@@ -312,6 +312,12 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'description' => __( '(QR-)IBAN of the account to which the transfer is to be made', 'sqrip-swiss-qr-invoice' ),
                 'class'       => 'qrinvoice-tab'  
             ),
+            'qr_reference_format' => array(
+                'title'       => __( 'Initiate QR-Ref# with these 6 digits', 'sqrip-swiss-qr-invoice' ),
+                'type'        => 'number',
+                'default'     => '',
+                'class'       => 'qrinvoice-tab '.$this->show_qr_reference_format()  
+            ),
             'qr_reference' => array(
                 'title' => __( 'Basis of the (QR) reference number', 'sqrip-swiss-qr-invoice' ),
                 'type'  => 'radio',
@@ -568,7 +574,25 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         );
     }
 
-    public function get_fund_management($param = ""){
+
+    public function show_qr_reference_format()
+    {
+        $iban = sqrip_get_plugin_option('iban');
+        $token = sqrip_get_plugin_option('token');
+
+        $response = sqrip_validation_iban($iban, $token);
+
+        $return = '';
+
+        if (isset($response->message)) {
+            $return = $response->message;
+        }
+
+        return $return == 'Valid qr IBAN' ? '' : 'hide';
+    }
+
+    public function get_fund_management($param = "")
+    {
         $endpoint   = 'get-fund-management-details';
 
         $service = [
@@ -638,7 +662,8 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
     }
 
 
-    public function get_active_service($param = ""){
+    public function get_active_service($param = "")
+    {
         $endpoint   = 'get-active-service-type';
 
         $service = [
@@ -677,7 +702,8 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         return !empty($param) ? $service[$param] : $service;
     }
 
-    public function get_address_options(){
+    public function get_address_options()
+    {
         $address_woocommerce = sqrip_get_payable_to_address_txt('woocommerce');
         $address_sqrip = sqrip_get_payable_to_address_txt('sqrip');
 
@@ -1084,7 +1110,6 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 ),
             );
         }
-
     }
 
     /**
@@ -1125,8 +1150,8 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
      *
      * @return bool|WP_Error
      */
-    public function process_refund($order_id, $amount = null, $reason = "") {
-
+    public function process_refund($order_id, $amount = null, $reason = "") 
+    {
         global $woocommerce;
 
         $order      = wc_get_order($order_id);

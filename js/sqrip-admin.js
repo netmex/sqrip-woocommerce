@@ -19,7 +19,8 @@ jQuery( document ).ready(function($){
     send_report_options = $('#woocommerce_sqrip_comparison_report_options'),
     btn_transfer = $('label[for="woocommerce_sqrip_btn_transfer"]'),
     btn_approve = $('.sqrip-approve'),
-    ip_refund_token = $('#woocommerce_sqrip_return_token');
+    ip_refund_token = $('#woocommerce_sqrip_return_token'),
+    ip_qrref_format = $('#woocommerce_sqrip_qr_reference_format');
 
     if (ip_token.length) {
         bt_check_token_html = '<button id="btn_sqrip_check_token" class="sqrip-btn sqrip-btn-validate-token">'+sqrip.txt_check_connection+'</button>';
@@ -227,6 +228,7 @@ jQuery( document ).ready(function($){
 
         if (data == "qrinvoice") {
             init_individual_address(ip_address.val());
+            init_ip_qrref_format();
         }
 
         else if (data == "comparison") {
@@ -567,4 +569,9 @@ jQuery( document ).ready(function($){
         })
     }
 
+    function init_ip_qrref_format(){
+        if (ip_qrref_format.hasClass('hide')) {
+            ip_qrref_format.closest('tr').hide();
+        }
+    }
 });

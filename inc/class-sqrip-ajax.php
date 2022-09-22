@@ -728,37 +728,28 @@ class Sqrip_Ajax {
 
 	function approve_order()
 	{
-	    if ( !$_POST['reference'] || !$_POST['order_id'] ) return;   
+	    if ( !$order_id = $_POST['order_id'] ) return;   
 
-	    $endpoint = 'approved-order';
-
-	    $body = '{
-		    "reference": "'.$_POST['reference'].'"
-		}';
-
-	    $response = sqrip_remote_request( $endpoint, $body, 'POST' );
-
+	  
 	   	$result = array(
 	    	'result' => false,
 	    	'message' => __('Something went wrong!', 'sqrip-swiss-qr-invoice')
 	    );
 
-	    if ($response->success) {
-	    	$order_id = $_POST['order_id'];
-	    	$status_completed = sqrip_get_plugin_option('status_completed');
-			$order = new WC_Order($order_id);
 
-			if ($order) {
-		        $order->update_status($status_completed);
-			    
-		        $result['result'] = true;
-		        $result['message'] = $response->message;
-	        }
+    	$status_completed = sqrip_get_plugin_option('status_completed');
+		$order = new WC_Order($order_id);
 
-	    } else {
-	        $result['result'] = false;
-	        $result['message'] = $response->message;
-	    }
+		if ($order) {
+	        $updated = $order->update_status($status_completed);
+		    
+		    if ($updated) {
+		    	$result['result'] = true;
+	        	$result['message'] = __('Order status updated', 'sqrip-swiss-qr-invoice');
+	    	}
+	        
+        }
+
 
 	    wp_send_json($result);
 	      
