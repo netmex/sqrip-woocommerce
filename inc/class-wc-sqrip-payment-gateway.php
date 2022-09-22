@@ -769,7 +769,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         return ob_get_clean();
     }
 
-        /**
+    /**
      * Generate Number Input HTML.
      *
      * @param string $key Field key.
