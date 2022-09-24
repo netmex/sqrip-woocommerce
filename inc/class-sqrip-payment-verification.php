@@ -18,8 +18,27 @@ class Sqrip_Payment_Verification {
     public function refresh_cron() {   
         $clear = $this->clear_cron();
 
-        $recurrence = sqrip_get_plugin_option('payment_frequence');
-        $times = sqrip_get_plugin_option('payment_frequence_time');
+        $recurrence = [
+            'monday',
+            'tuesday',
+            'wednesday',
+            'thursday',
+            'friday'
+        ];
+
+        $times = [
+            '10:00',
+            '23:00'
+        ];
+
+        /**
+         * @deprecated
+         * Payment Fréquence
+         * 24-09-2022
+         */
+
+        // $recurrence = sqrip_get_plugin_option('payment_frequence');
+        // $times = sqrip_get_plugin_option('payment_frequence_time');
         
         if (!is_array($recurrence)) {
             return;
