@@ -684,8 +684,11 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 
         if ( isset($response->active_service) ) {
 
+            $remaining_credits = $response->remaining_credits;
+            $remaining_credits = number_format($remaining_credits, 0, ".", "'");
+
             $service['iban'] = $response->iban;
-            $service['remaining_credits'] = $response->remaining_credits;
+            $service['remaining_credits'] = $remaining_credits;
             $service['active_service'] = $response->active_service;
 
             switch ($response->active_service) {

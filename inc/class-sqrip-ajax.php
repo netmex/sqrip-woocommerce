@@ -141,20 +141,23 @@ class Sqrip_Ajax {
 	    switch ($response->message) {
 	        case 'Valid simple IBAN':
 	            $result['result'] = true;
+	            $result['qriban'] = false;
 	            $result['message'] = __( "validated" , "sqrip" );
 	            $result['description'] = __('This is a normal IBAN. The customer can make deposits without noting the reference number (RF...). Therefore, automatic matching with orders is not guaranteed throughout. Manual processing may be necessary. A QR-IBAN is required for automatic matching. This is available for the same bank account. Information about this is available from your bank.', 'sqrip-swiss-qr-invoice');
-	            $result['bank'] = sprintf('Bank: <b>%s</b>', $bank);
+	            $result['bank'] = $bank ? sprintf('Bank: <b>%s</b>', $bank) : '';
 	            break;
 	        
 	        case 'Valid qr IBAN':
 	            $result['result'] = true;
+	            $result['qriban'] = true;
 	            $result['message'] = __( "validated" , "sqrip" );
 	            $result['description'] = __('This is a QR IBAN. The customer can make payments only by specifying a QR reference (number). You can uniquely assign the deposit to a customer / order. This enables automatic matching of payments received with orders. Want to automate this step? Contact us <a href="mailto:info@sqrip.ch">info@sqrip.ch</a>.', 'sqrip-swiss-qr-invoice');
-	            $result['bank'] = sprintf('Bank: <b>%s</b>', $bank);
+	            $result['bank'] = $bank ? sprintf('Bank: <b>%s</b>', $bank) : '';
 	            break;
 
 	        default:
 	            $result['result'] = false;
+	            $result['qriban'] = false;
 	            $result['message'] = __( "incorrect" , "sqrip" );
 	            $result['description'] = __('The (QR-)IBAN of your account to which the transfer should be made is ERROR.', 'sqrip-swiss-qr-invoice');
 	            break;
@@ -511,7 +514,7 @@ class Sqrip_Ajax {
 							<td>'.$customer_name.'</td>
 							<td>'.wc_price($order_unmatched->amount).'</td>
 							<td>'.wc_price($order_unmatched->paid_amount).'</td>
-							<td><a class="sqrip-approve" href="#" data-reference="'.$order_unmatched->reference.'" data-order_id="'.$order_id.'">Approve</a></td>
+							<td><a class="sqrip-approve" href="'.get_edit_post_link($order_id).'" data-reference="'.$order_unmatched->reference.'" data-order_id="'.$order_id.'">Approve</a></td>
 						</tr>';
 					}
 				$html .= '</tbody>

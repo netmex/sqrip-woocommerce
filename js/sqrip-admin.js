@@ -168,6 +168,12 @@ jQuery( document ).ready(function($){
                         _this.after(output_html);
                         _this.siblings('.sqrip-description').html(response.description);
                         _this.siblings('.sqrip-bank').html(response.bank);
+
+                        if (response.qriban) {
+                            ip_qrref_format.closest('tr').show();
+                        } else {
+                            ip_qrref_format.closest('tr').hide();
+                        }
                     }
                 },
                 error: function( jqXHR, textStatus, errorThrown ){

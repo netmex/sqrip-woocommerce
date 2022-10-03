@@ -91,6 +91,7 @@ function sqrip_prepare_qr_code_request_body($currency_symbol, $amount, $order_nu
     $qr_reference           = $plugin_options['qr_reference'];
     $address                = $plugin_options['address'];
     $lang                   = $plugin_options['lang'] ? $plugin_options['lang'] : "de";
+    $initial_digits         = $plugin_options['qr_reference_format'];
 
     $date                   = date('Y-m-d');
     $due_date_raw           = strtotime($date . " + ".$sqrip_due_date." days");
@@ -133,6 +134,13 @@ function sqrip_prepare_qr_code_request_body($currency_symbol, $amount, $order_nu
 	if ( $qr_reference == "order_number" ) {
 		$body['payment_information']['qr_reference'] = strval($order_number);
 	}
+
+    $token = $plugin_options['token'];
+    $iban_type = sqrip_validation_iban($iban, $token);
+  
+    if (isset($iban_type->message) &&  ($iban_type->message == 'Valid qr IBAN')){
+        $body['payment_information']['initial_digits'] = intval($initial_digits);
+    }
 
 	return $body;
 }
