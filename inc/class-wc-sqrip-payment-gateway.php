@@ -81,12 +81,12 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                         'title' => __( 'Fund Management', 'sqrip-swiss-qr-invoice' ),
                         'class' => $this->show_tab('enabled_fund_management'),
                     ],
-                    [
-                        'id' => 'reminders',
-                        'title' => __('Reminders', 'sqrip-swiss-qr-invoice'),
-                        'class' => $this->show_tab('enabled_reminder'),
-                        'description' => '',
-                    ],
+                    // [
+                    //     'id' => 'reminders',
+                    //     'title' => __('Reminders', 'sqrip-swiss-qr-invoice'),
+                    //     'class' => $this->show_tab('enabled_reminder'),
+                    //     'description' => '',
+                    // ],
                     [
                         'id' => 'refunds',
                         'title' => __('Refunds', 'sqrip-swiss-qr-invoice'),
@@ -379,30 +379,30 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'css'         => 'visibility: hidden; position: absolute',
                 'class'       => 'qrinvoice-tab' 
             ),
-            'status_reminders' => array(
-                'title'         => __( 'Status of awaiting payment orders', 'sqrip-swiss-qr-invoice' ),
-                'type'          => 'select',
-                'options'       => wc_get_order_statuses(),
-                'default' => 'wc-pending',
-                'description' => __('What is the order status that waits for confirmation of made payment to your bank account?
-                We will only check for payments at the bank account for these statuses.', 'sqrip-swiss-qr-invoice' ),
-                'class'       => 'reminders-tab'  
-            ),
-            'due_reminder' => array(
-                'title'       => __( 'Pas Due Reminder', 'sqrip-swiss-qr-invoice' ),
-                'type'        => 'number',
-                'default'     => 1,
-                'description' => __( 'How many days after the due date (see Tab "QR-Invoice", "Maturity") an e-mail should be send to the client.', 'sqrip-swiss-qr-invoice' ),
-                'css'         => "width:70px",
-                'class'       => 'reminders-tab'  
-            ),
-            'email_reminder' => array(
-                'title' => __( 'Email Template', 'sqrip-swiss-qr-invoice' ),
-                'description' => __( 'Choose the e-mail template to be used as reminder.', 'sqrip-swiss-qr-invoice' ),
-                'type' => 'select',
-                'options' => sqrip_get_wc_emails(),
-                'class'       => 'reminders-tab'  
-            ),
+            // 'status_reminders' => array(
+            //     'title'         => __( 'Status of awaiting payment orders', 'sqrip-swiss-qr-invoice' ),
+            //     'type'          => 'select',
+            //     'options'       => wc_get_order_statuses(),
+            //     'default' => 'wc-pending',
+            //     'description' => __('What is the order status that waits for confirmation of made payment to your bank account?
+            //     We will only check for payments at the bank account for these statuses.', 'sqrip-swiss-qr-invoice' ),
+            //     'class'       => 'reminders-tab'  
+            // ),
+            // 'due_reminder' => array(
+            //     'title'       => __( 'Pas Due Reminder', 'sqrip-swiss-qr-invoice' ),
+            //     'type'        => 'number',
+            //     'default'     => 1,
+            //     'description' => __( 'How many days after the due date (see Tab "QR-Invoice", "Maturity") an e-mail should be send to the client.', 'sqrip-swiss-qr-invoice' ),
+            //     'css'         => "width:70px",
+            //     'class'       => 'reminders-tab'  
+            // ),
+            // 'email_reminder' => array(
+            //     'title' => __( 'Email Template', 'sqrip-swiss-qr-invoice' ),
+            //     'description' => __( 'Choose the e-mail template to be used as reminder.', 'sqrip-swiss-qr-invoice' ),
+            //     'type' => 'select',
+            //     'options' => sqrip_get_wc_emails(),
+            //     'class'       => 'reminders-tab'  
+            // ),
 
             'section_general_settings' => array(
                 'title'         => __('General Settings', 'sqrip-swiss-qr-invoice' ),

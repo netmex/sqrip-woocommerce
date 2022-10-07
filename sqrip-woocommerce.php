@@ -76,13 +76,13 @@ function sqrip_plugin_init()
 {
     require_once __DIR__ . '/inc/class-sqrip-media-cleaner.php';
 
-    $enabled_reminder = sqrip_get_plugin_option('enabled_reminder');
+    // $enabled_reminder = sqrip_get_plugin_option('enabled_reminder');
 
-    if ($enabled_reminder == "yes") {
+    // if ($enabled_reminder == "yes") {
         
-        require_once __DIR__ . '/inc/class-sqrip-orders-reminder.php';
+    //     require_once __DIR__ . '/inc/class-sqrip-orders-reminder.php';
         
-    }
+    // }
 
     // $ebics_service = sqrip_get_plugin_option('ebics_service');
 
