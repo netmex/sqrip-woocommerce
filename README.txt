@@ -1,15 +1,15 @@
 === sqrip – Swiss QR Invoice ===
 Contributors: sqrip
 Donate link: https://sqrip.ch/
-Tags: woocommerce, payment, sqrip, qrcode, qr, scan, swiss qr invoice, QR-Rechnung, EBICS, QR-facture, bulletins de versement, Einzahlungsschein, QR-Einzahlungsschein, bulletins de versement, Swiss QR Code, code QR, QR-fattura, polizze di versamento
+Tags: woocommerce, payment, sqrip, qrcode, qr, scan, Kontoabgleich, swiss qr invoice, QR-Rechnung, EBICS, QR-facture, bulletins de versement, Einzahlungsschein, QR-Einzahlungsschein, bulletins de versement, Swiss QR Code, code QR, QR-fattura, polizze di versamento
 Requires at least: 4.7
-Tested up to: 5.9
-Stable tag: 1.5.4
+Tested up to: 6.0
+Stable tag: 1.5.5
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-sqrip – Modern and clever WooCommerce tools for the most widely used payment method in Switzerland: the bank transfers. 
+sqrip – A comprehensive and clever WooCommerce finance tool for the most widely used payment method in Switzerland: the bank transfers. 
 
 == Description ==
 At the end of September 2022, the traditional inpayment slips (ISR) for bank transfers in Switzerland will disappear. The replacement will be the "QR bill" (https://www.einfach-zahlen.ch/), which was introduced in July 2020.
@@ -40,8 +40,12 @@ The bank account to which the invoice amount should be transferred. If this acco
 d) (QR) reference number
 The reference number is either created randomly or calculated on the basis of the order number. It automatically adapts to the IBAN format used.
 
-e) Due date
-The time given to the payer to settle the invoice may be communicated as text on the payment part.
+e) additional information
+On up to three lines additional information can be added to the QR invoice. This includes 
+- the due date (The time given to the payer to settle the invoice may be communicated as text on the payment part.).
+- the order number (Be aware: sqrip not use the order# of the plugin "WoCommerce Sequential Order Numbers")
+- any additional text (e.g. URL of webshop, thank you message)
+This fiels supports WPML.
 
 f) Integration
 Define the e-mail to which the qr-invoice will be attached to.
@@ -53,8 +57,8 @@ The QR invoice can be enclosed with the e-mail in two ways:
 - only the payment section (formerly "payment slip") in A6 format.
 
 h) Language
-- The language to be used on the QR invoice (de, fr, it, en) can be set per store.
-- WPML is supported.
+- The default language to be used on the QR invoice (de, fr, it, en) can be set per store.
+- WPML is supported. For multilanguage sites, it's possible to display the QR invoice in the language selected by the customer.
 
 i) Test e-mail
 With one click, you can test the settings and see how the QR invoice is received by your customers.
@@ -105,11 +109,27 @@ Yes. We are already working on comparing the reconciliation of orders/purchases 
 4. sqrip API Key
 
 == Changelog ==
-= 1.4.2 =
-* Add company field to QRCode
-* Remove Duplicate due date field
+= 1.5.4 =
+* Add Refund token validation;
+* Shows QR-invoice on checkout screen;
+* Deletes unnecessary/old QR-invoices in media library.
 
-= 1.4.1 =
+= 1.5.3 =
+* Bug fixes
+
+= 1.5.2 =
+* New pictures added to wordpress entry;
+* deleted the hash # in the default field after report of problems with certain banking Apps;
+* ZIP-Codes with initial "CH-" are now possible;
+* Added company field to payee address.
+
+= 1.5.1 =
+* Use default settings if sqrip WC options have not been set before.
+
+= 1.5 =
+* Added company field to QRCode;
+* More flexibility with additional information on the QR invoice;
+* Remove Duplicate due date field;
 * Text adjustments;
 * Minor bug fixes.
 

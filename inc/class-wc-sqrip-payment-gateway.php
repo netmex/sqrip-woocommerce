@@ -244,11 +244,15 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'class'       => 'qrinvoice-tab'  
             ),
             'expired_date' => array(
+                'title'       => sprintf( 
+                    __( 'Delete QR-Invoices automatically after %s days.', 'sqrip-swiss-qr-invoice' ), 
+                    $this->get_option('expired_date')
+                ),
                 'title'       => __( 'Delete QR-Invoices automatically after', 'sqrip-swiss-qr-invoice' ),
-                'type'        => 'number',
                 'label'       => __( 'days.', 'sqrip-swiss-qr-invoice' ),
-                'description' => __( 'Keep the size of your media library small. sqrip deletes for you all the not anymore needed qr-invoices.',  'sqrip-swiss-qr-invoice' ),
-                'default'     => 30,
+                'description' => __( 'Keep the size of your media library small. sqrip deletes all qr-invoice files that are not needed anymore.',  'sqrip-swiss-qr-invoice' ),
+                'type'        => 'number',
+                'default'     => 10,
                 'css'         => "width:70px",
                 'class'       => 'qrinvoice-tab'  
             ),
