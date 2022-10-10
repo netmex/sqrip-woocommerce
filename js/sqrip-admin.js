@@ -52,6 +52,7 @@ jQuery( document ).ready(function($){
                     if(response) {
                         if (response.result) {
                             result = "updated";
+                            _this.closest('form').submit();
                         } else {
                             result = "error";
                         }
