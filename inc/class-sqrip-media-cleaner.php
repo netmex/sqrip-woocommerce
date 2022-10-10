@@ -1,4 +1,11 @@
 <?php 
+
+/**
+ * sqrip Media Cleaner
+ *
+ * @since 1.6
+ */
+
 class Sqrip_Media_Clearner {
 
     public $cron_hook;

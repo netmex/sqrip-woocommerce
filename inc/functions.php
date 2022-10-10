@@ -1,11 +1,42 @@
 <?php
 
+/**
+ * Gets a single option and uses the setting default if the value has not been set yet
+ * @param $key
+ * @return mixed|string|null
+ */
 function sqrip_get_plugin_option($key) {
-	$plugin_options     = get_option('woocommerce_sqrip_settings', array());
-	if($plugin_options && array_key_exists($key, $plugin_options)) {
+	$plugin_options = get_option('woocommerce_sqrip_settings', array());
+
+	// option exists in DB
+    if($plugin_options && array_key_exists($key, $plugin_options)) {
 		return $plugin_options[$key];
 	}
+
+    $gateway = new WC_Sqrip_Payment_Gateway();
+    $form_fields = $gateway->get_form_fields();
+
+    // Get option default from form fields if possible.
+    if ( isset( $form_fields[ $key ] ) ) {
+        return $gateway->get_field_default( $form_fields[ $key ] );
+    }
+
 	return null;
+}
+
+/**
+ * Gets all the plugin options and uses the setting defaults if values have not been set yet
+ * @return false|mixed
+ */
+function sqrip_get_plugin_options() {
+    $plugin_options = get_option('woocommerce_sqrip_settings', array());
+    $gateway = new WC_Sqrip_Payment_Gateway();
+    $form_fields = $gateway->get_form_fields();
+    $missing_settings = array_diff_key($form_fields, $plugin_options);
+    foreach($missing_settings as $key => $missing_setting) {
+        $plugin_options[$key] = isset( $form_fields[ $key ] ) ? $gateway->get_field_default( $form_fields[ $key ] ) : null;
+    }
+    return $plugin_options;
 }
 
 function sqrip_prepare_remote_args($body, $method, $token = null) {
@@ -48,21 +79,19 @@ function sqrip_remote_request( $endpoint, $body = '', $method = 'GET', $token = 
  * @param WC_Order $order woocommerce order
  *
  * @return array Array with the address correctly formatted for the
-*                payable_to / payable_by fields in the sqrip API
+ *         payable_to / payable_by fields in the sqrip API
  */
 function sqrip_get_billing_address_from_order($order) {
 	$order_data = $order->get_data();
     $company = isset($order_data['billing']['company']) ? $order_data['billing']['company'] : "";
 
 	$billing_address = array(
-        'name' => $order_data['billing']['first_name'] . ' ' . $order_data['billing']['last_name'],
-        'street' => $order_data['billing']['address_1'] . ($order_data['billing']['address_2'] ? ', ' . $order_data['billing']['address_2'] : ""),
-        'postal_code' => $order_data['billing']['postcode'],
-        'name'            => $order_data['billing']['first_name'] . ' ' . $order_data['billing']['last_name'],
-        'street'          => $order_data['billing']['address_1'] . ($order_data['billing']['address_2'] ? ', ' . $order_data['billing']['address_2'] : ""),
-        'town' => $order_data['billing']['city'],
-        'country_code' => $order_data['billing']['country']
-    );
+		'name'            => $order_data['billing']['first_name'] . ' ' . $order_data['billing']['last_name'],
+		'street'          => $order_data['billing']['address_1'] . ($order_data['billing']['address_2'] ? ', ' . $order_data['billing']['address_2'] : ""),
+		'postal_code'     => $order_data['billing']['postcode'],
+		'town' => $order_data['billing']['city'],
+		'country_code'    => $order_data['billing']['country']
+	);
 
     if ( !empty($company) ) {
         $billing_address['company'] = $company;
@@ -83,18 +112,17 @@ function sqrip_get_billing_address_from_order($order) {
  * @return array|false
  */
 function sqrip_prepare_qr_code_request_body($currency_symbol, $amount, $order_number) {
-    $plugin_options         = get_option('woocommerce_sqrip_settings', array());
-    $sqrip_due_date         = $plugin_options['due_date'];
-    $iban                   = $plugin_options['iban'];
+	$plugin_options         = sqrip_get_plugin_options();
+	$sqrip_due_date         = $plugin_options['due_date'];
+	$iban                   = $plugin_options['iban'];
 
-    $product                = $plugin_options['product'];
-    $qr_reference           = $plugin_options['qr_reference'];
-    $address                = $plugin_options['address'];
-    $lang                   = $plugin_options['lang'] ? $plugin_options['lang'] : "de";
-    $initial_digits         = $plugin_options['qr_reference_format'];
+	$product                = $plugin_options['product'];
+	$qr_reference           = $plugin_options['qr_reference'];
+	$address                = $plugin_options['address'];
+	$lang                   = $plugin_options['lang'] ? $plugin_options['lang'] : "de";
 
-    $date                   = date('Y-m-d');
-    $due_date_raw           = strtotime($date . " + ".$sqrip_due_date." days");
+	$date                   = date('Y-m-d');
+	$due_date_raw           = strtotime($date . " + ".$sqrip_due_date." days");
     $due_date               = date('Y-m-d', $due_date_raw);
 
     $additional_information = $plugin_options['additional_information'];
@@ -117,30 +145,23 @@ function sqrip_prepare_qr_code_request_body($currency_symbol, $amount, $order_nu
 
 	$body = [
 		"iban" => [
-			"iban" => $iban,
+			"iban"  => $iban,
 		],
 		"payment_information" =>
 			[
-				"currency_symbol" => $currency_symbol,
-				"amount"    => $amount,
-                "message"   => $additional_information
+				"currency_symbol"   => $currency_symbol,
+				"amount"            => $amount,
+                "message"           => $additional_information
 			],
-		"lang"    => $lang,
-		"product" => $product,
-		"source"  => "woocommerce"
+		"lang"      => $lang,
+		"product"   => $product,
+		"source"    => "woocommerce"
 	];
 
 	// If the user selects "Order Number" the API request will include param "qr_reference"
 	if ( $qr_reference == "order_number" ) {
 		$body['payment_information']['qr_reference'] = strval($order_number);
 	}
-
-    $token = $plugin_options['token'];
-    $iban_type = sqrip_validation_iban($iban, $token);
-  
-    if (isset($iban_type->message) &&  ($iban_type->message == 'Valid qr IBAN')){
-        $body['payment_information']['initial_digits'] = intval($initial_digits);
-    }
 
 	return $body;
 }
@@ -387,69 +408,4 @@ function sqrip_get_locale_by_lang($lang) {
         $locale = $lang;
     }
     return $locale;
-}
-
-
-function sqrip_get_active_service($param = ""){
-    $endpoint   = 'get-active-service-type';
-
-    $service = [
-        "iban"                  => "XXXX XXXX XXXX XXXX",
-        "remaining_credits"     => "0",
-        "active_service"        => "none",
-        "active_service_txt"    => __('No service active', 'sqrip-swiss-qr-invoice')
-    ];
-
-    $response = sqrip_remote_request($endpoint);  
-
-    if ( isset($response->active_service) ) {
-
-        $service['iban'] = $response->iban;
-        $service['remaining_credits'] = $response->remaining_credits;
-        $service['active_service'] = $response->active_service;
-
-        switch ($response->active_service) {
-            case 'camt_upload_service':
-                $service['active_service_txt'] = __('You have CAMT File upload service active', 'sqrip-swiss-qr-invoice');
-                break;
-
-            case 'ebics_service':
-                $service['active_service_txt'] = __('You have EBICS service active', 'sqrip-swiss-qr-invoice');
-                break;
-            
-            default:
-                $service['active_service_txt'] = __('No service active', 'sqrip-swiss-qr-invoice');
-                break;
-        }
-
-    }  
-
-    return !empty($param) ? $service[$param] : $service;
-}
-
-function sqrip_get_awaiting_orders(){
-    $status_awaiting = sqrip_get_plugin_option('status_awaiting');
-
-    $awaiting_orders = (array) wc_get_orders( array(
-        'limit'         => -1,
-        'status'        => $status_awaiting,
-        'meta_key'          => 'sqrip_reference_id', 
-        'meta_compare'      => '!=', 
-        'meta_value'        => ' ',
-    ) );
-
-    $orders = [];
-
-    if ( sizeof($awaiting_orders) > 0 ) {
-        foreach ( $awaiting_orders as $aw_order ) {
-            $order['order_id']  = $aw_order->get_id();
-            $order['amount']    = $aw_order->get_total();
-            $order['reference'] = $aw_order->get_meta('sqrip_reference_id');
-            $order['date']      = $aw_order->get_date_created()->date('Y-m-d H:i:s');
-
-            array_push($orders, $order);
-        }
-    } 
-
-    return $orders;
 }
