@@ -23,6 +23,8 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             'products'
         );
 
+
+
         // Method with all the options fields
         $this->init_form_fields();
 
@@ -108,7 +110,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             'remaining_credits' => array(
                 'title'       => __( 'Remaining Credits', 'sqrip-swiss-qr-invoice' ),
                 'type'        => 'info',
-                'label'       => $this->get_active_service('remaining_credits'),
+                'label'       => $this->get_ebics_overview('remaining_credits'),
                 'class'       => 'services-tab' 
             ),
             'section_qr_invoices' => array(
@@ -161,8 +163,8 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             'active_service' => array(
                 'title'       => __( 'Connected services', 'sqrip-swiss-qr-invoice' ),
                 'type'        => 'info',
-                'label'       => $this->get_active_service('active_service_txt'),
-                'class'       => 'services-tab '.$this->get_active_service('active_service'), 
+                'label'       => $this->get_ebics_overview('active_service_txt'),
+                'class'       => 'services-tab '.$this->get_ebics_overview('active_service'), 
             ),
             'section_fund_management' => array(
                 'title'         => __('Fund Management', 'sqrip-swiss-qr-invoice' ),
@@ -183,7 +185,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'type'        => 'info',
                 'label'        => sprintf( 
                     __( 'You forward your payments to %s', 'sqrip-swiss-qr-invoice' ), 
-                    $this->get_fund_management('main_account'),
+                    $this->get_ebics_overview('main_account'),
                 ),
                 'description'       => __( 'In order to forward the payments from your incoming bank account to your main bank account, please configure this service on sqrip.ch', 'sqrip-swiss-qr-invoice' ),
                 'class'       => 'services-tab',
@@ -512,7 +514,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             'account_qr_iban' => array(
                 'title'       => __( 'Account (QR-)IBAN', 'sqrip-swiss-qr-invoice' ),
                 'type'        => 'info',
-                'label'        => $this->get_fund_management('account_iban'),
+                'label'        => $this->get_ebics_overview('account_iban'),
                 'class'       => 'fund-management-tab',
             ),
             'account_balance' => array(
@@ -520,7 +522,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'type'        => 'info',
                 'label'        => sprintf( 
                     __( '%s as per %s', 'sqrip-swiss-qr-invoice' ), 
-                    $this->get_fund_management('account_balance'),
+                    $this->get_ebics_overview('account_balance'),
                     current_time('d.m.Y h:i')
                 ),
                 'class'       => 'fund-management-tab',
@@ -528,13 +530,13 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             'trigger_level' => array(
                 'title'       => __( 'Trigger Level', 'sqrip-swiss-qr-invoice' ),
                 'type'        => 'info',
-                'label'        => $this->get_fund_management('trigger_level'),
+                'label'        => $this->get_ebics_overview('trigger_level'),
                 'class'       => 'fund-management-tab',
             ),
             'trigger_periodicity' => array(
                 'title'       => __( 'Trigger periodicity', 'sqrip-swiss-qr-invoice' ),
                 'type'        => 'info',
-                'label'        => $this->get_fund_management('trigger_periodicity'),
+                'label'        => $this->get_ebics_overview('trigger_periodicity'),
                 'class'       => 'fund-management-tab',
             ),
             'fund_forward_payments' => array(
@@ -542,7 +544,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'type'        => 'info',
                 'label'        => sprintf( 
                     __( 'You forward your payments to %s', 'sqrip-swiss-qr-invoice' ), 
-                    $this->get_fund_management('main_account'),
+                    $this->get_ebics_overview('main_account'),
                 ),
                 'class'       => 'fund-management-tab',
             ),
@@ -596,9 +598,8 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         return $return == 'Valid qr IBAN' ? '' : 'hide';
     }
 
-    public function get_fund_management($param = "")
+    public function get_fund_management($response)
     {
-        $endpoint   = 'get-fund-management-details';
 
         $service = [
             "account_iban" => "XXXX XXXX XXXX XXXX",
@@ -608,14 +609,6 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             "account_balance" => "XXX.XXX",
             "trigger_periodicity"=> 'XXX', 
         ];
-
-        if (!isset($service[$param])) {
-            return;
-        }
-
-        $response = sqrip_remote_request($endpoint);  
-
-        // var_dump($response); exit;
 
         if ( isset($response->main_account) ) {
 
@@ -663,24 +656,33 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 
         }  
 
-        return !empty($param) ? $service[$param] : $service;
+        return $service;
+    }
+
+    public function get_ebics_overview($param = ""){
+        $endpoint = 'get-ebics-overview';
+
+        $response = sqrip_remote_request($endpoint);  
+
+        $service = $this->get_active_service($response);
+        $fund = $this->get_fund_management($response);
+
+        $return = array_merge($service, $fund);
+
+
+
+        return !empty($param) ? $return[$param] : $return;
     }
 
 
-    public function get_active_service($param = "")
+    public function get_active_service($response)
     {
-        $endpoint   = 'get-active-service-type';
-
         $service = [
             "iban"                  => "XXXX XXXX XXXX XXXX",
             "remaining_credits"     => "0",
             "active_service"        => "none",
             "active_service_txt"    => __('No service active', 'sqrip-swiss-qr-invoice')
         ];
-
-        $response = sqrip_remote_request($endpoint);  
-
-        // var_dump($response); exit;
 
         if ( isset($response->active_service) ) {
 
@@ -707,7 +709,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 
         }  
 
-        return !empty($param) ? $service[$param] : $service;
+        return $service;
     }
 
     public function get_address_options()
@@ -994,13 +996,22 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             $settings->add_message( $message );
         }  
 
+        if ( isset($response->status) && $response->status== "inactive" ) {
+
+            unset($_POST['woocommerce_sqrip_enabled']);
+
+            $settings = new WC_Admin_Settings();
+
+            $settings->add_error( __( 'The (QR-)IBAN has been changed. Please confirm the new (QR-)IBAN in your sqrip.ch account.', 'sqrip-swiss-qr-invoice' ) );
+        }  
+
     }
 
     public function process_admin_options()
     {
         $post_data  = $this->get_post_data();
 
-        $this->check_iban_status($post_data);
+        // $this->check_iban_status($post_data);
 
         $this->update_iban($post_data);
 

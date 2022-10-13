@@ -228,6 +228,8 @@ function sqrip_get_user_details($token = "")
 
     $body_decode   = sqrip_remote_request($endpoint, '', 'GET', $token); 
 
+    error_log(print_r($body_decode, true));
+
     $result = []; 
 
     if ($body_decode) {
