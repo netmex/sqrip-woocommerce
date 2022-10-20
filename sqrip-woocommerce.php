@@ -364,9 +364,16 @@ function sqrip_qr_action_order_details_after_order_table($order)
             echo '<div class="sqrip-qrcode-pdf"><p>' . __( 'Use the QR invoice below to pay the outstanding balance.' , 'sqrip-swiss-qr-invoice') . '</p><a class="button button-sqrip-invoice" href="' . esc_url($pdf_file) . '" >'. __('Download Invoice','sqrip-swiss-qr-invoice').' <i class="dashicons dashicons-pdf"></i></a></div>';
         }
 
-        if ( is_wc_endpoint_url( 'view-order' ) ) {
-            echo '<div class="sqrip-generate-new-qrcode"><button id="sqripGenerateNewQRCode" data-order="'.esc_attr($order_id).'" class="button button-sqrip-generate-qrcode">'. __('Generate new QR code','sqrip-swiss-qr-invoice'). '</a></button>';
-        }
+        /**
+         *  Insert Generate New QR code PNG after customer details
+         * 
+         *  @deprecated
+         *  @since 1.5.6
+         */
+
+        // if ( is_wc_endpoint_url( 'view-order' ) ) {
+        //     echo '<div class="sqrip-generate-new-qrcode"><button id="sqripGenerateNewQRCode" data-order="'.esc_attr($order_id).'" class="button button-sqrip-generate-qrcode">'. __('Generate new QR code','sqrip-swiss-qr-invoice'). '</a></button>';
+        // }
 
         echo '</div>';
     }
