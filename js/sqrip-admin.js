@@ -430,17 +430,13 @@ jQuery( document ).ready(function($){
     })
     
 
-    // if (camt_service.length) {
-    //     camt_service.on('change', function(e){
-    //         toggle_service_options($(this).is('::checked'), $('.camt-service'));
-    //     })
-    // }
+    if (camt_service.length && camt_service.is(':disabled')) {
+        camt_service.prop('checked', false);
+    }
 
-    // if (ebics_service.length) {
-    //     ebics_service.on('change', function(){
-    //         toggle_service_options($(this).is(':checked'), $('.ebics-service'));
-    //     })
-    // }
+    if (ebics_service.length && ebics_service.is(':disabled')) {
+        ebics_service.prop('checked', false);
+    }
 
     function sqrip_ajax(form_data, element){
         element.find('.sqrip-notice').remove();

@@ -57,6 +57,8 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
     {
 
         require __DIR__ . '/countries-array.php';
+
+        $active_service = $this->get_ebics_overview('active_service');
     
         $this->form_fields = array(
             'tabs' => array(
@@ -76,7 +78,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                         'id' => 'comparison',
                         'title' => __( 'Payment Comparison', 'sqrip-swiss-qr-invoice' ),
                         'description' => '',
-                        'class' => $this->show_tab('ebics_service,camt_service'),
+                        'class' => $active_service == "none" ? 'hide' : $this->show_tab('ebics_service,camt_service'),
                     ],
                     [
                         'id' => 'fund-management',
@@ -148,6 +150,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'type'        => 'checkbox',
                 'description' => '',
                 'default'     => 'no',
+                'disabled'    => $active_service == "none" ? true : false,
                 'class'       => 'services-tab',
                 'custom_attributes' => ['data-enable' => 'comparison']
             ),
@@ -157,6 +160,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'type'        => 'checkbox',
                 'description'   => __('Payment verification will be done twice on every working day.', 'sqrip-swiss-qr-invoice'),
                 'default'     => 'no',
+                'disabled'    => $active_service == "none" ? true : false,
                 'class'       => 'services-tab',
                 'custom_attributes' => ['data-enable' => 'comparison']
             ),
@@ -164,7 +168,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'title'       => __( 'Connected services', 'sqrip-swiss-qr-invoice' ),
                 'type'        => 'info',
                 'label'       => $this->get_ebics_overview('active_service_txt'),
-                'class'       => 'services-tab '.$this->get_ebics_overview('active_service'), 
+                'class'       => 'services-tab '.$active_service, 
             ),
             'section_fund_management' => array(
                 'title'         => __('Fund Management', 'sqrip-swiss-qr-invoice' ),
