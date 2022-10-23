@@ -52,19 +52,19 @@ jQuery( document ).ready(function($){
                     if(response) {
                         if (response.result) {
                             result = "updated";
-                            _this.closest('form').submit();
+                            btn_save.trigger('click');
                         } else {
                             result = "error";
                         }
 
-                        output_html = '<div class="sqrip-notice '+result+'">';
-                        output_html += '<p>'+response.message+'</p>';
-                        output_html += '</div>';
-                        _this.after(output_html);
+                        // output_html = '<div class="sqrip-notice '+result+'">';
+                        // output_html += '<p>'+response.message+'</p>';
+                        // output_html += '</div>';
+                        // _this.after(output_html);
 
-                        if (response.address) {
-                            ip_address.find('option[value="sqrip"]').text(response.address);
-                        }
+                        // if (response.address) {
+                        //     ip_address.find('option[value="sqrip"]').text(response.address);
+                        // }
                     }
                 },
                 error: function( jqXHR, textStatus, errorThrown ){
