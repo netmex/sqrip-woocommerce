@@ -378,10 +378,10 @@ class Sqrip_Ajax {
 
         		$html = $this->get_table_results($response, $orders);
 
-        		//if ( $send_report === "true" ) {
-        		// 	$email_html = $this->get_table_results($response, $orders, true, $rp_options);
-   	 			// 	$this->send_report($email_html);
-   	 			// }
+        		if ( $send_report === "true" ) {
+        			$email_html = $this->get_table_results($response, $orders, true, $rp_options);
+   	 				$this->send_report($email_html);
+   	 			}
 
         		wp_send_json(array(
 					'html' => $html,
