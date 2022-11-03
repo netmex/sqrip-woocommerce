@@ -37,8 +37,8 @@ class Sqrip_Payment_Verification {
          * 24-09-2022
          */
 
-        // $recurrence = sqrip_get_plugin_option('payment_frequence');
-        // $times = sqrip_get_plugin_option('payment_frequence_time');
+        $recurrence = sqrip_get_plugin_option('payment_frequence');
+        $times = sqrip_get_plugin_option('payment_frequence_time');
         
         if (!is_array($recurrence)) {
             return;

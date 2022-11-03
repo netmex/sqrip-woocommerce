@@ -451,41 +451,35 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'type'          => 'section',
                 'class'       => 'comparison-tab ebics-service' 
             ),
-
-            /**
-             * @deprecated
-             * Payment Fréquence
-             * 24-09-2022
-             */
-            // 'payment_frequence' => array(
-            //     'title'       => __( 'Payment Fréquence', 'sqrip-swiss-qr-invoice' ),
-            //     'type'        => 'multiselect',
-            //     'options'       => array(
-            //         'monday'        => __( 'Monday' , 'sqrip-swiss-qr-invoice' ),
-            //         'tuesday'       => __( 'Tuesday' , 'sqrip-swiss-qr-invoice' ),
-            //         'wednesday'     => __( 'Wednesday' , 'sqrip-swiss-qr-invoice' ),
-            //         'thursday'      => __( 'Thursday' , 'sqrip-swiss-qr-invoice' ),
-            //         'friday'        => __( 'Friday' , 'sqrip-swiss-qr-invoice' ),
-            //         'saturday'      => __( 'Saturday' , 'sqrip-swiss-qr-invoice' ),
-            //         'sunday'        => __( 'Sunday' , 'sqrip-swiss-qr-invoice' ),
+            'payment_frequence' => array(
+                'title'       => __( 'Payment Fréquence', 'sqrip-swiss-qr-invoice' ),
+                'type'        => 'multiselect',
+                'options'       => array(
+                    'monday'        => __( 'Monday' , 'sqrip-swiss-qr-invoice' ),
+                    'tuesday'       => __( 'Tuesday' , 'sqrip-swiss-qr-invoice' ),
+                    'wednesday'     => __( 'Wednesday' , 'sqrip-swiss-qr-invoice' ),
+                    'thursday'      => __( 'Thursday' , 'sqrip-swiss-qr-invoice' ),
+                    'friday'        => __( 'Friday' , 'sqrip-swiss-qr-invoice' ),
+                    'saturday'      => __( 'Saturday' , 'sqrip-swiss-qr-invoice' ),
+                    'sunday'        => __( 'Sunday' , 'sqrip-swiss-qr-invoice' ),
                     
-            //     ),
-            //     'class'         => 'comparison-tab ebics-service'  
-            // ),
-            // 'payment_frequence_time' => array(
-            //     'type'        => 'multiselect',
-            //     'options'     => array(
-            //         '04:00'      => '04:00',
-            //         '08:00'      => '08:00',
-            //         '13:00'      => '13:00',
-            //         '18:00'      => '18:00',
-            //         '21:00'      => '21:00',
-            //     ),
-            //     'description'   => __( 'Select the days and the time when sqrip should execute a comparison of the awaiting payment orders with your bank account.</br>
-            //         We charge your account for every comparison made.', 'sqrip-swiss-qr-invoice' ),
-            //     'desc_tip'      => __('Based on your selection, your weekly cost for this service is X credits.', 'sqrip-swiss-qr-invoice'),
-            //     'class'       => 'comparison-tab ebics-service'  
-            // ),
+                ),
+                'class'         => 'comparison-tab ebics-service'  
+            ),
+            'payment_frequence_time' => array(
+                'type'        => 'multiselect',
+                'options'     => array(
+                    '04:00'      => '04:00',
+                    '08:00'      => '08:00',
+                    '13:00'      => '13:00',
+                    '18:00'      => '18:00',
+                    '21:00'      => '21:00',
+                ),
+                'description'   => __( 'Select the days and the time when sqrip should execute a comparison of the awaiting payment orders with your bank account.</br>
+                    We charge your account for every comparison made.', 'sqrip-swiss-qr-invoice' ),
+                'desc_tip'      => __('Based on your selection, your weekly cost for this service is X credits.', 'sqrip-swiss-qr-invoice'),
+                'class'       => 'comparison-tab ebics-service'  
+            ),
 
             'comparison_report' => array(
                 'title'       => __( 'Send report to Admin E-Mail', 'sqrip-swiss-qr-invoice' ),
@@ -984,7 +978,8 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
          */
 
         if ( isset($response->confirmation_type) ) {
-
+            $message = '';
+            
             switch ($response->confirmation_type) {
                 case 'active':
                     $message = __( 'IBAN changes: Active confirmation (see API key in sqrip.ch account).' , 'sqrip-swiss-qr-invoice' );
@@ -995,9 +990,11 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                     break;
             }
             
-            $settings = new WC_Admin_Settings();
-
-            $settings->add_message( $message );
+            if ($message) {
+                $settings = new WC_Admin_Settings();
+                $settings->add_message( $message );
+            }
+            
         }  
 
         if ( isset($response->status) && $response->status== "inactive" ) {

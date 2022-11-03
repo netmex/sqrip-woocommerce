@@ -278,19 +278,23 @@ class Sqrip_Ajax {
 	    check_ajax_referer('sqrip-admin-settings', 'nonce');
 
 	    $local_file = $_FILES['file']['tmp_name'];
+	    $orders = sqrip_get_awaiting_orders();
 
 	    $boundary = md5( time() . 'xml' );
 	    $payload  = '';
-	    $payload .= '--' . $boundary;
-	    $payload .= "\r\n";
+	    $payload .= '--' . $boundary. "\r\n";
+
 	    $payload .= 'Content-Disposition: form-data; name="camt_file"; filename="' . $_FILES['file']['name'] . '"' . "\r\n";
-	    $payload .= 'Content-Type: application/xml \r\n'; // If you know the mime-type
+	    $payload .= 'Content-Type: application/xml \r\n'; 
 	    $payload .= 'Content-Transfer-Encoding: binary' . "\r\n";
 	    $payload .= "\r\n";
 	    $payload .= file_get_contents( $local_file );
 	    $payload .= "\r\n";
-	    $payload .= '--' . $boundary . '--';
-	    $payload .= "\r\n\r\n";
+	    $payload .= '--' . $boundary . "\r\n";
+	    $payload .= 'Content-Disposition: form-data; name="orders"' . "\r\n";
+		$payload .= 'Content-Type: application/json' . "\r\n\r\n";
+		$payload .= json_encode($orders) . "\r\n";
+		$payload .= '--' . $boundary . '--' . "\r\n";
 
 	    $args = array(
 	            'method'  => 'POST',
