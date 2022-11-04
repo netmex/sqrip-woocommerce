@@ -519,11 +519,20 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         $qr_reference   = $post_data['woocommerce_sqrip_qr_reference'];
         $lang           = isset($post_data['woocommerce_sqrip_lang']) ? $post_data['woocommerce_sqrip_lang'] : "de";
 
+        $plugin_options         = sqrip_get_plugin_options();
+        $additional_information = $plugin_options['additional_information'];
+
         // Integration By default is attachment.
         $integration    = 'attachment';
 
         $date               = date('Y-m-d');
         $due_date           = date('Y-m-d', strtotime($date . " + ".$sqrip_due_date." days"));
+        $due_date_raw       = strtotime($date . " + ".$sqrip_due_date." days");
+
+
+        if($additional_information) {
+            $additional_information = sqrip_additional_information_shortcodes($additional_information, $lang, $due_date_raw, 11111);
+        }
 
         $body = [
             "iban" => [
@@ -541,7 +550,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             [
                 "currency_symbol" => 'CHF',
                 "amount" => 107.77,
-                "due_date" => $due_date,
+                "message" => $additional_information
             ],
             "lang" => $lang,
             "product" => $product,
