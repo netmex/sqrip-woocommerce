@@ -57,10 +57,10 @@ jQuery( document ).ready(function($){
                             result = "error";
                         }
 
-                        // output_html = '<div class="sqrip-notice '+result+'">';
-                        // output_html += '<p>'+response.message+'</p>';
-                        // output_html += '</div>';
-                        // _this.after(output_html);
+                        output_html = '<div class="sqrip-notice '+result+'">';
+                        output_html += '<p>'+response.message+'</p>';
+                        output_html += '</div>';
+                        _this.after(output_html);
 
                         // if (response.address) {
                         //     ip_address.find('option[value="sqrip"]').text(response.address);
