@@ -18,31 +18,14 @@ class Sqrip_Payment_Verification {
     public function refresh_cron() {   
         $clear = $this->clear_cron();
 
-        $recurrence = [
-            'monday',
-            'tuesday',
-            'wednesday',
-            'thursday',
-            'friday'
-        ];
-
-        $times = [
-            '10:00',
-            '23:00'
-        ];
-
-        /**
-         * @deprecated
-         * Payment Fréquence
-         * 24-09-2022
-         */
-
         $recurrence = sqrip_get_plugin_option('payment_frequence');
         $times = sqrip_get_plugin_option('payment_frequence_time');
         
-        if (!is_array($recurrence)) {
+        if (!is_array($recurrence) || !is_array($times)) {
             return;
         }
+
+        $this->send_to_api($recurrence, $times);
 
         $hour = 0;
         $min = 0;
@@ -67,6 +50,30 @@ class Sqrip_Payment_Verification {
         }    
 
         return $setup_cron;    
+    }
+
+    public function send_to_api($recurrence, $times){
+        $endpoint = 'plugin-settings';
+
+        $hours = [];
+        foreach ($times as $time) {
+            $time_arr = explode(':', $time);
+
+            if (is_array($time_arr)) {
+                $hours[] = $time_arr[0];
+            }
+        }
+
+        $plugin_url = site_url( 'wp-cron.php' );
+
+        $body = '{
+           "period": "all",
+           "hours": '.json_encode($hours).',
+           "week_days": '.json_encode($recurrence).',
+           "plugin_url": "'.$plugin_url.'"
+        }';
+
+        $response = sqrip_remote_request($endpoint, $body, 'POST');  
     }
 
     public function setup_cron($timestamp){

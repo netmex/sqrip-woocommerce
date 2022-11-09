@@ -31,9 +31,9 @@ function sqrip_prepare_remote_args($body, $method, $token = null) {
 function sqrip_remote_request( $endpoint, $body = '', $method = 'GET', $token = "" )
 {
     $args = sqrip_prepare_remote_args($body, $method, $token);
-
+    
     $response = wp_remote_request(SQRIP_ENDPOINT.$endpoint, $args);
-
+    
     if ( is_wp_error($response) ) return;
 
     $body = wp_remote_retrieve_body($response);
