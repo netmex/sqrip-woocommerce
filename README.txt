@@ -109,6 +109,9 @@ Yes. We are already working on comparing the reconciliation of orders/purchases 
 4. sqrip API Key
 
 == Changelog ==
+= 1.5.6 =
+* Content of 'Additional Information' is correctly shown (with some dummy data) in the test e-mail.
+
 = 1.5.5 =
 * Bug fixes
 
