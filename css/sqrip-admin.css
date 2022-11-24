@@ -159,11 +159,19 @@ table.form-table .forminp .sqrip-btn-validate {
     margin-top: 10px;
 }
 
+
 table.form-table tr td label[for="woocommerce_sqrip_forward_payments"],
 table.form-table tr td label[for="woocommerce_sqrip_active_service"] {
     font-weight: 700;
 }
 
+.sqrip-activation-confirmed{
+    margin-left: 20px;
+    font-weight: 700;
+    color: #1AAE9F;
+}
+
+.sqrip-activation-confirmed:before,
 table.form-table tr td label[for="woocommerce_sqrip_forward_payments"]:before,
 table.form-table tr td label[for="woocommerce_sqrip_active_service"]:before {
     content: "\f147";

@@ -23,8 +23,6 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             'products'
         );
 
-
-
         // Method with all the options fields
         $this->init_form_fields();
 
@@ -54,11 +52,12 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
      * Plugin options, we deal with it in Step 3 too
      */
     public function init_form_fields()
-    {
+    {   
 
         require __DIR__ . '/countries-array.php';
 
         $active_service = $this->get_ebics_overview('active_service');
+        $activated_txt = "<span class='sqrip-activation-confirmed'>".__( 'Activation confirmed', 'sqrip-swiss-qr-invoice' )."</span>";
     
         $this->form_fields = array(
             'tabs' => array(
@@ -146,7 +145,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             ),
             'camt_service' => array(
                 'title'       => __( 'Manual Comparison - camt053', 'sqrip-swiss-qr-invoice' ),
-                'label'       => __( 'Enable/Disable', 'sqrip-swiss-qr-invoice' ),
+                'label'       => __( 'Enable/Disable', 'sqrip-swiss-qr-invoice' ) . ($this->get_user_details('camt') ? $activated_txt : ''),
                 'type'        => 'checkbox',
                 'description' => '',
                 'default'     => 'no',
@@ -156,19 +155,13 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             ),
             'ebics_service' => array(
                 'title'       => __( 'Automatic Comparaison - EBICS', 'sqrip-swiss-qr-invoice' ),
-                'label'       => __( 'Enable/Disable', 'sqrip-swiss-qr-invoice' ),
+                'label'       => __( 'Enable/Disable', 'sqrip-swiss-qr-invoice' ) . ($this->get_user_details('ebics') ? $activated_txt : ''),
                 'type'        => 'checkbox',
                 'description'   => __('Payment verification will be done twice on every working day.', 'sqrip-swiss-qr-invoice'),
                 'default'     => 'no',
                 'disabled'    => $active_service == "none" ? true : false,
                 'class'       => 'services-tab',
                 'custom_attributes' => ['data-enable' => 'comparison']
-            ),
-            'active_service' => array(
-                'title'       => __( 'Connected services', 'sqrip-swiss-qr-invoice' ),
-                'type'        => 'info',
-                'label'       => $this->get_ebics_overview('active_service_txt'),
-                'class'       => 'services-tab '.$active_service, 
             ),
             'section_fund_management' => array(
                 'title'         => __('Fund Management', 'sqrip-swiss-qr-invoice' ),
@@ -177,23 +170,14 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             ),
             'enabled_fund_management' => array(
                 'title'       => __( 'Fund Management', 'sqrip-swiss-qr-invoice' ),
-                'label'       => __( 'Turn On/Off', 'sqrip-swiss-qr-invoice' ),
+                'label'       => __( 'Turn On/Off', 'sqrip-swiss-qr-invoice' ). ($this->get_ebics_overview('main_account') !== "XXXX XXXX XXXX XXXX" ? $activated_txt : ""),
                 'type'        => 'checkbox',
                 'description' => '',
                 'default'     => 'no',
                 'class'       => 'services-tab',
                 'custom_attributes' => ['data-enable' => 'fund-management']
             ),
-            'forward_payments' => array(
-                'title'       => __( 'Forward Payments', 'sqrip-swiss-qr-invoice' ),
-                'type'        => 'info',
-                'label'        => sprintf( 
-                    __( 'You forward your payments to %s', 'sqrip-swiss-qr-invoice' ), 
-                    $this->get_ebics_overview('main_account'),
-                ),
-                'description'       => __( 'In order to forward the payments from your incoming bank account to your main bank account, please configure this service on sqrip.ch', 'sqrip-swiss-qr-invoice' ),
-                'class'       => 'services-tab',
-            ),
+
             'section_reminders' => array(
                 'title'         => __('Reminders', 'sqrip-swiss-qr-invoice' ),
                 'type'          => 'section',
@@ -306,7 +290,8 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'title'       => __( 'Initiate QR-Ref# with these 6 digits', 'sqrip-swiss-qr-invoice' ),
                 'type'        => 'number',
                 'default'     => '',
-                'class'       => 'qrinvoice-tab '.$this->show_qr_reference_format()  
+                'class'       => 'qrinvoice-tab '.$this->show_qr_reference_format(),
+                'custom_attributes' => ['min' => 0, 'maxlength' => 6]
             ),
             'qr_reference' => array(
                 'title' => __( 'Basis of the (QR) reference number', 'sqrip-swiss-qr-invoice' ),
@@ -655,6 +640,25 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         }  
 
         return $service;
+    }
+
+    public function get_user_details($service = "ebics"){
+        $endpoint = 'details';
+        $body_decode  = sqrip_remote_request($endpoint, '', 'GET', $token); 
+
+        if (!isset($body_decode->user)) {
+           return;
+        }
+
+        $user = $body_decode->user;
+
+        if ($service == "ebics") {
+            return $user->ebics_connection_is_active ? true : false;
+        }
+
+        if ($service == "camt") {
+            return $user->camt_file_upload_is_active ? true : false;
+        }
     }
 
     public function get_ebics_overview($param = ""){

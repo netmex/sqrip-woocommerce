@@ -220,15 +220,15 @@ function sqrip_get_payable_to_address_txt($address){
 
 
 /*
- *  Get user details from sqrip api 
+ * Get user details from sqrip api 
+ * @depracated v2.0.0
+ *
  */
 function sqrip_get_user_details($token = "")
 {
 	$endpoint = 'details';
 
     $body_decode   = sqrip_remote_request($endpoint, '', 'GET', $token); 
-
-    error_log(print_r($body_decode, true));
 
     $result = []; 
 

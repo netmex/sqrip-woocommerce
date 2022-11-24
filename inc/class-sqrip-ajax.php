@@ -103,19 +103,28 @@ class Sqrip_Ajax {
 	{
 	    if ( !$_POST['token'] ) return;   
 
-	    $response = sqrip_get_user_details( $_POST['token'] );
+	    $endpoint = 'details';
+	    $args = sqrip_prepare_remote_args('', 'GET', $token);
+    	$response = wp_remote_request(SQRIP_ENDPOINT.$endpoint, $args);
+    	$response_code = wp_remote_retrieve_response_code( $response );
 
-	    if ($response) {
-	        $address_txt = __('from sqrip account: ','sqrip-swiss-qr-invoice');
-	        $address_txt .= $response['name'].', '.$response['street'].', '.$response['city'].', '.$response['postal_code'].' '.$response['city'];
+    	switch ($response_code) {
+    		case 403:
+    			$result['result'] = false;
+		        $result['message'] = __("Valid token inactive", "sqrip-swiss-qr-invoice");
 
-	        $result['result'] = true;
-	        $result['message'] = __("API key confirmed", "sqrip-swiss-qr-invoice");
-	        $result['address'] = $address_txt;
-	    } else {
-	        $result['result'] = false;
-	        $result['message'] = __("API key NOT confirmed", "sqrip-swiss-qr-invoice");
-	    }
+    			break;
+
+    		case 200:
+    			$result['result'] = true;
+		        $result['message'] = __("Valid token active", "sqrip-swiss-qr-invoice");
+    			break;
+    		
+    		default:
+    			$result['result'] = false;
+		        $result['message'] = __("Invalid token", "sqrip-swiss-qr-invoice");
+    			break;
+    	}
 
 	    wp_send_json($result);
 	      
