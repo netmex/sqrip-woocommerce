@@ -10,7 +10,7 @@ class Sqrip_Media_Clearner {
             return;
         }
 
-        $this->media_prefix = 'sqrip';
+        $this->media_prefix = 'sqrip_invoice_';
         $this->query_param = 'sqrip_media';
 
         add_filter( 'posts_clauses', array($this, 'filter_posts_by_dates_days'), 10 , 2);

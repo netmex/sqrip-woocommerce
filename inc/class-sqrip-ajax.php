@@ -104,7 +104,7 @@ class Sqrip_Ajax {
 	    if ( !$_POST['token'] ) return;   
 
 	    $endpoint = 'details';
-	    $args = sqrip_prepare_remote_args('', 'GET', $token);
+	    $args = sqrip_prepare_remote_args('', 'GET', $_POST['token']);
     	$response = wp_remote_request(SQRIP_ENDPOINT.$endpoint, $args);
     	$response_code = wp_remote_retrieve_response_code( $response );
 

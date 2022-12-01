@@ -20,7 +20,9 @@ jQuery( document ).ready(function($){
     btn_transfer = $('label[for="woocommerce_sqrip_btn_transfer"]'),
     btn_approve = $('.sqrip-approve'),
     ip_refund_token = $('#woocommerce_sqrip_return_token'),
-    ip_qrref_format = $('#woocommerce_sqrip_qr_reference_format');
+    ip_qrref_format = $('#woocommerce_sqrip_qr_reference_format'),
+    ip_order_stt = $('#woocommerce_sqrip_new_status'),
+    btn_toggle_stt = $('.sqrip-toggle-order-satus');
 
     if (ip_token.length) {
         bt_check_token_html = '<button id="btn_sqrip_check_token" class="sqrip-btn sqrip-btn-validate-token">'+sqrip.txt_check_connection+'</button>';
@@ -576,5 +578,33 @@ jQuery( document ).ready(function($){
         if (ip_qrref_format.hasClass('hide')) {
             ip_qrref_format.closest('tr').hide();
         }
+    }
+
+    if (ip_order_stt.length) {
+        ip_order_stt.closest('tr').addClass('sqrip-order-status');
+
+        btn_create_order_html = '<button id="btn_create_order_stt" class="sqrip-btn sqrip-btn-create-order-stt">'+sqrip.txt_create+'</button>';
+        ip_order_stt.after(btn_create_order_html);
+
+        btn_toggle_stt.on('click', function(e){
+            e.preventDefault();
+
+            $(this).closest('tr').toggleClass('sqrip-show');
+        })
+
+        btn_create_order = $('#btn_create_order_stt');
+
+        btn_create_order.on('click', function(e){
+            e.preventDefault();
+
+            if (!ip_order_stt.val()) {
+                ip_order_stt.focus();
+            } else {
+                $('#woocommerce_sqrip_enabled_new_status').prop('checked', true);
+                setTimeout(function(){
+                    btn_save.trigger('click');
+                }, 200);
+            }
+        })
     }
 });

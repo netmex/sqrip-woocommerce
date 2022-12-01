@@ -56,9 +56,11 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 
         require __DIR__ . '/countries-array.php';
 
-        $active_service = $this->get_ebics_overview('active_service');
         $activated_txt = "<span class='sqrip-activation-confirmed'>".__( 'Activation confirmed', 'sqrip-swiss-qr-invoice' )."</span>";
-    
+        $camt_active = $this->get_user_details('camt');
+        $ebics_active = $this->get_user_details('camt');
+        $active_service = $this->get_ebics_overview('active_service');
+
         $this->form_fields = array(
             'tabs' => array(
                 'type'  => 'tab',
@@ -145,21 +147,21 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             ),
             'camt_service' => array(
                 'title'       => __( 'Manual Comparison - camt053', 'sqrip-swiss-qr-invoice' ),
-                'label'       => __( 'Enable/Disable', 'sqrip-swiss-qr-invoice' ) . ($this->get_user_details('camt') ? $activated_txt : ''),
+                'label'       => __( 'Enable/Disable', 'sqrip-swiss-qr-invoice' ) . ($camt_active ? $activated_txt : ''),
                 'type'        => 'checkbox',
                 'description' => '',
                 'default'     => 'no',
-                'disabled'    => $active_service == "none" ? true : false,
+                'disabled'    => !$camt_active ? true : false,
                 'class'       => 'services-tab',
                 'custom_attributes' => ['data-enable' => 'comparison']
             ),
             'ebics_service' => array(
                 'title'       => __( 'Automatic Comparaison - EBICS', 'sqrip-swiss-qr-invoice' ),
-                'label'       => __( 'Enable/Disable', 'sqrip-swiss-qr-invoice' ) . ($this->get_user_details('ebics') ? $activated_txt : ''),
+                'label'       => __( 'Enable/Disable', 'sqrip-swiss-qr-invoice' ) . ($ebics_active ? $activated_txt : ''),
                 'type'        => 'checkbox',
                 'description'   => __('Payment verification will be done twice on every working day.', 'sqrip-swiss-qr-invoice'),
                 'default'     => 'no',
-                'disabled'    => $active_service == "none" ? true : false,
+                'disabled'    => !$ebics_active ? true : false,
                 'class'       => 'services-tab',
                 'custom_attributes' => ['data-enable' => 'comparison']
             ),
@@ -415,8 +417,23 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'options'       => wc_get_order_statuses(),
                 'placeholder' => 'Select Status',
                 'default' => 'wc-completed',
-                'description' => __('To what order status should we change your order, once the payment has been confirmed?', 'sqrip-swiss-qr-invoice' ),
+                
                 'class'       => 'comparison-tab'  
+            ),
+            'new_status' => array(
+                'title' => '',
+                'type' => 'text',
+                'class' => 'comparison-tab',
+                'default'  => __('Completed, Paid', 'sqrip-swiss-qr-invoice'),
+                'description' => __('To what order status should we change your order, once the payment has been confirmed?', 'sqrip-swiss-qr-invoice' ).'</ br>'.sprintf(__('If there is no suitable status available, you can create one right %s', 'sqrip-swiss-qr-invoice'), '<a href="#" class="sqrip-toggle-order-satus">'.__('here', 'sqrip-swiss-qr-invoice').'</a>'),
+            ),
+            'enabled_new_status' => array(
+                'title'       => '',
+                'type'        => 'checkbox',
+                'label'       => ' ',
+                'default'     => 'no',
+                'css'         => 'visibility: hidden; position: absolute',
+                'class'       => 'comparison-tab' 
             ),
             'section_manual_comparison' => array(
                 'title'         => __('Manual Comparison - camt053', 'sqrip-swiss-qr-invoice' ),
@@ -644,7 +661,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 
     public function get_user_details($service = "ebics"){
         $endpoint = 'details';
-        $body_decode  = sqrip_remote_request($endpoint, '', 'GET', $token); 
+        $body_decode  = sqrip_remote_request($endpoint, '', 'GET'); 
 
         if (!isset($body_decode->user)) {
            return;
@@ -1037,6 +1054,12 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         }  else {
 
             $Sqrip_Payment_Verification->clear_cron();
+
+        }
+
+        if ( isset($post_data['woocommerce_sqrip_enabled_new_status']) && !empty($post_data['woocommerce_sqrip_enabled_new_status']) ) {
+
+            $_POST['woocommerce_sqrip_status_completed'] = 'sqrip-completed-paid';
 
         }
 

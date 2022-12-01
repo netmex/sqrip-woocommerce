@@ -132,6 +132,15 @@ function sqrip_add_admin_notice()
         delete_transient( "sqrip_admin_action_errors" );
     }
 
+
+    $allow_url_fopen = ini_get('allow_url_fopen');
+
+    if (!$allow_url_fopen) {
+        $class = 'notice notice-error is-dismissible';
+        $message = __( 'In order for sqrip to save the QR-Invoices in your library you should switch allow_url_open to on on your php.ini or htaccess file.', 'sqrip-swiss-qr-invoice' );
+
+        printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) );
+    }
 }
 
 /**
@@ -151,6 +160,7 @@ add_action( 'admin_enqueue_scripts', function (){
             array( 
                 'ajax_url' => admin_url( 'admin-ajax.php' ),
                 'ajax_nonce' => wp_create_nonce( 'sqrip-admin-settings' ),
+                'txt_create' => __( 'Create', 'sqrip-swiss-qr-invoice' ),
                 'txt_check_connection' => __( 'Connection test', 'sqrip-swiss-qr-invoice' ),
                 'txt_validate_iban' => __( 'Check', 'sqrip-swiss-qr-invoice' ),
                 'txt_send_test_email' => sprintf( 
@@ -666,3 +676,46 @@ function sqrip_custom_upload_xml($mimes) {
 
 // Disable the Zip/postcode validation 
 add_filter( 'woocommerce_validate_postcode' , '__return_true' );
+
+
+// Register new status
+function sqrip_register_new_order_status() {
+    $sqrip_new_status  = sqrip_get_plugin_option('new_status');
+    $enabled_new_status  = sqrip_get_plugin_option('enabled_new_status');
+
+    if (!$sqrip_new_status || $enabled_new_status == "no") {
+        return;
+    }
+
+    register_post_status( 'sqrip-completed-paid', array(
+        'label'                     => $sqrip_new_status,
+        'public'                    => true,
+        'show_in_admin_status_list' => true,
+        'show_in_admin_all_list'    => true,
+        'exclude_from_search'       => false,
+    ) );
+}
+
+add_action( 'init', 'sqrip_register_new_order_status' );
+
+// Add custom status to order status list
+function sqrip_add_new_order_statuses( $order_statuses ) {
+    $sqrip_new_status  = sqrip_get_plugin_option('new_status');
+    $enabled_new_status  = sqrip_get_plugin_option('enabled_new_status');
+
+    if (!$sqrip_new_status || $enabled_new_status == "no") {
+        return $order_statuses;
+    }
+
+    $new_order_statuses = array();
+
+    foreach ( $order_statuses as $key => $status ) {
+        $new_order_statuses[ $key ] = $status;
+        if ( 'wc-completed' === $key ) {
+            $new_order_statuses['sqrip-completed-paid'] = $sqrip_new_status;
+        }
+    }
+    return $new_order_statuses;
+}
+
+add_filter( 'wc_order_statuses', 'sqrip_add_new_order_statuses' );
