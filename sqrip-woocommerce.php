@@ -687,12 +687,14 @@ function sqrip_register_new_order_status() {
         return;
     }
 
-    register_post_status( 'sqrip-completed-paid', array(
+    register_post_status( 'wc-sqrip-paid', array(
         'label'                     => $sqrip_new_status,
         'public'                    => true,
         'show_in_admin_status_list' => true,
         'show_in_admin_all_list'    => true,
         'exclude_from_search'       => false,
+        'label_count'               => _n_noop( $sqrip_new_status.' <span class="count">(%s)</span>', $sqrip_new_status.' <span class="count">(%s)</span>' )
+
     ) );
 }
 
@@ -712,7 +714,7 @@ function sqrip_add_new_order_statuses( $order_statuses ) {
     foreach ( $order_statuses as $key => $status ) {
         $new_order_statuses[ $key ] = $status;
         if ( 'wc-completed' === $key ) {
-            $new_order_statuses['sqrip-completed-paid'] = $sqrip_new_status;
+            $new_order_statuses['wc-sqrip-paid'] = $sqrip_new_status;
         }
     }
     return $new_order_statuses;
