@@ -280,3 +280,8 @@ table.sqrip-table td p.sqrip-note {
 .sqrip-order-status.sqrip-show td.forminp{
     display: table-cell;
 }
+
+.order-status.status-sqrip-paid {
+    background: #c8d7e1;
+    color: #2e4453;
+}

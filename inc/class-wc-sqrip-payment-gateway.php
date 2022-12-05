@@ -1059,7 +1059,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 
         if ( isset($post_data['woocommerce_sqrip_enabled_new_status']) && !empty($post_data['woocommerce_sqrip_enabled_new_status']) ) {
 
-            $_POST['woocommerce_sqrip_status_completed'] = 'sqrip-completed-paid';
+            $_POST['woocommerce_sqrip_status_completed'] = 'wc-sqrip-paid';
 
         }
 
