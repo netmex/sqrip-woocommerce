@@ -514,7 +514,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             'account_qr_iban' => array(
                 'title'       => __( 'Account (QR-)IBAN', 'sqrip-swiss-qr-invoice' ),
                 'type'        => 'info',
-                'label'        => $this->get_ebics_overview('account_iban'),
+                'label'        => $this->get_ebics_overview('debit_account'),
                 'class'       => 'fund-management-tab',
             ),
             'account_balance' => array(
@@ -642,9 +642,15 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 }
 
                 if (isset($periodicity->hours)) {
-                    $time = $periodicity->hours;
-                    $time .= isset($periodicity->minutes) ? ':'.$periodicity->minutes : '';
+                    $count_h = 0;
+                    $time = '';
 
+                    foreach ($periodicity->hours as $hour) {
+                        $count_h++;
+                        $time .= $count_h > 1 ? ', '.$hour : $hour;
+                        $time .= isset($periodicity->minutes) ? ':'.$periodicity->minutes : '';
+                    }
+           
                     $trigger_periodicity .= sprintf( 
                         __( ' at %s', 'sqrip-swiss-qr-invoice' ),
                         $time
@@ -685,6 +691,8 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 
         $service = $this->get_active_service($response);
         $fund = $this->get_fund_management($response);
+
+        var_dump($response); 
 
         $return = array_merge($service, $fund);
 
