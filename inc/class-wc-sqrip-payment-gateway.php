@@ -692,11 +692,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         $service = $this->get_active_service($response);
         $fund = $this->get_fund_management($response);
 
-        var_dump($response); 
-
         $return = array_merge($service, $fund);
-
-
 
         return !empty($param) ? $return[$param] : $return;
     }
