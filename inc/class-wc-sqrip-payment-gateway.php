@@ -53,12 +53,12 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
      */
     public function init_form_fields()
     {   
-
         require __DIR__ . '/countries-array.php';
 
         $activated_txt = "<span class='sqrip-activation-confirmed'>".__( 'Activation confirmed', 'sqrip-swiss-qr-invoice' )."</span>";
-        $camt_active = $this->get_user_details('camt');
-        $ebics_active = $this->get_user_details('camt');
+
+        $camt_active = $this->get_ebics_overview('active_service') == "camt_upload_service" ? true : false;
+        $ebics_active = $this->get_ebics_overview('active_service') == "ebics_service" ? true : false;
         $active_service = $this->get_ebics_overview('active_service');
 
         $this->form_fields = array(
@@ -1033,9 +1033,23 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
     {
         $post_data  = $this->get_post_data();
 
-        // $this->check_iban_status($post_data);
+        $iban       = $post_data['woocommerce_sqrip_iban'];
+        $cur_iban   = sqrip_get_plugin_option('iban');
+        $iban_changed = $iban != $cur_iban ? true : false;
 
-        $this->update_iban($post_data);
+        if ($iban_changed) {
+            
+            $this->update_iban($post_data);
+
+        } 
+
+        // else {
+        //     $server_iban = $this->get_ebics_overview('account_iban');
+
+        //     if ($server_iban) {
+        //         $this->update_option('iban', $server_iban);
+        //     }
+        // }
 
         if ( isset($post_data['woocommerce_sqrip_test_email']) ) {
 
