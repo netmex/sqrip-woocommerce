@@ -339,6 +339,14 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'options'       => sqrip_get_wc_emails(),
                 'class'         => 'qrinvoice-tab'  
             ),
+            'file_name' => array(
+                'title'       => __( 'File Name' , 'sqrip-swiss-qr-invoice' ),
+                'type'        => 'textarea',
+                'class'       => 'qrinvoice-tab',
+                'maxlength'   => 140,
+                'default'     => __("[order_date] [shop_name] Invoice Order: #[order_number]","sqrip-swiss-qr-invoice"),
+                'description' => __( 'The following short codes are available:<br>[order_number] the order number.<br>[order_date] the order date.<br>[shop_name] Shop name.', 'sqrip-swiss-qr-invoice' ),
+            ),
             'product' => array(
                 'title'         => __( 'Format', 'sqrip-swiss-qr-invoice' ),
                 'type'          => 'select',
@@ -1351,7 +1359,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 
         if (isset($response_body->reference)) {
 	        $sqrip_png       =    $response_body->png_file;
-            $sqrip_qr_png_attachment_id = $this->file_upload($sqrip_png, '.png');
+            $sqrip_qr_png_attachment_id = $this->file_upload($sqrip_png, '.png', '', $order_id);
 
 	        $order->add_order_note( __('sqrip QR-Code für Rückerstattung erstellt.', 'sqrip-swiss-qr-invoice') );
 
@@ -1461,7 +1469,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             $sqrip_reference =    $response_body->reference;
 
             // TODO: replace with attachment ID and store this in meta instead of actual file
-            $sqrip_qr_pdf_attachment_id = $this->file_upload($sqrip_pdf, '.pdf');
+            $sqrip_qr_pdf_attachment_id = $this->file_upload($sqrip_pdf, '.pdf', '', $order_id);
             // $sqrip_qr_png_attachment_id = $this->file_upload($sqrip_png, '.png');
 
             $sqrip_qr_pdf_url = wp_get_attachment_url($sqrip_qr_pdf_attachment_id);
@@ -1523,13 +1531,17 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
     /*
     *  sqrip QR Code PDF  Download in medialibrary and set
     */
-    public function file_upload($fileurl, $type, $token = "")
+    public function file_upload($fileurl, $type, $token = "", $order_id = "")
     {
         include_once(ABSPATH . 'wp-admin/includes/image.php');
 
-        $prefix = 'sqrip_invoice_';
-        $uniq_name = date('dmY') . '' . (int) microtime(true);
-        $filename = $prefix . $uniq_name . $type;
+        if (!$order_id) {
+            $sqrip_name = date('dmY') . '' . (int) microtime(true);
+        } else {
+            $sqrip_name = sqrip_file_name($order_id);
+        }
+        
+        $filename = $sqrip_name . $type;
 
         // Get the path to the upload directory.
         $uploaddir = wp_upload_dir();
@@ -1558,7 +1570,10 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             'post_mime_type' => $wp_filetype['type'],
             'post_title' => $filename,
             'post_content' => '',
-            'post_status' => 'inherit'
+            'post_status' => 'inherit',
+            'meta_input' => array(
+                'sqrip_invoice' => true
+            )
         );
         // Insert the attachment.
         $attach_id = wp_insert_attachment($attachment, $uploadfile);

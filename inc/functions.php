@@ -455,3 +455,18 @@ function sqrip_get_awaiting_orders(){
 
     return $orders;
 }
+
+function sqrip_file_name($order_id) {
+    $order = wc_get_order($order_id);
+
+    $sqrip_file_name = sqrip_get_plugin_option('file_name');
+
+    // replace [order_number] with order number
+    $sqrip_file_name = str_replace("[order_number]", $order_id, $sqrip_file_name);
+    // replace [order_date] with order number
+    $sqrip_file_name = str_replace("[order_date]", $order->get_date_created()->date('Ymd'), $sqrip_file_name);
+    // replace [order_number] with order number
+    $sqrip_file_name = str_replace("[shop_name]", get_bloginfo('name'), $sqrip_file_name);
+
+    return $sqrip_file_name;
+}
