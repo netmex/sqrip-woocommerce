@@ -6,85 +6,25 @@
  */
 class Sqrip_Payment_Verification {
 
-    public $cron_hook;
+    public $webhook_url;
 
-    public function __construct() {
-        // Store our cron hook name
-        $this->cron_hook = 'sqrip_payment_verification';
-        // Add action that points to class method
-        add_action($this->cron_hook, array($this, 'verify'));
+    /**
+     * Construdor :)
+     */
+    public function __construct($webhook_url = "") {
+        $this->webhook = $webhook_url;
     }
 
-    public function refresh_cron() {   
-        $clear = $this->clear_cron();
-
-        $recurrence = sqrip_get_plugin_option('payment_frequence');
-        $times = sqrip_get_plugin_option('payment_frequence_time');
-        
-        if (!is_array($recurrence) || !is_array($times)) {
-            return;
-        }
-
-        $this->send_to_api($recurrence, $times);
-
-        $hour = 0;
-        $min = 0;
-
-        $setup_cron = false;
-        foreach ($recurrence as $day) {
-            $date = new DateTime('next '.$day);
-
-            foreach ($times as $time) {
-                $time_arr = explode(':', $time);
-
-                if (is_array($time_arr)) {
-                    $hour = $time_arr[0];
-                    $min = $time_arr[1];
-                }
-
-                $date->setTime($hour, $min);
-                $timestamp = $date->getTimestamp();
-
-                $setup_cron = $this->setup_cron($timestamp);
-            }
-        }    
-
-        return $setup_cron;    
-    }
-
-    public function send_to_api($recurrence, $times){
+    public function send_to_api(){
         $endpoint = 'plugin-settings';
 
-        $hours = [];
-        foreach ($times as $time) {
-            $time_arr = explode(':', $time);
-
-            if (is_array($time_arr)) {
-                $hours[] = $time_arr[0];
-            }
-        }
-
-        $plugin_url = site_url( 'wp-cron.php' );
-
         $body = '{
-           "period": "all",
-           "hours": '.json_encode($hours).',
-           "week_days": '.json_encode($recurrence).',
-           "plugin_url": "'.$plugin_url.'"
+           "plugin_url": "'.$this->webhook.'"
         }';
 
         $response = sqrip_remote_request($endpoint, $body, 'POST');  
-    }
 
-    public function setup_cron($timestamp){
-        // Add schedule event
-        return wp_schedule_event($timestamp, 'weekly', $this->cron_hook);
-    }
-
-    public function clear_cron(){
-        $clear = wp_clear_scheduled_hook($this->cron_hook);
-
-        return $clear;
+        return $response;
     }
 
     public function verify() {
@@ -92,6 +32,8 @@ class Sqrip_Payment_Verification {
         $logs[] = '[Sqrip_Payment_Verification] is starting...';
 
         $orders = sqrip_get_awaiting_orders();
+        $isSent = false;
+        $return = [];
 
         if ($orders) {
             $body = [];
@@ -124,19 +66,41 @@ class Sqrip_Payment_Verification {
                     $html = $Sqrip_Ajax->get_table_results($response, $orders);
                     $email_sent = $Sqrip_Ajax->send_report($html);
 
+                    if ($email_sent) {
+                        $isSent = true;
+                    }
+
                     $logs[] = $email_sent ? 'Sent report to '.$email_sent.'! ' : 'Email failed to send. Please check your Email SMTP settings.';
                 }
-            } 
+
+                $return = [
+                    'status' => 200,
+                    'message' => 'Successful Comparison'
+                ];
+            } else {
+                $return = [
+                    'status' => 202,
+                    'message' => 'Request to sqrip to confirm order failed!'
+                ];
+            }
 
         } else {
 
             $logs[] = sprintf('No order with %s status found!', $status_awaiting);
+
+            $return = [
+                'status' => 203,
+                'message' => 'No awaiting orders found!'
+            ];
 
         }
 
         $logs[] = '[Sqrip_Payment_Verification] Finished!';
 
         error_log(print_r($logs, true));
+
+        $return['email_sent'] = $isSent;
+        return $return;
     }
 
     public function update_order_status($orders){
@@ -151,8 +115,8 @@ class Sqrip_Payment_Verification {
 
         foreach ($orders as $order) {
 
-            if ($order['paid_amount'] >= $order['amount']) {
-                $order_id = $order['order_id'];
+            if ($order->paid_amount >= $order->amount) {
+                $order_id = $order->order_id;
                 $order = new WC_Order($order_id);
                
                 $updated[$order_id] =  $order->update_status($status_completed);
@@ -164,5 +128,3 @@ class Sqrip_Payment_Verification {
     }
 
 } 
-
-new Sqrip_Payment_Verification;

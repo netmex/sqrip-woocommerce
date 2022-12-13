@@ -46,6 +46,17 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 
         // This action hook saves the settings
         add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
+
+
+        $week_days = $this->get_frequency("week_days");
+        if ($week_days) {
+            $this->update_option('payment_frequence', $week_days);
+        }
+
+        $hours = $this->get_frequency("hours");
+        if ($hours) {
+            $this->update_option('payment_frequence_time', $hours);
+        }
     }
 
     /**
@@ -472,19 +483,19 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                     'friday'        => __( 'Friday' , 'sqrip-swiss-qr-invoice' ),
                     'saturday'      => __( 'Saturday' , 'sqrip-swiss-qr-invoice' ),
                     'sunday'        => __( 'Sunday' , 'sqrip-swiss-qr-invoice' ),
-                    
                 ),
+                'disabled'      => true,
                 'class'         => 'comparison-tab ebics-service'  
             ),
             'payment_frequence_time' => array(
                 'type'        => 'multiselect',
                 'options'     => array(
-                    '04:00'      => '04:00',
-                    '08:00'      => '08:00',
-                    '13:00'      => '13:00',
-                    '18:00'      => '18:00',
-                    '21:00'      => '21:00',
+                    '06'      => '06:00',
+                    '11'      => '11:00',
+                    '17'      => '17:00',
+                    '23'      => '23:00',
                 ),
+                'disabled'      => true,
                 'description'   => __( 'Select the days and the time when sqrip should execute a comparison of the awaiting payment orders with your bank account.</br>
                     We charge your account for every comparison made.', 'sqrip-swiss-qr-invoice' ),
                 'desc_tip'      => __('Based on your selection, your weekly cost for this service is X credits.', 'sqrip-swiss-qr-invoice'),
@@ -572,6 +583,44 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             
         );
     }
+
+    public function get_frequency($param = "week_days"){
+        $get_ebics_overview = $this->get_ebics_overview('', true);
+        $periodicity = $get_ebics_overview->trigger_periodicity;
+
+        if ($param == "week_days") {
+            $week_days = $periodicity->week_days;
+
+            if (!$week_days) {
+                return;
+            }
+            $res_day = [];
+
+            foreach ($week_days as $week_day) {
+                $res_day[] = $week_day->name; 
+            }
+
+            return $res_day;
+        }
+
+        if ($param == "hours") {
+            $hours = $periodicity->hours;
+
+            if (!$hours) {
+                return;
+            }
+            $res_hour = [];
+
+            foreach ($hours as $hour) {
+                $res_hour[] = $hour; 
+            }
+
+            return $res_hour;
+        }
+
+        return;
+    }
+    
 
     public function show_tab($options){
         $options = explode(',', $options);
@@ -692,10 +741,14 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         }
     }
 
-    public function get_ebics_overview($param = ""){
+    public function get_ebics_overview($param = "", $return_full = false){
         $endpoint = 'get-ebics-overview';
 
-        $response = sqrip_remote_request($endpoint);  
+        $response = sqrip_remote_request($endpoint);
+
+        if ($return_full) {
+            return $response;
+        }  
 
         $service = $this->get_active_service($response);
         $fund = $this->get_fund_management($response);
@@ -1045,19 +1098,21 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
     {
         $post_data  = $this->get_post_data();
 
+        /**
+         * Iban status - In Progress
+         * 
+         * @created 10-12-2022
+         */ 
         $iban       = $post_data['woocommerce_sqrip_iban'];
         $cur_iban   = sqrip_get_plugin_option('iban');
         $iban_changed = $iban != $cur_iban ? true : false;
 
         if ($iban_changed) {
-            
             $this->update_iban($post_data);
-
         } 
 
         // else {
         //     $server_iban = $this->get_ebics_overview('account_iban');
-
         //     if ($server_iban) {
         //         $this->update_option('iban', $server_iban);
         //     }
@@ -1071,22 +1126,24 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 
         }
 
-        $Sqrip_Payment_Verification = new Sqrip_Payment_Verification();
-
+        /**
+         * Payment Verification
+         * 
+         * @created 10-12-2022
+         */        
+        
         if ( isset($post_data['woocommerce_sqrip_ebics_service']) ) {
-            
-            $Sqrip_Payment_Verification->refresh_cron();
+            $Sqrip_WP_Webhook = new Sqrip_WP_Webhook();
+            $webhook_url = $Sqrip_WP_Webhook->getWebhook();
 
-        }  else {
+            $Sqrip_Payment_Verification = new Sqrip_Payment_Verification($webhook_url);
+            $message = $Sqrip_Payment_Verification->send_to_api();
 
-            $Sqrip_Payment_Verification->clear_cron();
-
-        }
+            error_log(print_r($message,true));
+        }  
 
         if ( isset($post_data['woocommerce_sqrip_enabled_new_status']) && !empty($post_data['woocommerce_sqrip_enabled_new_status']) ) {
-
             $_POST['woocommerce_sqrip_status_completed'] = 'wc-sqrip-paid';
-
         }
 
         return parent::process_admin_options();
