@@ -46,17 +46,6 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 
         // This action hook saves the settings
         add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
-
-
-        $week_days = $this->get_frequency("week_days");
-        if ($week_days) {
-            $this->update_option('payment_frequence', $week_days);
-        }
-
-        $hours = $this->get_frequency("hours");
-        if ($hours) {
-            $this->update_option('payment_frequence_time', $hours);
-        }
     }
 
     /**
@@ -473,35 +462,11 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'class'       => 'comparison-tab ebics-service' 
             ),
             'payment_frequence' => array(
-                'title'       => __( 'Payment Fréquence', 'sqrip-swiss-qr-invoice' ),
-                'type'        => 'multiselect',
-                'options'       => array(
-                    'monday'        => __( 'Monday' , 'sqrip-swiss-qr-invoice' ),
-                    'tuesday'       => __( 'Tuesday' , 'sqrip-swiss-qr-invoice' ),
-                    'wednesday'     => __( 'Wednesday' , 'sqrip-swiss-qr-invoice' ),
-                    'thursday'      => __( 'Thursday' , 'sqrip-swiss-qr-invoice' ),
-                    'friday'        => __( 'Friday' , 'sqrip-swiss-qr-invoice' ),
-                    'saturday'      => __( 'Saturday' , 'sqrip-swiss-qr-invoice' ),
-                    'sunday'        => __( 'Sunday' , 'sqrip-swiss-qr-invoice' ),
-                ),
-                'disabled'      => true,
+                'title'       => __( 'Payment Comparison', 'sqrip-swiss-qr-invoice' ),
+                'type'        => 'info',
+                'label'        => $this->get_ebics_overview('trigger_periodicity'),
                 'class'         => 'comparison-tab ebics-service'  
             ),
-            'payment_frequence_time' => array(
-                'type'        => 'multiselect',
-                'options'     => array(
-                    '06'      => '06:00',
-                    '11'      => '11:00',
-                    '17'      => '17:00',
-                    '23'      => '23:00',
-                ),
-                'disabled'      => true,
-                'description'   => __( 'Select the days and the time when sqrip should execute a comparison of the awaiting payment orders with your bank account.</br>
-                    We charge your account for every comparison made.', 'sqrip-swiss-qr-invoice' ),
-                'desc_tip'      => __('Based on your selection, your weekly cost for this service is X credits.', 'sqrip-swiss-qr-invoice'),
-                'class'       => 'comparison-tab ebics-service'  
-            ),
-
             'comparison_report' => array(
                 'title'       => __( 'Send report to Admin E-Mail', 'sqrip-swiss-qr-invoice' ),
                 'label'       => __( 'Send report by email', 'sqrip-swiss-qr-invoice' ),
@@ -586,7 +551,11 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 
     public function get_frequency($param = "week_days"){
         $get_ebics_overview = $this->get_ebics_overview('', true);
-        $periodicity = $get_ebics_overview->trigger_periodicity;
+        $periodicity = isset($get_ebics_overview->trigger_periodicity) ? $get_ebics_overview->trigger_periodicity : '';
+
+        if (!$periodicity) {
+            return;
+        }
 
         if ($param == "week_days") {
             $week_days = $periodicity->week_days;
@@ -604,7 +573,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         }
 
         if ($param == "hours") {
-            $hours = $periodicity->hours;
+            $hours = isset($periodicity->hours) ? $periodicity->hours : '';
 
             if (!$hours) {
                 return;
@@ -655,7 +624,34 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         return $return == 'Valid qr IBAN' ? '' : 'hide';
     }
 
-    public function get_fund_management($response)
+    public function get_fund_management_detail($param = ""){
+        $endpoint = 'get-fund-management-details';
+
+        $response = sqrip_remote_request($endpoint);
+
+        $return = $this->get_settings_response_data($response, true);
+
+        return !empty($param) ? $return[$param] : $return;
+    }
+
+    public function get_ebics_overview($param = "", $return_full = false){
+        $endpoint = 'get-ebics-overview';
+
+        $response = sqrip_remote_request($endpoint);
+
+        if ($return_full) {
+            return $response;
+        }  
+
+        $service = $this->get_active_service($response);
+        $payment_comparision = $this->get_settings_response_data($response);
+
+        $return = array_merge($service, $payment_comparision);
+
+        return !empty($param) ? $return[$param] : $return;
+    }
+
+    public function get_settings_response_data($response, $fund = false)
     {
 
         $service = [
@@ -675,47 +671,55 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             $service['account_balance'] = isset($response->account_balance) ? $response->account_balance : '';
             $service['account_iban'] = isset($response->account_iban) ? $response->account_iban : '';
 
-            if (isset($response->trigger_periodicity)) {
-                $weeksday = '';
-                $periodicity = $response->trigger_periodicity;
+            $periodicity = isset($response->trigger_periodicity) ? $response->trigger_periodicity : '';
 
-                $periode = isset($periodicity->period) ? $periodicity->period : '';
-                $periodes = isset($periodicity->week_days) ? $periodicity->week_days : '';
-                
-                $trigger_periodicity = $periode;
-
-                $count = 0;
-                if ($periodes && is_array($periodes)) {
-                    foreach ($periodes as $periode) {
-                        $count++;
-                        $weeksday .= $count > 1 ? ', ' : '';
-                        $weeksday .= $periode->label;
-                    }
-
-                    $trigger_periodicity .= sprintf( 
-                        __( ' on %s', 'sqrip-swiss-qr-invoice' ),
-                        $weeksday,
-                    );
-                }
-
-                if (isset($periodicity->hours)) {
-                    $count_h = 0;
-                    $time = '';
-
-                    foreach ($periodicity->hours as $hour) {
-                        $count_h++;
-                        $time .= $count_h > 1 ? ', '.$hour : $hour;
-                        $time .= isset($periodicity->minutes) ? ':'.$periodicity->minutes : '';
-                    }
-           
-                    $trigger_periodicity .= sprintf( 
-                        __( ' at %s', 'sqrip-swiss-qr-invoice' ),
-                        $time
-                    );
-                }
-                
-                $service['trigger_periodicity'] = $trigger_periodicity;
+            if ($fund) {
+                $periodicity = isset($response->fundmanagement_periodicity) ? $response->fundmanagement_periodicity : '';
             }
+
+            if (!$periodicity) {
+                return $service;
+            }
+         
+            $weeksday = '';
+
+            $periode = isset($periodicity->period) ? $periodicity->period : '';
+            $periodes = isset($periodicity->week_days) ? $periodicity->week_days : '';
+            
+            $trigger_periodicity = $periode;
+
+            $count = 0;
+            if ($periodes && is_array($periodes)) {
+                foreach ($periodes as $periode) {
+                    $count++;
+                    $weeksday .= $count > 1 ? ', ' : '';
+                    $weeksday .= $periode->label;
+                }
+
+                $trigger_periodicity .= sprintf( 
+                    __( ' on %s', 'sqrip-swiss-qr-invoice' ),
+                    $weeksday,
+                );
+            }
+
+            if (isset($periodicity->hours)) {
+                $count_h = 0;
+                $time = '';
+
+                foreach ($periodicity->hours as $hour) {
+                    $count_h++;
+                    $time .= $count_h > 1 ? ', '.$hour : $hour;
+                    $time .= isset($periodicity->minutes) ? ':'.$periodicity->minutes : '';
+                }
+       
+                $trigger_periodicity .= sprintf( 
+                    __( ' at %s', 'sqrip-swiss-qr-invoice' ),
+                    $time
+                );
+            }
+            
+            $service['trigger_periodicity'] = $trigger_periodicity;
+            
 
         }  
 
@@ -740,24 +744,6 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             return $user->camt_file_upload_is_active ? true : false;
         }
     }
-
-    public function get_ebics_overview($param = "", $return_full = false){
-        $endpoint = 'get-ebics-overview';
-
-        $response = sqrip_remote_request($endpoint);
-
-        if ($return_full) {
-            return $response;
-        }  
-
-        $service = $this->get_active_service($response);
-        $fund = $this->get_fund_management($response);
-
-        $return = array_merge($service, $fund);
-
-        return !empty($param) ? $return[$param] : $return;
-    }
-
 
     public function get_active_service($response)
     {

@@ -582,6 +582,7 @@ jQuery( document ).ready(function($){
 
     if (ip_order_stt.length) {
         ip_order_stt.closest('tr').addClass('sqrip-order-status');
+        $('#woocommerce_sqrip_enabled_new_status').prop('checked', false);
 
         btn_create_order_html = '<button id="btn_create_order_stt" class="sqrip-btn sqrip-btn-create-order-stt">'+sqrip.txt_create+'</button>';
         ip_order_stt.after(btn_create_order_html);

@@ -51,7 +51,7 @@ class Sqrip_WP_Webhook {
 
 		$webhookIsValid = $this->isValid($token);
 
-		if ( $webhookIsValid && $_SERVER['REQUEST_METHOD'] == "POST" ) {
+		if ( $webhookIsValid && $_SERVER['REQUEST_METHOD'] == "GET" ) {
 
 			$ebics_service = sqrip_get_plugin_option('ebics_service');
 

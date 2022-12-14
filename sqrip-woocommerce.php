@@ -156,11 +156,14 @@ add_action( 'admin_enqueue_scripts', function (){
     if (isset($_GET['section']) && $_GET['section'] == "sqrip") {
         wp_enqueue_script('sqrip-admin', plugins_url( 'js/sqrip-admin.js', __FILE__ ), array('jquery'), '1.1.1', true);
 
+        $sqrip_new_status  = sqrip_get_plugin_option('new_status');
+
         wp_localize_script( 'sqrip-admin', 'sqrip',
             array( 
                 'ajax_url' => admin_url( 'admin-ajax.php' ),
                 'ajax_nonce' => wp_create_nonce( 'sqrip-admin-settings' ),
-                'txt_create' => __( 'Create', 'sqrip-swiss-qr-invoice' ),
+                'txt_create' => !$sqrip_new_status ? __( 'Create', 'sqrip-swiss-qr-invoice' ) : __( 'Update', 'sqrip-swiss-qr-invoice' ),
+                'txt_updated' => __( 'Update', 'sqrip-swiss-qr-invoice' ),
                 'txt_check_connection' => __( 'Connection test', 'sqrip-swiss-qr-invoice' ),
                 'txt_validate_iban' => __( 'Check', 'sqrip-swiss-qr-invoice' ),
                 'txt_send_test_email' => sprintf( 

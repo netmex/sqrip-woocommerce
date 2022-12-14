@@ -138,7 +138,7 @@ function sqrip_prepare_qr_code_request_body($currency_symbol, $amount, $order_nu
     $token = $plugin_options['token'];
     $iban_type = sqrip_validation_iban($iban, $token);
   
-    if (isset($iban_type->message) &&  ($iban_type->message == 'Valid qr IBAN')){
+    if (isset($iban_type->message) &&  ($iban_type->message == 'Valid qr IBAN' && $initial_digits)){
         $body['payment_information']['initial_digits'] = intval($initial_digits);
     }
 

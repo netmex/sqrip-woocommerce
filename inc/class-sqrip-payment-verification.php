@@ -79,7 +79,7 @@ class Sqrip_Payment_Verification {
                 ];
             } else {
                 $return = [
-                    'status' => 202,
+                    'status' => 302,
                     'message' => 'Request to sqrip to confirm order failed!'
                 ];
             }
