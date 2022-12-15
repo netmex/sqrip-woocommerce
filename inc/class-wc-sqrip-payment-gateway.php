@@ -165,6 +165,21 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'class'       => 'services-tab',
                 'custom_attributes' => ['data-enable' => 'comparison']
             ),
+            'section_reminders' => array(
+                'title'         => __('Reminders', 'sqrip-swiss-qr-invoice' ),
+                'type'          => 'section',
+                'description'   => __( 'If an invoice has not been paid within the defined time, you can send a reminder to the client', 'sqrip-swiss-qr-invoice'),
+                'class'       => 'services-tab' 
+            ),
+            'enabled_reminder' => array(
+                'title'       => __( 'Reminders', 'sqrip-swiss-qr-invoice' ),
+                'label'       => __( 'Turn On/Off', 'sqrip-swiss-qr-invoice' ),
+                'type'        => 'checkbox',
+                'default'     => 'no',
+                'class'       => 'services-tab',
+                'disabled'    => !$ebics_active ? true : false,
+                'custom_attributes' => ['data-enable' => 'reminders']
+            ),
             'section_fund_management' => array(
                 'title'         => __('Fund Management', 'sqrip-swiss-qr-invoice' ),
                 'type'          => 'section',
@@ -178,21 +193,6 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'default'     => 'no',
                 'class'       => 'services-tab',
                 'custom_attributes' => ['data-enable' => 'fund-management']
-            ),
-
-            'section_reminders' => array(
-                'title'         => __('Reminders', 'sqrip-swiss-qr-invoice' ),
-                'type'          => 'section',
-                'description'   => __( 'If an invoice has not been paid within the defined time, you can send a reminder to the client', 'sqrip-swiss-qr-invoice'),
-                'class'       => 'services-tab' 
-            ),
-            'enabled_reminder' => array(
-                'title'       => __( 'Reminders', 'sqrip-swiss-qr-invoice' ),
-                'label'       => __( 'Turn On/Off', 'sqrip-swiss-qr-invoice' ),
-                'type'        => 'checkbox',
-                'default'     => 'no',
-                'class'       => 'services-tab',
-                'custom_attributes' => ['data-enable' => 'reminders']
             ),
             'section_refund' => array(
                 'title'         => __('Refunds', 'sqrip-swiss-qr-invoice' ),
@@ -465,6 +465,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'title'       => __( 'Payment Comparison', 'sqrip-swiss-qr-invoice' ),
                 'type'        => 'info',
                 'label'        => $this->get_ebics_overview('trigger_periodicity'),
+                'description' => __( 'To edit these setting go to your EBICS setting at <a href="https://api.sqrip.ch/ebics/settings">https://api.sqrip.ch/ebics/settings</a>', 'sqrip-swiss-qr-invoice' ),
                 'class'         => 'comparison-tab ebics-service'  
             ),
             'comparison_report' => array(
@@ -634,10 +635,11 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         return !empty($param) ? $return[$param] : $return;
     }
 
-    public function get_ebics_overview($param = "", $return_full = false){
+    public function get_ebics_overview($param = "", $return_full = false, $token = ""){
         $endpoint = 'get-ebics-overview';
+        $token    = $token ? $token : sqrip_get_plugin_option('token');
 
-        $response = sqrip_remote_request($endpoint);
+        $response = sqrip_remote_request($endpoint, '', 'GET', $token);
 
         if ($return_full) {
             return $response;
@@ -660,7 +662,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             "debit_account" => "XXXX XXXX XXXX XXXX",
             "trigger_level" => "XXX",
             "account_balance" => "XXX.XXX",
-            "trigger_periodicity"=> 'XXX', 
+            "trigger_periodicity"=> 'Not set', 
         ];
 
         if ( isset($response->main_account) ) {
@@ -685,6 +687,10 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 
             $periode = isset($periodicity->period) ? $periodicity->period : '';
             $periodes = isset($periodicity->week_days) ? $periodicity->week_days : '';
+
+            if (!$periodes) {
+                return $service;
+            }
             
             $trigger_periodicity = $periode;
 
@@ -1085,24 +1091,29 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         $post_data  = $this->get_post_data();
 
         /**
-         * Iban status - In Progress
+         * Iban status
          * 
          * @created 10-12-2022
          */ 
-        $iban       = $post_data['woocommerce_sqrip_iban'];
-        $cur_iban   = sqrip_get_plugin_option('iban');
-        $iban_changed = $iban != $cur_iban ? true : false;
+        $iban           = $post_data['woocommerce_sqrip_iban'];
+        $cur_iban       = sqrip_get_plugin_option('iban');
+        $iban_changed   = $iban != $cur_iban ? true : false;
 
         if ($iban_changed) {
             $this->update_iban($post_data);
         } 
 
-        // else {
-        //     $server_iban = $this->get_ebics_overview('account_iban');
-        //     if ($server_iban) {
-        //         $this->update_option('iban', $server_iban);
-        //     }
-        // }
+        $token          = $post_data['woocommerce_sqrip_token'];
+        $cur_token      = sqrip_get_plugin_option('token');
+        $token_changed  = $token != $cur_token ? true : false;
+
+        if ($token_changed) {
+            $server_iban = $this->get_ebics_overview('iban', false, $token);
+
+            if ($server_iban) {
+                $_POST['woocommerce_sqrip_iban'] = $server_iban;
+            }
+        }
 
         if ( isset($post_data['woocommerce_sqrip_test_email']) ) {
 
@@ -1579,9 +1590,11 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         include_once(ABSPATH . 'wp-admin/includes/image.php');
 
         if (!$order_id) {
-            $sqrip_name = date('dmY') . '' . (int) microtime(true);
+            $sqrip_name = date('dmY') . (int) microtime(true);
+            $sqrip_title = $sqrip_name;
         } else {
             $sqrip_name = sqrip_file_name($order_id);
+            $sqrip_title = sqrip_file_name($order_id, false);
         }
         
         $filename = $sqrip_name . $type;
@@ -1611,7 +1624,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 
         $attachment = array(
             'post_mime_type' => $wp_filetype['type'],
-            'post_title' => $filename,
+            'post_title' => $sqrip_title,
             'post_content' => '',
             'post_status' => 'inherit',
             'meta_input' => array(

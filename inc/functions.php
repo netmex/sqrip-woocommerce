@@ -456,7 +456,7 @@ function sqrip_get_awaiting_orders(){
     return $orders;
 }
 
-function sqrip_file_name($order_id) {
+function sqrip_file_name($order_id, $sanitize = true) {
     $order = wc_get_order($order_id);
 
     $sqrip_file_name = sqrip_get_plugin_option('file_name');
@@ -468,5 +468,5 @@ function sqrip_file_name($order_id) {
     // replace [order_number] with order number
     $sqrip_file_name = str_replace("[shop_name]", get_bloginfo('name'), $sqrip_file_name);
 
-    return $sqrip_file_name;
+    return $sanitize ? sanitize_title($sqrip_file_name) : $sqrip_file_name;
 }

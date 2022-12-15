@@ -9,6 +9,7 @@ jQuery( document ).ready(function($){
     tab = $('.sqrip-tab'),
     ebics_service = $('#woocommerce_sqrip_ebics_service'),
     camt_service = $('#woocommerce_sqrip_camt_service'),
+    reminder_service = $('#woocommerce_sqrip_enabled_reminder'),
     pm_frequence = $('#woocommerce_sqrip_payment_frequence'),
     rem_creds = $('#woocommerce_sqrip_remaining_credits'),
     up_camt = $('#woocommerce_sqrip_camt053_file'),
@@ -331,7 +332,7 @@ jQuery( document ).ready(function($){
                     if (response.success) {
                         notice = response.html;
                     } else {
-                        notice = sqrip_notice('Error 404', true);
+                        notice = sqrip_notice(response.html, true);
                     }
 
                     wrap.append(notice);
@@ -438,6 +439,10 @@ jQuery( document ).ready(function($){
 
     if (ebics_service.length && ebics_service.is(':disabled')) {
         ebics_service.prop('checked', false);
+    }
+
+    if (reminder_service.length && reminder_service.is(':disabled')) {
+        reminder_service.prop('checked', false);
     }
 
     function sqrip_ajax(form_data, element){

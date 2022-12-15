@@ -400,7 +400,8 @@ class Sqrip_Ajax {
         	} else {
 
         		wp_send_json(array(
-					'success' => false
+					'success' => false,
+					'html' => __('Sqrip Confirm order failed!','sqrip-swiss-qr-invoice')
 				));
 
         	}
@@ -408,8 +409,8 @@ class Sqrip_Ajax {
         } else {
 
         	wp_send_json(array(
-        		'response' => false,
-        		'message' => __('No orders found!','sqrip-swiss-qr-invoice')
+        		'success' => false,
+        		'html' => __('No awaiting orders found!','sqrip-swiss-qr-invoice')
         	));
 
         }
