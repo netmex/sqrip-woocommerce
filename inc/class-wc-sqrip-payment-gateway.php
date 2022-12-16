@@ -123,7 +123,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             ),
             'enabled' => array(
                 'title'       => __( 'QR invoices with sqrip API', 'sqrip-swiss-qr-invoice' ),
-                'label'       => __( 'Enable/Disable ', 'sqrip-swiss-qr-invoice' ),
+                'label'       => __( 'Activation ', 'sqrip-swiss-qr-invoice' ),
                 'type'        => 'checkbox',
                 'description' => '',
                 'default'     => 'no',
@@ -147,7 +147,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             ),
             'camt_service' => array(
                 'title'       => __( 'Manual Comparison - camt053', 'sqrip-swiss-qr-invoice' ),
-                'label'       => __( 'Enable/Disable', 'sqrip-swiss-qr-invoice' ) . ($camt_active ? $activated_txt : ''),
+                'label'       => __( 'Activation', 'sqrip-swiss-qr-invoice' ) . ($camt_active ? $activated_txt : ''),
                 'type'        => 'checkbox',
                 'description' => '',
                 'default'     => 'no',
@@ -157,7 +157,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             ),
             'ebics_service' => array(
                 'title'       => __( 'Automatic Comparaison - EBICS', 'sqrip-swiss-qr-invoice' ),
-                'label'       => __( 'Enable/Disable', 'sqrip-swiss-qr-invoice' ) . ($ebics_active ? $activated_txt : ''),
+                'label'       => __( 'Activation', 'sqrip-swiss-qr-invoice' ) . ($ebics_active ? $activated_txt : ''),
                 'type'        => 'checkbox',
                 'description'   => __('Payment verification will be done twice on every working day.', 'sqrip-swiss-qr-invoice'),
                 'default'     => 'no',
@@ -169,14 +169,14 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'title'         => __('Reminders', 'sqrip-swiss-qr-invoice' ),
                 'type'          => 'section',
                 'description'   => __( 'If an invoice has not been paid within the defined time, you can send a reminder to the client', 'sqrip-swiss-qr-invoice'),
-                'class'       => 'services-tab' 
+                'class'       => 'services-tab reminder-section' 
             ),
             'enabled_reminder' => array(
                 'title'       => __( 'Reminders', 'sqrip-swiss-qr-invoice' ),
-                'label'       => __( 'Turn On/Off', 'sqrip-swiss-qr-invoice' ),
+                'label'       => __( 'Activation', 'sqrip-swiss-qr-invoice' ),
                 'type'        => 'checkbox',
                 'default'     => 'no',
-                'class'       => 'services-tab',
+                'class'       => 'services-tab reminder-section',
                 'disabled'    => !$ebics_active ? true : false,
                 'custom_attributes' => ['data-enable' => 'reminders']
             ),
@@ -187,7 +187,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             ),
             'enabled_fund_management' => array(
                 'title'       => __( 'Fund Management', 'sqrip-swiss-qr-invoice' ),
-                'label'       => __( 'Turn On/Off', 'sqrip-swiss-qr-invoice' ). ($this->get_ebics_overview('main_account') !== "XXXX XXXX XXXX XXXX" ? $activated_txt : ""),
+                'label'       => __( 'Activation', 'sqrip-swiss-qr-invoice' ). ($this->get_ebics_overview('main_account') !== "XXXX XXXX XXXX XXXX" ? $activated_txt : ""),
                 'type'        => 'checkbox',
                 'description' => '',
                 'default'     => 'no',
@@ -202,7 +202,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             ),
             'return_enabled' => array(
                 'title'       => __( 'Refunds', 'sqrip-swiss-qr-invoice' ),
-                'label'       => __( 'Activate/Deactivate', 'sqrip-swiss-qr-invoice' ),
+                'label'       => __( 'Activation', 'sqrip-swiss-qr-invoice' ),
                 'type'        => 'checkbox',
                 'description' => '',
                 'default'     => 'no',
@@ -708,7 +708,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 );
             }
 
-            if (isset($periodicity->hours)) {
+            if (isset($periodicity->hours) && is_array($periodicity->hours)) {
                 $count_h = 0;
                 $time = '';
 
@@ -1155,6 +1155,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         $sqrip_due_date = $post_data['woocommerce_sqrip_due_date'];
         $address        = $post_data['woocommerce_sqrip_address'];
         $qr_reference   = $post_data['woocommerce_sqrip_qr_reference'];
+        $initial_digits = $post_data['woocommerce_sqrip_qr_reference_format'];
         $lang           = isset($post_data['woocommerce_sqrip_lang']) ? $post_data['woocommerce_sqrip_lang'] : "de";
 
         $plugin_options         = get_option('woocommerce_sqrip_settings', array());
@@ -1199,6 +1200,12 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 
         if ( $qr_reference == "order_number" ) {
             $body['payment_information']['qr_reference'] = '5000';
+        }
+
+        $iban_type = sqrip_validation_iban($iban, $token);
+
+        if (isset($iban_type->message) &&  ($iban_type->message == 'Valid qr IBAN' && $initial_digits)){
+            $body['payment_information']['initial_digits'] = intval($initial_digits);
         }
 
         if ($address == "individual") {

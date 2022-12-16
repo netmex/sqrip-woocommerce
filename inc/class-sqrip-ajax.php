@@ -419,6 +419,8 @@ class Sqrip_Ajax {
 	}
 
 	public function get_order_status($status) {
+		$sqrip_new_status  = sqrip_get_plugin_option('new_status');
+
 		$order_statuses = array(
 			'wc-pending'    => _x( 'Pending payment', 'Order status', 'woocommerce' ),
 			'wc-processing' => _x( 'Processing', 'Order status', 'woocommerce' ),
@@ -427,6 +429,7 @@ class Sqrip_Ajax {
 			'wc-cancelled'  => _x( 'Cancelled', 'Order status', 'woocommerce' ),
 			'wc-refunded'   => _x( 'Refunded', 'Order status', 'woocommerce' ),
 			'wc-failed'     => _x( 'Failed', 'Order status', 'woocommerce' ),
+			'wc-sqrip-paid' => $sqrip_new_status
 		);
 
 		return isset($order_statuses[$status]) ? $order_statuses[$status] : $status;
@@ -439,7 +442,39 @@ class Sqrip_Ajax {
 		$orders_not_found = isset($data->orders_not_found) && !empty($data->orders_not_found) ? $data->orders_not_found : [];
 		$payments_made_more_than_once = isset($data->payments_made_more_than_once) && !empty($data->payments_made_more_than_once) ? $data->payments_made_more_than_once : [];
 
-		$html = '<div class="sqrip-table-results">';
+		$html = '<style>
+		.sqrip-table-results h3 {
+		    color: #1AAE9F;
+		    font-weight: bold;
+		}
+
+		h2,
+		h3 {
+		    color: #1d2327;
+		    font-size: 1.3em;
+		    margin: 1em 0;
+		}
+
+		.sqrip-table-results .sqrip-table thead tr th {
+		    background-color: #fff;
+		}
+
+		table.sqrip-table thead tr th,
+		table.sqrip-table tbody tr td {
+		    padding: 10px;
+		    border: 1px solid #7a7a7a;
+		}
+
+		table.sqrip-table thead tr th {
+		    font-weight: bold;
+		}
+		.sqrip-table-results .sqrip-table tbody tr td {
+		    padding: 10px;
+		    background-color: #fff;
+		}
+		</style>';
+
+		$html .= '<div class="sqrip-table-results">';
 
 		if ($email) {
 			$status_completed = sqrip_get_plugin_option('status_completed');

@@ -527,6 +527,16 @@ jQuery( document ).ready(function($){
         }
     })
 
+    ebics_service.on('change', function(){
+        tr = $('.reminder-section').closest('tr');
+        if ($(this).is(':checked')){
+            tr.show();
+        } else {
+            tr.hide();
+            reminder_service.prop('checked', false).trigger('change');
+        }
+    })
+
 
     if (ip_refund_token.length) {
         bt_check_refund_token_html = '<button id="btn_sqrip_check_refund_token" class="sqrip-btn sqrip-btn-validate-token">'+sqrip.txt_check_connection+'</button>';
