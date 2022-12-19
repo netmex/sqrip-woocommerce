@@ -61,6 +61,8 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         $ebics_active = $this->get_ebics_overview('active_service') == "ebics_service" ? true : false;
         $active_service = $this->get_ebics_overview('active_service');
 
+        $description = $this->show_tab('ebics_service,camt_service') == 'hide' ? __('What is the order status that waits for confirmation of made payment to your bank account?', 'sqrip-swiss-qr-invoice' ) : __('What is the order status that waits for confirmation of made payment to your bank account? We will only check for payments at the bank account for these statuses.', 'sqrip-swiss-qr-invoice' );
+
         $this->form_fields = array(
             'tabs' => array(
                 'type'  => 'tab',
@@ -79,7 +81,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                         'id' => 'comparison',
                         'title' => __( 'Payment Comparison', 'sqrip-swiss-qr-invoice' ),
                         'description' => '',
-                        'class' => $active_service == "none" ? 'hide' : $this->show_tab('ebics_service,camt_service'),
+                        'class' => '',
                     ],
                     [
                         'id' => 'fund-management',
@@ -153,7 +155,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'default'     => 'no',
                 'disabled'    => !$camt_active ? true : false,
                 'class'       => 'services-tab',
-                'custom_attributes' => ['data-enable' => 'comparison']
+                // 'custom_attributes' => ['data-enable' => 'comparison']
             ),
             'ebics_service' => array(
                 'title'       => __( 'Automatic Comparaison - EBICS', 'sqrip-swiss-qr-invoice' ),
@@ -163,7 +165,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'default'     => 'no',
                 'disabled'    => !$ebics_active ? true : false,
                 'class'       => 'services-tab',
-                'custom_attributes' => ['data-enable' => 'comparison']
+                // 'custom_attributes' => ['data-enable' => 'comparison']
             ),
             'section_reminders' => array(
                 'title'         => __('Reminders', 'sqrip-swiss-qr-invoice' ),
@@ -385,8 +387,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'type'          => 'select',
                 'options'       => wc_get_order_statuses(),
                 'default' => 'wc-pending',
-                'description' => __('What is the order status that waits for confirmation of made payment to your bank account?
-                We will only check for payments at the bank account for these statuses.', 'sqrip-swiss-qr-invoice' ),
+                'description' => $description,
                 'class'       => 'reminders-tab'  
             ),
             'due_reminder' => array(
@@ -415,8 +416,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'type'          => 'select',
                 'options'       => wc_get_order_statuses(),
                 'default' => 'wc-pending',
-                'description' => __('What is the order status that waits for confirmation of made payment to your bank account?
-                We will only check for payments at the bank account for these statuses.', 'sqrip-swiss-qr-invoice' ),
+                'description' => $description,
                 'class'       => 'comparison-tab'  
             ),
             'status_completed' => array(
@@ -533,13 +533,39 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 ),
                 'class'       => 'fund-management-tab',
             ),
+            'fund_sender_name' => array(
+                'title' => __( 'Reciever name', 'sqrip-swiss-qr-invoice' ),
+                'type' => 'text',
+                'class' => 'fund-management-tab',
+            ),
+            'fund_sender_postcode' => array(
+                'title' => __( 'ZIP CODE', 'sqrip-swiss-qr-invoice' ),
+                'type' => 'text',
+                'class' => 'fund-management-tab',
+            ),
+            'fund_sender_city' => array(
+                'title' => __( 'City', 'sqrip-swiss-qr-invoice' ),
+                'type' => 'text',
+                'class' => 'fund-management-tab',
+            ),
+            'fund_sender_country' => array(
+                'title' => __( 'Country code', 'sqrip-swiss-qr-invoice' ),
+                'type' => 'select',
+                'class' => 'fund-management-tab',
+                'options' => $countries_list
+            ),
+            'fund_remarks' => array(
+                'title' => __( 'Remarks', 'sqrip-swiss-qr-invoice' ),
+                'type' => 'text',
+                'class' => 'fund-management-tab',
+                'options' => $countries_list
+            ),
             'btn_transfer' => array(
                 'title'       => __( 'Executes transfer', 'sqrip-swiss-qr-invoice' ),
                 'label'       => __( 'Update & Transfer' ),
                 'type'        => 'info',
                 'class'       => 'fund-management-tab btn-transfer'  
             ),
-
             'return_token' => array(
                 'title'       => __( 'API key for Refunds' , 'sqrip-swiss-qr-invoice' ),
                 'type'        => 'textarea',
@@ -1086,6 +1112,26 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 
     }
 
+    public function update_fund_management_transfer_details($post_data){
+        $endpoint = 'fund-management-transfer-details';
+
+        $reciever_name      = isset($post_data['woocommerce_fund_sender_name']) ? $post_data['woocommerce_fund_sender_name'] : '';
+        $postal_code        = isset($post_data['woocommerce_fund_sender_postcode']) ? $post_data['woocommerce_fund_sender_postcode'] : '';
+        $city               = isset($post_data['woocommerce_fund_sender_city']) ? $post_data['woocommerce_fund_sender_city'] : '';
+        $country_code       = isset($post_data['woocommerce_sqrip_fund_sender_country']) ? $post_data['woocommerce_sqrip_fund_remarks'] : '';
+        $remarks            = isset($post_data['woocommerce_sqrip_fund_remarks']) ? $post_data['woocommerce_sqrip_fund_remarks'] : '';
+
+        $body = '{
+                "reciever_name": "'.$reciever_name.'",
+                "country_code": "'.$country_code.'",
+                "city": "'.$city.'",
+                "postal_code": "'.$postal_code.'",
+                "remarks": "'.$remarks.'"
+        }';
+
+        $response = sqrip_remote_request( $endpoint, $body, 'POST' );
+    }
+
     public function process_admin_options()
     {
         $post_data  = $this->get_post_data();
@@ -1143,7 +1189,9 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             $_POST['woocommerce_sqrip_status_completed'] = 'wc-sqrip-paid';
         }
 
-        return parent::process_admin_options();
+        $this->update_fund_management_transfer_details($post_data);
+
+        return parent::process_admin_options($post_data);
     }
 
     public function send_test_email($post_data)

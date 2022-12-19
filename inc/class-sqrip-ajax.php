@@ -756,7 +756,7 @@ class Sqrip_Ajax {
 
 	    $endpoint = 'update-transfer';
 
-	    $response = sqrip_remote_request( $endpoint, '', 'GET' );
+	    $response = sqrip_remote_request( $endpoint, '', 'GET', $_POST['token'] );
 
 	    if ($response) {
 	        $result['result'] = true;
@@ -764,7 +764,7 @@ class Sqrip_Ajax {
 	        $result['amount'] = sprintf(__('Amount : %s', 'sqrip-swiss-qr-invoice'), '<b>'.$response->amount.'</b>');
 	    } else {
 	        $result['result'] = false;
-	        $result['message'] = $response->message;
+	        $result['message'] = isset($response->message) ? $response->message : __("No result", 'sqrip-swiss-qr-invoice');
 	    }
 
 	    wp_send_json($result);
