@@ -152,9 +152,9 @@ jQuery( document ).ready(function($){
 
         btn_refund.on('click', function(e){
             var _this = $(this);
-            console.log('clicked');
+            // console.log('clicked');
             if (!ib_checked) {
-                console.log('ib_checked', ib_checked);
+                // console.log('ib_checked', ib_checked);
                 e.stopImmediatePropagation();
 
                 $.ajax({
