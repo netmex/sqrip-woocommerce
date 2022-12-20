@@ -59,7 +59,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 
         $camt_active = $this->get_ebics_overview('active_service') == "camt_upload_service" ? true : false;
         $ebics_active = $this->get_ebics_overview('active_service') == "ebics_service" ? true : false;
-        $active_service = $this->get_ebics_overview('active_service');
+        // $active_service = $this->get_ebics_overview('active_service');
 
         $description = $this->show_tab('ebics_service,camt_service') == 'hide' ? __('What is the order status that waits for confirmation of made payment to your bank account?', 'sqrip-swiss-qr-invoice' ) : __('What is the order status that waits for confirmation of made payment to your bank account? We will only check for payments at the bank account for these statuses.', 'sqrip-swiss-qr-invoice' );
 

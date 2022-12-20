@@ -1,7 +1,9 @@
 jQuery( document ).ready(function($){
 
     var btn_regenerate_qrcode = $('button.sqrip-re-generate-qrcode'),
-    btn_refund = $('button.do-api-refund');
+    btn_refund = $('button.do-api-refund'),
+    btn_initiate_payment = $('button.sqrip-initiate-payment'),
+    btn_confirm = $('button.sqrip-payment-confirmed');
 
     btn_regenerate_qrcode.on('click', function(e){
 
@@ -20,7 +22,6 @@ jQuery( document ).ready(function($){
         
     });
 
-    btn_initiate_payment = $('button.sqrip-initiate-payment');
 
     btn_initiate_payment.on('click', function(e){
 
@@ -33,6 +34,23 @@ jQuery( document ).ready(function($){
         if ( _form.length ) {
 
             _form.prepend('<input type="hidden" id="_sqrip_initiate_payment" name="_sqrip_initiate_payment" value="1">');
+            _form.trigger('submit');
+
+        }
+        
+    });
+
+    btn_confirm.on('click', function(e){
+
+        e.preventDefault();
+
+        _form = $('form#post');
+
+        $('body').addClass('sqrip-loading');
+  
+        if ( _form.length ) {
+
+            jQuery('#order_status').val(sqrip.status_completed);            
             _form.trigger('submit');
 
         }

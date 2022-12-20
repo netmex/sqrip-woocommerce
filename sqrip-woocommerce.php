@@ -183,7 +183,8 @@ add_action( 'admin_enqueue_scripts', function (){
             array( 
                 'ajax_url' => admin_url( 'admin-ajax.php' ),
                 'ajax_refund_paid_nonce' => wp_create_nonce( 'sqrip-mark-refund-paid' ),
-                'ajax_refund_unpaid_nonce' => wp_create_nonce( 'sqrip-mark-refund-unpaid' )
+                'ajax_refund_unpaid_nonce' => wp_create_nonce( 'sqrip-mark-refund-unpaid' ),
+                'status_completed' => sqrip_get_plugin_option('status_completed')
             )
         );
     }
@@ -256,6 +257,15 @@ if (!function_exists('sqrip_add_fields_for_order_details')) {
             echo $pdf_file ? '<li><b>'.__( 'QR-Code PDF', 'sqrip-swiss-qr-invoice' ).' :</b> <a target="_blank" href="'.esc_url($pdf_file).'"><span class="dashicons dashicons-media-document"></span></a></li>' : '';
 
             echo '<li><button class="button button-secondary sqrip-re-generate-qrcode">'.__( 'Renew QR Invoice', 'sqrip-swiss-qr-invoice' ).'</button></li>';
+
+            $ebics_service = sqrip_get_plugin_option('ebics_service');
+            $camt_active = sqrip_get_plugin_option('camt_active');
+
+            if ($ebics_service == "yes" || $camt_active == "yes") {
+                echo '<li><button class="button button-primary sqrip-payment-confirmed">'.__( 'Payment confirmed', 'sqrip-swiss-qr-invoice' ).'</button></li>';
+
+            }
+
 
             echo '</ul>';
 
@@ -724,5 +734,3 @@ function sqrip_add_new_order_statuses( $order_statuses ) {
 }
 
 add_filter( 'wc_order_statuses', 'sqrip_add_new_order_statuses' );
-
-
