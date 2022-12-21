@@ -3,7 +3,8 @@ jQuery( document ).ready(function($){
     var btn_regenerate_qrcode = $('button.sqrip-re-generate-qrcode'),
     btn_refund = $('button.do-api-refund'),
     btn_initiate_payment = $('button.sqrip-initiate-payment'),
-    btn_confirm = $('button.sqrip-payment-confirmed');
+    btn_confirm = $('button.sqrip-payment-confirmed'),
+    sqrip_error = '<p class="sqrip-error">'+sqrip.field_required_txt+'</p>';
 
     btn_regenerate_qrcode.on('click', function(e){
 
@@ -28,13 +29,31 @@ jQuery( document ).ready(function($){
         e.preventDefault();
 
         _form = $('form#post');
-
-        $('body').addClass('sqrip-loading');
   
         if ( _form.length ) {
 
-            _form.prepend('<input type="hidden" id="_sqrip_initiate_payment" name="_sqrip_initiate_payment" value="1">');
-            _form.trigger('submit');
+            _form.find('.sqrip-error').remove();
+            fields_invalid = sqrip_validate_initiate_payment();
+            $('#_payment_method').val('sqrip');
+
+            if (fields_invalid.length) {
+
+                boxButton = $('.order_data_column > h3 > .edit_address').eq(0);
+                isBoxShowing = boxButton.is(':visible');
+
+                if (isBoxShowing) {
+                    boxButton.click();
+                }
+
+                $.each( fields_invalid, function( i, field ) {
+                    $( "p." + field + "_field" ).append(sqrip_error);
+                });
+            } else {
+                $('body').addClass('sqrip-loading');
+
+                _form.prepend('<input type="hidden" id="_sqrip_initiate_payment" name="_sqrip_initiate_payment" value="1">');
+                _form.trigger('submit');
+            }
 
         }
         
@@ -224,6 +243,27 @@ jQuery( document ).ready(function($){
                 }
             })
         }
+    }
+
+    function sqrip_validate_initiate_payment(){
+        mandatory_fields = [
+            '_billing_first_name',
+            '_billing_last_name',
+            '_billing_address_1',
+            '_billing_address_2',
+            '_billing_city',
+            '_billing_postcode',
+            '_billing_country',
+            '_billing_email',
+            '_billing_phone'
+        ];
+
+        response = $.grep(mandatory_fields, function(field) {
+            value = $( "#" + field ).val();
+            return !$.trim(value);
+        });
+
+        return response;
     }
 
 });

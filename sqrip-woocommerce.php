@@ -184,7 +184,8 @@ add_action( 'admin_enqueue_scripts', function (){
                 'ajax_url' => admin_url( 'admin-ajax.php' ),
                 'ajax_refund_paid_nonce' => wp_create_nonce( 'sqrip-mark-refund-paid' ),
                 'ajax_refund_unpaid_nonce' => wp_create_nonce( 'sqrip-mark-refund-unpaid' ),
-                'status_completed' => sqrip_get_plugin_option('status_completed')
+                'status_completed' => sqrip_get_plugin_option('status_completed'),
+                'field_required_txt' => __('This field is required', 'sqrip-swiss-qr-invoice')
             )
         );
     }
@@ -429,13 +430,26 @@ add_filter( 'wp_insert_post_data' , function ( $data , $postarr, $unsanitized_po
         $order_billing_city         = $postarr['_billing_city'];
         $order_billing_postcode     = $postarr['_billing_postcode'];
         $order_billing_country      = $postarr['_billing_country'];
+        $order_billing_company      = $postarr['_billing_company'];
                     
         $currency_symbol    =   $order_data['currency'];
         $amount             =   floatval($order_data['total']);
    
         $body = sqrip_prepare_qr_code_request_body($currency_symbol, $amount, $postarr['ID']);
 
-        $body["payable_by"] = sqrip_get_billing_address_from_order($order);
+        $billing_address = array(
+            'name'          => $order_billing_first_name . ' ' . $order_billing_last_name,
+            'street'        => $order_billing_address,
+            'postal_code'   => $order_billing_postcode,
+            'town'          => $order_billing_city,
+            'country_code'  => $order_billing_country
+        );
+
+        if ( !empty($order_billing_company) ) {
+            $billing_address['company'] = $order_billing_company;
+        }
+
+        $body["payable_by"] = $billing_address;
 
         $address = sqrip_get_plugin_option('address');
 
@@ -445,8 +459,6 @@ add_filter( 'wp_insert_post_data' , function ( $data , $postarr, $unsanitized_po
 
         $endpoint = 'code';
         $response = wp_remote_post(SQRIP_ENDPOINT.$endpoint, $args);
-
-        // var_dump( $response); exit;
 
         $response_body = wp_remote_retrieve_body($response);
         $response_body = json_decode($response_body);
@@ -470,7 +482,7 @@ add_filter( 'wp_insert_post_data' , function ( $data , $postarr, $unsanitized_po
             elseif ( isset($postarr['_sqrip_initiate_payment']) ) {
                 $error_title = __( 'Initiate sqrip payment error:', 'sqrip-swiss-qr-invoice' );
                 $order_notes = __('sqrip payment initiation was successful', 'sqrip-swiss-qr-invoice');
-                $order->set_payment_method('sqrip');
+                // $order->set_payment_method('sqrip');
             }
 
             if (isset($response_body->reference)) {

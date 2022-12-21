@@ -285,3 +285,8 @@ table.sqrip-table td p.sqrip-note {
     background: #c8d7e1;
     color: #2e4453;
 }
+
+#order_data .order_data_column p.sqrip-error{
+    color: red;
+    margin-top: 5px;
+}
