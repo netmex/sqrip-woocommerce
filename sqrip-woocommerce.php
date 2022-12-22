@@ -241,13 +241,13 @@ if (!function_exists('sqrip_add_fields_for_order_details')) {
     function sqrip_add_fields_for_order_details()
     {
         global $post;
-
-        $reference_id = get_post_meta($post->ID, 'sqrip_reference_id', true);
-        $pdf_file = get_post_meta($post->ID, 'sqrip_pdf_file_url', true);
+        $order_id = $post->ID;
+        $reference_id = get_post_meta($order_id, 'sqrip_reference_id', true);
+        $pdf_file = get_post_meta($order_id, 'sqrip_pdf_file_url', true);
         
         // check for legacy pdf meta file
         if(!$pdf_file) {
-            $pdf_file = get_post_meta($post->ID, 'sqrip_pdf_file', true);
+            $pdf_file = get_post_meta($order_id, 'sqrip_pdf_file', true);
         }
         
         if ($reference_id || $pdf_file) {
@@ -261,8 +261,12 @@ if (!function_exists('sqrip_add_fields_for_order_details')) {
 
             $ebics_service = sqrip_get_plugin_option('ebics_service');
             $camt_active = sqrip_get_plugin_option('camt_active');
+            $status_awaiting = sqrip_get_plugin_option('status_awaiting');
 
-            if ($ebics_service == "yes" || $camt_active == "yes") {
+            $order = wc_get_order( $order_id );
+            $order_status = 'wc-'.$order->get_status();
+
+            if (($ebics_service == "yes" || $camt_active == "yes") && $status_awaiting == $order_status) {
                 echo '<li><button class="button button-primary sqrip-payment-confirmed">'.__( 'Payment confirmed', 'sqrip-swiss-qr-invoice' ).'</button></li>';
 
             }
@@ -437,8 +441,14 @@ add_filter( 'wp_insert_post_data' , function ( $data , $postarr, $unsanitized_po
    
         $body = sqrip_prepare_qr_code_request_body($currency_symbol, $amount, $postarr['ID']);
 
+        if (!$order_billing_first_name && !$order_billing_last_name) {
+            $name = $order_billing_company;
+        } else {
+            $name = $order_billing_first_name . ' ' . $order_billing_last_name;
+        }
+
         $billing_address = array(
-            'name'          => $order_billing_first_name . ' ' . $order_billing_last_name,
+            'name'          => $name,
             'street'        => $order_billing_address,
             'postal_code'   => $order_billing_postcode,
             'town'          => $order_billing_city,

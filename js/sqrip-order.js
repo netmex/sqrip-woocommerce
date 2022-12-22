@@ -247,16 +247,19 @@ jQuery( document ).ready(function($){
 
     function sqrip_validate_initiate_payment(){
         mandatory_fields = [
-            '_billing_first_name',
-            '_billing_last_name',
             '_billing_address_1',
-            '_billing_address_2',
             '_billing_city',
             '_billing_postcode',
             '_billing_country',
             '_billing_email',
             '_billing_phone'
         ];
+
+        company = $( "#_billing_company" ).val();
+        
+        if (!$.trim(company)) {
+            mandatory_fields.push('_billing_first_name','_billing_last_name');
+        }
 
         response = $.grep(mandatory_fields, function(field) {
             value = $( "#" + field ).val();
