@@ -630,8 +630,10 @@ jQuery( document ).ready(function($){
     }
 
     btn_save.on('click', function(){
+        // console.log('submit');
         form = $(this).closest('#mainform');
-        form.find('input[required]').each(function(){
+        form.find('input.sqrip-address-individual').each(function(){
+            // console.log($(this).val().trim());
             if( $(this).val().trim().length < 1 ) {
                 sqrip_tab_init('qrinvoice');
             }
