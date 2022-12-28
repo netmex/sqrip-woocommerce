@@ -217,7 +217,12 @@ jQuery( document ).ready(function($){
 
     function init_individual_address(_val){
         if (_val == 'individual') {
-            $('.sqrip-address-individual').prop('required', true).closest('tr').show();
+            $('.sqrip-address-individual').closest('tr').show();
+
+            if ($('.sqrip-tab[data-tab="qrinvoice"]').hasClass('active')) {
+                $('.sqrip-address-individual').prop('required', true);
+            }
+            
         } else {
             $('.sqrip-address-individual').prop('required', false).closest('tr').hide();
         }
@@ -623,4 +628,13 @@ jQuery( document ).ready(function($){
             }
         })
     }
+
+    btn_save.on('click', function(){
+        form = $(this).closest('#mainform');
+        form.find('input[required]').each(function(){
+            if( $(this).val().trim().length < 1 ) {
+                sqrip_tab_init('qrinvoice');
+            }
+        })
+    })
 });
