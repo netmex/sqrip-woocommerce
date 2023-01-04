@@ -435,29 +435,31 @@ add_filter( 'wp_insert_post_data' , function ( $data , $postarr, $unsanitized_po
         $order_billing_postcode     = $postarr['_billing_postcode'];
         $order_billing_country      = $postarr['_billing_country'];
         $order_billing_company      = $postarr['_billing_company'];
+        $token                      = sqrip_get_plugin_option('token');
                     
         $currency_symbol    =   $order_data['currency'];
         $amount             =   floatval($order_data['total']);
    
         $body = sqrip_prepare_qr_code_request_body($currency_symbol, $amount, $postarr['ID']);
 
-        if (!$order_billing_first_name && !$order_billing_last_name) {
-            $name = $order_billing_company;
-        } else {
-            $name = $order_billing_first_name . ' ' . $order_billing_last_name;
-        }
-
         $billing_address = array(
-            'name'          => $name,
             'street'        => $order_billing_address,
             'postal_code'   => $order_billing_postcode,
             'town'          => $order_billing_city,
             'country_code'  => $order_billing_country
         );
 
-        if ( !empty($order_billing_company) ) {
-            $billing_address['company'] = $order_billing_company;
+        if (!$order_billing_first_name && !$order_billing_last_name) {
+            $name = $order_billing_company;
+        } else {
+            $name = $order_billing_first_name . ' ' . $order_billing_last_name;
+
+            if ( !empty($order_billing_company) ) {
+                $billing_address['company'] = $order_billing_company;
+            }
         }
+
+        $billing_address['name'] = $name;
 
         $body["payable_by"] = $billing_address;
 
@@ -520,7 +522,7 @@ add_filter( 'wp_insert_post_data' , function ( $data , $postarr, $unsanitized_po
                 // TODO: replace with attachment ID and store this in meta instead of actual file
                 $sqrip_class_payment = new WC_Sqrip_Payment_Gateway;
 
-                $sqrip_qr_pdf_attachment_id = $sqrip_class_payment->file_upload($sqrip_pdf, '.pdf');
+                $sqrip_qr_pdf_attachment_id = $sqrip_class_payment->file_upload($sqrip_pdf, '.pdf', $token, $postarr['ID']);
                 // $sqrip_qr_png_attachment_id = $sqrip_class_payment->file_upload($sqrip_png, '.png');
 
                 $sqrip_qr_pdf_url = wp_get_attachment_url($sqrip_qr_pdf_attachment_id);
