@@ -260,14 +260,14 @@ if (!function_exists('sqrip_add_fields_for_order_details')) {
 
             echo '<li><button class="button button-secondary sqrip-re-generate-qrcode">'.__( 'Renew QR Invoice', 'sqrip-swiss-qr-invoice' ).'</button></li>';
 
-            $ebics_service = sqrip_get_plugin_option('ebics_service');
-            $camt_active = sqrip_get_plugin_option('camt_active');
+            // $ebics_service = sqrip_get_plugin_option('ebics_service');
+            // $camt_active = sqrip_get_plugin_option('camt_active');
             $status_awaiting = sqrip_get_plugin_option('status_awaiting');
 
             $order = wc_get_order( $order_id );
             $order_status = 'wc-'.$order->get_status();
 
-            if (($ebics_service == "yes" || $camt_active == "yes") && $status_awaiting == $order_status) {
+            if ($status_awaiting == $order_status) {
                 echo '<li><button class="button button-primary sqrip-payment-confirmed">'.__( 'Payment confirmed', 'sqrip-swiss-qr-invoice' ).'</button></li>';
 
             }

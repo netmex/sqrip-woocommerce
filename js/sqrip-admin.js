@@ -92,6 +92,52 @@ jQuery( document ).ready(function($){
         }
     });
 
+    if (btn_save.length) {
+
+        btn_transfer_html = '<button id="sqrip_btn_transfer" class="button-primary sqrip-btn fund-management-tab btn-transfer">'+sqrip.txt_transfer+'</button>';
+
+        btn_save.after(btn_transfer_html);
+
+        btn_transfer = $('#sqrip_btn_transfer');
+        btn_transfer.on('click', function(e){
+            e.preventDefault();
+            _this = $(this);
+            _output = $('.info-transfer');
+            _output.find('.sqrip-notice').remove();
+
+            $.ajax({
+                type : "post", 
+                url : sqrip.ajax_url, 
+                data : {
+                    action: "sqrip_transfer", 
+                    token: ip_token.val()
+                },
+                beforeSend: function(){
+                   $('body').addClass('sqrip-loading');
+                },
+                success: function(response) {
+                    if(response) {
+                        if (response.result) {
+                            result = "updated";
+                        } else {
+                            result = "error";
+                        }
+                        output_html = '<div class="sqrip-notice '+result+'">';
+                        output_html += '<p>'+response.message+'</p><p class="sqrip-amount">'+response.amount+'</p>';
+                        output_html += '</div>';
+                        _output.html(output_html);
+                    }
+                },
+                error: function( jqXHR, textStatus, errorThrown ){
+                    console.log( 'The following error occured: ' + textStatus, errorThrown );
+                },
+                complete: function(){
+                    $('body').removeClass('sqrip-loading');
+                }
+            })
+        });
+    }
+
     init_individual_address(ip_address.val());
 
     ip_address.on('change', function(){
@@ -601,49 +647,5 @@ jQuery( document ).ready(function($){
         })
     })
 
-    if (btn_save.length) {
 
-        btn_transfer_html = '<button id="sqrip_btn_transfer" class="button-primary sqrip-btn fund-management-tab btn-transfer">'+sqrip.txt_transfer+'</button>';
-
-        btn_save.after(btn_transfer_html);
-
-        btn_transfer = $('#sqrip_btn_transfer');
-        btn_transfer.on('click', function(e){
-            e.preventDefault();
-            _this = $(this);
-            _output = $('.info-transfer');
-            _output.find('.sqrip-notice').remove();
-
-            $.ajax({
-                type : "post", 
-                url : sqrip.ajax_url, 
-                data : {
-                    action: "sqrip_transfer", 
-                    token: ip_token.val()
-                },
-                beforeSend: function(){
-                   $('body').addClass('sqrip-loading');
-                },
-                success: function(response) {
-                    if(response) {
-                        if (response.result) {
-                            result = "updated";
-                        } else {
-                            result = "error";
-                        }
-                        output_html = '<div class="sqrip-notice '+result+'">';
-                        output_html += '<p>'+response.message+'</p><p class="sqrip-amount">'+response.amount+'</p>';
-                        output_html += '</div>';
-                        _output.html(output_html);
-                    }
-                },
-                error: function( jqXHR, textStatus, errorThrown ){
-                    console.log( 'The following error occured: ' + textStatus, errorThrown );
-                },
-                complete: function(){
-                    $('body').removeClass('sqrip-loading');
-                }
-            })
-        });
-    }
 });

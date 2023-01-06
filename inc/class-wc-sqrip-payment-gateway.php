@@ -295,7 +295,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'type'        => 'number',
                 'default'     => '',
                 'class'       => 'qrinvoice-tab '.$this->show_qr_reference_format(),
-                'custom_attributes' => ['min' => 0, 'maxlength' => 6]
+                'custom_attributes' => ['min' => 100000, 'max' => 999999]
             ),
             'qr_reference' => array(
                 'title' => __( 'Basis of the (QR) reference number', 'sqrip-swiss-qr-invoice' ),
@@ -462,10 +462,10 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'class'       => 'comparison-tab ebics-service' 
             ),
             'payment_frequence' => array(
-                'title'       => __( 'Payment Comparison', 'sqrip-swiss-qr-invoice' ),
+                'title'       => __( 'Trigger Periodicity', 'sqrip-swiss-qr-invoice' ),
                 'type'        => 'info',
                 'label'        => $this->get_ebics_overview('trigger_periodicity'),
-                'description' => __( 'To edit these setting go to your EBICS setting at <a href="https://api.sqrip.ch/ebics/settings">https://api.sqrip.ch/ebics/settings</a>', 'sqrip-swiss-qr-invoice' ),
+                'description' => __( 'To edit these setting go to your EBICS setting at <a href="https://api.sqrip.ch/ebics/settings" target="_blank">https://api.sqrip.ch/ebics/settings</a>', 'sqrip-swiss-qr-invoice' ),
                 'class'         => 'comparison-tab ebics-service'  
             ),
             'comparison_report' => array(
@@ -729,18 +729,35 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 return $service;
             }
             
-            $trigger_periodicity = $periode;
+            // $trigger_periodicity = $periode;
+            $trigger_periodicity = '';
 
             $count = 0;
             if ($periodes && is_array($periodes)) {
-                foreach ($periodes as $periode) {
-                    $count++;
-                    $weeksday .= $count > 1 ? ', ' : '';
-                    $weeksday .= isset($periode->label) ? $periode->label : $periode;
+                $weeksday_arr = [
+                    'Monday',
+                    'Tuesday',
+                    'Wednesday',
+                    'Thursday',
+                    'Friday',
+                    'Saturday',
+                    'Sunday'
+                ];
+                $separate = '';
+
+                if (isset($periodes[0]->label)) {
+                   $periodes = array_column($periodes, 'label');
                 }
 
+                foreach ($weeksday_arr as $value) {
+                    if (in_array($value, $periodes)) {
+                        $weeksday .= $separate.$value;
+                        $separate = ', ';
+                    }
+                }
+ 
                 $trigger_periodicity .= sprintf( 
-                    __( ' on %s', 'sqrip-swiss-qr-invoice' ),
+                    __( 'on %s', 'sqrip-swiss-qr-invoice' ),
                     $weeksday,
                 );
             }
@@ -748,12 +765,18 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             if (isset($periodicity->hours) && is_array($periodicity->hours)) {
                 $count_h = 0;
                 $time = '';
+                $separate = '';
 
                 foreach ($periodicity->hours as $hour) {
-                    $count_h++;
-                    $time .= $count_h > 1 ? ', '.$hour : $hour;
-                    $time .= isset($periodicity->minutes) ? ':'.$periodicity->minutes : ':00';
+
+                    $time .= $separate.$hour;
+                    $time .= isset($periodicity->minutes) ? ':'.$periodicity->minutes: ':00';
+
+
+                    $separate = ', ';
                 }
+
+                // var_dump($time);
        
                 $trigger_periodicity .= sprintf( 
                     __( ' at %s', 'sqrip-swiss-qr-invoice' ),
@@ -1263,9 +1286,10 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 
         $iban_type = sqrip_validation_iban($iban, $token);
 
-        if (isset($iban_type->message) &&  ($iban_type->message == 'Valid qr IBAN' && $initial_digits)){
+        if (isset($iban_type->message) && $iban_type->message == 'Valid qr IBAN' && $initial_digits) {
             $body['payment_information']['initial_digits'] = intval($initial_digits);
         }
+
 
         if ($address == "individual") {
 

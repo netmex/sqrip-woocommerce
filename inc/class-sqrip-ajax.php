@@ -117,7 +117,7 @@ class Sqrip_Ajax {
 
     		case 200:
     			$result['result'] = true;
-		        $result['message'] = __("Valid token active", "sqrip-swiss-qr-invoice");
+		        $result['message'] = __("Valid, active API Key", "sqrip-swiss-qr-invoice");
     			break;
     		
     		default:
@@ -482,7 +482,7 @@ class Sqrip_Ajax {
 			$status_txt = $this->get_order_status($status_completed);
 
 			$html .= '<h3>'.sprintf(
-				__('%s orders updated to %s', 'sqrip-swiss-qr-invoice'), 
+				__('%s orders updated to "%s"', 'sqrip-swiss-qr-invoice'), 
 				count($orders_matched),
 				$status_txt
 			).'</h3>';

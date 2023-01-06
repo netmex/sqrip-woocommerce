@@ -159,7 +159,7 @@ function sqrip_get_payable_to_address($address = 'woocommerce')
     	
     	case 'woocommerce':
 
-            if ( empty(get_option( 'woocommerce_store_address' )) || empty(get_option( 'woocommerce_store_address_2' )) ) {
+            if ( empty(get_option( 'woocommerce_store_address' )) && empty(get_option( 'woocommerce_store_address_2' )) ) {
 
                 $result = [];
                 
