@@ -140,7 +140,6 @@ table.form-table .fund-management-tab ~ td label{
     cursor: text;
 } 
 
-table.form-table tr td label[for="woocommerce_sqrip_btn_transfer"],
 table.form-table tr th label[for="woocommerce_sqrip_test_email"],
 table.form-table tr td label[for="woocommerce_sqrip_compare_btn"],
 table.form-table .sqrip-btn,
@@ -289,4 +288,13 @@ table.sqrip-table td p.sqrip-note {
 #order_data .order_data_column p.sqrip-error{
     color: red;
     margin-top: 5px;
+}
+
+.sqrip-btn.btn-transfer{
+    margin-left: 10px;
+}
+
+table.form-table  .info-transfer .sqrip-notice{
+    height: auto;
+    margin-left: 0;
 }

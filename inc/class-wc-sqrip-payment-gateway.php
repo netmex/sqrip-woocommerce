@@ -499,7 +499,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             'account_qr_iban' => array(
                 'title'       => __( 'Account (QR-)IBAN', 'sqrip-swiss-qr-invoice' ),
                 'type'        => 'info',
-                'label'        => $this->get_ebics_overview('debit_account'),
+                'label'        => $this->get_fund_management_detail('account_iban'),
                 'class'       => 'fund-management-tab',
             ),
             'account_balance' => array(
@@ -507,7 +507,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'type'        => 'info',
                 'label'        => sprintf( 
                     __( '%s as per %s', 'sqrip-swiss-qr-invoice' ), 
-                    $this->get_ebics_overview('account_balance'),
+                    $this->get_fund_management_detail('account_balance'),
                     current_time('d.m.Y h:i')
                 ),
                 'class'       => 'fund-management-tab',
@@ -515,13 +515,13 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             'trigger_level' => array(
                 'title'       => __( 'Trigger Level', 'sqrip-swiss-qr-invoice' ),
                 'type'        => 'info',
-                'label'        => $this->get_ebics_overview('trigger_level'),
+                'label'        => $this->get_fund_management_detail('trigger_level'),
                 'class'       => 'fund-management-tab',
             ),
             'trigger_periodicity' => array(
                 'title'       => __( 'Trigger periodicity', 'sqrip-swiss-qr-invoice' ),
                 'type'        => 'info',
-                'label'        => $this->get_ebics_overview('trigger_periodicity'),
+                'label'        => $this->get_fund_management_detail('trigger_periodicity'),
                 'class'       => 'fund-management-tab',
             ),
             'fund_forward_payments' => array(
@@ -529,42 +529,45 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'type'        => 'info',
                 'label'        => sprintf( 
                     __( 'You forward your payments to %s', 'sqrip-swiss-qr-invoice' ), 
-                    $this->get_ebics_overview('main_account'),
+                    $this->get_fund_management_detail('main_account'),
                 ),
                 'class'       => 'fund-management-tab',
             ),
             'fund_sender_name' => array(
                 'title' => __( 'Reciever name', 'sqrip-swiss-qr-invoice' ),
-                'type' => 'text',
+                'type' => 'info',
+                'label'   => $this->get_fund_management_detail('reciever_name'),
                 'class' => 'fund-management-tab',
             ),
             'fund_sender_postcode' => array(
                 'title' => __( 'ZIP CODE', 'sqrip-swiss-qr-invoice' ),
-                'type' => 'text',
+                'type' => 'info',
+                'label'   => $this->get_fund_management_detail('postal_code'),
                 'class' => 'fund-management-tab',
             ),
             'fund_sender_city' => array(
                 'title' => __( 'City', 'sqrip-swiss-qr-invoice' ),
-                'type' => 'text',
+                'type' => 'info',
+                'label'   => $this->get_fund_management_detail('city'),
                 'class' => 'fund-management-tab',
             ),
             'fund_sender_country' => array(
                 'title' => __( 'Country code', 'sqrip-swiss-qr-invoice' ),
-                'type' => 'select',
+                'type' => 'info',
+                'label'   => $this->get_fund_management_detail('country_code'),
                 'class' => 'fund-management-tab',
-                'options' => $countries_list
             ),
             'fund_remarks' => array(
                 'title' => __( 'Remarks', 'sqrip-swiss-qr-invoice' ),
                 'type' => 'text',
+                'default' => $this->get_fund_management_detail('remarks'),
                 'class' => 'fund-management-tab',
-                'options' => $countries_list
             ),
             'btn_transfer' => array(
-                'title'       => __( 'Executes transfer', 'sqrip-swiss-qr-invoice' ),
-                'label'       => __( 'Update & Transfer' ),
+                'title'       => '',
+                'label'       => '',
                 'type'        => 'info',
-                'class'       => 'fund-management-tab btn-transfer'  
+                'class'       => 'fund-management-tab info-transfer'  
             ),
             'return_token' => array(
                 'title'       => __( 'API key for Refunds' , 'sqrip-swiss-qr-invoice' ),
@@ -658,7 +661,15 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 
         $return = $this->get_settings_response_data($response, true);
 
-        return !empty($param) ? $return[$param] : $return;
+        if (!empty($param) && isset($return[$param])) {
+            return $return[$param];
+        }
+
+        if (!empty($param) && isset($response->$param)) {
+            return $response->$param;
+        }
+
+        return;
     }
 
     public function get_ebics_overview($param = "", $return_full = false, $token = ""){
@@ -725,7 +736,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 foreach ($periodes as $periode) {
                     $count++;
                     $weeksday .= $count > 1 ? ', ' : '';
-                    $weeksday .= $periode->label;
+                    $weeksday .= isset($periode->label) ? $periode->label : $periode;
                 }
 
                 $trigger_periodicity .= sprintf( 
@@ -741,7 +752,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 foreach ($periodicity->hours as $hour) {
                     $count_h++;
                     $time .= $count_h > 1 ? ', '.$hour : $hour;
-                    $time .= isset($periodicity->minutes) ? ':'.$periodicity->minutes : '';
+                    $time .= isset($periodicity->minutes) ? ':'.$periodicity->minutes : ':00';
                 }
        
                 $trigger_periodicity .= sprintf( 

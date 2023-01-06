@@ -166,6 +166,7 @@ add_action( 'admin_enqueue_scripts', function (){
                 'txt_updated' => __( 'Update', 'sqrip-swiss-qr-invoice' ),
                 'txt_check_connection' => __( 'Connection test', 'sqrip-swiss-qr-invoice' ),
                 'txt_validate_iban' => __( 'Check', 'sqrip-swiss-qr-invoice' ),
+                'txt_transfer' => __( 'Update & Transfer', 'sqrip-swiss-qr-invoice' ),
                 'txt_send_test_email' => sprintf( 
                     __( 'Send test to %s', 'sqrip-swiss-qr-invoice' ), 
                     esc_html( get_option('admin_email') ) 

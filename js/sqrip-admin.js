@@ -18,7 +18,7 @@ jQuery( document ).ready(function($){
     ip_send_rp = $('#woocommerce_sqrip_comparison_report'),
     enable_service = $('input[data-enable]'),
     send_report_options = $('#woocommerce_sqrip_comparison_report_options'),
-    btn_transfer = $('label[for="woocommerce_sqrip_btn_transfer"]'),
+    // btn_transfer = $('label[for="woocommerce_sqrip_btn_transfer"]'),
     btn_approve = $('.sqrip-approve'),
     ip_refund_token = $('#woocommerce_sqrip_return_token'),
     ip_qrref_format = $('#woocommerce_sqrip_qr_reference_format'),
@@ -250,6 +250,12 @@ jQuery( document ).ready(function($){
             toggle_service_options(ebics_service.is(':checked'), $('.ebics-service'));
             toggle_service_options(camt_service.is(':checked'), $('.camt-service'));
         }
+
+        if (data != "fund-management") {
+            $('#sqrip_btn_transfer').hide();
+        } else {
+            $('#sqrip_btn_transfer').show();
+        }
     }
 
     function init_comparison_tab(connect, table) {
@@ -352,51 +358,6 @@ jQuery( document ).ready(function($){
             })
         })
     }
-
-    if (btn_transfer.length) {
-        btn_transfer.on('click', function(e){
-            e.preventDefault();
-            _this = $(this);
-            _output = _this.closest('td.forminp');
-            _output.find('.sqrip-notice').remove();
-  
-            _output.find('.sqrip-amount').remove();
-
-            $.ajax({
-                type : "post", 
-                url : sqrip.ajax_url, 
-                data : {
-                    action: "sqrip_transfer", 
-                    token: ip_token.val()
-                },
-                beforeSend: function(){
-                   $('body').addClass('sqrip-loading');
-                },
-                success: function(response) {
-                    if(response) {
-                        if (response.result) {
-                            result = "updated";
-                        } else {
-                            result = "error";
-                        }
-                        output_html = '<div class="sqrip-notice '+result+'">';
-                        output_html += '<p>'+response.message+'</p>';
-                        output_html += '</div><p class="sqrip-amount"></p>';
-                        _this.after(output_html);
-         
-                        _this.siblings('.sqrip-amount').html(response.amount);
-                    }
-                },
-                error: function( jqXHR, textStatus, errorThrown ){
-                    console.log( 'The following error occured: ' + textStatus, errorThrown );
-                },
-                complete: function(){
-                    $('body').removeClass('sqrip-loading');
-                }
-            })
-        })
-    }
-
 
     $('.form-table').on('click', '.sqrip-approve', function(e){
         e.preventDefault();
@@ -639,4 +600,50 @@ jQuery( document ).ready(function($){
             }
         })
     })
+
+    if (btn_save.length) {
+
+        btn_transfer_html = '<button id="sqrip_btn_transfer" class="button-primary sqrip-btn fund-management-tab btn-transfer">'+sqrip.txt_transfer+'</button>';
+
+        btn_save.after(btn_transfer_html);
+
+        btn_transfer = $('#sqrip_btn_transfer');
+        btn_transfer.on('click', function(e){
+            e.preventDefault();
+            _this = $(this);
+            _output = $('.info-transfer');
+            _output.find('.sqrip-notice').remove();
+
+            $.ajax({
+                type : "post", 
+                url : sqrip.ajax_url, 
+                data : {
+                    action: "sqrip_transfer", 
+                    token: ip_token.val()
+                },
+                beforeSend: function(){
+                   $('body').addClass('sqrip-loading');
+                },
+                success: function(response) {
+                    if(response) {
+                        if (response.result) {
+                            result = "updated";
+                        } else {
+                            result = "error";
+                        }
+                        output_html = '<div class="sqrip-notice '+result+'">';
+                        output_html += '<p>'+response.message+'</p><p class="sqrip-amount">'+response.amount+'</p>';
+                        output_html += '</div>';
+                        _output.html(output_html);
+                    }
+                },
+                error: function( jqXHR, textStatus, errorThrown ){
+                    console.log( 'The following error occured: ' + textStatus, errorThrown );
+                },
+                complete: function(){
+                    $('body').removeClass('sqrip-loading');
+                }
+            })
+        });
+    }
 });
