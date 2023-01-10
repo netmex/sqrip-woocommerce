@@ -1,10 +1,10 @@
 <?php
 
 /**
- * Plugin Name:             sqrip.ch
+ * Plugin Name:             sqrip – Swiss QR Invoice
  * Plugin URI:              https://sqrip.ch/
- * Description:             sqrip – A comprehensive and clever WooCommerce finance tool for the most widely used payment method in Switzerland: the bank transfers. 
- * Version:                 1.5.6
+ * Description:             sqrip extends WooCommerce payment options for Swiss stores and Swiss customers with the new QR payment parts.
+ * Version:                 2.0.0
  * Author:                  netmex digital gmbh
  * Author URI:              https://sqrip.ch/
  */
@@ -17,11 +17,14 @@ if ( !in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', ge
     return;
 }
 
-define( 'SQRIP_ENDPOINT', 'https://api.sqrip.ch/api/' );
+define( 'SQRIP_ENDPOINT', 'https://beta.sqrip.ch/api/' );
 define( 'SQRIP_PLUGIN_BASENAME', plugin_basename(__FILE__) );
 
 require_once __DIR__ . '/inc/functions.php';
-require_once __DIR__ . '/inc/sqrip-ajax.php';
+require_once __DIR__ . '/inc/class-sqrip-ajax.php';
+
+
+
 
 /**
  * Add plugin Settings link
@@ -49,6 +52,7 @@ add_filter('woocommerce_payment_gateways', 'sqrip_add_gateway_class');
 function sqrip_add_gateway_class($gateways)
 {
     $gateways[] = 'WC_Sqrip_Payment_Gateway'; // your class name is here
+
     return $gateways;
 }
 
@@ -63,11 +67,31 @@ add_action('plugins_loaded', 'sqrip_init_gateway_class');
 function sqrip_init_gateway_class()
 {
     require_once __DIR__ . '/inc/class-wc-sqrip-payment-gateway.php';
-
-    require_once __DIR__ . '/inc/class-sqrip-media-cleaner.php';
 }
 
 
+add_action('init', 'sqrip_plugin_init');
+
+function sqrip_plugin_init()
+{
+    require_once __DIR__ . '/inc/class-sqrip-media-cleaner.php';
+
+    $enabled_reminder = sqrip_get_plugin_option('enabled_reminder');
+
+    if ($enabled_reminder == "yes") {
+        
+        require_once __DIR__ . '/inc/class-sqrip-orders-reminder.php';
+        
+    }
+    /**
+     * Payment Verification
+     * 
+     * @created 10-12-2022
+     */
+    require_once __DIR__ . '/inc/class-sqrip-payment-verification.php';
+
+    require_once __DIR__ . '/inc/class-sqrip-webhook.php';
+}
 
 /**
  *  Add admin notices
@@ -108,6 +132,15 @@ function sqrip_add_admin_notice()
         delete_transient( "sqrip_admin_action_errors" );
     }
 
+
+    $allow_url_fopen = ini_get('allow_url_fopen');
+
+    if (!$allow_url_fopen) {
+        $class = 'notice notice-error is-dismissible';
+        $message = __( 'In order for sqrip to save the QR-Invoices in your library you should switch allow_url_open to on on your php.ini or htaccess file.', 'sqrip-swiss-qr-invoice' );
+
+        printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) );
+    }
 }
 
 /**
@@ -121,13 +154,19 @@ add_action( 'admin_enqueue_scripts', function (){
     wp_enqueue_style('sqrip-admin', plugins_url( 'css/sqrip-admin.css', __FILE__ ), '', '1.1.1');
 
     if (isset($_GET['section']) && $_GET['section'] == "sqrip") {
-        wp_enqueue_script('sqrip-admin', plugins_url( 'js/sqrip-admin.js', __FILE__ ), array('jquery'), '1.5.5', true);
+        wp_enqueue_script('sqrip-admin', plugins_url( 'js/sqrip-admin.js', __FILE__ ), array('jquery'), '1.1.1', true);
+
+        $sqrip_new_status  = sqrip_get_plugin_option('new_status');
 
         wp_localize_script( 'sqrip-admin', 'sqrip',
             array( 
                 'ajax_url' => admin_url( 'admin-ajax.php' ),
+                'ajax_nonce' => wp_create_nonce( 'sqrip-admin-settings' ),
+                'txt_create' => !$sqrip_new_status ? __( 'Create', 'sqrip-swiss-qr-invoice' ) : __( 'Update', 'sqrip-swiss-qr-invoice' ),
+                'txt_updated' => __( 'Update', 'sqrip-swiss-qr-invoice' ),
                 'txt_check_connection' => __( 'Connection test', 'sqrip-swiss-qr-invoice' ),
                 'txt_validate_iban' => __( 'Check', 'sqrip-swiss-qr-invoice' ),
+                'txt_transfer' => __( 'Update & Transfer', 'sqrip-swiss-qr-invoice' ),
                 'txt_send_test_email' => sprintf( 
                     __( 'Send test to %s', 'sqrip-swiss-qr-invoice' ), 
                     esc_html( get_option('admin_email') ) 
@@ -145,7 +184,9 @@ add_action( 'admin_enqueue_scripts', function (){
             array( 
                 'ajax_url' => admin_url( 'admin-ajax.php' ),
                 'ajax_refund_paid_nonce' => wp_create_nonce( 'sqrip-mark-refund-paid' ),
-                'ajax_refund_unpaid_nonce' => wp_create_nonce( 'sqrip-mark-refund-unpaid' )
+                'ajax_refund_unpaid_nonce' => wp_create_nonce( 'sqrip-mark-refund-unpaid' ),
+                'status_completed' => sqrip_get_plugin_option('status_completed'),
+                'field_required_txt' => __('This field is required', 'sqrip-swiss-qr-invoice')
             )
         );
     }
@@ -164,7 +205,7 @@ add_action( 'wp_enqueue_scripts', 'sqrip_enqueue_scripts' );
 function sqrip_enqueue_scripts() 
 {
     wp_enqueue_style( 'sqrip', plugins_url( 'css/sqrip-order.css', __FILE__ ), false);
-    
+
     wp_enqueue_script( 'sqrip', plugins_url( 'js/sqrip-fe.js', __FILE__ ), array('jquery'), '1.0.3', true);
 
     wp_localize_script( 'sqrip', 'sqrip',
@@ -201,13 +242,13 @@ if (!function_exists('sqrip_add_fields_for_order_details')) {
     function sqrip_add_fields_for_order_details()
     {
         global $post;
-
-        $reference_id = get_post_meta($post->ID, 'sqrip_reference_id', true);
-        $pdf_file = get_post_meta($post->ID, 'sqrip_pdf_file_url', true);
+        $order_id = $post->ID;
+        $reference_id = get_post_meta($order_id, 'sqrip_reference_id', true);
+        $pdf_file = get_post_meta($order_id, 'sqrip_pdf_file_url', true);
         
         // check for legacy pdf meta file
         if(!$pdf_file) {
-            $pdf_file = get_post_meta($post->ID, 'sqrip_pdf_file', true);
+            $pdf_file = get_post_meta($order_id, 'sqrip_pdf_file', true);
         }
         
         if ($reference_id || $pdf_file) {
@@ -218,6 +259,19 @@ if (!function_exists('sqrip_add_fields_for_order_details')) {
             echo $pdf_file ? '<li><b>'.__( 'QR-Code PDF', 'sqrip-swiss-qr-invoice' ).' :</b> <a target="_blank" href="'.esc_url($pdf_file).'"><span class="dashicons dashicons-media-document"></span></a></li>' : '';
 
             echo '<li><button class="button button-secondary sqrip-re-generate-qrcode">'.__( 'Renew QR Invoice', 'sqrip-swiss-qr-invoice' ).'</button></li>';
+
+            // $ebics_service = sqrip_get_plugin_option('ebics_service');
+            // $camt_active = sqrip_get_plugin_option('camt_active');
+            $status_awaiting = sqrip_get_plugin_option('status_awaiting');
+
+            $order = wc_get_order( $order_id );
+            $order_status = 'wc-'.$order->get_status();
+
+            if ($status_awaiting == $order_status) {
+                echo '<li><button class="button button-primary sqrip-payment-confirmed">'.__( 'Payment confirmed', 'sqrip-swiss-qr-invoice' ).'</button></li>';
+
+            }
+
 
             echo '</ul>';
 
@@ -277,7 +331,7 @@ function sqrip_attach_qrcode_pdf_to_email($attachments, $email_id, $order)
 
     $payment_method = $order->get_payment_method();
 
-    $plugin_options = get_option('woocommerce_sqrip_settings', array());
+    // $plugin_options = get_option('woocommerce_sqrip_settings', array());
 
     // $integration_email = array_key_exists('integration_email', $plugin_options) ? $plugin_options['integration_email'] : '';
 
@@ -302,9 +356,9 @@ function sqrip_attach_qrcode_pdf_to_email($attachments, $email_id, $order)
 }
 
 /**
- *  Insert sqrip QR code after order table
+ *  Insert sqrip QR code after customer details
  *  
- *  @since 1.5.3
+ *  @since 1.0
  */
 
 add_action('woocommerce_order_details_after_order_table', 'sqrip_qr_action_order_details_after_order_table', 10, 1);
@@ -319,10 +373,7 @@ function sqrip_qr_action_order_details_after_order_table($order)
 
     if ($payment_method === 'sqrip') {
         $order_id = $order->get_id(); 
-
-        $plugin_options = get_option('woocommerce_sqrip_settings', array());
-
-        $integration_order = array_key_exists('integration_order', $plugin_options) ? $plugin_options['integration_order'] : '';
+        $integration_order = sqrip_get_plugin_option('integration_order');
 
         // $png_file = get_post_meta($order_id, 'sqrip_png_file_url', true);
         $pdf_file = get_post_meta($order_id, 'sqrip_pdf_file_url', true);
@@ -384,13 +435,34 @@ add_filter( 'wp_insert_post_data' , function ( $data , $postarr, $unsanitized_po
         $order_billing_city         = $postarr['_billing_city'];
         $order_billing_postcode     = $postarr['_billing_postcode'];
         $order_billing_country      = $postarr['_billing_country'];
+        $order_billing_company      = $postarr['_billing_company'];
+        $token                      = sqrip_get_plugin_option('token');
                     
         $currency_symbol    =   $order_data['currency'];
         $amount             =   floatval($order_data['total']);
    
         $body = sqrip_prepare_qr_code_request_body($currency_symbol, $amount, $postarr['ID']);
 
-        $body["payable_by"] = sqrip_get_billing_address_from_order($order);
+        $billing_address = array(
+            'street'        => $order_billing_address,
+            'postal_code'   => $order_billing_postcode,
+            'town'          => $order_billing_city,
+            'country_code'  => $order_billing_country
+        );
+
+        if (!$order_billing_first_name && !$order_billing_last_name) {
+            $name = $order_billing_company;
+        } else {
+            $name = $order_billing_first_name . ' ' . $order_billing_last_name;
+
+            if ( !empty($order_billing_company) ) {
+                $billing_address['company'] = $order_billing_company;
+            }
+        }
+
+        $billing_address['name'] = $name;
+
+        $body["payable_by"] = $billing_address;
 
         $address = sqrip_get_plugin_option('address');
 
@@ -423,7 +495,7 @@ add_filter( 'wp_insert_post_data' , function ( $data , $postarr, $unsanitized_po
             elseif ( isset($postarr['_sqrip_initiate_payment']) ) {
                 $error_title = __( 'Initiate sqrip payment error:', 'sqrip-swiss-qr-invoice' );
                 $order_notes = __('sqrip payment initiation was successful', 'sqrip-swiss-qr-invoice');
-                $order->set_payment_method('sqrip');
+                // $order->set_payment_method('sqrip');
             }
 
             if (isset($response_body->reference)) {
@@ -451,7 +523,7 @@ add_filter( 'wp_insert_post_data' , function ( $data , $postarr, $unsanitized_po
                 // TODO: replace with attachment ID and store this in meta instead of actual file
                 $sqrip_class_payment = new WC_Sqrip_Payment_Gateway;
 
-                $sqrip_qr_pdf_attachment_id = $sqrip_class_payment->file_upload($sqrip_pdf, '.pdf');
+                $sqrip_qr_pdf_attachment_id = $sqrip_class_payment->file_upload($sqrip_pdf, '.pdf', $token, $postarr['ID']);
                 // $sqrip_qr_png_attachment_id = $sqrip_class_payment->file_upload($sqrip_png, '.png');
 
                 $sqrip_qr_pdf_url = wp_get_attachment_url($sqrip_qr_pdf_attachment_id);
@@ -600,9 +672,9 @@ function sqrip_extra_user_profile_fields( $user ) {
         <h3><?php _e("Refunds with sqrip", "sqrip"); ?></h3>
         <table class="form-table">
             <tr>
-                <th><label for="iban"><?php _e("IBAN"); ?></label></th>
+                <th><label for="iban_num"><?php _e("IBAN"); ?></label></th>
                 <td>
-                    <input type="text" name="iban" id="iban" value="<?php echo esc_attr( sqrip_get_customer_iban($user)); ?>" class="regular-text" /><br />
+                    <input type="text" name="iban_num" id="iban_num" value="<?php echo esc_attr( sqrip_get_customer_iban($user)); ?>" class="regular-text" /><br />
                     <span class="description"><?php _e("This iban will be used to generate a sqrip qr code in case of a refund."); ?></span>
                 </td>
             </tr>
@@ -629,9 +701,61 @@ function sqrip_save_extra_user_profile_fields( $user_id ) {
     }
 
     $user = get_user_by('id', $user_id);
-    sqrip_set_customer_iban($user, $_POST['iban']);
+    sqrip_set_customer_iban($user, $_POST['iban_num']);
 
+}
+
+add_filter('upload_mimes', 'sqrip_custom_upload_xml');
+ 
+function sqrip_custom_upload_xml($mimes) {
+    $mimes = array_merge($mimes, array('xml' => 'application/xml'));
+    return $mimes;
 }
 
 // Disable the Zip/postcode validation 
 add_filter( 'woocommerce_validate_postcode' , '__return_true' );
+
+
+// Register new status
+function sqrip_register_new_order_status() {
+    $sqrip_new_status  = sqrip_get_plugin_option('new_status');
+    $enabled_new_status  = sqrip_get_plugin_option('enabled_new_status');
+
+    if (!$sqrip_new_status || $enabled_new_status == "no") {
+        return;
+    }
+
+    register_post_status( 'wc-sqrip-paid', array(
+        'label'                     => $sqrip_new_status,
+        'public'                    => true,
+        'show_in_admin_status_list' => true,
+        'show_in_admin_all_list'    => true,
+        'exclude_from_search'       => false,
+        'label_count'               => _n_noop( $sqrip_new_status.' <span class="count">(%s)</span>', $sqrip_new_status.' <span class="count">(%s)</span>' )
+
+    ) );
+}
+
+add_action( 'init', 'sqrip_register_new_order_status' );
+
+// Add custom status to order status list
+function sqrip_add_new_order_statuses( $order_statuses ) {
+    $sqrip_new_status  = sqrip_get_plugin_option('new_status');
+    $enabled_new_status  = sqrip_get_plugin_option('enabled_new_status');
+
+    if (!$sqrip_new_status || $enabled_new_status == "no") {
+        return $order_statuses;
+    }
+
+    $new_order_statuses = array();
+
+    foreach ( $order_statuses as $key => $status ) {
+        $new_order_statuses[ $key ] = $status;
+        if ( 'wc-completed' === $key ) {
+            $new_order_statuses['wc-sqrip-paid'] = $sqrip_new_status;
+        }
+    }
+    return $new_order_statuses;
+}
+
+add_filter( 'wc_order_statuses', 'sqrip_add_new_order_statuses' );

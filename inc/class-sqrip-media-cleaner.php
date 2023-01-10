@@ -1,11 +1,4 @@
 <?php 
-
-/**
- * sqrip Media Cleaner
- *
- * @since 1.6
- */
-
 class Sqrip_Media_Clearner {
 
     public $cron_hook;
@@ -17,11 +10,11 @@ class Sqrip_Media_Clearner {
             return;
         }
 
-        $this->media_prefix = 'sqrip';
-        $this->query_param = 'sqrip_media';
+        // $this->media_prefix = 'sqrip_invoice_';
+        // $this->query_param = 'sqrip_media';
 
         add_filter( 'posts_clauses', array($this, 'filter_posts_by_dates_days'), 10 , 2);
-        add_filter( 'posts_where', array($this, 'filter_media_title'), 10, 2 );
+        // add_filter( 'posts_where', array($this, 'filter_media_title'), 10, 2 );
         // Store our cron hook name
         $this->cron_hook = 'sqrip_media_cleaner';
         // Install cron!
@@ -46,15 +39,16 @@ class Sqrip_Media_Clearner {
 
         // TRUE = bypasses the trash and force deletion.
         $force_delete = true;
-        $param = $this->query_param;
-        $prefix = $this->media_prefix;
+        // $param = $this->query_param;
+        // $prefix = $this->media_prefix;
         // Get all attachments that are images. 
         $atts = get_posts( array(
-            $param             => $prefix,
             'post_type'        => 'attachment',
             'post_mime_type'   => 'application/pdf',
             'posts_per_page'   => -1,
             'post_days_old'    => $days,
+            'meta_key'         => 'sqrip_invoice',
+            'meta_value'       => 1,
             'suppress_filters' => false,
         ) );
 

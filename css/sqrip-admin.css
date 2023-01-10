@@ -19,8 +19,8 @@ body.sqrip-loading {
     cursor: wait;
 }
 
-.forminp .sqrip-btn-validate {
-    margin-left: 10px;
+table.form-table .forminp button.sqrip-btn-validate {
+    margin-top: 10px;
 }
 
 table.form-table .sqrip-notice {
@@ -29,11 +29,7 @@ table.form-table .sqrip-notice {
     line-height: 1;
     height: 25px;
     margin-left: 15px;
-    margin-top: 0!important;
-}
-
-table.form-table .sqrip-notice.mt-10{
-    margin-top: 10px!important;
+    /*margin-top: 0 !important;*/
 }
 
 table.form-table td .sqrip-notice p {
@@ -51,7 +47,7 @@ table.form-table td .sqrip-notice p {
 }
 
 .wp-core-ui .button-secondary.sqrip-btn-send-test-email {
-    margin-left: 15px;
+    margin-left: -16px;
 }
 
 .sqrip-payment .sqrip-re-generate-qrcode {
@@ -59,7 +55,12 @@ table.form-table td .sqrip-notice p {
 }
 
 .sqrip-tabs {
+    margin-top: 30px;
     display: flex;
+}
+
+.sqrip-tab.hide{
+    display: none;
 }
 
 .sqrip-tab {
@@ -77,17 +78,54 @@ table.form-table td .sqrip-notice p {
 
 
 .sqrip-tab.active {
-    border-color: #6558F5;
+    border-color: #371f84;
 }
 
 .sqrip-tab.active h2 {
-    color: #6558F5;
+    color: #371f84;
 }
 
 .sqrip-tabs-description {
     display: block;
     max-width: 900px;
     margin: 20px 0 10px;
+}
+
+.woocommerce .sqrip-tabs-description+table.form-table {
+    table-layout: auto;
+}
+
+.woocommerce .sqrip-tabs-description+table.form-table textarea {
+    max-width: 600px;
+    min-height: 90px;
+}
+
+.woocommerce .sqrip-tabs-description+table.form-table .sqrip-section:first-child th {
+    padding-top: 0;
+}
+
+.woocommerce .sqrip-tabs-description+table.form-table .sqrip-section th {
+    font-weight: normal;
+    padding-bottom: 0;
+}
+
+.woocommerce .sqrip-tabs-description+table.form-table #woocommerce_sqrip_iban{
+    display: block;
+}
+
+/*.sqrip-section .description {
+    margin: 2px 0 5px;
+    font-weight: 500;
+    color: #646970;
+}*/
+
+.woocommerce .sqrip-tabs-description+table.form-table th {
+    width: 245px;
+}
+
+.woocommerce .sqrip-tabs-description+table.form-table .sqrip-section th h3 {
+    color: #371f84;
+    font-weight: bold;
 }
 
 /*.sqrip-tabs ~ .form-table tr{
@@ -98,10 +136,15 @@ table.form-table td .sqrip-notice p {
     display: table-row!important;
 }*/
 
+table.form-table .fund-management-tab ~ td label{
+    cursor: text;
+} 
+
+table.form-table tr th label[for="woocommerce_sqrip_test_email"],
 table.form-table tr td label[for="woocommerce_sqrip_compare_btn"],
-table.form-table tr th label[for="woocommerce_sqrip_active_service"],
-.sqrip-btn {
-    background-color: #6558f5;
+table.form-table .sqrip-btn,
+table.form-table .forminp .sqrip-btn-validate {
+    background-color: #371f84;
     padding: 10px 20px;
     display: inline-block;
     border-radius: 6px;
@@ -111,15 +154,23 @@ table.form-table tr th label[for="woocommerce_sqrip_active_service"],
     cursor: pointer;
 }
 
-.sqrip-btn{
+.sqrip-btn {
     margin-top: 10px;
 }
+
 
 table.form-table tr td label[for="woocommerce_sqrip_forward_payments"],
 table.form-table tr td label[for="woocommerce_sqrip_active_service"] {
     font-weight: 700;
 }
 
+.sqrip-activation-confirmed{
+    margin-left: 20px;
+    font-weight: 700;
+    color: #1AAE9F;
+}
+
+.sqrip-activation-confirmed:before,
 table.form-table tr td label[for="woocommerce_sqrip_forward_payments"]:before,
 table.form-table tr td label[for="woocommerce_sqrip_active_service"]:before {
     content: "\f147";
@@ -134,19 +185,23 @@ table.form-table tr td label[for="woocommerce_sqrip_active_service"]:before {
     color: #1AAE9F;
 }
 
+table.form-table tr label[for="woocommerce_sqrip_payment_frequence_time"] ~ p.description{
+    margin-top: -70px;
+}
+
+/*table.form-table div.description{
+    margin: 2px 0 5px;
+    color: #646970;
+}*/
+
+#tiptip_content ol{
+    text-align: left;
+}
+
 table.form-table tr td label[for="woocommerce_sqrip_remaining_credits"] {
-    opacity: 0.6;
     font-weight: bold;
-    width: 150px;
-    margin: 0;
-    box-sizing: border-box;
-    line-height: 32px;
-    vertical-align: top;
-    border: 1px solid;
-    display: block;
-    padding: 0 6px;
-    background-color: rgb(221 221 221);
-    border-radius: 4px;
+    vertical-align: middle;
+    line-height: 1.4;
 }
 
 .wp-core-ui .button-secondary.sqrip-btn-validate-token {
@@ -167,6 +222,12 @@ table.sqrip-table tbody tr td {
     border: 1px solid #7a7a7a;
 }
 
+table.sqrip-table td p.sqrip-note {
+    display: block;
+    margin-top: 2px;
+    font-size: 12px;
+}
+
 .sqrip-table-results h3 {
     color: #1AAE9F;
     font-weight: bold;
@@ -177,11 +238,63 @@ table.sqrip-table tbody tr td {
     border-radius: 50%;
 }
 
-.sqrip-tabs ~ table.form-table tr td {
+.sqrip-tabs~table.form-table tr td {
     vertical-align: top;
-    padding: 20px;
-} 
+    /*padding: 20px;*/
+}
 
-.sqrip-tabs ~ table.form-table tr td input.camt-service{
-    padding: 0!important;
+.sqrip-tabs~table.form-table tr td input.camt-service {
+    padding: 0 !important;
+}
+
+.sqrip-tabs~table.form-table tr th.comparison-tab.none~td label:before {
+    display: none;
+}
+
+.sqrip-table-results .sqrip-table {
+    border-spacing: 0;
+}
+
+.sqrip-table-results .sqrip-table thead tr th {
+    background-color: #fff;
+}
+
+.sqrip-table-results .sqrip-table tbody tr td {
+    padding: 10px;
+    background-color: #fff;
+}
+
+#woocommerce_sqrip_new_status{
+    display: block;
+}
+
+.sqrip-order-status th{
+    padding-top: 0;
+}
+
+.sqrip-order-status td.forminp{
+    display: none;
+}
+
+.sqrip-order-status.sqrip-show td.forminp{
+    display: table-cell;
+}
+
+.order-status.status-sqrip-paid {
+    background: #c8d7e1;
+    color: #2e4453;
+}
+
+#order_data .order_data_column p.sqrip-error{
+    color: red;
+    margin-top: 5px;
+}
+
+.sqrip-btn.btn-transfer{
+    margin-left: 10px;
+}
+
+table.form-table  .info-transfer .sqrip-notice{
+    height: auto;
+    margin-left: 0;
 }

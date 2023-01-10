@@ -1,6 +1,10 @@
 jQuery( document ).ready(function($){
 
-    btn_regenerate_qrcode = $('button.sqrip-re-generate-qrcode');
+    var btn_regenerate_qrcode = $('button.sqrip-re-generate-qrcode'),
+    btn_refund = $('button.do-api-refund'),
+    btn_initiate_payment = $('button.sqrip-initiate-payment'),
+    btn_confirm = $('button.sqrip-payment-confirmed'),
+    sqrip_error = '<p class="sqrip-error">'+sqrip.field_required_txt+'</p>';
 
     btn_regenerate_qrcode.on('click', function(e){
 
@@ -19,9 +23,43 @@ jQuery( document ).ready(function($){
         
     });
 
-    btn_initiate_payment = $('button.sqrip-initiate-payment');
 
     btn_initiate_payment.on('click', function(e){
+
+        e.preventDefault();
+
+        _form = $('form#post');
+  
+        if ( _form.length ) {
+
+            _form.find('.sqrip-error').remove();
+            fields_invalid = sqrip_validate_initiate_payment();
+            $('#_payment_method').val('sqrip');
+
+            if (fields_invalid.length) {
+
+                boxButton = $('.order_data_column > h3 > .edit_address').eq(0);
+                isBoxShowing = boxButton.is(':visible');
+
+                if (isBoxShowing) {
+                    boxButton.click();
+                }
+
+                $.each( fields_invalid, function( i, field ) {
+                    $( "p." + field + "_field" ).append(sqrip_error);
+                });
+            } else {
+                $('body').addClass('sqrip-loading');
+
+                _form.prepend('<input type="hidden" id="_sqrip_initiate_payment" name="_sqrip_initiate_payment" value="1">');
+                _form.trigger('submit');
+            }
+
+        }
+        
+    });
+
+    btn_confirm.on('click', function(e){
 
         e.preventDefault();
 
@@ -31,7 +69,7 @@ jQuery( document ).ready(function($){
   
         if ( _form.length ) {
 
-            _form.prepend('<input type="hidden" id="_sqrip_initiate_payment" name="_sqrip_initiate_payment" value="1">');
+            jQuery('#order_status').val(sqrip.status_completed);            
             _form.trigger('submit');
 
         }
@@ -145,6 +183,91 @@ jQuery( document ).ready(function($){
             }
         })
     });
+
+    if (btn_refund.length) {
+        ib_checked = false;
+
+        btn_refund.on('click', function(e){
+            var _this = $(this);
+            // console.log('clicked');
+            if (!ib_checked) {
+                // console.log('ib_checked', ib_checked);
+                e.stopImmediatePropagation();
+
+                $.ajax({
+                    type : "post",
+                    url : sqrip.ajax_url,
+                    data : {
+                        action: "sqrip_refund_valiation",
+                    },
+                    success: function(response) {
+                        if (response.status) {
+                            ib_checked = true;
+
+                            setTimeout(function(){ 
+                                _this.trigger('click'); 
+                            }, 700);
+                            
+                        } else {
+                            iban = prompt(response.message, "");
+
+                            if (iban == null || iban == "") {
+
+                            } else {
+                                sqrip_save_iban(iban, _this);
+                            }
+                        }
+                    }
+                })
+            }
+        })
+
+        function sqrip_save_iban(iban, $btn){
+            $.ajax({
+                type : "post",
+                url : sqrip.ajax_url,
+                data : {
+                    action: "sqrip_save_refund_iban",
+                    iban: iban
+                },
+                success: function(response) {
+                    if (response.status) {
+
+                        setTimeout(function(){ 
+                            $btn.trigger('click'); 
+                        }, 700);
+                        
+                    } else {
+                        alert(response.message);
+                    }
+                }
+            })
+        }
+    }
+
+    function sqrip_validate_initiate_payment(){
+        mandatory_fields = [
+            '_billing_address_1',
+            '_billing_city',
+            '_billing_postcode',
+            '_billing_country',
+            '_billing_email',
+            '_billing_phone'
+        ];
+
+        company = $( "#_billing_company" ).val();
+        
+        if (!$.trim(company)) {
+            mandatory_fields.push('_billing_first_name','_billing_last_name');
+        }
+
+        response = $.grep(mandatory_fields, function(field) {
+            value = $( "#" + field ).val();
+            return !$.trim(value);
+        });
+
+        return response;
+    }
 
 });
 

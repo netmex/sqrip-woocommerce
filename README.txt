@@ -4,7 +4,7 @@ Donate link: https://sqrip.ch/
 Tags: woocommerce, payment, sqrip, qrcode, qr, scan, Kontoabgleich, swiss qr invoice, QR-Rechnung, EBICS, QR-facture, bulletins de versement, Einzahlungsschein, QR-Einzahlungsschein, bulletins de versement, Swiss QR Code, code QR, QR-fattura, polizze di versamento
 Requires at least: 4.7
 Tested up to: 6.1
-Stable tag: 1.5.6
+Stable tag: 2.0.0
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -112,6 +112,9 @@ Yes. We are already working on comparing the reconciliation of orders/purchases 
 = 1.5.6 =
 * Content of 'Additional Information' is correctly shown (with some dummy data) in the test e-mail.
 
+= 1.4.2 =
+* Add company field to QRCode
+* Remove Duplicate due date field
 = 1.5.5 =
 * Bug fixes
 
