@@ -116,8 +116,12 @@ class Sqrip_Ajax {
     			break;
 
     		case 200:
+    			$body = wp_remote_retrieve_body($response);
+    			$body_decode = json_decode($body);
     			$result['result'] = true;
-		        $result['message'] = __("Valid, active API Key", "sqrip-swiss-qr-invoice");
+
+    			$result['message'] = $body_decode->message;
+		        // $result['message'] = __("Valid, active API Key", "sqrip-swiss-qr-invoice");
     			break;
     		
     		default:
