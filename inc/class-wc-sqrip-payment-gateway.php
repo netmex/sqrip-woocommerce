@@ -550,10 +550,13 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                     $message = __( 'IBAN changes: Passive confirmation (see API key in sqrip.ch account)' , 'sqrip-swiss-qr-invoice' );
                     break;
             }
-            
-            $settings = new WC_Admin_Settings();
 
-            $settings->add_message( $message );
+            if ($message) {
+                $settings = new WC_Admin_Settings();
+                $settings->add_message( $message );
+            }
+            
+            
         }  
 
     }
