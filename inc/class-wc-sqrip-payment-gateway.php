@@ -72,6 +72,8 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         }
 
         $address_options['individual'] = __( 'Third address' , 'sqrip-swiss-qr-invoice' );
+
+        $description = __('What is the order status that waits for confirmation of made payment to your bank account?', 'sqrip-swiss-qr-invoice' );
         
         $this->form_fields = array(
             'tabs' => array(
@@ -83,12 +85,19 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                         'class' => 'active',
                     ],
                     [
+                        'id' => 'comparison',
+                        'title' => __( 'Payment Comparison', 'sqrip-swiss-qr-invoice' ),
+                        'description' => '',
+                        'class' => '',
+                    ],
+                    [
                         'id' => 'refunds',
                         'title' => __('Refunds', 'sqrip-swiss-qr-invoice'),
                         'class' => '',
                     ]
                 ]
             ),
+
             'enabled' => array(
                 'title'       => __( 'Enable/Disable', 'sqrip-swiss-qr-invoice' ),
                 'label'       => __( 'Enable QR invoices with sqrip API', 'sqrip-swiss-qr-invoice' ),
@@ -169,6 +178,13 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'description' => __( '(QR-)IBAN of the account to which the transfer is to be made', 'sqrip-swiss-qr-invoice' ),
                 'class'       => 'qrinvoice-tab'
             ),
+            'qr_reference_format' => array(
+                'title'       => __( 'Initiate QR-Ref# with these 6 digits', 'sqrip-swiss-qr-invoice' ),
+                'type'        => 'number',
+                'default'     => '',
+                'class'       => 'qrinvoice-tab '.$this->show_qr_reference_format(),
+                'custom_attributes' => ['min' => 100000, 'max' => 999999]
+            ),
             'qr_reference' => array(
                 'title' => __( 'Basis of the (QR) reference number', 'sqrip-swiss-qr-invoice' ),
                 'type' => 'radio',
@@ -242,6 +258,43 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'default'     => 'no',
                 'css'         => 'visibility: hidden'  
             ),
+            'section_general_settings' => array(
+                'title'         => __('General Settings', 'sqrip-swiss-qr-invoice' ),
+                'type'          => 'section',
+                'class'       => 'comparison-tab' 
+            ),
+            'status_awaiting' => array(
+                'title'         => __( 'Status of awaiting payment orders', 'sqrip-swiss-qr-invoice' ),
+                'type'          => 'select',
+                'options'       => wc_get_order_statuses(),
+                'default' => 'wc-pending',
+                'description' => $description,
+                'class'       => 'comparison-tab'  
+            ),
+            'status_completed' => array(
+                'title'         => __( 'Completed Orders Status', 'sqrip-swiss-qr-invoice' ),
+                'type'          => 'select',
+                'options'       => wc_get_order_statuses(),
+                'placeholder' => 'Select Status',
+                'default' => 'wc-completed',
+                
+                'class'       => 'comparison-tab'  
+            ),
+            'new_status' => array(
+                'title' => '',
+                'type' => 'text',
+                'class' => 'comparison-tab',
+                'default'  => __('Completed, Paid', 'sqrip-swiss-qr-invoice'),
+                'description' => __('To what order status should we change your order, once the payment has been confirmed?', 'sqrip-swiss-qr-invoice' ).'</ br>'.sprintf(__('If there is no suitable status available, you can create one right %s', 'sqrip-swiss-qr-invoice'), '<a href="#" class="sqrip-toggle-order-satus">'.__('here', 'sqrip-swiss-qr-invoice').'</a>'),
+            ),
+            'enabled_new_status' => array(
+                'title'       => '',
+                'type'        => 'checkbox',
+                'label'       => ' ',
+                'default'     => 'no',
+                'css'         => 'visibility: hidden; position: absolute',
+                'class'       => 'comparison-tab' 
+            ),
             'return_enabled' => array(
                 'title'       => __( 'Activate/Deactivate Refunds', 'sqrip-swiss-qr-invoice' ),
                 'label'       => __( 'Activate sqrip for Refunds', 'sqrip-swiss-qr-invoice' ),
@@ -258,6 +311,22 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             ),
             
         );
+    }
+
+    public function show_qr_reference_format()
+    {
+        $iban = sqrip_get_plugin_option('iban');
+        $token = sqrip_get_plugin_option('token');
+
+        $response = sqrip_validation_iban($iban, $token);
+
+        $return = '';
+
+        if (isset($response->message)) {
+            $return = $response->message;
+        }
+
+        return $return == 'Valid qr IBAN' ? '' : 'hide';
     }
 
     public function generate_tab_html($key, $data)
@@ -505,6 +574,10 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 
         }
 
+        if ( isset($post_data['woocommerce_sqrip_enabled_new_status']) && !empty($post_data['woocommerce_sqrip_enabled_new_status']) ) {
+            $_POST['woocommerce_sqrip_status_completed'] = 'wc-sqrip-paid';
+        }
+
         return parent::process_admin_options();
     }
 
@@ -517,6 +590,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         $sqrip_due_date = $post_data['woocommerce_sqrip_due_date'];
         $address        = $post_data['woocommerce_sqrip_address'];
         $qr_reference   = $post_data['woocommerce_sqrip_qr_reference'];
+        $initial_digits = $post_data['woocommerce_sqrip_qr_reference_format'];
         $lang           = isset($post_data['woocommerce_sqrip_lang']) ? $post_data['woocommerce_sqrip_lang'] : "de";
 
         $plugin_options         = sqrip_get_plugin_options();
@@ -560,6 +634,12 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 
         if ( $qr_reference == "order_number" ) {
             $body['payment_information']['qr_reference'] = '5000';
+        }
+
+        $iban_type = sqrip_validation_iban($iban, $token);
+
+        if (isset($iban_type->message) && $iban_type->message == 'Valid qr IBAN' && $initial_digits) {
+            $body['payment_information']['initial_digits'] = intval($initial_digits);
         }
 
         if ($address == "individual") {

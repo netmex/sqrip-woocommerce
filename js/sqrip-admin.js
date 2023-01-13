@@ -9,7 +9,10 @@ jQuery( document ).ready(function($){
     btn_save = $('button.woocommerce-save-button'),
     sqrip_additional_information = $('#woocommerce_sqrip_additional_information'),
     tab = $('.sqrip-tab'),
-    ip_refund_token = $('#woocommerce_sqrip_return_token');
+    ip_qrref_format = $('#woocommerce_sqrip_qr_reference_format'),
+    ip_order_stt = $('#woocommerce_sqrip_new_status'),
+    ip_refund_token = $('#woocommerce_sqrip_return_token'),
+    btn_toggle_stt = $('.sqrip-toggle-order-satus');
 
     if (ip_token.length) {
         bt_check_token_html = '<button id="btn_sqrip_check_token" class="button-secondary sqrip-btn-validate-token">'+sqrip.txt_check_connection+'</button>';
@@ -130,6 +133,8 @@ jQuery( document ).ready(function($){
             _this = $(this);
             _output = _this.closest('td.forminp');
             _output.find('.sqrip-notice').remove();
+            _output.find('.sqrip-description').remove();
+            _output.find('.sqrip-bank').remove();
 
             $.ajax({
                 type : "post", 
@@ -151,9 +156,16 @@ jQuery( document ).ready(function($){
                         }
                         output_html = '<div class="sqrip-notice '+result+'">';
                         output_html += '<p>'+response.message+'</p>';
-                        output_html += '</div>';
+                        output_html += '</div><p class="sqrip-bank"></p><p class="sqrip-description"></p>';
                         _this.after(output_html);
-                        _this.siblings('.description').html(response.description);
+                        _this.siblings('.sqrip-description').html(response.description);
+                        _this.siblings('.sqrip-bank').html(response.bank);
+
+                        if (response.qriban) {
+                            ip_qrref_format.closest('tr').show();
+                        } else {
+                            ip_qrref_format.closest('tr').hide();
+                        }
                     }
                 },
                 error: function( jqXHR, textStatus, errorThrown ){
@@ -225,11 +237,18 @@ jQuery( document ).ready(function($){
 
         if (data == "qrinvoice") {
             init_individual_address(ip_address.val());
+            init_ip_qrref_format();
         }
 
-        else if (data == "comparison") {
-            toggle_service_options(ebics_service.is(':checked'), $('.ebics-service'));
-            toggle_service_options(camt_service.is(':checked'), $('.camt-service'));
+        // else if (data == "comparison") {
+        //     toggle_service_options(ebics_service.is(':checked'), $('.ebics-service'));
+        //     toggle_service_options(camt_service.is(':checked'), $('.camt-service'));
+        // }
+    }
+
+    function init_ip_qrref_format(){
+        if (ip_qrref_format.hasClass('hide')) {
+            ip_qrref_format.closest('tr').hide();
         }
     }
 
@@ -281,6 +300,35 @@ jQuery( document ).ready(function($){
                     $('body').removeClass('sqrip-loading');
                 }
             })
+        })
+    }
+
+    if (ip_order_stt.length) {
+        ip_order_stt.closest('tr').addClass('sqrip-order-status');
+        $('#woocommerce_sqrip_enabled_new_status').prop('checked', false);
+
+        btn_create_order_html = '<button id="btn_create_order_stt" class="sqrip-btn sqrip-btn-create-order-stt">'+sqrip.txt_create+'</button>';
+        ip_order_stt.after(btn_create_order_html);
+
+        btn_toggle_stt.on('click', function(e){
+            e.preventDefault();
+
+            $(this).closest('tr').toggleClass('sqrip-show');
+        })
+
+        btn_create_order = $('#btn_create_order_stt');
+
+        btn_create_order.on('click', function(e){
+            e.preventDefault();
+
+            if (!ip_order_stt.val()) {
+                ip_order_stt.focus();
+            } else {
+                $('#woocommerce_sqrip_enabled_new_status').prop('checked', true);
+                setTimeout(function(){
+                    btn_save.trigger('click');
+                }, 200);
+            }
         })
     }
 });

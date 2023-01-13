@@ -1,6 +1,7 @@
 jQuery( document ).ready(function($){
 
-    btn_regenerate_qrcode = $('button.sqrip-re-generate-qrcode');
+    var btn_regenerate_qrcode = $('button.sqrip-re-generate-qrcode'),
+    btn_confirm = $('button.sqrip-payment-confirmed');
 
     btn_regenerate_qrcode.on('click', function(e){
 
@@ -100,6 +101,23 @@ jQuery( document ).ready(function($){
                 _this.prop( "disabled", false );
             }
         })
+    });
+    
+    btn_confirm.on('click', function(e){
+
+        e.preventDefault();
+
+        _form = $('form#post');
+
+        $('body').addClass('sqrip-loading');
+  
+        if ( _form.length ) {
+
+            jQuery('#order_status').val(sqrip.status_completed);            
+            _form.trigger('submit');
+
+        }
+        
     });
 
     // mark sqrip refund as unpaid

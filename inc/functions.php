@@ -115,6 +115,8 @@ function sqrip_prepare_qr_code_request_body($currency_symbol, $amount, $order_nu
 	$plugin_options         = sqrip_get_plugin_options();
 	$sqrip_due_date         = $plugin_options['due_date'];
 	$iban                   = $plugin_options['iban'];
+    $token                  = $plugin_options['token'];
+    $initial_digits         = $plugin_options['qr_reference_format'];
 
 	$product                = $plugin_options['product'];
 	$qr_reference           = $plugin_options['qr_reference'];
@@ -162,6 +164,12 @@ function sqrip_prepare_qr_code_request_body($currency_symbol, $amount, $order_nu
 	if ( $qr_reference == "order_number" ) {
 		$body['payment_information']['qr_reference'] = strval($order_number);
 	}
+
+    $iban_type = sqrip_validation_iban($iban, $token);
+
+    if (isset($iban_type->message) && $iban_type->message == 'Valid qr IBAN' && $initial_digits) {
+        $body['payment_information']['initial_digits'] = intval($initial_digits);
+    }
 
 	return $body;
 }

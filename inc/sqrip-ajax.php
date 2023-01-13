@@ -70,21 +70,27 @@ function sqrip_validation_iban_ajax()
 
     $response = sqrip_validation_iban($iban, $token);
     $result = [];
+    $bank = isset($response->bank_data->bank) ? $response->bank_data->bank : '';
     switch ($response->message) {
         case 'Valid simple IBAN':
             $result['result'] = true;
+            $result['qriban'] = false;
             $result['message'] = __( "validated" , "sqrip" );
             $result['description'] = __('This is a normal IBAN. The customer can make deposits without noting the reference number (RF...). Therefore, automatic matching with orders is not guaranteed throughout. Manual processing may be necessary. A QR-IBAN is required for automatic matching. This is available for the same bank account. Information about this is available from your bank.', 'sqrip-swiss-qr-invoice');
+            $result['bank'] = $bank ? sprintf('Bank: <b>%s</b>', $bank) : '';
             break;
         
         case 'Valid qr IBAN':
             $result['result'] = true;
+            $result['qriban'] = true;
             $result['message'] = __( "validated" , "sqrip" );
             $result['description'] = __('This is a QR IBAN. The customer can make payments only by specifying a QR reference (number). You can uniquely assign the deposit to a customer / order. This enables automatic matching of payments received with orders. Want to automate this step? Contact us <a href="mailto:info@sqrip.ch">info@sqrip.ch</a>.', 'sqrip-swiss-qr-invoice');
+            $result['bank'] = $bank ? sprintf('Bank: <b>%s</b>', $bank) : '';
             break;
 
         default:
             $result['result'] = false;
+            $result['qriban'] = false;
             $result['message'] = __( "incorrect" , "sqrip" );
             $result['description'] = __('The (QR-)IBAN of your account to which the transfer should be made is ERROR.', 'sqrip-swiss-qr-invoice');
             break;
@@ -107,18 +113,31 @@ function sqrip_validation_token_ajax()
 {
     if ( !$_POST['token'] ) return;   
 
-    $response = sqrip_get_user_details( $_POST['token'] );
+    $endpoint = 'details';
+    $args = sqrip_prepare_remote_args('', 'GET', $_POST['token']);
+    $response = wp_remote_request(SQRIP_ENDPOINT.$endpoint, $args);
+    $response_code = wp_remote_retrieve_response_code( $response );
 
-    if ($response) {
-        $address_txt = __('from sqrip account: ','sqrip-swiss-qr-invoice');
-        $address_txt .= $response['name'].', '.$response['street'].', '.$response['city'].', '.$response['postal_code'].' '.$response['city'];
+    switch ($response_code) {
+        case 403:
+            $result['result'] = false;
+            $result['message'] = __("Valid token inactive", "sqrip-swiss-qr-invoice");
 
-        $result['result'] = true;
-        $result['message'] = __("API key confirmed", "sqrip-swiss-qr-invoice");
-        $result['address'] = $address_txt;
-    } else {
-        $result['result'] = false;
-        $result['message'] = __("API key NOT confirmed", "sqrip-swiss-qr-invoice");
+            break;
+
+        case 200:
+            $body = wp_remote_retrieve_body($response);
+            $body_decode = json_decode($body);
+            $result['result'] = true;
+
+            $result['message'] = $body_decode->message;
+            // $result['message'] = __("Valid, active API Key", "sqrip-swiss-qr-invoice");
+            break;
+        
+        default:
+            $result['result'] = false;
+            $result['message'] = __("Invalid token", "sqrip-swiss-qr-invoice");
+            break;
     }
 
     wp_send_json($result);
