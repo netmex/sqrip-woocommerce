@@ -13,13 +13,13 @@ function sqrip_get_plugin_option($key) {
 		return $plugin_options[$key];
 	}
 
-    $gateway = new WC_Sqrip_Payment_Gateway();
-    $form_fields = $gateway->get_form_fields();
+    // $gateway = new WC_Sqrip_Payment_Gateway();
+    // $form_fields = $gateway->get_form_fields();
 
-    // Get option default from form fields if possible.
-    if ( isset( $form_fields[ $key ] ) ) {
-        return $gateway->get_field_default( $form_fields[ $key ] );
-    }
+    // // Get option default from form fields if possible.
+    // if ( isset( $form_fields[ $key ] ) ) {
+    //     return $gateway->get_field_default( $form_fields[ $key ] );
+    // }
 
 	return null;
 }
@@ -30,18 +30,22 @@ function sqrip_get_plugin_option($key) {
  */
 function sqrip_get_plugin_options() {
     $plugin_options = get_option('woocommerce_sqrip_settings', array());
-    $gateway = new WC_Sqrip_Payment_Gateway();
-    $form_fields = $gateway->get_form_fields();
-    $missing_settings = array_diff_key($form_fields, $plugin_options);
-    foreach($missing_settings as $key => $missing_setting) {
-        $plugin_options[$key] = isset( $form_fields[ $key ] ) ? $gateway->get_field_default( $form_fields[ $key ] ) : null;
-    }
+    // $gateway = new WC_Sqrip_Payment_Gateway();
+    // $form_fields = $gateway->get_form_fields();
+    // $missing_settings = array_diff_key($form_fields, $plugin_options);
+    // foreach($missing_settings as $key => $missing_setting) {
+    //     $plugin_options[$key] = isset( $form_fields[ $key ] ) ? $gateway->get_field_default( $form_fields[ $key ] ) : null;
+    // }
     return $plugin_options;
 }
 
 function sqrip_prepare_remote_args($body, $method, $token = null) {
-	$plugin_options     = get_option('woocommerce_sqrip_settings', array());
-	$token              = $token ? $token : $plugin_options['token'];
+	$plugin_token     = sqrip_get_plugin_option('token');
+	$token              = $token ? $token : $plugin_token;
+
+    if (!$token || $token == null) {
+        return;
+    }
 
 	$args = [];
 	$args['method'] = $method;
@@ -210,7 +214,7 @@ function sqrip_get_payable_to_address($address = 'woocommerce')
     		    $result = array(
     		        'name' => get_bloginfo('name'),
     		        'street' => $address,
-    		        'city' => get_option( 'woocommerce_store_city' ),
+    		        'town' => get_option( 'woocommerce_store_city' ),
     		        'postal_code' => get_option( 'woocommerce_store_postcode' ),
     		        'country_code' => $store_country,
     		    );
@@ -225,7 +229,7 @@ function sqrip_get_payable_to_address($address = 'woocommerce')
             $result = array(
                 'name' => $plugin_options['address_name'],
                 'street' => $plugin_options['address_street'],
-                'city' => $plugin_options['address_city'],
+                'town' => $plugin_options['address_city'],
                 'postal_code' => $plugin_options['address_postcode'],
                 'country_code' => $plugin_options['address_country'],
             );
@@ -244,7 +248,7 @@ function sqrip_get_payable_to_address_txt($address){
         return false;
     }
 
-    return $address_txt = $address_arr['name'].', '.$address_arr['street'].', '.$address_arr['city'].' '.$address_arr['postal_code'];
+    return $address_txt = $address_arr['name'].', '.$address_arr['street'].', '.$address_arr['town'].' '.$address_arr['postal_code'];
 }
 
 
@@ -277,7 +281,7 @@ function sqrip_get_user_details($token = "")
         
         if ($address) {
             $result = array(
-                'city' => $address->city,
+                'town' => $address->city,
                 'country_code' => $address->country_code,
                 'name' => $name,
                 'postal_code' => $address->zip,
@@ -416,4 +420,24 @@ function sqrip_get_locale_by_lang($lang) {
         $locale = $lang;
     }
     return $locale;
+}
+
+function sqrip_file_name($order_id) {
+    $order = wc_get_order($order_id);
+    $order_date = '';
+
+    if ($order) {
+        $order_date = $order->get_date_created()->date('Ymd');
+    }
+
+    $sqrip_file_name = sqrip_get_plugin_option('file_name');
+
+    // replace [order_number] with order number
+    $sqrip_file_name = str_replace("[order_number]", $order_id, $sqrip_file_name);
+    // replace [order_date] with order number
+    $sqrip_file_name = str_replace("[order_date]", $order_date, $sqrip_file_name);
+    // replace [order_number] with order number
+    $sqrip_file_name = str_replace("[shop_name]", get_bloginfo('name'), $sqrip_file_name);
+
+    return $sqrip_file_name;
 }

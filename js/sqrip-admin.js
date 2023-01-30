@@ -183,7 +183,7 @@ jQuery( document ).ready(function($){
     ip_test_email.closest('tr').hide();
 
     if (btn_save.length){
-        bt_test_email_html = '<button id="btn_test_email" class="button-secondary sqrip-btn-send-test-email">'+sqrip.txt_send_test_email+'</button>';
+        bt_test_email_html = '<button id="btn_test_email" class="button-secondary qrinvoice-tab sqrip-btn-send-test-email">'+sqrip.txt_send_test_email+'</button>';
         btn_save.after(bt_test_email_html);
 
         bt_test_email = $("#btn_test_email");
@@ -233,11 +233,13 @@ jQuery( document ).ready(function($){
 
         table = $('.sqrip-tabs').siblings('.form-table');
         table.find('tr').hide();
+        $('.sqrip-btn-send-test-email').hide();
         table.find('.'+data+'-tab').closest('tr').show();
 
         if (data == "qrinvoice") {
             init_individual_address(ip_address.val());
             init_ip_qrref_format();
+            $('.sqrip-btn-send-test-email').show();
         }
 
         // else if (data == "comparison") {
@@ -253,7 +255,7 @@ jQuery( document ).ready(function($){
     }
 
     if (ip_refund_token.length) {
-        bt_check_refund_token_html = '<button id="btn_sqrip_check_refund_token" class="sqrip-btn sqrip-btn-validate-token">'+sqrip.txt_check_connection+'</button>';
+        bt_check_refund_token_html = '<button id="btn_sqrip_check_refund_token" class="button-secondary sqrip-btn sqrip-btn-validate-token">'+sqrip.txt_check_connection+'</button>';
         ip_refund_token.after(bt_check_refund_token_html);
 
         bt_check_refund_token = $('#btn_sqrip_check_refund_token');
@@ -307,7 +309,7 @@ jQuery( document ).ready(function($){
         ip_order_stt.closest('tr').addClass('sqrip-order-status');
         $('#woocommerce_sqrip_enabled_new_status').prop('checked', false);
 
-        btn_create_order_html = '<button id="btn_create_order_stt" class="sqrip-btn sqrip-btn-create-order-stt">'+sqrip.txt_create+'</button>';
+        btn_create_order_html = '<button id="btn_create_order_stt" class="button-secondary sqrip-btn sqrip-btn-create-order-stt">'+sqrip.txt_create+'</button>';
         ip_order_stt.after(btn_create_order_html);
 
         btn_toggle_stt.on('click', function(e){

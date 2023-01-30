@@ -63,9 +63,11 @@ add_action('plugins_loaded', 'sqrip_init_gateway_class');
 function sqrip_init_gateway_class()
 {
     require_once __DIR__ . '/inc/class-wc-sqrip-payment-gateway.php';
-
-    require_once __DIR__ . '/inc/class-sqrip-media-cleaner.php';
 }
+
+add_action('woocommerce_after_register_post_type', function(){
+    require_once __DIR__ . '/inc/class-sqrip-media-cleaner.php';
+});
 
 
 
@@ -238,7 +240,7 @@ if (!function_exists('sqrip_add_fields_for_order_details')) {
             $order_status = 'wc-'.$order->get_status();
 
             if ($status_awaiting == $order_status) {
-                echo '<li><button class="button button-primary sqrip-payment-confirmed">'.__( 'Payment confirmed', 'sqrip-swiss-qr-invoice' ).'</button></li>';
+                echo '<li><button class="button button-primary sqrip-payment-confirmed">'.__( 'Confirm payment', 'sqrip-swiss-qr-invoice' ).'</button></li>';
 
             }
 
@@ -702,3 +704,29 @@ function sqrip_add_new_order_statuses( $order_statuses ) {
 }
 
 add_filter( 'wc_order_statuses', 'sqrip_add_new_order_statuses' );
+
+// Add your custom order status action button (for orders with "processing" status)
+add_filter( 'woocommerce_admin_order_actions', 'sqrip_add_custom_order_status_actions_button', 100, 2 );
+function sqrip_add_custom_order_status_actions_button( $actions, $order ) {
+    // Display the button for all orders that have a 'processing' status
+
+    $status_awaiting = sqrip_get_plugin_option('status_awaiting');
+    $status_awaiting = str_replace('wc-', '', $status_awaiting);
+    if ( $order->has_status( array( $status_awaiting ) ) ) {
+
+        // The key slug defined for your action button
+        $action_slug = 'sqrip_payment_confirmed';
+        $status = $_GET['status'];
+        $order_id = method_exists($order, 'get_id') ? $order->get_id() : $order->id;
+
+        $reference_id = get_post_meta($order_id, 'sqrip_reference_id', true);
+
+        // Set the action button
+        $actions[$action_slug] = array(
+            'url'       => wp_nonce_url(admin_url('admin-ajax.php?action=sqrip_payment_confirmed&status=invoice'.$status.'&order_id=' . $order_id), 'sqrip_payment_confirmed'),
+            'name'      => 'Ref#'.$reference_id.'</br>'.wc_price($order->get_total()),
+            'action'    => $action_slug,
+        );
+    }
+    return $actions;
+}
