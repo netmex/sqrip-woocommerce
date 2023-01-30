@@ -1,9 +1,9 @@
 <?php
 
 /**
- * Plugin Name:             sqrip – Swiss QR Invoice
+ * Plugin Name:             sqrip.ch
  * Plugin URI:              https://sqrip.ch/
- * Description:             sqrip extends WooCommerce payment options for Swiss stores and Swiss customers with the new QR payment parts.
+ * Description:             sqrip – A comprehensive and clever WooCommerce finance tool for the most widely used payment method in Switzerland: the bank transfers. 
  * Version:                 2.0.0
  * Author:                  netmex digital gmbh
  * Author URI:              https://sqrip.ch/
@@ -69,6 +69,9 @@ function sqrip_init_gateway_class()
     require_once __DIR__ . '/inc/class-wc-sqrip-payment-gateway.php';
 }
 
+add_action('woocommerce_after_register_post_type', function(){
+    require_once __DIR__ . '/inc/class-sqrip-media-cleaner.php';
+});
 
 add_action('init', 'sqrip_plugin_init');
 
@@ -92,7 +95,6 @@ function sqrip_plugin_init()
 
     require_once __DIR__ . '/inc/class-sqrip-webhook.php';
 }
-
 /**
  *  Add admin notices
  *  
@@ -154,7 +156,7 @@ add_action( 'admin_enqueue_scripts', function (){
     wp_enqueue_style('sqrip-admin', plugins_url( 'css/sqrip-admin.css', __FILE__ ), '', '1.1.1');
 
     if (isset($_GET['section']) && $_GET['section'] == "sqrip") {
-        wp_enqueue_script('sqrip-admin', plugins_url( 'js/sqrip-admin.js', __FILE__ ), array('jquery'), '1.1.1', true);
+        wp_enqueue_script('sqrip-admin', plugins_url( 'js/sqrip-admin.js', __FILE__ ), array('jquery'), '1.5.5', true);
 
         $sqrip_new_status  = sqrip_get_plugin_option('new_status');
 
@@ -356,9 +358,9 @@ function sqrip_attach_qrcode_pdf_to_email($attachments, $email_id, $order)
 }
 
 /**
- *  Insert sqrip QR code after customer details
+ *  Insert sqrip QR code after order table
  *  
- *  @since 1.0
+ *  @since 1.5.3
  */
 
 add_action('woocommerce_order_details_after_order_table', 'sqrip_qr_action_order_details_after_order_table', 10, 1);
@@ -443,12 +445,7 @@ add_filter( 'wp_insert_post_data' , function ( $data , $postarr, $unsanitized_po
    
         $body = sqrip_prepare_qr_code_request_body($currency_symbol, $amount, $postarr['ID']);
 
-        $billing_address = array(
-            'street'        => $order_billing_address,
-            'postal_code'   => $order_billing_postcode,
-            'town'          => $order_billing_city,
-            'country_code'  => $order_billing_country
-        );
+        $body["payable_by"] = sqrip_get_billing_address_from_order($order);
 
         if (!$order_billing_first_name && !$order_billing_last_name) {
             $name = $order_billing_company;
@@ -759,3 +756,30 @@ function sqrip_add_new_order_statuses( $order_statuses ) {
 }
 
 add_filter( 'wc_order_statuses', 'sqrip_add_new_order_statuses' );
+
+
+// Add your custom order status action button (for orders with "processing" status)
+add_filter( 'woocommerce_admin_order_actions', 'sqrip_add_custom_order_status_actions_button', 100, 2 );
+function sqrip_add_custom_order_status_actions_button( $actions, $order ) {
+    // Display the button for all orders that have a 'processing' status
+
+    $status_awaiting = sqrip_get_plugin_option('status_awaiting');
+    $status_awaiting = str_replace('wc-', '', $status_awaiting);
+    if ( $order->has_status( array( $status_awaiting ) ) ) {
+
+        // The key slug defined for your action button
+        $action_slug = 'sqrip_payment_confirmed';
+        $status = $_GET['status'];
+        $order_id = method_exists($order, 'get_id') ? $order->get_id() : $order->id;
+
+        $reference_id = get_post_meta($order_id, 'sqrip_reference_id', true);
+
+        // Set the action button
+        $actions[$action_slug] = array(
+            'url'       => wp_nonce_url(admin_url('admin-ajax.php?action=sqrip_payment_confirmed&status=invoice'.$status.'&order_id=' . $order_id), 'sqrip_payment_confirmed'),
+            'name'      => 'Ref#'.$reference_id.'</br>'.wc_price($order->get_total()),
+            'action'    => $action_slug,
+        );
+    }
+    return $actions;
+}

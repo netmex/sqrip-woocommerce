@@ -1,4 +1,11 @@
 <?php 
+
+/**
+ * sqrip Media Cleaner
+ *
+ * @since 1.6
+ */
+
 class Sqrip_Media_Clearner {
 
     public $cron_hook;
@@ -9,12 +16,6 @@ class Sqrip_Media_Clearner {
         if (!$this->expired_date) {
             return;
         }
-
-        // $this->media_prefix = 'sqrip_invoice_';
-        // $this->query_param = 'sqrip_media';
-
-        add_filter( 'posts_clauses', array($this, 'filter_posts_by_dates_days'), 10 , 2);
-        // add_filter( 'posts_where', array($this, 'filter_media_title'), 10, 2 );
         // Store our cron hook name
         $this->cron_hook = 'sqrip_media_cleaner';
         // Install cron!
@@ -38,71 +39,39 @@ class Sqrip_Media_Clearner {
         $days = $this->expired_date;
 
         // TRUE = bypasses the trash and force deletion.
-        $force_delete = true;
-        // $param = $this->query_param;
-        // $prefix = $this->media_prefix;
-        // Get all attachments that are images. 
-        $atts = get_posts( array(
-            'post_type'        => 'attachment',
-            'post_mime_type'   => 'application/pdf',
-            'posts_per_page'   => -1,
-            'post_days_old'    => $days,
-            'meta_key'         => 'sqrip_invoice',
-            'meta_value'       => 1,
-            'suppress_filters' => false,
+        $status_completed = sqrip_get_plugin_option('status_completed');
+
+        $time_delay       = 60 * 60 * 24 * $days; 
+        $current_time     = strtotime( date('Y-m-d H:00:00') );
+        $targeted_time    = $current_time - $time_delay;
+
+        $completed_orders = (array) wc_get_orders( array(
+            'limit'             => -1,
+            'status'            => $status_completed,
+            'date_created'      => '<' . $targeted_time,
+            'payment_method'    => 'sqrip',
         ) );
 
-        $current_date = current_time( 'mysql' );
-        $logs = '';
+        $logs = 'Sqrip_Media_Cleaner starting...';
 
-        if ($atts) {
-            foreach ( $atts as $att ) {
-                // Get the number of days since the attachment was created.
-                // $created_datetime = new DateTime( $att->post_date );
-                // $current_datetime = new DateTime( $current_date );
-                // $interval = $created_datetime->diff( $current_datetime );
+        if ($completed_orders) {
+            foreach ( $completed_orders as $order ) {
+                $att_id = get_post_meta($order->ID, 'sqrip_qr_pdf_attachment_id', true);
+              
+                wp_delete_attachment( $att_id, true );
 
-                // // If the attachment is $days days old since its CREATION DATE, delete
-                // // the attachment (post data and image) and all thumbnails.
-                // if ( $interval->days >= $days ) {
-                    wp_delete_attachment( $att->ID, $force_delete );
-                // }
+                $logs .= ' Deleted attachement '.$att_id.' in order #'.$order->ID.'.';
             }
 
-            $logs = 'Sqrip_Media_Cleaner ran and deleted '.count($atts).' invoices!';
-            $logs .= 'List Invoices:';
-            $logs .= print_r($atts, true);
+            $logs .= 'Sqrip_Media_Cleaner ran and deleted '.count($completed_orders).' invoices!';
 
         } else {
-            $logs = 'Sqrip_Media_Cleaner ran and deleted 0 invoices!';
+            $logs .= 'Sqrip_Media_Cleaner ran and deleted 0 invoices!';
         }
 
         error_log($logs);
         
     }
-
-    function filter_media_title( $where, $wp_query ) {
-        global $wpdb;
-        $param = $this->query_param;
-
-        if ( $sqrip_media = $wp_query->get( $param ) ) {
-            $where .= ' AND ' . $wpdb->posts . '.post_title LIKE \'%' . esc_sql( $wpdb->esc_like( $sqrip_media ) ) . '%\'';
-        }
-        return $where;
-    }
-
-    function filter_posts_by_dates_days( array $clauses, WP_Query $wp_query ) {
-        $days = $wp_query->get( 'post_days_old' );
-        if ( is_numeric( $days ) && $days >= 0 ) {
-            global $wpdb;
-            $clauses['where'] .= $wpdb->prepare( "
-                AND ( DATEDIFF( NOW(), {$wpdb->posts}.post_date ) > %d )
-            ", $days );
-        }
-
-        return $clauses;
-    }
-
 } 
 
 

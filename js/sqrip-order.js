@@ -139,6 +139,23 @@ jQuery( document ).ready(function($){
             }
         })
     });
+    
+    btn_confirm.on('click', function(e){
+
+        e.preventDefault();
+
+        _form = $('form#post');
+
+        $('body').addClass('sqrip-loading');
+  
+        if ( _form.length ) {
+
+            jQuery('#order_status').val(sqrip.status_completed);            
+            _form.trigger('submit');
+
+        }
+        
+    });
 
     // mark sqrip refund as unpaid
     $(".woocommerce_sqrip_refund_unpaid").on("click", function(e) {

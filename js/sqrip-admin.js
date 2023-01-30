@@ -60,7 +60,7 @@ jQuery( document ).ready(function($){
                             result = "error";
                         }
 
-                        output_html = '<div class="sqrip-notice '+result+'">';
+                        output_html = '<div class="sqrip-notice mt-10 '+result+'">';
                         output_html += '<p>'+response.message+'</p>';
                         output_html += '</div>';
                         _this.after(output_html);
@@ -240,8 +240,9 @@ jQuery( document ).ready(function($){
 
     // ip_test_email.closest('tr').hide();
 
-    if (ip_test_email.length){
-        ip_test_email.closest('tr').find('th').attr('colspan', 2).css('padding-bottom', 0);
+    if (btn_save.length){
+        bt_test_email_html = '<button id="btn_test_email" class="button-secondary qrinvoice-tab sqrip-btn-send-test-email">'+sqrip.txt_send_test_email+'</button>';
+        btn_save.after(bt_test_email_html);
 
         bt_test_email = $('label[for="woocommerce_sqrip_test_email"]');
         bt_test_email.on('click', function(e){

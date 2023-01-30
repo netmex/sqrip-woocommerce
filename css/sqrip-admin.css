@@ -47,7 +47,7 @@ table.form-table td .sqrip-notice p {
 }
 
 .wp-core-ui .button-secondary.sqrip-btn-send-test-email {
-    margin-left: -16px;
+    margin-left: 15px;
 }
 
 .sqrip-payment .sqrip-re-generate-qrcode {
@@ -140,7 +140,7 @@ table.form-table .fund-management-tab ~ td label{
     cursor: text;
 } 
 
-table.form-table tr th label[for="woocommerce_sqrip_test_email"],
+/*table.form-table tr th label[for="woocommerce_sqrip_test_email"],
 table.form-table tr td label[for="woocommerce_sqrip_compare_btn"],
 table.form-table .sqrip-btn,
 table.form-table .forminp .sqrip-btn-validate {
@@ -153,7 +153,7 @@ table.form-table .forminp .sqrip-btn-validate {
     border: 0;
     cursor: pointer;
 }
-
+*/
 .sqrip-btn {
     margin-top: 10px;
 }
@@ -266,6 +266,7 @@ table.sqrip-table td p.sqrip-note {
 
 #woocommerce_sqrip_new_status{
     display: block;
+    margin-bottom: 10px;
 }
 
 .sqrip-order-status th{
@@ -297,4 +298,23 @@ table.sqrip-table td p.sqrip-note {
 table.form-table  .info-transfer .sqrip-notice{
     height: auto;
     margin-left: 0;
+}
+
+.post-type-shop_order .wp-list-table .column-wc_actions a.button.sqrip_payment_confirmed:before{
+    /*text-indent: 0;
+    width: auto;
+    padding-left: 10px!important;
+    padding-right: 10px!important;*/
+    content: "";
+    background: url('payment_confirmed.png') no-repeat center center / contain;
+    width: 65%;
+    height: 100%;
+    display: block;
+    margin: auto;
+}
+
+body.post-type-shop_order #tiptip_content, 
+body.post-type-shop_order .chart-tooltip, 
+body.post-type-shop_order .wc_error_tip{
+    max-width: 250px!important;
 }
