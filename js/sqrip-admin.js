@@ -12,7 +12,9 @@ jQuery( document ).ready(function($){
     ip_qrref_format = $('#woocommerce_sqrip_qr_reference_format'),
     ip_order_stt = $('#woocommerce_sqrip_new_status'),
     ip_refund_token = $('#woocommerce_sqrip_return_token'),
-    btn_toggle_stt = $('.sqrip-toggle-order-satus');
+    btn_toggle_stt = $('.sqrip-toggle-order-satus'),
+    ip_enb_new_status = $('#woocommerce_sqrip_enabled_new_status'),
+    ip_ft_new_status = $('#woocommerce_first_time_new_status');
 
     if (ip_token.length) {
         bt_check_token_html = '<button id="btn_sqrip_check_token" class="button-secondary sqrip-btn-validate-token">'+sqrip.txt_check_connection+'</button>';
@@ -307,7 +309,7 @@ jQuery( document ).ready(function($){
 
     if (ip_order_stt.length) {
         ip_order_stt.closest('tr').addClass('sqrip-order-status');
-        $('#woocommerce_sqrip_enabled_new_status').prop('checked', false);
+        ip_ft_new_status.prop('checked', false);
 
         btn_create_order_html = '<button id="btn_create_order_stt" class="button-secondary sqrip-btn sqrip-btn-create-order-stt">'+sqrip.txt_create+'</button>';
         ip_order_stt.after(btn_create_order_html);
@@ -326,7 +328,8 @@ jQuery( document ).ready(function($){
             if (!ip_order_stt.val()) {
                 ip_order_stt.focus();
             } else {
-                $('#woocommerce_sqrip_enabled_new_status').prop('checked', true);
+                ip_enb_new_status.prop('checked', true);
+                ip_ft_new_status.prop('checked', true);
                 setTimeout(function(){
                     btn_save.trigger('click');
                 }, 200);

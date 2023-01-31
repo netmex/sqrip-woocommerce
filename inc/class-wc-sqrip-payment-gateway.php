@@ -303,6 +303,14 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'css'         => 'visibility: hidden; position: absolute',
                 'class'       => 'comparison-tab' 
             ),
+            'first_time_new_status' => array(
+                'title'       => '',
+                'type'        => 'checkbox',
+                'label'       => ' ',
+                'default'     => 'no',
+                'css'         => 'visibility: hidden; position: absolute',
+                'class'       => 'comparison-tab' 
+            ),
             'return_enabled' => array(
                 'title'       => __( 'Activate/Deactivate Refunds', 'sqrip-swiss-qr-invoice' ),
                 'label'       => __( 'Activate sqrip for Refunds', 'sqrip-swiss-qr-invoice' ),
@@ -585,7 +593,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 
         }
 
-        if ( isset($post_data['woocommerce_sqrip_enabled_new_status']) && !empty($post_data['woocommerce_sqrip_enabled_new_status']) ) {
+        if ( isset($post_data['woocommerce_sqrip_enabled_new_status']) && !empty($post_data['woocommerce_sqrip_enabled_new_status']) && isset($post_data['woocommerce_sqrip_first_time_new_status']) ) {
             $_POST['woocommerce_sqrip_status_completed'] = 'wc-sqrip-paid';
         }
 
