@@ -769,14 +769,13 @@ function sqrip_add_custom_order_status_actions_button( $actions, $order ) {
 
         // The key slug defined for your action button
         $action_slug = 'sqrip_payment_confirmed';
-        $status = $_GET['status'];
         $order_id = method_exists($order, 'get_id') ? $order->get_id() : $order->id;
 
         $reference_id = get_post_meta($order_id, 'sqrip_reference_id', true);
 
         // Set the action button
         $actions[$action_slug] = array(
-            'url'       => wp_nonce_url(admin_url('admin-ajax.php?action=sqrip_payment_confirmed&status=invoice'.$status.'&order_id=' . $order_id), 'sqrip_payment_confirmed'),
+            'url'       => wp_nonce_url(admin_url('admin-ajax.php?action=sqrip_payment_confirmed&status=invoice'.$status_awaiting.'&order_id=' . $order_id), 'sqrip_payment_confirmed'),
             'name'      => 'Ref#'.$reference_id.'</br>'.wc_price($order->get_total()),
             'action'    => $action_slug,
         );

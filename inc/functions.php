@@ -89,7 +89,13 @@ function sqrip_get_billing_address_from_order($order) {
 	$order_data = $order->get_data();
     $company = isset($order_data['billing']['company']) ? $order_data['billing']['company'] : "";
 
-	$billing_address = array(
+    $billing_address = array(
+        'name'      => $order_data['billing']['first_name'] . ' ' . $order_data['billing']['last_name'],
+        'street'    => $order_data['billing']['address_1'] . ($order_data['billing']['address_2'] ? ', ' . $order_data['billing']['address_2'] : ""),
+        'postal_code' => $order_data['billing']['postcode'],
+        'town'      => $order_data['billing']['city'],
+        'country_code' => $order_data['billing']['country']
+    );
 
     if ( !empty($company) ) {
         $billing_address['company'] = $company;
