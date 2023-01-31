@@ -23,10 +23,12 @@ jQuery( document ).ready(function($){
     ip_refund_token = $('#woocommerce_sqrip_return_token'),
     ip_qrref_format = $('#woocommerce_sqrip_qr_reference_format'),
     ip_order_stt = $('#woocommerce_sqrip_new_status'),
-    btn_toggle_stt = $('.sqrip-toggle-order-satus');
+    btn_toggle_stt = $('.sqrip-toggle-order-satus'),
+    ip_enb_new_status = $('#woocommerce_sqrip_enabled_new_status'),
+    ip_ft_new_status = $('#woocommerce_first_time_new_status');
 
     if (ip_token.length) {
-        bt_check_token_html = '<button id="btn_sqrip_check_token" class="sqrip-btn sqrip-btn-validate-token">'+sqrip.txt_check_connection+'</button>';
+        bt_check_token_html = '<button id="btn_sqrip_check_token" class="button-secondary sqrip-btn-validate-token">'+sqrip.txt_check_connection+'</button>';
         ip_token.after(bt_check_token_html);
 
         bt_check_token = $('#btn_sqrip_check_token');
@@ -94,7 +96,7 @@ jQuery( document ).ready(function($){
 
     if (btn_save.length) {
 
-        btn_transfer_html = '<button id="sqrip_btn_transfer" class="button-primary sqrip-btn fund-management-tab btn-transfer">'+sqrip.txt_transfer+'</button>';
+        btn_transfer_html = '<button id="sqrip_btn_transfer" class="button-secondary sqrip-btn fund-management-tab btn-transfer">'+sqrip.txt_transfer+'</button>';
 
         btn_save.after(btn_transfer_html);
 
@@ -286,11 +288,13 @@ jQuery( document ).ready(function($){
 
         table = $('.sqrip-tabs').siblings('.form-table');
         table.find('tr').hide();
+        $('.sqrip-btn-send-test-email').hide();
         table.find('.'+data+'-tab').closest('tr').show();
 
         if (data == "qrinvoice") {
             init_individual_address(ip_address.val());
             init_ip_qrref_format();
+            $('.sqrip-btn-send-test-email').show();
         }
 
         else if (data == "comparison") {
@@ -552,7 +556,7 @@ jQuery( document ).ready(function($){
 
 
     if (ip_refund_token.length) {
-        bt_check_refund_token_html = '<button id="btn_sqrip_check_refund_token" class="sqrip-btn sqrip-btn-validate-token">'+sqrip.txt_check_connection+'</button>';
+        bt_check_refund_token_html = '<button id="btn_sqrip_check_refund_token" class="sqrip-btn button-secondary sqrip-btn-validate-token">'+sqrip.txt_check_connection+'</button>';
         ip_refund_token.after(bt_check_refund_token_html);
 
         bt_check_refund_token = $('#btn_sqrip_check_refund_token');
@@ -610,9 +614,9 @@ jQuery( document ).ready(function($){
 
     if (ip_order_stt.length) {
         ip_order_stt.closest('tr').addClass('sqrip-order-status');
-        $('#woocommerce_sqrip_enabled_new_status').prop('checked', false);
+        ip_ft_new_status.prop('checked', false);
 
-        btn_create_order_html = '<button id="btn_create_order_stt" class="sqrip-btn sqrip-btn-create-order-stt">'+sqrip.txt_create+'</button>';
+        btn_create_order_html = '<button id="btn_create_order_stt" class="button-secondary sqrip-btn sqrip-btn-create-order-stt">'+sqrip.txt_create+'</button>';
         ip_order_stt.after(btn_create_order_html);
 
         btn_toggle_stt.on('click', function(e){
@@ -629,7 +633,8 @@ jQuery( document ).ready(function($){
             if (!ip_order_stt.val()) {
                 ip_order_stt.focus();
             } else {
-                $('#woocommerce_sqrip_enabled_new_status').prop('checked', true);
+                ip_enb_new_status.prop('checked', true);
+                ip_ft_new_status.prop('checked', true);
                 setTimeout(function(){
                     btn_save.trigger('click');
                 }, 200);

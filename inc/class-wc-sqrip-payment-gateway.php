@@ -57,10 +57,13 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 
         $activated_txt = "<span class='sqrip-activation-confirmed'>".__( 'Activation confirmed', 'sqrip-swiss-qr-invoice' )."</span>";
 
-        $camt_active = $this->get_ebics_overview('active_service') == "camt_upload_service" ? true : false;
-        $ebics_active = $this->get_ebics_overview('active_service') == "ebics_service" ? true : false;
-        // $active_service = $this->get_ebics_overview('active_service');
+        $ebics_overview = $this->get_ebics_overview();
+        $fund_management = $this->get_fund_management_detail();
 
+
+        $camt_active = $ebics_overview['active_service'] == "camt_upload_service" ? true : false;
+        $ebics_active = $ebics_overview['active_service'] == "ebics_service" ? true : false;
+ 
         $description = $this->show_tab('ebics_service,camt_service') == 'hide' ? __('What is the order status that waits for confirmation of made payment to your bank account?', 'sqrip-swiss-qr-invoice' ) : __('What is the order status that waits for confirmation of made payment to your bank account? We will only check for payments at the bank account for these statuses.', 'sqrip-swiss-qr-invoice' );
 
         $this->form_fields = array(
@@ -115,7 +118,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             'remaining_credits' => array(
                 'title'       => __( 'Remaining Credits', 'sqrip-swiss-qr-invoice' ),
                 'type'        => 'info',
-                'label'       => $this->get_ebics_overview('remaining_credits'),
+                'label'       => $ebics_overview['remaining_credits'],
                 'class'       => 'services-tab' 
             ),
             'section_qr_invoices' => array(
@@ -189,7 +192,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             ),
             'enabled_fund_management' => array(
                 'title'       => __( 'Fund Management', 'sqrip-swiss-qr-invoice' ),
-                'label'       => __( 'Activation', 'sqrip-swiss-qr-invoice' ). ($this->get_ebics_overview('main_account') !== "XXXX XXXX XXXX XXXX" ? $activated_txt : ""),
+                'label'       => __( 'Activation', 'sqrip-swiss-qr-invoice' ). ($ebics_overview['main_account'] !== "XXXX XXXX XXXX XXXX" ? $activated_txt : ""),
                 'type'        => 'checkbox',
                 'description' => '',
                 'default'     => 'no',
@@ -372,12 +375,8 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'class'       => 'qrinvoice-tab'  
             ),
             'test_email' => array(
-                'title'       => sprintf( 
-                    __( 'Send test to %s', 'sqrip-swiss-qr-invoice' ), 
-                    esc_html( get_option('admin_email') ) 
-                ),
+                'title'       => '',
                 'type'        => 'checkbox',
-                'label'       => ' ',
                 'default'     => 'no',
                 'css'         => 'visibility: hidden; position: absolute',
                 'class'       => 'qrinvoice-tab' 
@@ -425,7 +424,6 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'options'       => wc_get_order_statuses(),
                 'placeholder' => 'Select Status',
                 'default' => 'wc-completed',
-                
                 'class'       => 'comparison-tab'  
             ),
             'new_status' => array(
@@ -436,6 +434,14 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'description' => __('To what order status should we change your order, once the payment has been confirmed?', 'sqrip-swiss-qr-invoice' ).'</ br>'.sprintf(__('If there is no suitable status available, you can create one right %s', 'sqrip-swiss-qr-invoice'), '<a href="#" class="sqrip-toggle-order-satus">'.__('here', 'sqrip-swiss-qr-invoice').'</a>'),
             ),
             'enabled_new_status' => array(
+                'title'       => '',
+                'type'        => 'checkbox',
+                'label'       => ' ',
+                'default'     => 'no',
+                'css'         => 'visibility: hidden; position: absolute',
+                'class'       => 'comparison-tab' 
+            ),
+            'first_time_new_status' => array(
                 'title'       => '',
                 'type'        => 'checkbox',
                 'label'       => ' ',
@@ -464,7 +470,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             'payment_frequence' => array(
                 'title'       => __( 'Trigger Periodicity', 'sqrip-swiss-qr-invoice' ),
                 'type'        => 'info',
-                'label'        => $this->get_ebics_overview('trigger_periodicity'),
+                'label'        => $ebics_overview['trigger_periodicity'],
                 'description' => __( 'To edit these setting go to your EBICS setting at <a href="https://api.sqrip.ch/ebics/settings" target="_blank">https://api.sqrip.ch/ebics/settings</a>', 'sqrip-swiss-qr-invoice' ),
                 'class'         => 'comparison-tab ebics-service'  
             ),
@@ -499,7 +505,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             'account_qr_iban' => array(
                 'title'       => __( 'Account (QR-)IBAN', 'sqrip-swiss-qr-invoice' ),
                 'type'        => 'info',
-                'label'        => $this->get_fund_management_detail('account_iban'),
+                'label'        => $fund_management['account_iban'],
                 'class'       => 'fund-management-tab',
             ),
             'account_balance' => array(
@@ -507,7 +513,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'type'        => 'info',
                 'label'        => sprintf( 
                     __( '%s as per %s', 'sqrip-swiss-qr-invoice' ), 
-                    $this->get_fund_management_detail('account_balance'),
+                    $fund_management['account_balance'],
                     current_time('d.m.Y h:i')
                 ),
                 'class'       => 'fund-management-tab',
@@ -515,13 +521,13 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             'trigger_level' => array(
                 'title'       => __( 'Trigger Level', 'sqrip-swiss-qr-invoice' ),
                 'type'        => 'info',
-                'label'        => $this->get_fund_management_detail('trigger_level'),
+                'label'        => $fund_management['trigger_level'],
                 'class'       => 'fund-management-tab',
             ),
             'trigger_periodicity' => array(
                 'title'       => __( 'Trigger periodicity', 'sqrip-swiss-qr-invoice' ),
                 'type'        => 'info',
-                'label'        => $this->get_fund_management_detail('trigger_periodicity'),
+                'label'        => $fund_management['trigger_periodicity'],
                 'class'       => 'fund-management-tab',
             ),
             'fund_forward_payments' => array(
@@ -529,38 +535,38 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'type'        => 'info',
                 'label'        => sprintf( 
                     __( 'You forward your payments to %s', 'sqrip-swiss-qr-invoice' ), 
-                    $this->get_fund_management_detail('main_account'),
+                    $fund_management['main_account'],
                 ),
                 'class'       => 'fund-management-tab',
             ),
             'fund_sender_name' => array(
                 'title' => __( 'Reciever name', 'sqrip-swiss-qr-invoice' ),
                 'type' => 'info',
-                'label'   => $this->get_fund_management_detail('reciever_name'),
+                'label'   => $fund_management['reciever_name'],
                 'class' => 'fund-management-tab',
             ),
             'fund_sender_postcode' => array(
                 'title' => __( 'ZIP CODE', 'sqrip-swiss-qr-invoice' ),
                 'type' => 'info',
-                'label'   => $this->get_fund_management_detail('postal_code'),
+                'label'   => $fund_management['postal_code'],
                 'class' => 'fund-management-tab',
             ),
             'fund_sender_city' => array(
                 'title' => __( 'City', 'sqrip-swiss-qr-invoice' ),
                 'type' => 'info',
-                'label'   => $this->get_fund_management_detail('city'),
+                'label'   => $fund_management['city'],
                 'class' => 'fund-management-tab',
             ),
             'fund_sender_country' => array(
                 'title' => __( 'Country code', 'sqrip-swiss-qr-invoice' ),
                 'type' => 'info',
-                'label'   => $this->get_fund_management_detail('country_code'),
+                'label'   => $fund_management['country_code'],
                 'class' => 'fund-management-tab',
             ),
             'fund_remarks' => array(
                 'title' => __( 'Remarks', 'sqrip-swiss-qr-invoice' ),
                 'type' => 'text',
-                'default' => $this->get_fund_management_detail('remarks'),
+                'default' => $fund_management['remarks'],
                 'class' => 'fund-management-tab',
             ),
             'btn_transfer' => array(
@@ -578,48 +584,6 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             
         );
     }
-
-    public function get_frequency($param = "week_days"){
-        $get_ebics_overview = $this->get_ebics_overview('', true);
-        $periodicity = isset($get_ebics_overview->trigger_periodicity) ? $get_ebics_overview->trigger_periodicity : '';
-
-        if (!$periodicity) {
-            return;
-        }
-
-        if ($param == "week_days") {
-            $week_days = $periodicity->week_days;
-
-            if (!$week_days) {
-                return;
-            }
-            $res_day = [];
-
-            foreach ($week_days as $week_day) {
-                $res_day[] = $week_day->name; 
-            }
-
-            return $res_day;
-        }
-
-        if ($param == "hours") {
-            $hours = isset($periodicity->hours) ? $periodicity->hours : '';
-
-            if (!$hours) {
-                return;
-            }
-            $res_hour = [];
-
-            foreach ($hours as $hour) {
-                $res_hour[] = $hour; 
-            }
-
-            return $res_hour;
-        }
-
-        return;
-    }
-    
 
     public function show_tab($options){
         $options = explode(',', $options);
@@ -654,22 +618,20 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         return $return == 'Valid qr IBAN' ? '' : 'hide';
     }
 
-    public function get_fund_management_detail($param = ""){
+
+    public function get_fund_management_detail(){
+
         $endpoint = 'get-fund-management-details';
 
         $response = sqrip_remote_request($endpoint);
 
         $return = $this->get_settings_response_data($response, true);
 
-        if (!empty($param) && isset($return[$param])) {
-            return $return[$param];
-        }
 
-        if (!empty($param) && isset($response->$param)) {
-            return $response->$param;
-        }
+        $response = array_merge((array)$response, $return);
 
-        return;
+        return $response;
+
     }
 
     public function get_ebics_overview($param = "", $return_full = false, $token = ""){
@@ -692,13 +654,12 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 
     public function get_settings_response_data($response, $fund = false)
     {
-
         $service = [
-            "account_iban" => "XXXX XXXX XXXX XXXX",
-            "main_account"  => "XXXX XXXX XXXX XXXX",
-            "debit_account" => "XXXX XXXX XXXX XXXX",
-            "trigger_level" => "XXX",
-            "account_balance" => "XXX.XXX",
+            "account_iban"      => "XXXX XXXX XXXX XXXX",
+            "main_account"      => "XXXX XXXX XXXX XXXX",
+            "debit_account"     => "XXXX XXXX XXXX XXXX",
+            "trigger_level"     => "XXX",
+            "account_balance"   => "XXX.XXX",
             "trigger_periodicity"=> 'Not set', 
         ];
 
@@ -1219,7 +1180,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             error_log(print_r($message,true));
         }  
 
-        if ( isset($post_data['woocommerce_sqrip_enabled_new_status']) && !empty($post_data['woocommerce_sqrip_enabled_new_status']) ) {
+        if ( isset($post_data['woocommerce_sqrip_enabled_new_status']) && !empty($post_data['woocommerce_sqrip_enabled_new_status']) && isset($post_data['woocommerce_sqrip_first_time_new_status']) ) {
             $_POST['woocommerce_sqrip_status_completed'] = 'wc-sqrip-paid';
         }
 
@@ -1239,6 +1200,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         $qr_reference   = $post_data['woocommerce_sqrip_qr_reference'];
         $initial_digits = $post_data['woocommerce_sqrip_qr_reference_format'];
         $lang           = isset($post_data['woocommerce_sqrip_lang']) ? $post_data['woocommerce_sqrip_lang'] : "de";
+        $order_id       = 11111;
 
         $plugin_options         = get_option('woocommerce_sqrip_settings', array());
         $additional_information = $plugin_options['additional_information'];
@@ -1253,7 +1215,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 
 
         if($additional_information) {
-            $additional_information = sqrip_additional_information_shortcodes($additional_information, $lang, $due_date_raw, 11111);
+            $additional_information = sqrip_additional_information_shortcodes($additional_information, $lang, $due_date_raw, $order_id);
         }
 
         $body = [
@@ -1296,7 +1258,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             $body['payable_to'] = array(
                 'name' => $post_data['woocommerce_sqrip_address_name'],
                 'street' => $post_data['woocommerce_sqrip_address_street'],
-                'city' => $post_data['woocommerce_sqrip_address_city'],
+                'town' => $post_data['woocommerce_sqrip_address_city'],
                 'postal_code' => $post_data['woocommerce_sqrip_address_postcode'],
                 'country_code' => $post_data['woocommerce_sqrip_address_country'],
             );
@@ -1333,7 +1295,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             $sqrip_reference =    $response_body->reference;
 
             // TODO: replace with attachment ID and store this in meta instead of actual file
-            $sqrip_qr_pdf_attachment_id = $this->file_upload($sqrip_pdf, '.pdf', $token);
+            $sqrip_qr_pdf_attachment_id = $this->file_upload($sqrip_pdf, '.pdf', $token, $order_id);
             // $sqrip_qr_png_attachment_id = $this->file_upload($sqrip_png, '.png', $token);
 
             $sqrip_qr_pdf_url = wp_get_attachment_url($sqrip_qr_pdf_attachment_id);
@@ -1679,19 +1641,13 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
     {
         include_once(ABSPATH . 'wp-admin/includes/image.php');
 
-        if (!$order_id) {
-            $sqrip_name = date('dmY') . (int) microtime(true);
-            $sqrip_title = $sqrip_name;
-        } else {
-            $sqrip_name = sqrip_file_name($order_id);
-            $sqrip_title = sqrip_file_name($order_id, false);
-        }
-        
+        $sqrip_name = sqrip_file_name($order_id);
         $filename = $sqrip_name . $type;
-
+        $file_path = sanitize_title($sqrip_name). $type;
+        
         // Get the path to the upload directory.
         $uploaddir = wp_upload_dir();
-        $uploadfile = $uploaddir['path'] . '/' . $filename;
+        $uploadfile = $uploaddir['path'] . '/' . $file_path;
 
         // initiate context with request settings
         $plugin_options = get_option('woocommerce_sqrip_settings', array());
@@ -1714,7 +1670,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 
         $attachment = array(
             'post_mime_type' => $wp_filetype['type'],
-            'post_title' => $sqrip_title,
+            'post_title' => $filename,
             'post_content' => '',
             'post_status' => 'inherit',
             'meta_input' => array(

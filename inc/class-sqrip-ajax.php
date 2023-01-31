@@ -40,6 +40,8 @@ class Sqrip_Ajax {
 		add_action( 'wp_ajax_sqrip_approve_order',  array( $this, 'approve_order' ) );
 
 		add_action( 'wp_ajax_sqrip_validation_refund_token',  array( $this, 'validate_refund_token' ) );
+
+		add_action( 'wp_ajax_sqrip_payment_confirmed', 'payment_confirmed' );
 	}
 
 	/**
@@ -828,6 +830,30 @@ class Sqrip_Ajax {
 
 	    wp_send_json($response);
 	      
+	    die();
+	}
+
+	
+	function payment_confirmed()
+	{
+	    check_ajax_referer('sqrip_payment_confirmed', '_wpnonce');
+
+	    if (!isset($_GET['order_id']) || empty($_GET['order_id'])) {
+	        return;
+	    }
+
+	    $order_id = $_GET['order_id'];
+	    $status_completed = sqrip_get_plugin_option('status_completed');
+
+	    $order = wc_get_order($order_id);
+
+	    if (!$order) {
+	        return;
+	    }
+
+	    $order->update_status($status_completed, 'order_note');
+
+	    wp_redirect(get_admin_url().'edit.php?post_type=shop_order');
 	    die();
 	}
 }

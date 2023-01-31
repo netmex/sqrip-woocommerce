@@ -270,7 +270,7 @@ if (!function_exists('sqrip_add_fields_for_order_details')) {
             $order_status = 'wc-'.$order->get_status();
 
             if ($status_awaiting == $order_status) {
-                echo '<li><button class="button button-primary sqrip-payment-confirmed">'.__( 'Payment confirmed', 'sqrip-swiss-qr-invoice' ).'</button></li>';
+                echo '<li><button class="button button-primary sqrip-payment-confirmed">'.__( 'Confirm payment', 'sqrip-swiss-qr-invoice' ).'</button></li>';
 
             }
 
@@ -775,7 +775,7 @@ function sqrip_add_custom_order_status_actions_button( $actions, $order ) {
 
         // Set the action button
         $actions[$action_slug] = array(
-            'url'       => wp_nonce_url(admin_url('admin-ajax.php?action=sqrip_payment_confirmed&status=invoice'.$status_awaiting.'&order_id=' . $order_id), 'sqrip_payment_confirmed'),
+            'url'       => wp_nonce_url(admin_url('admin-ajax.php?action=sqrip_payment_confirmed&order_id=' . $order_id), 'sqrip_payment_confirmed'),
             'name'      => 'Ref#'.$reference_id.'</br>'.wc_price($order->get_total()),
             'action'    => $action_slug,
         );
