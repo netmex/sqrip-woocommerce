@@ -25,7 +25,7 @@ jQuery( document ).ready(function($){
     ip_order_stt = $('#woocommerce_sqrip_new_status'),
     btn_toggle_stt = $('.sqrip-toggle-order-satus'),
     ip_enb_new_status = $('#woocommerce_sqrip_enabled_new_status'),
-    ip_ft_new_status = $('#woocommerce_first_time_new_status');
+    ip_ft_new_status = $('#woocommerce_sqrip_first_time_new_status');
 
     if (ip_token.length) {
         bt_check_token_html = '<button id="btn_sqrip_check_token" class="button-secondary sqrip-btn-validate-token">'+sqrip.txt_check_connection+'</button>';

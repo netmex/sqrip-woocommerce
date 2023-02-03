@@ -1243,7 +1243,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         ];
 
         if ( $qr_reference == "order_number" ) {
-            $body['payment_information']['qr_reference'] = '5000';
+            $body['payment_information']['qr_reference'] = $order_id;
         }
 
         $iban_type = sqrip_validation_iban($iban, $token);
@@ -1337,10 +1337,13 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 $settings->add_error( __('E-Mail can not be sent, please check WP MAIL SMTP', 'sqrip-swiss-qr-invoice') );
             }
         } else {
+
+            $message = isset($response_body->message) ? $response_body->message : 'Connection error!';
+            
             $settings->add_error( 
                 sprintf( 
                     __( 'sqrip Error: %s', 'sqrip-swiss-qr-invoice' ), 
-                    esc_html( $response_body->message ) 
+                    esc_html( $message ) 
                 ),
             );
         }
