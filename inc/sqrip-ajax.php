@@ -223,6 +223,7 @@ function sqrip_validate_refund_token()
 
 
 add_action( 'wp_ajax_sqrip_payment_confirmed', 'sqrip_payment_confirmed' );
+add_action( 'wp_ajax_nopriv_sqrip_payment_confirmed', 'sqrip_payment_confirmed' );
 
 function sqrip_payment_confirmed()
 {
@@ -241,8 +242,10 @@ function sqrip_payment_confirmed()
         return;
     }
 
+    $paged = isset($_GET['paged']) ? '&paged='.$_GET['paged'] : '';
+
     $order->update_status($status_completed, 'order_note');
 
-    wp_redirect(get_admin_url().'edit.php?post_type=shop_order');
+    wp_redirect(get_admin_url().'edit.php?post_type=shop_order'.$paged);
     die();
 }

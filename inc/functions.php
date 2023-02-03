@@ -428,6 +428,8 @@ function sqrip_file_name($order_id) {
 
     if ($order) {
         $order_date = $order->get_date_created()->date('Ymd');
+    } else {
+        $order_date = date("Ymd");
     }
 
     $sqrip_file_name = sqrip_get_plugin_option('file_name');

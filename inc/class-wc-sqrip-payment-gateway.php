@@ -556,7 +556,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
          */
 
         if ( isset($response->confirmation_type) ) {
-
+            $message = '';
             switch ($response->confirmation_type) {
                 case 'active':
                     $message = __( 'IBAN changes: Active confirmation (see API key in sqrip.ch account).' , 'sqrip-swiss-qr-invoice' );
@@ -653,7 +653,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         ];
 
         if ( $qr_reference == "order_number" ) {
-            $body['payment_information']['qr_reference'] = '5000';
+            $body['payment_information']['qr_reference'] = $order_id;
         }
 
         $iban_type = sqrip_validation_iban($iban, $token);
@@ -696,6 +696,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         $response_body = wp_remote_retrieve_body($response);
         $response_body = json_decode($response_body);
 
+        
         $settings = new WC_Admin_Settings();
 
         if (isset($response_body->reference)) {
@@ -709,6 +710,8 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 
             $sqrip_qr_pdf_url = wp_get_attachment_url($sqrip_qr_pdf_attachment_id);
             $sqrip_qr_pdf_path = get_attached_file($sqrip_qr_pdf_attachment_id);
+
+
 
             // $sqrip_qr_png_url = wp_get_attachment_url($sqrip_qr_png_attachment_id);
             // $sqrip_qr_png_path = get_attached_file($sqrip_qr_png_attachment_id);
@@ -746,10 +749,12 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 $settings->add_error( __('E-Mail can not be sent, please check WP MAIL SMTP', 'sqrip-swiss-qr-invoice') );
             }
         } else {
+            $message = isset($response_body->message) ? $response_body->message : 'Connection error!';
+
             $settings->add_error( 
                 sprintf( 
                     __( 'sqrip Error: %s', 'sqrip-swiss-qr-invoice' ), 
-                    esc_html( $response_body->message ) 
+                    esc_html( $message ) 
                 ),
             );
         }
