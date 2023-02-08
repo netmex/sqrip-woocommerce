@@ -24,8 +24,6 @@ require_once __DIR__ . '/inc/functions.php';
 require_once __DIR__ . '/inc/class-sqrip-ajax.php';
 
 
-
-
 /**
  * Add plugin Settings link
  *
@@ -206,16 +204,20 @@ add_action( 'wp_enqueue_scripts', 'sqrip_enqueue_scripts' );
 
 function sqrip_enqueue_scripts() 
 {
-    wp_enqueue_style( 'sqrip', plugins_url( 'css/sqrip-order.css', __FILE__ ), false);
+    if ( is_account_page() || is_checkout() ) {
+    
+        wp_enqueue_style( 'sqrip', plugins_url( 'css/sqrip-order.css', __FILE__ ), false);
 
-    wp_enqueue_script( 'sqrip', plugins_url( 'js/sqrip-fe.js', __FILE__ ), array('jquery'), '1.0.3', true);
+        // wp_enqueue_script( 'sqrip', plugins_url( 'js/sqrip-fe.js', __FILE__ ), array('jquery'), '1.0.3', true);
 
-    wp_localize_script( 'sqrip', 'sqrip',
-        array( 
-            'ajax_url' => admin_url( 'admin-ajax.php' ),
-            'ajax_nonce' => wp_create_nonce( 'sqrip-generate-new-qrcode' )
-        )
-    );
+        // wp_localize_script( 'sqrip', 'sqrip',
+        //     array( 
+        //         'ajax_url' => admin_url( 'admin-ajax.php' ),
+        //         'ajax_nonce' => wp_create_nonce( 'sqrip-generate-new-qrcode' )
+        //     )
+        // );
+
+    }
 }
 
 
@@ -245,6 +247,8 @@ if (!function_exists('sqrip_add_fields_for_order_details')) {
     {
         global $post;
         $order_id = $post->ID;
+        $payment_method = get_post_meta( $order_id, '_payment_method', true );
+
         $reference_id = get_post_meta($order_id, 'sqrip_reference_id', true);
         $pdf_file = get_post_meta($order_id, 'sqrip_pdf_file_url', true);
         
@@ -252,30 +256,44 @@ if (!function_exists('sqrip_add_fields_for_order_details')) {
         if(!$pdf_file) {
             $pdf_file = get_post_meta($order_id, 'sqrip_pdf_file', true);
         }
-        
-        if ($reference_id || $pdf_file) {
-            echo '<ul class="sqrip-payment">';
 
-            echo $reference_id ? '<li><b>'.__('Reference number','sqrip-swiss-qr-invoice').' :</b> '.esc_html($reference_id).'</li>' : '';
-
-            echo $pdf_file ? '<li><b>'.__( 'QR-Code PDF', 'sqrip-swiss-qr-invoice' ).' :</b> <a target="_blank" href="'.esc_url($pdf_file).'"><span class="dashicons dashicons-media-document"></span></a></li>' : '';
-
-            echo '<li><button class="button button-secondary sqrip-re-generate-qrcode">'.__( 'Renew QR Invoice', 'sqrip-swiss-qr-invoice' ).'</button></li>';
-
-            // $ebics_service = sqrip_get_plugin_option('ebics_service');
-            // $camt_active = sqrip_get_plugin_option('camt_active');
+        if ($payment_method == 'sqrip') { 
             $status_awaiting = sqrip_get_plugin_option('status_awaiting');
 
             $order = wc_get_order( $order_id );
             $order_status = 'wc-'.$order->get_status();
 
-            if ($status_awaiting == $order_status) {
-                echo '<li><button class="button button-primary sqrip-payment-confirmed">'.__( 'Confirm payment', 'sqrip-swiss-qr-invoice' ).'</button></li>';
+            ?>
+ 
+            <ul class="sqrip-payment">
+                <li>
+                    <b><?php echo __('Reference number','sqrip-swiss-qr-invoice') ?> :</b> <?php echo $reference_id ? esc_html($reference_id) : __('Deleted','sqrip-swiss-qr-invoice'); ?>
+                </li>
+                <li>
+                    <b><?php echo __( 'QR-Code PDF', 'sqrip-swiss-qr-invoice' ) ?> :</b>
+                    <?php if ($pdf_file) : ?>
+                        <a target="_blank" href="<?php echo esc_url($pdf_file); ?>">
+                            <span class="dashicons dashicons-media-document"></span>
+                        </a>
+                    <?php else :  ?> 
+                        <?php echo __('Deleted','sqrip-swiss-qr-invoice'); ?>
+                    <?php endif; ?>
+                    
+                </li>
+                <li>
+                    <button class="button button-secondary sqrip-re-generate-qrcode"><?php echo __( 'Renew QR Invoice', 'sqrip-swiss-qr-invoice' ); ?></button>
+                </li>
 
-            }
+                <?php if ($status_awaiting == $order_status): ?>
+                <li>
+                    <button class="button button-primary sqrip-payment-confirmed">
+                        <?php echo __( 'Confirm payment', 'sqrip-swiss-qr-invoice' ); ?>
+                    </button>
+                </li>
+                <?php endif; ?>
+            </ul>
 
-
-            echo '</ul>';
+            <?php
 
         } else {
 
@@ -453,13 +471,13 @@ add_filter( 'wp_insert_post_data' , function ( $data , $postarr, $unsanitized_po
             $name = $order_billing_first_name . ' ' . $order_billing_last_name;
 
             if ( !empty($order_billing_company) ) {
-                $billing_address['company'] = $order_billing_company;
+                $body["payable_by"]['company'] = $order_billing_company;
             }
         }
 
-        $billing_address['name'] = $name;
+        $body["payable_by"]['name'] = $name;
 
-        $body["payable_by"] = $billing_address;
+        // $body["payable_by"] = $billing_address;
 
         $address = sqrip_get_plugin_option('address');
 
@@ -471,6 +489,7 @@ add_filter( 'wp_insert_post_data' , function ( $data , $postarr, $unsanitized_po
         $response = wp_remote_post(SQRIP_ENDPOINT.$endpoint, $args);
 
         $response_body = wp_remote_retrieve_body($response);
+
         $response_body = json_decode($response_body);
 
         if ( is_wp_error($response) ) {
@@ -532,7 +551,7 @@ add_filter( 'wp_insert_post_data' , function ( $data , $postarr, $unsanitized_po
                 $order->add_order_note( $order_notes );
 
                 $order->update_meta_data('sqrip_reference_id', $sqrip_reference);
-
+                $order->update_meta_data('sqrip_qr_pdf_attachment_id', $sqrip_qr_pdf_attachment_id);
                 $order->update_meta_data('sqrip_pdf_file_url', $sqrip_qr_pdf_url);
                 $order->update_meta_data('sqrip_pdf_file_path', $sqrip_qr_pdf_path);
 

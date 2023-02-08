@@ -66,6 +66,8 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
  
         $description = $this->show_tab('ebics_service,camt_service') == 'hide' ? __('What is the order status that waits for confirmation of made payment to your bank account?', 'sqrip-swiss-qr-invoice' ) : __('What is the order status that waits for confirmation of made payment to your bank account? We will only check for payments at the bank account for these statuses.', 'sqrip-swiss-qr-invoice' );
 
+        $wc_statuses = wc_get_order_statuses();
+
         $this->form_fields = array(
             'tabs' => array(
                 'type'  => 'tab',
@@ -230,7 +232,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             'status_order' => array(
                 'title'         => __( 'Order status after payment with SQRIP method', 'sqrip-swiss-qr-invoice' ),
                 'type'          => 'select',
-                'options'       => wc_get_order_statuses(),
+                'options'       => $wc_statuses,
                 'default'       => 'wc-on-hold',
                 'desc_tip'      => __('How should you pick this?<br>
                 <ol><li>Want to ship the product after the payment clears?</br>
@@ -241,7 +243,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'class'       => 'qrinvoice-tab'  
             ),
             'expired_date' => array(
-                'title'       => __( 'Delete QR-Invoices automatically after', 'sqrip-swiss-qr-invoice' ),
+                'title'       => sprintf(__( 'Delete QR-invoice once status has been changed to %s', 'sqrip-swiss-qr-invoice' ), $wc_statuses[sqrip_get_plugin_option('status_completed')]),
                 'type'        => 'number',
                 'label'       => __( 'days.', 'sqrip-swiss-qr-invoice' ),
                 'description' => __( 'Keep the size of your media library small. sqrip deletes for you all the not anymore needed qr-invoices.',  'sqrip-swiss-qr-invoice' ),
@@ -384,7 +386,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             'status_reminders' => array(
                 'title'         => __( 'Status of awaiting payment orders', 'sqrip-swiss-qr-invoice' ),
                 'type'          => 'select',
-                'options'       => wc_get_order_statuses(),
+                'options'       => $wc_statuses,
                 'default' => 'wc-pending',
                 'description' => $description,
                 'class'       => 'reminders-tab'  
@@ -413,7 +415,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             'status_awaiting' => array(
                 'title'         => __( 'Status of awaiting payment orders', 'sqrip-swiss-qr-invoice' ),
                 'type'          => 'select',
-                'options'       => wc_get_order_statuses(),
+                'options'       => $wc_statuses,
                 'default' => 'wc-pending',
                 'description' => $description,
                 'class'       => 'comparison-tab'  
@@ -421,7 +423,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             'status_completed' => array(
                 'title'         => __( 'Completed Orders Status', 'sqrip-swiss-qr-invoice' ),
                 'type'          => 'select',
-                'options'       => wc_get_order_statuses(),
+                'options'       => $wc_statuses,
                 'placeholder' => 'Select Status',
                 'default' => 'wc-completed',
                 'class'       => 'comparison-tab'  
@@ -1590,7 +1592,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             $order->add_order_note( __('sqrip QR Invoice created.', 'sqrip-swiss-qr-invoice') );
 
             $order->update_meta_data('sqrip_reference_id', $sqrip_reference);
-
+            $order->update_meta_data('sqrip_qr_pdf_attachment_id', $sqrip_qr_pdf_attachment_id);
             $order->update_meta_data('sqrip_pdf_file_url', $sqrip_qr_pdf_url);
             $order->update_meta_data('sqrip_pdf_file_path', $sqrip_qr_pdf_path);
 
