@@ -136,6 +136,10 @@ add_action( 'admin_enqueue_scripts', function (){
 
         $sqrip_new_status  = sqrip_get_plugin_option('enabled_new_status');
 
+        $sqrip_details = sqrip_get_user_details('', 'full');
+
+        // var_dump($sqrip_details); exit;
+
         wp_localize_script( 'sqrip-admin', 'sqrip',
             array( 
                 'ajax_url' => admin_url( 'admin-ajax.php' ),
@@ -145,7 +149,10 @@ add_action( 'admin_enqueue_scripts', function (){
                 'txt_send_test_email' => sprintf( 
                     __( 'Send test to %s', 'sqrip-swiss-qr-invoice' ), 
                     esc_html( get_option('admin_email') ) 
-                )
+                ),
+                'txt_send_test_email_warning' => __( 'You have no free credits, a paid credit will be charged', 'sqrip-swiss-qr-invoice' ), 
+                'txt_send_test_email_no_credit' => __( 'You have no credits left', 'sqrip-swiss-qr-invoice' ), 
+                'details' => $sqrip_details
             )
         );
     }

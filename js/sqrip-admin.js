@@ -184,8 +184,17 @@ jQuery( document ).ready(function($){
 
     ip_test_email.closest('tr').hide();
 
-    if (btn_save.length){
-        bt_test_email_html = '<button id="btn_test_email" class="button-secondary qrinvoice-tab sqrip-btn-send-test-email">'+sqrip.txt_send_test_email+'</button>';
+    if (btn_save.length && sqrip.details){
+        $disabled = $warning = "";
+
+        if (!sqrip.details.free_credits && !sqrip.details.credits_left) {
+            $disabled = "disabled";
+            $warning = '<span class="sqrip-warning">' + sqrip.txt_send_test_email_no_credit + '</span>';
+        } else if (!sqrip.details.free_credits && sqrip.details.credits_left){
+            $warning = '<span class="sqrip-warning">' + sqrip.txt_send_test_email_warning + '</span>';
+        }
+
+        bt_test_email_html = '<button id="btn_test_email" class="button-secondary qrinvoice-tab sqrip-btn-send-test-email" '+$disabled+'>'+sqrip.txt_send_test_email+'</button>'+$warning;
         btn_save.after(bt_test_email_html);
 
         bt_test_email = $("#btn_test_email");

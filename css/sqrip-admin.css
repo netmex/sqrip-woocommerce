@@ -50,6 +50,19 @@ table.form-table td .sqrip-notice p {
     margin-left: 15px;
 }
 
+.sqrip-warning{
+    position: absolute;
+    left: 117px;
+    color: red;
+    top: 35px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.sqrip-tabs ~ p.submit{
+    position: relative;
+}
+
 .sqrip-payment .sqrip-re-generate-qrcode {
     margin-top: 20px;
 }

@@ -611,7 +611,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         $qr_reference   = $post_data['woocommerce_sqrip_qr_reference'];
         $initial_digits = $post_data['woocommerce_sqrip_qr_reference_format'];
         $lang           = isset($post_data['woocommerce_sqrip_lang']) ? $post_data['woocommerce_sqrip_lang'] : "de";
-        $order_id       = 11111;
+        $order_id       = "11111";
 
         $plugin_options         = sqrip_get_plugin_options();
         $additional_information = $plugin_options['additional_information'];
@@ -682,6 +682,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 
         $args = [
             'method'      => 'POST',
+            'timeout'     => 60,
             'headers'     => [
                 'Content-Type' => 'application/json',
                 'Authorization' => 'Bearer '.$token,
@@ -696,7 +697,6 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         $response_body = wp_remote_retrieve_body($response);
         $response_body = json_decode($response_body);
 
-        
         $settings = new WC_Admin_Settings();
 
         if (isset($response_body->reference)) {
@@ -1056,9 +1056,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         include_once(ABSPATH . 'wp-admin/includes/image.php');
 
         $sqrip_name = sqrip_file_name($order_id);
-        
         $filename = $sqrip_name . $type;
-
         $file_path = sanitize_title($sqrip_name). $type;
 
         // Get the path to the upload directory.
@@ -1089,6 +1087,9 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             'post_title' => $filename,
             'post_content' => '',
             'post_status' => 'inherit',
+            'meta_input' => array(
+                'sqrip_invoice' => true
+            )
         );
         // Insert the attachment.
         $attach_id = wp_insert_attachment($attachment, $uploadfile);

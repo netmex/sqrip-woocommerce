@@ -48,6 +48,7 @@ function sqrip_prepare_remote_args($body, $method, $token = null) {
     }
 
 	$args = [];
+    $args['timeout'] = 60;
 	$args['method'] = $method;
 	$args['headers'] = [
 		'Content-Type'  => 'application/json',
@@ -255,11 +256,15 @@ function sqrip_get_payable_to_address_txt($address){
 /*
  *  Get user details from sqrip api 
  */
-function sqrip_get_user_details($token = "")
+function sqrip_get_user_details($token = "", $return = "address")
 {
 	$endpoint = 'details';
 
     $body_decode   = sqrip_remote_request($endpoint, '', 'GET', $token); 
+
+    if ($return == "full") {
+        return $body_decode;
+    }
 
     $result = []; 
 
