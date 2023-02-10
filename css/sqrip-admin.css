@@ -50,13 +50,12 @@ table.form-table td .sqrip-notice p {
     margin-left: 15px;
 }
 
-.sqrip-warning{
+.sqrip-test-warning{
     position: absolute;
     left: 117px;
     color: red;
     top: 35px;
     font-size: 12px;
-    font-weight: bold;
 }
 
 .sqrip-tabs ~ p.submit{

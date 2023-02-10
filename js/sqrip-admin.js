@@ -189,9 +189,9 @@ jQuery( document ).ready(function($){
 
         if (!sqrip.details.free_credits && !sqrip.details.credits_left) {
             $disabled = "disabled";
-            $warning = '<span class="sqrip-warning">' + sqrip.txt_send_test_email_no_credit + '</span>';
+            $warning = '<span class="sqrip-test-warning">' + sqrip.txt_send_test_email_no_credit + '</span>';
         } else if (!sqrip.details.free_credits && sqrip.details.credits_left){
-            $warning = '<span class="sqrip-warning">' + sqrip.txt_send_test_email_warning + '</span>';
+            $warning = '<span class="sqrip-test-warning">' + sqrip.txt_send_test_email_warning + '</span>';
         }
 
         bt_test_email_html = '<button id="btn_test_email" class="button-secondary qrinvoice-tab sqrip-btn-send-test-email" '+$disabled+'>'+sqrip.txt_send_test_email+'</button>'+$warning;
@@ -245,12 +245,14 @@ jQuery( document ).ready(function($){
         table = $('.sqrip-tabs').siblings('.form-table');
         table.find('tr').hide();
         $('.sqrip-btn-send-test-email').hide();
+        $('.sqrip-test-warning').hide();
         table.find('.'+data+'-tab').closest('tr').show();
 
         if (data == "qrinvoice") {
             init_individual_address(ip_address.val());
             init_ip_qrref_format();
             $('.sqrip-btn-send-test-email').show();
+            $('.sqrip-test-warning').show();
         }
 
         // else if (data == "comparison") {

@@ -147,27 +147,27 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'class'       => 'qrinvoice-tab'
             ),
             'address_name' => array(
-                'title' => __( 'Name', 'sqrip-swiss-qr-invoice' ),
+                'title' => __( 'Name*', 'sqrip-swiss-qr-invoice' ),
                 'type' => 'text',
                 'class' => 'sqrip-address-individual',
             ),
             'address_street' => array(
-                'title' => __( 'Street', 'sqrip-swiss-qr-invoice' ),
+                'title' => __( 'Street*', 'sqrip-swiss-qr-invoice' ),
                 'type' => 'text',
                 'class' => 'sqrip-address-individual',
             ),
             'address_postcode' => array(
-                'title' => __( 'ZIP CODE', 'sqrip-swiss-qr-invoice' ),
+                'title' => __( 'ZIP CODE*', 'sqrip-swiss-qr-invoice' ),
                 'type' => 'text',
                 'class' => 'sqrip-address-individual',
             ),
             'address_city' => array(
-                'title' => __( 'City', 'sqrip-swiss-qr-invoice' ),
+                'title' => __( 'City*', 'sqrip-swiss-qr-invoice' ),
                 'type' => 'text',
                 'class' => 'sqrip-address-individual',
             ),
             'address_country' => array(
-                'title' => __( 'Country code', 'sqrip-swiss-qr-invoice' ),
+                'title' => __( 'Country code*', 'sqrip-swiss-qr-invoice' ),
                 'type' => 'select',
                 'class' => 'sqrip-address-individual',
                 'options' => $countries_list

@@ -425,6 +425,7 @@ add_filter( 'wp_insert_post_data' , function ( $data , $postarr, $unsanitized_po
 
         $body["payable_by"] = sqrip_get_billing_address_from_order($order);
 
+
         $address = sqrip_get_plugin_option('address');
 
         $body['payable_to'] = sqrip_get_payable_to_address($address);
