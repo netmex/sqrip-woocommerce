@@ -17,7 +17,7 @@ if ( !in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', ge
     return;
 }
 
-define( 'SQRIP_ENDPOINT', 'https://api.sqrip.ch/api/' );
+define( 'SQRIP_ENDPOINT', 'https://beta.sqrip.ch/api/' );
 define( 'SQRIP_PLUGIN_BASENAME', plugin_basename(__FILE__) );
 
 require_once __DIR__ . '/inc/functions.php';
@@ -152,7 +152,8 @@ add_action( 'admin_enqueue_scripts', function (){
                 ),
                 'txt_send_test_email_warning' => __( 'You have no free credits, a paid credit will be charged', 'sqrip-swiss-qr-invoice' ), 
                 'txt_send_test_email_no_credit' => __( 'You have no credits left', 'sqrip-swiss-qr-invoice' ), 
-                'details' => $sqrip_details
+                'details' => $sqrip_details,
+                'field_required_txt' => __('This field is required', 'sqrip-swiss-qr-invoice')
             )
         );
     }
