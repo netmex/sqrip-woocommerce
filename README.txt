@@ -112,16 +112,17 @@ Yes. We are already working on comparing the reconciliation of orders/purchases 
 = 1.6 =
 * Validation of API keys shows API key name for better identification;
 * Test e-mails include initial numbers of QR-Reference;
-* Design improvements;
+* Design and Text improvements;
+* Bug fixing.
 
-Our users requested these changes:
+We made users (even more) happy with these changes:
 * Plugin is no longer loaded on every page;
 * Individual file names of QR-invoices;
 * Supressing generation of QR-reference at checkout;
 * Manually added orders requires less data, shows specific error message when mandatory fields are void;
 * Easier manual payment comparison in order overview table and on order detail page;
 * Select the order status for unpaid and paid orders;
-* allowing allow_url_open in the PHP settings to prevent issues with PDF download;
+* allowing allow_url_open in the PHP settings to prevent issues with downloading and local storing of PDF.
 
 = 1.5.6 =
 * Content of 'Additional Information' is correctly shown (with some dummy data) in the test e-mail.
