@@ -51,19 +51,25 @@ table.form-table td .sqrip-notice p {
 }
 
 .sqrip-test-warning{
-    position: absolute;
-    left: 117px;
     color: red;
-    top: 35px;
-    font-size: 12px;
+    display: inline-block;
+    margin-left: 10px;
 }
 
 .sqrip-tabs ~ p.submit{
     position: relative;
 }
 
+.sqrip-payment{
+    margin-bottom: 0;
+}
+
 .sqrip-payment .sqrip-re-generate-qrcode {
     margin-top: 20px;
+}
+
+.sqrip-payment li:last-child{
+    margin-bottom: 0;
 }
 
 .sqrip-tabs {

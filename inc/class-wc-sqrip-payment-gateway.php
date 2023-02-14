@@ -112,6 +112,11 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'description' => __( 'Open an account at <a href="https://sqrip.ch" target="_blank">https://sqrip.ch</a>, create an API key, copy and paste it here. Done!', 'sqrip-swiss-qr-invoice' ),
                 'class'       => 'qrinvoice-tab'
             ),
+            'section_display' => array(
+                'title' => __('Display', 'sqrip-swiss-qr-invoice'),
+                'type'        => 'section',
+                'class'       => 'qrinvoice-tab'
+            ),
             'title' => array(
                 'title'       => __( 'Payment method name', 'sqrip-swiss-qr-invoice' ),
                 'type'        => 'text',
@@ -125,20 +130,18 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'description' => __( 'Description of what the customer can expect from this payment option.', 'sqrip-swiss-qr-invoice' ),
                 'class'       => 'qrinvoice-tab'
             ),
-            'expired_date' => array(
-                'title'       => __( 'Delete QR-Invoices automatically after', 'sqrip-swiss-qr-invoice' ),
-                'label'       => __( 'days.', 'sqrip-swiss-qr-invoice' ),
-                'description' => __( 'Keep the size of your media library small. sqrip deletes all qr-invoice files that are not needed anymore.',  'sqrip-swiss-qr-invoice' ),
-                'type'        => 'number',
-                'default'     => 10,
-                'css'         => "width:70px",
-                'class'       => 'qrinvoice-tab'  
-            ),
+
             'section_payment_recevier' => array(
                 'title' => __( 'Payee', 'sqrip-swiss-qr-invoice' ),
                 'type' => 'section',
                 'class'       => 'qrinvoice-tab'
             ),
+            'iban' => array(
+                'title' => __( '(QR-)IBAN of Payee', 'sqrip-swiss-qr-invoice' ),
+                'type' => 'text',
+                'description' => __( '(QR-)IBAN of the account to which the transfer is to be made', 'sqrip-swiss-qr-invoice' ),
+                'class'       => 'qrinvoice-tab'
+            ),            
             'address' => array(
                 'title' => __( 'Address', 'sqrip-swiss-qr-invoice' ),
                 'type' => 'select',
@@ -157,7 +160,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'class' => 'sqrip-address-individual',
             ),
             'address_postcode' => array(
-                'title' => __( 'ZIP CODE*', 'sqrip-swiss-qr-invoice' ),
+                'title' => __( 'ZIP*', 'sqrip-swiss-qr-invoice' ),
                 'type' => 'text',
                 'class' => 'sqrip-address-individual',
             ),
@@ -167,15 +170,15 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'class' => 'sqrip-address-individual',
             ),
             'address_country' => array(
-                'title' => __( 'Country code*', 'sqrip-swiss-qr-invoice' ),
+                'title' => __( 'Country*', 'sqrip-swiss-qr-invoice' ),
                 'type' => 'select',
                 'class' => 'sqrip-address-individual',
                 'options' => $countries_list
             ),
-            'iban' => array(
-                'title' => __( '(QR-)IBAN', 'sqrip-swiss-qr-invoice' ),
-                'type' => 'text',
-                'description' => __( '(QR-)IBAN of the account to which the transfer is to be made', 'sqrip-swiss-qr-invoice' ),
+
+            'section_qr_invoice' => array(
+                'title' => __('Invoice Details', 'sqrip-swiss-qr-invoice'),
+                'type'        => 'section',
                 'class'       => 'qrinvoice-tab'
             ),
             'qr_reference_format' => array(
@@ -186,17 +189,12 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'custom_attributes' => ['min' => 100000, 'max' => 999999]
             ),
             'qr_reference' => array(
-                'title' => __( 'Basis of the (QR) reference number', 'sqrip-swiss-qr-invoice' ),
+                'title' => __( 'Basis of the (QR-)Ref#', 'sqrip-swiss-qr-invoice' ),
                 'type' => 'radio',
                 'options' => array(
-                    'random' => __( 'random number', 'sqrip-swiss-qr-invoice' ),
+                    'random' => __( 'Random number', 'sqrip-swiss-qr-invoice' ),
                     'order_number' => __('Order number', 'sqrip-swiss-qr-invoice' ),
                 ),
-                'class'       => 'qrinvoice-tab'
-            ),
-            'section_qr_invoice' => array(
-                'title' => __('QR Invoice Display', 'sqrip-swiss-qr-invoice'),
-                'type'        => 'section',
                 'class'       => 'qrinvoice-tab'
             ),
             'due_date' => array(
@@ -204,14 +202,6 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'type'        => 'number',
                 'default'     => 30,
                 'css'         => "width:70px",
-                'class'        => 'qrinvoice-tab'
-            ),
-            'integration_order' => array(
-                'title'       => __( 'on the confirmation page', 'sqrip-swiss-qr-invoice' ),
-                'label'       => __( 'Offer QR invoice for download', 'sqrip-swiss-qr-invoice' ),
-                'type'        => 'checkbox',
-                'description' => '',
-                'default'     => 'yes',
                 'class'        => 'qrinvoice-tab'
             ),
             'additional_information' => array(
@@ -223,21 +213,14 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'description' => __( 'Will be displayed on the QR invoice in the section “Additional information”. <br>The following short codes are available:<br>[order_number] the order number.<br>[due_date format="%Y-%m-%d"] to insert the due date of the invoice.<br><a href="https://www.php.net/strftime" target="_blank">Supported formats</a> are:<br>%Y-%m-%d -> 2022-04-06<br>%m.%d.%y -> 04.06.22<br>%d. %B %Y -> 06. April 2022<br>%e. %b %Y -> 6. Apr 2022', 'sqrip-swiss-qr-invoice' ),
                 'class'        => 'qrinvoice-tab'
             ),
-            'email_attached' => array(
-                'title' => __( 'Attach QR-Invoice to', 'sqrip-swiss-qr-invoice' ),
-                'description' => __( 'Select email template to which the QR-invoice is attached.', 'sqrip-swiss-qr-invoice' ),
-                'type' => 'select',
-                'options' => sqrip_get_wc_emails(),
-                'class'        => 'qrinvoice-tab'
-            ),
-            'file_name' => array(
-                'title'       => __( 'File Name' , 'sqrip-swiss-qr-invoice' ),
-                'type'        => 'textarea',
-                'class'       => 'qrinvoice-tab',
-                'maxlength'   => 140,
-                'default'     => __("[order_date] [shop_name] Invoice Order: #[order_number]","sqrip-swiss-qr-invoice"),
-                'description' => __( 'The following short codes are available:<br>[order_number] the order number.<br>[order_date] the order date.<br>[shop_name] Shop name.', 'sqrip-swiss-qr-invoice' ),
-            ),
+            // 'file_name' => array(
+            //     'title'       => __( 'File Name' , 'sqrip-swiss-qr-invoice' ),
+            //     'type'        => 'textarea',
+            //     'class'       => 'qrinvoice-tab',
+            //     'maxlength'   => 140,
+            //     'default'     => __("[order_date] [shop_name] Invoice Order: #[order_number]","sqrip-swiss-qr-invoice"),
+            //     'description' => __( 'The following short codes are available:<br>[order_number] the order number.<br>[order_date] the order date.<br>[shop_name] Shop name.', 'sqrip-swiss-qr-invoice' ),
+            // ),
             'product' => array(
                 'title'         => __( 'Format', 'sqrip-swiss-qr-invoice' ),
                 'type'          => 'select',
@@ -260,6 +243,37 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'default' => 'de',
                 'class'        => 'qrinvoice-tab'
             ),
+            'section_handling' => array(
+                'title' => __('Handling', 'sqrip-swiss-qr-invoice'),
+                'type'        => 'section',
+                'class'       => 'qrinvoice-tab'
+            ),
+            'email_attached' => array(
+                'title' => __( 'Attach QR-Invoice to E-Mail template', 'sqrip-swiss-qr-invoice' ),
+                'description' => __( 'Select email template to which the QR-invoice is attached.', 'sqrip-swiss-qr-invoice' ),
+                'type' => 'select',
+                'options' => sqrip_get_wc_emails(),
+                'class'        => 'qrinvoice-tab'
+            ),
+
+            'integration_order' => array(
+                'title'       => __( 'Show QR-invoice on confirmation page', 'sqrip-swiss-qr-invoice' ),
+                'label'       => __( 'Offer QR invoice for download', 'sqrip-swiss-qr-invoice' ),
+                'type'        => 'checkbox',
+                'description' => '',
+                'default'     => 'yes',
+                'class'        => 'qrinvoice-tab'
+            ),
+            'expired_date' => array(
+                'title'       => __( 'Delete QR-Invoices automatically after', 'sqrip-swiss-qr-invoice' ),
+                'label'       => __( 'days.', 'sqrip-swiss-qr-invoice' ),
+                'description' => __( 'Keep the size of your media library small. sqrip deletes all qr-invoice files that are not needed anymore.',  'sqrip-swiss-qr-invoice' ),
+                'type'        => 'number',
+                'default'     => 10,
+                'css'         => "width:70px",
+                'class'       => 'qrinvoice-tab'  
+            ),
+
             'test_email' => array(
                 'title'       => '',
                 'type'        => 'checkbox',
@@ -496,7 +510,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 
         ob_start();
         ?>
-            <tr valign="top sqrip-section">
+            <tr valign="top" class="sqrip-section">
                 <th scope="row" class="titledesc <?php echo esc_attr($data['class']); ?>"  colspan="2">
                     <h3><?php echo wp_kses_post( $data['title'] ); ?> <?php echo $this->get_tooltip_html( $data ); // WPCS: XSS ok. ?></h3>
                     <?php echo $this->get_description_html( $data ); // WPCS: XSS ok. ?>

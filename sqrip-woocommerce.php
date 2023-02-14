@@ -138,8 +138,6 @@ add_action( 'admin_enqueue_scripts', function (){
 
         $sqrip_details = sqrip_get_user_details('', 'full');
 
-        // var_dump($sqrip_details); exit;
-
         wp_localize_script( 'sqrip-admin', 'sqrip',
             array( 
                 'ajax_url' => admin_url( 'admin-ajax.php' ),

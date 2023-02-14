@@ -437,7 +437,13 @@ function sqrip_file_name($order_id) {
         $order_date = date("Ymd");
     }
 
-    $sqrip_file_name = sqrip_get_plugin_option('file_name');
+    /**
+     * Remove the File name setting 
+     * @deprecated 1.6
+     */
+    // $sqrip_file_name = sqrip_get_plugin_option('file_name');
+
+    $sqrip_file_name = '[shop_name]-[order_number][order_date]';
 
     // replace [order_number] with order number
     $sqrip_file_name = str_replace("[order_number]", $order_id, $sqrip_file_name);
