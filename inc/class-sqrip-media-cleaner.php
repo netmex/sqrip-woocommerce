@@ -12,8 +12,9 @@ class Sqrip_Media_Clearner {
 
     public function __construct() {
         $this->expired_date = sqrip_get_plugin_option('expired_date');
-       
-        if (!$this->expired_date) {
+        $this->enabled_delete_invoice = sqrip_get_plugin_option('enabled_delete_invoice');
+
+        if ($this->enabled_delete_invoice != "yes" || !$this->expired_date) {
             return;
         }
         // Store our cron hook name
@@ -68,10 +69,10 @@ class Sqrip_Media_Clearner {
 
                 $logs .= $deleted_att ? ' Deleted attachement '.$att_id.' in order #'.$order_id.'.' : ' No attachement deleted for order #'.$order_id;
 
-                delete_post_meta($order_id, 'sqrip_reference_id');
-                delete_post_meta($order_id, 'sqrip_pdf_file_path');
-                delete_post_meta($order_id, 'sqrip_pdf_file_url');
-                delete_post_meta($order_id, 'sqrip_qr_pdf_attachment_id');
+                update_post_meta($order_id, 'sqrip_reference_id', 'deleted');
+                update_post_meta($order_id, 'sqrip_pdf_file_path', 'deleted');
+                update_post_meta($order_id, 'sqrip_pdf_file_url', 'deleted');
+                update_post_meta($order_id, 'sqrip_qr_pdf_attachment_id', 'deleted');
 
                 $logs .=' Deleted sqrip_reference_id, sqrip_qr_pdf_attachment_id, sqrip_pdf_file_path & sqrip_pdf_file_url for order #'.$order_id.'.';
             }
