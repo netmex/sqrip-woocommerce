@@ -17,7 +17,7 @@ if ( !in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', ge
     return;
 }
 
-define( 'SQRIP_ENDPOINT', 'https://api.sqrip.ch/api/' );
+define( 'SQRIP_ENDPOINT', 'https://beta.sqrip.ch/api/' );
 define( 'SQRIP_PLUGIN_BASENAME', plugin_basename(__FILE__) );
 
 require_once __DIR__ . '/inc/functions.php';
@@ -167,6 +167,7 @@ add_action( 'admin_enqueue_scripts', function (){
                 'ajax_refund_paid_nonce' => wp_create_nonce( 'sqrip-mark-refund-paid' ),
                 'ajax_refund_unpaid_nonce' => wp_create_nonce( 'sqrip-mark-refund-unpaid' ),
                 'status_completed' => sqrip_get_plugin_option('status_completed'),
+                'field_required_txt' => __('This field is required', 'sqrip-swiss-qr-invoice')
             )
         );
     }
@@ -219,38 +220,69 @@ if (!function_exists('sqrip_add_meta_boxes')) {
  */
 
 if (!function_exists('sqrip_add_fields_for_order_details')) {
-    function sqrip_add_fields_for_order_details()
+     function sqrip_add_fields_for_order_details()
     {
         global $post;
         $order_id = $post->ID;
-        $reference_id = get_post_meta($post->ID, 'sqrip_reference_id', true);
-        $pdf_file = get_post_meta($post->ID, 'sqrip_pdf_file_url', true);
+        $payment_method = get_post_meta( $order_id, '_payment_method', true );
+
+        $reference_id = get_post_meta($order_id, 'sqrip_reference_id', true);
+        $pdf_file = get_post_meta($order_id, 'sqrip_pdf_file_url', true);
         
         // check for legacy pdf meta file
         if(!$pdf_file) {
-            $pdf_file = get_post_meta($post->ID, 'sqrip_pdf_file', true);
+            $pdf_file = get_post_meta($order_id, 'sqrip_pdf_file', true);
         }
-        
+
         if ($reference_id || $pdf_file) {
-            echo '<ul class="sqrip-payment">';
+            $btn_txt =  __( 'Renew QR Invoice', 'sqrip-swiss-qr-invoice' );
+        } else {
+            $btn_txt =  __( 'Generate QR Invoice', 'sqrip-swiss-qr-invoice' );
+        }
 
-            echo $reference_id ? '<li><b>'.__('Reference number','sqrip-swiss-qr-invoice').' :</b> '.esc_html($reference_id).'</li>' : '';
-
-            echo $pdf_file ? '<li><b>'.__( 'QR-Code PDF', 'sqrip-swiss-qr-invoice' ).' :</b> <a target="_blank" href="'.esc_url($pdf_file).'"><span class="dashicons dashicons-media-document"></span></a></li>' : '';
-
-            echo '<li><button class="button button-secondary sqrip-re-generate-qrcode">'.__( 'Renew QR Invoice', 'sqrip-swiss-qr-invoice' ).'</button></li>';
-
+        if ($payment_method == 'sqrip') { 
             $status_awaiting = sqrip_get_plugin_option('status_awaiting');
 
             $order = wc_get_order( $order_id );
             $order_status = 'wc-'.$order->get_status();
 
-            if ($status_awaiting == $order_status) {
-                echo '<li><button class="button button-primary sqrip-payment-confirmed">'.__( 'Confirm payment', 'sqrip-swiss-qr-invoice' ).'</button></li>';
+            ?>
+ 
+            <ul class="sqrip-payment">
 
-            }
+                <?php if ($reference_id) { ?>
+                    <li>
+                        <b><?php echo __('Reference number','sqrip-swiss-qr-invoice'); ?> :</b> <?php echo $reference_id == "deleted" ? __('Deteled', 'sqrip-swiss-qr-invoice') : esc_html($reference_id); ?>
+                    </li>
+                <?php } ?>
 
-            echo '</ul>';
+                <?php if ($pdf_file) { ?>
+                <li>
+                    <b><?php echo __( 'QR-Code PDF', 'sqrip-swiss-qr-invoice' ) ?> :</b>
+                    <?php if ($pdf_file == "deleted") : ?>
+                        <?php echo __('Deleted','sqrip-swiss-qr-invoice'); ?>
+                    <?php else :  ?> 
+                        <a target="_blank" href="<?php echo esc_url($pdf_file); ?>">
+                            <span class="dashicons dashicons-media-document"></span>
+                        </a>
+                    <?php endif; ?>
+                </li>
+                <?php } ?>
+
+                <li>
+                    <button class="button button-secondary sqrip-re-generate-qrcode"><?php echo $btn_txt; ?></button>
+                </li>
+
+                <?php if ($status_awaiting == $order_status): ?>
+                <li>
+                    <button class="button button-primary sqrip-payment-confirmed">
+                        <?php echo __( 'Confirm payment', 'sqrip-swiss-qr-invoice' ); ?>
+                    </button>
+                </li>
+                <?php endif; ?>
+            </ul>
+
+            <?php
 
         } else {
 

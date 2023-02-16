@@ -58,9 +58,21 @@ class Sqrip_Media_Clearner {
             foreach ( $completed_orders as $order ) {
                 $att_id = get_post_meta($order->ID, 'sqrip_qr_pdf_attachment_id', true);
               
-                wp_delete_attachment( $att_id, true );
+                if (!$att_id) {
+                    $attach_url = get_post_meta($order_id, 'sqrip_pdf_file_url', true);
+                    $att_id = attachment_url_to_postid($attach_url);
+                }
+              
+                $deleted_att = wp_delete_attachment( $att_id, true );
 
-                $logs .= ' Deleted attachement '.$att_id.' in order #'.$order->ID.'.';
+                $logs .= $deleted_att ? ' Deleted attachement '.$att_id.' in order #'.$order_id.'.' : ' No attachement deleted for order #'.$order_id;
+
+                update_post_meta($order_id, 'sqrip_reference_id', 'deleted');
+                update_post_meta($order_id, 'sqrip_pdf_file_path', 'deleted');
+                update_post_meta($order_id, 'sqrip_pdf_file_url', 'deleted');
+                update_post_meta($order_id, 'sqrip_qr_pdf_attachment_id', 'deleted');
+
+                $logs .=' Deleted sqrip_reference_id, sqrip_qr_pdf_attachment_id, sqrip_pdf_file_path & sqrip_pdf_file_url for order #'.$order_id.'.';
             }
 
             $logs .= 'Sqrip_Media_Cleaner ran and deleted '.count($completed_orders).' invoices!';

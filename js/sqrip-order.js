@@ -10,13 +10,30 @@ jQuery( document ).ready(function($){
         e.preventDefault();
 
         _form = $('form#post');
-
-        $('body').addClass('sqrip-loading');
   
         if ( _form.length ) {
+            _form.find('.sqrip-error').remove();
+            fields_invalid = sqrip_validate_initiate_payment();
+            $('#_payment_method').val('sqrip');
 
-            _form.prepend('<input type="hidden" id="_sqrip_regenerate_qrcode" name="_sqrip_regenerate_qrcode" value="1">');
-            _form.trigger('submit');
+            if (fields_invalid.length) {
+
+                boxButton = $('.order_data_column > h3 > .edit_address').eq(0);
+                isBoxShowing = boxButton.is(':visible');
+
+                if (isBoxShowing) {
+                    boxButton.click();
+                }
+
+                $.each( fields_invalid, function( i, field ) {
+                    $( "p." + field + "_field" ).append(sqrip_error);
+                });
+            } else {
+                $('body').addClass('sqrip-loading');
+
+                _form.prepend('<input type="hidden" id="_sqrip_regenerate_qrcode" name="_sqrip_regenerate_qrcode" value="1">');
+                _form.trigger('submit');
+            }
 
         }
         
@@ -191,7 +208,6 @@ jQuery( document ).ready(function($){
             '_billing_postcode',
             '_billing_country',
             '_billing_email',
-            '_billing_phone'
         ];
 
         company = $( "#_billing_company" ).val();
