@@ -99,7 +99,7 @@ function sqrip_get_billing_address_from_order($order) {
     );
 
     if ( !empty($company) ) {
-        $billing_address['company'] = $company;
+        $billing_address['name'] = $company;
     }
 
 	return $billing_address;

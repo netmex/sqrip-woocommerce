@@ -475,21 +475,17 @@ add_filter( 'wp_insert_post_data' , function ( $data , $postarr, $unsanitized_po
    
         $body = sqrip_prepare_qr_code_request_body($currency_symbol, $amount, $postarr['ID']);
 
-        $body["payable_by"] = sqrip_get_billing_address_from_order($order);
+        $body["payable_by"] = array(
+            'name'            => $order_billing_first_name.' '.$order_billing_last_name,
+            'street'          => $order_billing_address,
+            'postal_code'     => $order_billing_postcode,
+            'town'            => $order_billing_city,
+            'country_code'    => $order_billing_country
+        );
 
-        if (!$order_billing_first_name && !$order_billing_last_name) {
-            $name = $order_billing_company;
-        } else {
-            $name = $order_billing_first_name . ' ' . $order_billing_last_name;
-
-            if ( !empty($order_billing_company) ) {
-                $body["payable_by"]['company'] = $order_billing_company;
-            }
+        if ( !empty($order_billing_company) ) {
+            $body["payable_by"]['name'] = $order_billing_company;
         }
-
-        $body["payable_by"]['name'] = $name;
-
-        // $body["payable_by"] = $billing_address;
 
         $address = sqrip_get_plugin_option('address');
 
@@ -579,6 +575,14 @@ add_filter( 'wp_insert_post_data' , function ( $data , $postarr, $unsanitized_po
                 if (isset($response_body->errors)) {
                     $errors_output = json_encode($response_body->errors, JSON_PRETTY_PRINT); 
                     // $error_goto = 'Please add your address correctly at <a href="' . admin_url( 'admin.php?page=wc-settings&tab=checkout&section=sqrip' ) . '" aria-label="' . esc_attr__( 'sqrip settings', 'sqrip-swiss-qr-invoice' ) . '">' . esc_html__( 'sqrip settings', 'sqrip-swiss-qr-invoice' ) . '</a>';
+
+                    $error_arr = (array) $response_body->errors;
+                    if (
+                        isset($error_arr['payable_by.name']) ||
+                        isset($error_arr['payable_by.company'])
+                    ) {
+                       $errors_output = __('Please submit at least either Name / Last name or Company name to generate the invoice', 'sqrip-swiss-qr-invoice');
+                    }
 
                 } 
 
