@@ -447,14 +447,25 @@ add_filter( 'wp_insert_post_data' , function ( $data , $postarr, $unsanitized_po
         $order_billing_city         = $postarr['_billing_city'];
         $order_billing_postcode     = $postarr['_billing_postcode'];
         $order_billing_country      = $postarr['_billing_country'];
+        $order_billing_company      = $postarr['_billing_company'];
                     
         $currency_symbol    =   $order_data['currency'];
         $amount             =   floatval($order_data['total']);
    
         $body = sqrip_prepare_qr_code_request_body($currency_symbol, $amount, $postarr['ID']);
 
-        $body["payable_by"] = sqrip_get_billing_address_from_order($order);
+        $body["payable_by"] = array(
+            'name'            => $order_billing_first_name.' '.$order_billing_last_name,
+            'street'          => $order_billing_address,
+            'postal_code'     => $order_billing_postcode,
+            'town'            => $order_billing_city,
+            'country_code'    => $order_billing_country
+        );
 
+
+        if ( !empty($order_billing_company) ) {
+            $body["payable_by"]['name'] = $order_billing_company;
+        }
 
         $address = sqrip_get_plugin_option('address');
 
@@ -527,7 +538,7 @@ add_filter( 'wp_insert_post_data' , function ( $data , $postarr, $unsanitized_po
                 $order->add_order_note( $order_notes );
 
                 $order->update_meta_data('sqrip_reference_id', $sqrip_reference);
-
+                $order->update_meta_data('sqrip_qr_pdf_attachment_id', $sqrip_qr_pdf_attachment_id);
                 $order->update_meta_data('sqrip_pdf_file_url', $sqrip_qr_pdf_url);
                 $order->update_meta_data('sqrip_pdf_file_path', $sqrip_qr_pdf_path);
 
@@ -543,6 +554,14 @@ add_filter( 'wp_insert_post_data' , function ( $data , $postarr, $unsanitized_po
                 if (isset($response_body->errors)) {
                     $errors_output = json_encode($response_body->errors, JSON_PRETTY_PRINT); 
                     // $error_goto = 'Please add your address correctly at <a href="' . admin_url( 'admin.php?page=wc-settings&tab=checkout&section=sqrip' ) . '" aria-label="' . esc_attr__( 'sqrip settings', 'sqrip-swiss-qr-invoice' ) . '">' . esc_html__( 'sqrip settings', 'sqrip-swiss-qr-invoice' ) . '</a>';
+
+                    $error_arr = (array) $response_body->errors;
+                    if (
+                        isset($error_arr['payable_by.name']) ||
+                        isset($error_arr['payable_by.company'])
+                    ) {
+                       $errors_output = __('Please submit at least either Name / Last name or Company name to generate the invoice', 'sqrip-swiss-qr-invoice');
+                    }
 
                 } 
 

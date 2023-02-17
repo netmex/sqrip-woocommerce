@@ -106,6 +106,14 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'default'     => 'no',
                 'class'       => 'qrinvoice-tab'
             ),
+            'suppress_generation' => array(
+                'title'       => __( 'Enable manual invoice generation', 'sqrip-swiss-qr-invoice' ),
+                'label'       => __( 'Don\'t generate QR-invoice at checkout but manually', 'sqrip-swiss-qr-invoice' ),
+                'type'        => 'checkbox',
+                'description' => __('If you enable this, you will need to generate invoices manually for every order. This is helpful if you often need to adjust the price after an order is placed', 'sqrip-swiss-qr-invoice'),
+                'default'     => 'no',
+                'class'       => 'qrinvoice-tab'  
+            ),
             'token' => array(
                 'title'       => __( 'API key' , 'sqrip-swiss-qr-invoice' ),
                 'type'        => 'textarea',
@@ -932,6 +940,15 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         $amount             =   floatval($order_data['total']);
 
         $address = sqrip_get_plugin_option('address');
+
+        $suppress_generation = sqrip_get_plugin_option('suppress_generation');
+
+        if ($suppress_generation == "yes") {
+            return array(
+                'result'   => 'success',
+                'redirect' => $this->get_return_url($order),
+            );
+        }
 
         $body = sqrip_prepare_qr_code_request_body($currency_symbol, $amount, strval($order_id));
         $body["payable_by"] = sqrip_get_billing_address_from_order($order);
