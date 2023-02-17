@@ -12,8 +12,9 @@ class Sqrip_Media_Clearner {
 
     public function __construct() {
         $this->expired_date = sqrip_get_plugin_option('expired_date');
-       
-        if (!$this->expired_date) {
+        $this->enabled_delete_invoice = sqrip_get_plugin_option('enabled_delete_invoice');
+
+        if ($this->enabled_delete_invoice != "yes" || !$this->expired_date) {
             return;
         }
         // Store our cron hook name
@@ -56,7 +57,8 @@ class Sqrip_Media_Clearner {
 
         if ($completed_orders) {
             foreach ( $completed_orders as $order ) {
-                $att_id = get_post_meta($order->ID, 'sqrip_qr_pdf_attachment_id', true);
+                $order_id = $order->ID;
+                $att_id = get_post_meta($order_id, 'sqrip_qr_pdf_attachment_id', true);
               
                 if (!$att_id) {
                     $attach_url = get_post_meta($order_id, 'sqrip_pdf_file_url', true);

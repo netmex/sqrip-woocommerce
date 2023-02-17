@@ -74,6 +74,8 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         $address_options['individual'] = __( 'Third address' , 'sqrip-swiss-qr-invoice' );
 
         $description = __('What is the order status that waits for confirmation of made payment to your bank account?', 'sqrip-swiss-qr-invoice' );
+
+        $wc_statuses = wc_get_order_statuses();
         
         $this->form_fields = array(
             'tabs' => array(
@@ -279,6 +281,13 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'type'        => 'number',
                 'default'     => 10,
                 'css'         => "width:70px",
+                'class'       => 'qrinvoice-tab'  
+            ),
+            'enabled_delete_invoice' => array(
+                'title'       => sprintf(__( 'Delete QR-invoice once status has been changed to %s', 'sqrip-swiss-qr-invoice' ), $wc_statuses[sqrip_get_plugin_option('status_completed')]),
+                'type'        => 'checkbox',
+                'label'       => __( 'Activation', 'sqrip-swiss-qr-invoice' ),
+                'default'     => 'no',
                 'class'       => 'qrinvoice-tab'  
             ),
 
