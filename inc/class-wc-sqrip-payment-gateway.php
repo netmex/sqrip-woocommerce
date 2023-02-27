@@ -99,22 +99,18 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                     ]
                 ]
             ),
-
+            'section_activation' => array(
+                'title' => __('Activation & Connection', 'sqrip-swiss-qr-invoice'),
+                'type'        => 'section',
+                'class'       => 'qrinvoice-tab'
+            ),
             'enabled' => array(
-                'title'       => __( 'Enable/Disable', 'sqrip-swiss-qr-invoice' ),
+                'title'       => __( 'Activate sqrip', 'sqrip-swiss-qr-invoice' ),
                 'label'       => __( 'Enable QR invoices with sqrip API', 'sqrip-swiss-qr-invoice' ),
                 'type'        => 'checkbox',
                 'description' => '',
                 'default'     => 'no',
                 'class'       => 'qrinvoice-tab'
-            ),
-            'suppress_generation' => array(
-                'title'       => __( 'Enable manual invoice generation', 'sqrip-swiss-qr-invoice' ),
-                'label'       => __( 'Don\'t generate QR-invoice at checkout but manually', 'sqrip-swiss-qr-invoice' ),
-                'type'        => 'checkbox',
-                'description' => __('If you enable this, the order status for orders with sqrip will change to \'Payment pending\', a confirmation e-mail will be sent and the order will wait for you to generate qr-invoices manually. This is helpful, if you generally need to adjust pricing or quantity after an order has been placed.', 'sqrip-swiss-qr-invoice'),
-                'default'     => 'no',
-                'class'       => 'qrinvoice-tab'  
             ),
             'token' => array(
                 'title'       => __( 'API key' , 'sqrip-swiss-qr-invoice' ),
@@ -258,6 +254,22 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'type'        => 'section',
                 'class'       => 'qrinvoice-tab'
             ),
+            'suppress_generation' => array(
+                'title'       => __( 'Suppress QR-Invoice generation at checkout', 'sqrip-swiss-qr-invoice' ),
+                'label'       => __( 'Don\'t generate QR-invoice at checkout but manually', 'sqrip-swiss-qr-invoice' ),
+                'type'        => 'checkbox',
+                'description' => __('If you enable this, the order status for orders with sqrip will change to \'Payment pending\', a confirmation e-mail will be sent and the order will wait for you to generate qr-invoices manually. This is helpful, if you generally need to adjust pricing or quantity after an order has been placed.', 'sqrip-swiss-qr-invoice'),
+                'default'     => 'no',
+                'class'       => 'qrinvoice-tab'  
+            ),
+            'integration_order' => array(
+                'title'       => __( 'Show QR-invoice on confirmation page', 'sqrip-swiss-qr-invoice' ),
+                'label'       => __( 'Offer QR invoice for download', 'sqrip-swiss-qr-invoice' ),
+                'type'        => 'checkbox',
+                'description' => '',
+                'default'     => 'yes',
+                'class'        => 'qrinvoice-tab '.$this->show_integration_order()
+            ),
             'email_attached' => array(
                 'title' => __( 'Attach QR-Invoice to E-Mail template', 'sqrip-swiss-qr-invoice' ),
                 'description' => __( 'Select email template to which the QR-invoice is attached.', 'sqrip-swiss-qr-invoice' ),
@@ -265,32 +277,22 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'options' => sqrip_get_wc_emails(),
                 'class'        => 'qrinvoice-tab'
             ),
-
-            'integration_order' => array(
-                'title'       => __( 'Show QR-invoice on confirmation page', 'sqrip-swiss-qr-invoice' ),
-                'label'       => __( 'Offer QR invoice for download', 'sqrip-swiss-qr-invoice' ),
-                'type'        => 'checkbox',
-                'description' => '',
-                'default'     => 'yes',
-                'class'        => 'qrinvoice-tab'
+            'delete_invoice_status' => array(
+                'title'       => __( 'Delete QR-invoice once status has been changed to', 'sqrip-swiss-qr-invoice' ),
+                'type'        => 'select',
+                'options'       => wc_get_order_statuses(),
+                'class'       => 'qrinvoice-tab'  
             ),
             'expired_date' => array(
-                'title'       => __( 'Delete QR-Invoices automatically after', 'sqrip-swiss-qr-invoice' ),
+                'title'       => __( 'Delete any generated QR-invoice after ', 'sqrip-swiss-qr-invoice' ),
                 'label'       => __( 'days.', 'sqrip-swiss-qr-invoice' ),
                 'description' => __( 'Keep the size of your media library small. sqrip deletes all qr-invoice files that are not needed anymore.',  'sqrip-swiss-qr-invoice' ),
+                'desc_tip'    => __( 'Do not set this too low!', 'sqrip-swiss-qr-invoice' ),
                 'type'        => 'number',
                 'default'     => 10,
                 'css'         => "width:70px",
                 'class'       => 'qrinvoice-tab'  
             ),
-            'enabled_delete_invoice' => array(
-                'title'       => sprintf(__( 'Delete QR-invoice once status has been changed to %s', 'sqrip-swiss-qr-invoice' ), $wc_statuses[sqrip_get_plugin_option('status_completed')]),
-                'type'        => 'checkbox',
-                'label'       => __( 'Activation', 'sqrip-swiss-qr-invoice' ),
-                'default'     => 'no',
-                'class'       => 'qrinvoice-tab'  
-            ),
-
             'test_email' => array(
                 'title'       => '',
                 'type'        => 'checkbox',
@@ -358,6 +360,12 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             ),
             
         );
+    }
+
+    public function show_integration_order(){
+        $iban = sqrip_get_plugin_option('suppress_generation');
+
+        return $iban == 'yes' ? '' : 'hide';
     }
 
     public function show_qr_reference_format()
