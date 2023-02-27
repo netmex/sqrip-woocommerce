@@ -12,9 +12,9 @@ class Sqrip_Media_Clearner {
 
     public function __construct() {
         $this->expired_date = sqrip_get_plugin_option('expired_date');
-        $this->enabled_delete_invoice = sqrip_get_plugin_option('enabled_delete_invoice');
+        $this->delete_invoice_status = sqrip_get_plugin_option('delete_invoice_status');
 
-        if ($this->enabled_delete_invoice != "yes" || !$this->expired_date) {
+        if (!$this->expired_date) {
             return;
         }
         // Store our cron hook name
@@ -40,7 +40,7 @@ class Sqrip_Media_Clearner {
         $days = $this->expired_date;
 
         // TRUE = bypasses the trash and force deletion.
-        $status_completed = sqrip_get_plugin_option('status_completed');
+        $status_completed = $this->delete_invoice_status;
 
         $time_delay       = 60 * 60 * 24 * $days; 
         $current_time     = strtotime( date('Y-m-d H:00:00') );

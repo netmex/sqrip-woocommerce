@@ -375,6 +375,12 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'type'        => 'checkbox',
                 'description' => '',
                 'default'     => 'yes',
+                'class'       => 'qrinvoice-tab '.$this->show_integration_order()  
+            ),
+            'delete_invoice_status' => array(
+                'title'       => __( 'Delete QR-invoice once status has been changed to', 'sqrip-swiss-qr-invoice' ),
+                'type'        => 'select',
+                'options'       => $wc_statuses,
                 'class'       => 'qrinvoice-tab'  
             ),
             'expired_date' => array(
@@ -386,13 +392,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'css'         => "width:70px",
                 'class'       => 'qrinvoice-tab'  
             ),
-            'enabled_delete_invoice' => array(
-                'title'       => sprintf(__( 'Delete QR-invoice once status has been changed to %s', 'sqrip-swiss-qr-invoice' ), $wc_statuses[sqrip_get_plugin_option('status_completed')]),
-                'type'        => 'checkbox',
-                'label'       => __( 'Activation', 'sqrip-swiss-qr-invoice' ),
-                'default'     => 'no',
-                'class'       => 'qrinvoice-tab'  
-            ),
+
             // 'file_name' => array(
             //     'title'       => __( 'File Name' , 'sqrip-swiss-qr-invoice' ),
             //     'type'        => 'textarea',
@@ -610,6 +610,12 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             ),
             
         );
+    }
+
+    public function show_integration_order(){
+        $iban = sqrip_get_plugin_option('suppress_generation');
+
+        return $iban == 'yes' ? '' : 'hide';
     }
 
     public function show_tab($options){
