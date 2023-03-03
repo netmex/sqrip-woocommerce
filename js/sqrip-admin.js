@@ -269,9 +269,9 @@ jQuery( document ).ready(function($){
         }
 
         if(ip_suppress_generation.is(':checked')){
-            ip_integration_order.closest('tr').show();
-        } else {
             ip_integration_order.closest('tr').hide();
+        } else {
+            ip_integration_order.closest('tr').show();
         }
     }
 
@@ -359,9 +359,9 @@ jQuery( document ).ready(function($){
     if (ip_suppress_generation.length) {
         ip_suppress_generation.on('change', function(){
             if($(this).is(':checked')){
-                ip_integration_order.closest('tr').show();
-            } else {
                 ip_integration_order.closest('tr').hide();
+            } else {
+                ip_integration_order.closest('tr').show();
             }
         })
     }

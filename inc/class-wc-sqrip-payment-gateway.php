@@ -76,6 +76,13 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         $description = __('What is the order status that waits for confirmation of made payment to your bank account?', 'sqrip-swiss-qr-invoice' );
 
         $wc_statuses = wc_get_order_statuses();
+
+        $tooltip = sprintf('<span class="sqrip-tooltip"><span>%s</span></span>', __('Do not set this too low! Remove input to disable the setting.', 'sqrip-swiss-qr-invoice'));
+
+
+        if (sqrip_get_plugin_option('expired_date') == NULL) {
+            $this->update_option('expired_date', 10);
+        }
         
         $this->form_fields = array(
             'tabs' => array(
@@ -285,9 +292,8 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             ),
             'expired_date' => array(
                 'title'       => __( 'Delete any generated QR-invoice after ', 'sqrip-swiss-qr-invoice' ),
-                'label'       => __( 'days.', 'sqrip-swiss-qr-invoice' ),
+                'label'       => sprintf('%s %s', __('days.', 'sqrip-swiss-qr-invoice'), $tooltip),
                 'description' => __( 'Keep the size of your media library small. sqrip deletes all qr-invoice files that are not needed anymore.',  'sqrip-swiss-qr-invoice' ),
-                'desc_tip'    => __( 'Do not set this too low!', 'sqrip-swiss-qr-invoice' ),
                 'type'        => 'number',
                 'default'     => 10,
                 'css'         => "width:70px",
@@ -363,9 +369,9 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
     }
 
     public function show_integration_order(){
-        $iban = sqrip_get_plugin_option('suppress_generation');
+        $suppress_generation = sqrip_get_plugin_option('suppress_generation');
 
-        return $iban == 'yes' ? '' : 'hide';
+        return $suppress_generation == 'yes' ? 'hide' : '';
     }
 
     public function show_qr_reference_format()

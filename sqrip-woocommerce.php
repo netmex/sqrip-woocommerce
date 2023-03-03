@@ -792,3 +792,32 @@ function sqrip_add_custom_order_status_actions_button( $actions, $order ) {
     }
     return $actions;
 }
+
+
+add_action('woocommerce_order_status_changed', function($post_id, $old_status, $new_status){
+    $delete_invoice_status = sqrip_get_plugin_option('delete_invoice_status');
+
+    if (!$delete_invoice_status) {
+        return;
+    }
+
+    $new_status = "wc-".$new_status;
+
+    if ($new_status == $delete_invoice_status) {
+        $order_id = $post_id;
+        $att_id = get_post_meta($order_id, 'sqrip_qr_pdf_attachment_id', true);
+      
+        if (!$att_id) {
+            $attach_url = get_post_meta($order_id, 'sqrip_pdf_file_url', true);
+            $att_id = attachment_url_to_postid($attach_url);
+        }
+      
+        wp_delete_attachment( $att_id, true );
+
+        update_post_meta($order_id, 'sqrip_reference_id', 'deleted');
+        update_post_meta($order_id, 'sqrip_pdf_file_path', 'deleted');
+        update_post_meta($order_id, 'sqrip_pdf_file_url', 'deleted');
+        update_post_meta($order_id, 'sqrip_qr_pdf_attachment_id', 'deleted');
+    }
+
+}, 10, 3);
