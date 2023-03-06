@@ -415,10 +415,10 @@ function sqrip_additional_information_shortcodes($additional_information, $lang,
  */
 function sqrip_get_locale_by_lang($lang) {
     $locales = [
-        'de' => 'de_DE',
-        'fr' => 'fr_FR',
-        'it' => 'it_IT',
-        'en' => 'en_US'
+        'de' => 'de_DE.UTF-8',
+        'fr' => 'fr_FR.UTF-8',
+        'it' => 'it_IT.UTF-8',
+        'en' => 'en_US.UTF-8'
     ];
     $locale = $locales[$lang];
     if(!$locale) {
