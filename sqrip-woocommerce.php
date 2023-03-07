@@ -65,11 +65,6 @@ function sqrip_init_gateway_class()
     require_once __DIR__ . '/inc/class-wc-sqrip-payment-gateway.php';
 }
 
-add_action('woocommerce_after_register_post_type', function(){
-    require_once __DIR__ . '/inc/class-sqrip-media-cleaner.php';
-});
-
-
 
 /**
  *  Add admin notices

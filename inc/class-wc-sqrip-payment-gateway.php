@@ -31,7 +31,6 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         $this->enabled = $this->get_option('enabled');
         $this->title = $this->get_option('title');
         $this->description = $this->get_option('description');
-        $this->expired_date = $this->get_option('expired_date');
         $this->due_date = $this->get_option('due_date');
         $this->iban = $this->get_option('iban');
         $this->token = $this->get_option('token');
@@ -78,11 +77,6 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         $wc_statuses = wc_get_order_statuses();
 
         $tooltip = sprintf('<span class="sqrip-tooltip"><span>%s</span></span>', __('Do not set this too low! Remove input to disable the setting.', 'sqrip-swiss-qr-invoice'));
-
-
-        if (sqrip_get_plugin_option('expired_date') == NULL) {
-            $this->update_option('expired_date', 10);
-        }
         
         $this->form_fields = array(
             'tabs' => array(
@@ -283,21 +277,6 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'type' => 'select',
                 'options' => sqrip_get_wc_emails(),
                 'class'        => 'qrinvoice-tab'
-            ),
-            'delete_invoice_status' => array(
-                'title'       => __( 'Delete QR-invoice once status has been changed to', 'sqrip-swiss-qr-invoice' ),
-                'type'        => 'select',
-                'options'       => wc_get_order_statuses(),
-                'class'       => 'qrinvoice-tab'  
-            ),
-            'expired_date' => array(
-                'title'       => __( 'Delete any generated QR-invoice after ', 'sqrip-swiss-qr-invoice' ),
-                'label'       => sprintf('%s %s', __('days.', 'sqrip-swiss-qr-invoice'), $tooltip),
-                'description' => __( 'Keep the size of your media library small. sqrip deletes all qr-invoice files that are not needed anymore.',  'sqrip-swiss-qr-invoice' ),
-                'type'        => 'number',
-                'default'     => 10,
-                'css'         => "width:70px",
-                'class'       => 'qrinvoice-tab'  
             ),
             'test_email' => array(
                 'title'       => '',
