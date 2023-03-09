@@ -38,7 +38,7 @@ c) (QR-)IBAN
 The bank account to which the invoice amount should be transferred. If this account number is changed intentionally or unintentionally, the owner of the sqrip account will be informed of this change by e-mail. He can actively confirm the change or passively allow it.
 
 d) (QR) reference number
-The reference number is either created randomly or calculated on the basis of the order number. It automatically adapts to the IBAN format used.
+The reference number is either created randomly or calculated on the basis of the order number. Inital 6 digits can be defined for easier identification. It automatically adapts to the IBAN format used.
 
 e) additional information
 On up to three lines additional information can be added to the QR invoice. This includes 
@@ -50,6 +50,7 @@ This fiels supports WPML.
 f) Integration
 Define the e-mail to which the qr-invoice will be attached to.
 It can also be offered for download on the confirmation page.
+If you generally need to adjust pricing or quantity after an order has been placed, you can suppress a QR invoice generation at the checkout and generate it manually later. 
 
 g) E-mail enclosure
 The QR invoice can be enclosed with the e-mail in two ways:
@@ -69,6 +70,8 @@ Add sqrip as payment method for manually created orders.
 k) Use sqrip QR-Codes for Refunds
 Scan the QR-Code with your Banking App to initiate refunds. Remember: IBAN of client required!
 
+l) Manual payment comparison
+Once an order has a defined order status you can confirm that the payment was done by the client and the status of the order can be changed to another status. If there is no suitable status available, you can create one in seconds. You can confirm the payments either on the list of orders or on the order detail page. 
 
 = Requirements =
 1. Besides a current WordPress and WooCommerce installation, an account on sqrip.ch is required.
@@ -77,7 +80,7 @@ Scan the QR-Code with your Banking App to initiate refunds. Remember: IBAN of cl
 4. Invoice amounts must be in CHF or EUR.
 
 = Privacy =
-- The data transmitted to sqrip for the purpose of creating the QR invoice (e.g. payer, amount) will be deleted immediately after delivery of the file.
+- The data transmitted to sqrip for the purpose of creating the QR invoice (e.g. payer, amount) will be deleted within a defined period.
 - On https://api.sqrip.ch each production/delivery is recorded in a logbook with date/time, origin (e.g. WooCommerce), API key called and product delivered.
 
 == Frequently Asked Questions ==
@@ -111,7 +114,7 @@ Yes. We are already working on comparing the reconciliation of orders/purchases 
 == Changelog ==
 = 1.6 : March 2023 =
 * Validation of API keys shows API key name for better identification;
-* A hint placed right of the button for sending test e-mails tells you if a free or a bought credit is used for it;
+* A hint placed right of the button for sending test e-mails tells you if a bought credit is used for it;
 * Test e-mails include initial numbers of QR-Reference;
 * Design and Text improvements;
 * Bug fixing.
@@ -121,7 +124,7 @@ We made users (even more) happy with these changes:
 * Supressing generation of QR-reference at checkout;
 * Manually added orders requires less data, shows specific error message when mandatory fields are void;
 * Select the order status for unpaid and paid orders. Should there be no suitable status for paid orders (e.g. "paid, processing"), add one quickly;
-* Easier manual payment comparison in order overview table and on order detail page. With just one click the status is updated;
+* Easier manual payment comparison on list of orders page and on order detail page. With just one click the status is updated;
 * allowing allow_url_open in the PHP settings to prevent issues with downloading and local storing of PDF.
 
 = 1.5.6 =
