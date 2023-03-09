@@ -118,7 +118,6 @@ Yes. We are already working on comparing the reconciliation of orders/purchases 
 
 We made users (even more) happy with these changes:
 * Plugin is no longer loaded on every page;
-* Individual file names of QR-invoices;
 * Supressing generation of QR-reference at checkout;
 * Manually added orders requires less data, shows specific error message when mandatory fields are void;
 * Select the order status for unpaid and paid orders. Should there be no suitable status for paid orders (e.g. "paid, processing"), add one quickly;
