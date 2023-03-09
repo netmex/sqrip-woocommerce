@@ -282,6 +282,7 @@ table.sqrip-table td p.sqrip-note {
     background-color: #fff;
 }
 
+#woocommerce_sqrip_new_awaiting_status,
 #woocommerce_sqrip_new_status{
     display: block;
     margin-bottom: 10px;
@@ -386,4 +387,11 @@ span.sqrip-tooltip span{
 
 span.sqrip-tooltip:hover span{
     display: block;
+}
+
+tr.sqrip-no-height{
+    height: 1px;
+    max-height: 1px;
+    overflow: hidden;
+    position: absolute;
 }

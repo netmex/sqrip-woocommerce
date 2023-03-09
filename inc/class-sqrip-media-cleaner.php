@@ -15,7 +15,6 @@ class Sqrip_Media_Clearner {
         // $this->delete_invoice_status = sqrip_get_plugin_option('delete_invoice_status');
 
         if (!$this->expired_date) {
-            error_log('ukirot stop'. $this->expired_date);
             return;
         }
 
