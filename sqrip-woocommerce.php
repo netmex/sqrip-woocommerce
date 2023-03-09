@@ -109,7 +109,7 @@ function sqrip_add_admin_notice()
 
     if (!$allow_url_fopen) {
         $class = 'notice notice-error is-dismissible';
-        $message = __( 'Damit sqrip die QR-Rechnungen in der Mediathek speichern kann muss "allow_url_open" in der php.ini oder htaccess-Datei zugelassen werden.' );
+        $message = __( 'In order to save the qr invoice to your media library, "allow_url_open" must be activated in your php.ini or htaccess-file.' );
 
         printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) );
     }
