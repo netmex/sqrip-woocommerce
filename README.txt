@@ -109,7 +109,7 @@ Yes. We are already working on comparing the reconciliation of orders/purchases 
 4. sqrip API Key
 
 == Changelog ==
-= 1.6 =
+= 1.6 : March 2023 =
 * Validation of API keys shows API key name for better identification;
 * A hint placed right of the button for sending test e-mails tells you if a free or a bought credit is used for it;
 * Test e-mails include initial numbers of QR-Reference;
