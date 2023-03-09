@@ -4,7 +4,7 @@
  * Plugin Name:             sqrip.ch
  * Plugin URI:              https://sqrip.ch/
  * Description:             sqrip – A comprehensive, flexible and clever WooCommerce finance tool for the most widely used payment method in Switzerland: the bank transfers. 
- * Version:                 1.6
+ * Version:                 1.7
  * Author:                  netmex digital gmbh
  * Author URI:              https://sqrip.ch/
  */
@@ -17,7 +17,7 @@ if ( !in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', ge
     return;
 }
 
-define( 'SQRIP_ENDPOINT', 'https://api.sqrip.ch/api/' );
+define( 'SQRIP_ENDPOINT', 'https://beta.sqrip.ch/api/' );
 define( 'SQRIP_PLUGIN_BASENAME', plugin_basename(__FILE__) );
 
 require_once __DIR__ . '/inc/functions.php';
@@ -252,7 +252,7 @@ if (!function_exists('sqrip_add_fields_for_order_details')) {
 
                 <?php if ($reference_id) { ?>
                     <li>
-                        <b><?php echo __('Reference number','sqrip-swiss-qr-invoice'); ?> :</b> <?php echo $reference_id == "deleted" ? __('Deteled', 'sqrip-swiss-qr-invoice') : esc_html($reference_id); ?>
+                        <b><?php echo __('Reference number','sqrip-swiss-qr-invoice'); ?> :</b> <?php echo $reference_id == "deleted" ? __('Deteled', 'sqrip-swiss-qr-invoice') : apply_filters('sqrip_reference_id', $reference_id); ?>
                     </li>
                 <?php } ?>
 
@@ -741,12 +741,33 @@ function sqrip_register_new_order_status() {
 
 add_action( 'init', 'sqrip_register_new_order_status' );
 
+
+// Register new status
+function sqrip_register_new_order_awstatus() {
+    $sqrip_new_status  = sqrip_get_plugin_option('new_awaiting_status');
+    $enabled_new_status  = sqrip_get_plugin_option('enabled_new_awstatus');
+
+    if (!$sqrip_new_status || $enabled_new_status == "no") {
+        return;
+    }
+
+    register_post_status( 'wc-sqrip-awaiting', array(
+        'label'                     => $sqrip_new_status,
+        'public'                    => true,
+        'show_in_admin_status_list' => true,
+        'show_in_admin_all_list'    => true,
+        'exclude_from_search'       => false,
+        'label_count'               => _n_noop( $sqrip_new_status.' <span class="count">(%s)</span>', $sqrip_new_status.' <span class="count">(%s)</span>' )
+
+    ) );
+}
+
+add_action( 'init', 'sqrip_register_new_order_awstatus' );
+
 // Add custom status to order status list
 function sqrip_add_new_order_statuses( $order_statuses ) {
     $sqrip_new_status  = sqrip_get_plugin_option('new_status');
     $enabled_new_status  = sqrip_get_plugin_option('enabled_new_status');
-
-    // var_dump($enabled_new_status);
 
     if (!$sqrip_new_status || $enabled_new_status == "no") {
         return $order_statuses;
@@ -765,6 +786,28 @@ function sqrip_add_new_order_statuses( $order_statuses ) {
 
 add_filter( 'wc_order_statuses', 'sqrip_add_new_order_statuses' );
 
+// Add custom status to order status list
+function sqrip_add_new_order_awstatuses( $order_statuses ) {
+    $sqrip_new_status  = sqrip_get_plugin_option('new_awaiting_status');
+    $enabled_new_status  = sqrip_get_plugin_option('enabled_new_awstatus');
+
+    if (!$sqrip_new_status || $enabled_new_status == "no") {
+        return $order_statuses;
+    }
+
+    $new_order_statuses = array();
+
+    foreach ( $order_statuses as $key => $status ) {
+        $new_order_statuses[ $key ] = $status;
+        if ( 'wc-pending' === $key ) {
+            $new_order_statuses['wc-sqrip-awaiting'] = $sqrip_new_status;
+        }
+    }
+    return $new_order_statuses;
+}
+
+add_filter( 'wc_order_statuses', 'sqrip_add_new_order_awstatuses' );
+
 // Add your custom order status action button (for orders with "processing" status)
 add_filter( 'woocommerce_admin_order_actions', 'sqrip_add_custom_order_status_actions_button', 100, 2 );
 function sqrip_add_custom_order_status_actions_button( $actions, $order ) {
@@ -781,6 +824,8 @@ function sqrip_add_custom_order_status_actions_button( $actions, $order ) {
 
         $reference_id = get_post_meta($order_id, 'sqrip_reference_id', true);
 
+        $reference_id = apply_filters('sqrip_reference_id', $reference_id);
+
         $paged = isset($_GET['paged']) ? '&paged='.$_GET['paged'] : '';
 
         // Set the action button
@@ -792,3 +837,48 @@ function sqrip_add_custom_order_status_actions_button( $actions, $order ) {
     }
     return $actions;
 }
+
+
+add_action('woocommerce_order_status_changed', function($post_id, $old_status, $new_status){
+    $delete_invoice_status = sqrip_get_plugin_option('delete_invoice_status');
+
+    if (!$delete_invoice_status) {
+        return;
+    }
+
+    $new_status = "wc-".$new_status;
+
+    if ($new_status == $delete_invoice_status) {
+        $order_id = $post_id;
+        $att_id = get_post_meta($order_id, 'sqrip_qr_pdf_attachment_id', true);
+      
+        if (!$att_id) {
+            $attach_url = get_post_meta($order_id, 'sqrip_pdf_file_url', true);
+            $att_id = attachment_url_to_postid($attach_url);
+        }
+      
+        wp_delete_attachment( $att_id, true );
+
+        update_post_meta($order_id, 'sqrip_reference_id', 'deleted');
+        update_post_meta($order_id, 'sqrip_pdf_file_path', 'deleted');
+        update_post_meta($order_id, 'sqrip_pdf_file_url', 'deleted');
+        update_post_meta($order_id, 'sqrip_qr_pdf_attachment_id', 'deleted');
+    }
+
+}, 10, 3);
+
+add_filter('sqrip_reference_id', function($reference_id){
+    $reference_id_formated = substr($reference_id, 0, 2);
+    $reference_id_formated .= ' '.substr($reference_id, 2, 5);
+    $reference_id_formated .= ' '.substr($reference_id, 7, 5);
+    $reference_id_formated .= ' '.substr($reference_id, 12, 5);
+    $reference_id_formated .= ' '.substr($reference_id, 17, 5);
+    $reference_id_formated .= ' '.substr($reference_id, 22, 5);
+
+    return esc_html($reference_id_formated);
+
+}, 10, 1);
+
+
+
+

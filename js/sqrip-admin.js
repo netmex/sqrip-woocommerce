@@ -11,12 +11,16 @@ jQuery( document ).ready(function($){
     tab = $('.sqrip-tab'),
     ip_qrref_format = $('#woocommerce_sqrip_qr_reference_format'),
     ip_order_stt = $('#woocommerce_sqrip_new_status'),
+    ip_aworder_stt = $('#woocommerce_sqrip_new_awaiting_status'),
     ip_refund_token = $('#woocommerce_sqrip_return_token'),
     btn_toggle_stt = $('.sqrip-toggle-order-satus'),
     ip_enb_new_status = $('#woocommerce_sqrip_enabled_new_status'),
     ip_ft_new_status = $('#woocommerce_sqrip_first_time_new_status'),
+    ip_enb_new_awstatus = $('#woocommerce_sqrip_enabled_new_awstatus'),
+    ip_ft_new_awstatus = $('#woocommerce_sqrip_first_time_new_awstatus'),
     ip_suppress_generation = $('#woocommerce_sqrip_suppress_generation'),
-    ip_integration_order = $('#woocommerce_sqrip_integration_order');
+    ip_integration_order = $('#woocommerce_sqrip_integration_order'),
+    nh = $('.sqrip-no-height');
 
     if (ip_token.length) {
         bt_check_token_html = '<button id="btn_sqrip_check_token" class="button-secondary sqrip-btn-validate-token">'+sqrip.txt_check_connection+'</button>';
@@ -356,6 +360,30 @@ jQuery( document ).ready(function($){
         })
     }
 
+    if (ip_aworder_stt.length) {
+        ip_aworder_stt.closest('tr').addClass('sqrip-order-status');
+        ip_ft_new_awstatus.prop('checked', false);
+
+        btn_create_aworder_html = '<button id="btn_create_aworder_stt" class="button-secondary sqrip-btn sqrip-btn-create-order-stt">'+sqrip.txt_create+'</button>';
+        ip_aworder_stt.after(btn_create_aworder_html);
+
+        btn_create_aworder = $('#btn_create_aworder_stt');
+
+        btn_create_aworder.on('click', function(e){
+            e.preventDefault();
+
+            if (!ip_aworder_stt.val()) {
+                ip_aworder_stt.focus();
+            } else {
+                ip_enb_new_awstatus.prop('checked', true);
+                ip_ft_new_awstatus.prop('checked', true);
+                setTimeout(function(){
+                    btn_save.trigger('click');
+                }, 200);
+            }
+        })
+    }
+
     if (ip_suppress_generation.length) {
         ip_suppress_generation.on('change', function(){
             if($(this).is(':checked')){
@@ -364,5 +392,9 @@ jQuery( document ).ready(function($){
                 ip_integration_order.closest('tr').hide();
             }
         })
+    }
+
+    if (nh.length) {
+        nh.closest('tr').addClass('sqrip-no-height');
     }
 });

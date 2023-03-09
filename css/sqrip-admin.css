@@ -282,6 +282,7 @@ table.sqrip-table td p.sqrip-note {
     background-color: #fff;
 }
 
+#woocommerce_sqrip_new_awaiting_status,
 #woocommerce_sqrip_new_status{
     display: block;
     margin-bottom: 10px;
@@ -348,4 +349,49 @@ body.post-type-shop_order #tiptip_content,
 body.post-type-shop_order .chart-tooltip, 
 body.post-type-shop_order .wc_error_tip{
     max-width: 250px!important;
+}
+
+span.sqrip-tooltip:after {
+    font-family: Dashicons;
+    speak: never;
+    font-weight: 400;
+    font-variant: normal;
+    text-transform: none;
+    line-height: 1;
+    -webkit-font-smoothing: antialiased;
+    margin: 0;
+    text-indent: 0;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    content: "\f223";
+    cursor: help;
+}
+span.sqrip-tooltip{
+    position: relative;
+}
+span.sqrip-tooltip span{
+    background-color: #333;
+     display: none; 
+    position: absolute;
+    top: 100%;
+    width: 180px;
+    border-radius: 3px;
+    left: 0;
+    transform: translateX(-50%);
+    color: #fff;
+    text-align: center;
+    font-size: 10px;
+    padding: 10px;
+}
+
+span.sqrip-tooltip:hover span{
+    display: block;
+}
+
+tr.sqrip-no-height{
+    height: 1px;
+    max-height: 1px;
+    overflow: hidden;
+    position: absolute;
 }

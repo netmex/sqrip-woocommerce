@@ -12,11 +12,14 @@ class Sqrip_Media_Clearner {
 
     public function __construct() {
         $this->expired_date = sqrip_get_plugin_option('expired_date');
-        $this->delete_invoice_status = sqrip_get_plugin_option('delete_invoice_status');
+        // $this->delete_invoice_status = sqrip_get_plugin_option('delete_invoice_status');
 
         if (!$this->expired_date) {
+            error_log('ukirot stop'. $this->expired_date);
             return;
         }
+
+        error_log('ukirot starting');
         // Store our cron hook name
         $this->cron_hook = 'sqrip_media_cleaner';
         // Install cron!
@@ -48,7 +51,7 @@ class Sqrip_Media_Clearner {
 
         $completed_orders = (array) wc_get_orders( array(
             'limit'             => -1,
-            'status'            => $status_completed,
+            // 'status'            => $status_completed,
             'date_created'      => '<' . $targeted_time,
             'payment_method'    => 'sqrip',
         ) );
