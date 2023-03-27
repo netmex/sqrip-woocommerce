@@ -5,13 +5,14 @@
  * @param $key
  * @return mixed|string|null
  */
-function sqrip_get_plugin_option($key) {
-	$plugin_options = get_option('woocommerce_sqrip_settings', array());
+function sqrip_get_plugin_option($key)
+{
+    $plugin_options = get_option('woocommerce_sqrip_settings', array());
 
-	// option exists in DB
-    if($plugin_options && array_key_exists($key, $plugin_options)) {
-		return $plugin_options[$key];
-	}
+    // option exists in DB
+    if ($plugin_options && array_key_exists($key, $plugin_options)) {
+        return $plugin_options[$key];
+    }
 
     // $gateway = new WC_Sqrip_Payment_Gateway();
     // $form_fields = $gateway->get_form_fields();
@@ -21,14 +22,15 @@ function sqrip_get_plugin_option($key) {
     //     return $gateway->get_field_default( $form_fields[ $key ] );
     // }
 
-	return null;
+    return null;
 }
 
 /**
  * Gets all the plugin options and uses the setting defaults if values have not been set yet
  * @return false|mixed
  */
-function sqrip_get_plugin_options() {
+function sqrip_get_plugin_options()
+{
     $plugin_options = get_option('woocommerce_sqrip_settings', array());
     // $gateway = new WC_Sqrip_Payment_Gateway();
     // $form_fields = $gateway->get_form_fields();
@@ -39,38 +41,39 @@ function sqrip_get_plugin_options() {
     return $plugin_options;
 }
 
-function sqrip_prepare_remote_args($body, $method, $token = null) {
-	$plugin_token     = sqrip_get_plugin_option('token');
-	$token              = $token ? $token : $plugin_token;
+function sqrip_prepare_remote_args($body, $method, $token = null)
+{
+    $plugin_token = sqrip_get_plugin_option('token');
+    $token = $token ? $token : $plugin_token;
 
     if (!$token || $token == null) {
         return;
     }
 
-	$args = [];
+    $args = [];
     $args['timeout'] = 60;
-	$args['method'] = $method;
-	$args['headers'] = [
-		'Content-Type'  => 'application/json',
-		'Authorization' => 'Bearer '.$token,
-		'Accept'        => 'application/json'
-	];
+    $args['method'] = $method;
+    $args['headers'] = [
+        'Content-Type' => 'application/json',
+        'Authorization' => 'Bearer ' . $token,
+        'Accept' => 'application/json'
+    ];
 
-	if(!is_string($body)) {
-		$body = json_encode($body);
-	}
+    if (!is_string($body)) {
+        $body = json_encode($body);
+    }
 
-	$args['body'] = $body;
-	return $args;
+    $args['body'] = $body;
+    return $args;
 }
 
-function sqrip_remote_request( $endpoint, $body = '', $method = 'GET', $token = "" )
+function sqrip_remote_request($endpoint, $body = '', $method = 'GET', $token = "")
 {
     $args = sqrip_prepare_remote_args($body, $method, $token);
 
-    $response = wp_remote_request(SQRIP_ENDPOINT.$endpoint, $args);
+    $response = wp_remote_request(SQRIP_ENDPOINT . $endpoint, $args);
 
-    if ( is_wp_error($response) ) return;
+    if (is_wp_error($response)) return;
 
     $body = wp_remote_retrieve_body($response);
 
@@ -86,25 +89,31 @@ function sqrip_remote_request( $endpoint, $body = '', $method = 'GET', $token = 
  * @return array Array with the address correctly formatted for the
  *         payable_to / payable_by fields in the sqrip API
  */
-function sqrip_get_billing_address_from_order($order) {
-	$order_data = $order->get_data();
+function sqrip_get_billing_address_from_order($order)
+{
+    $order_data = $order->get_data();
     $company = isset($order_data['billing']['company']) ? $order_data['billing']['company'] : "";
 
-	$billing_address = array(
-		'name'            => $order_data['billing']['first_name'] . ' ' . $order_data['billing']['last_name'],
-		'street'          => $order_data['billing']['address_1'] . ($order_data['billing']['address_2'] ? ', ' . $order_data['billing']['address_2'] : ""),
-		'postal_code'     => $order_data['billing']['postcode'],
-		'town' => $order_data['billing']['city'],
-		'country_code'    => $order_data['billing']['country']
-	);
+    $billing_address = array(
+        'name' => $order_data['billing']['first_name'] . ' ' . $order_data['billing']['last_name'],
+        'street' => $order_data['billing']['address_1'] . ($order_data['billing']['address_2'] ? ', ' . $order_data['billing']['address_2'] : ""),
+        'postal_code' => $order_data['billing']['postcode'],
+        'town' => $order_data['billing']['city'],
+        'country_code' => $order_data['billing']['country']
+    );
 
-    if ( !empty($company) ) {
+    if (!empty($company)) {
         $billing_address['name'] = $company;
     }
 
-	return $billing_address;
-}
+    $plugin_options = sqrip_get_plugin_options();
+    $payer = $plugin_options['payer'];
+    if ($payer == 'both') {
+        $billing_address['name'] = $order_data['billing']['first_name'] . ' ' . $order_data['billing']['last_name'] . "\n" . $company;
+    }
 
+    return $billing_address;
+}
 
 
 /**
@@ -116,59 +125,60 @@ function sqrip_get_billing_address_from_order($order) {
  *
  * @return array|false
  */
-function sqrip_prepare_qr_code_request_body($currency_symbol, $amount, $order_number) {
-	$plugin_options         = sqrip_get_plugin_options();
-	$sqrip_due_date         = $plugin_options['due_date'];
-	$iban                   = $plugin_options['iban'];
-    $token                  = $plugin_options['token'];
-    $initial_digits         = $plugin_options['qr_reference_format'];
+function sqrip_prepare_qr_code_request_body($currency_symbol, $amount, $order_number)
+{
+    $plugin_options = sqrip_get_plugin_options();
+    $sqrip_due_date = $plugin_options['due_date'];
+    $iban = $plugin_options['iban'];
+    $token = $plugin_options['token'];
+    $initial_digits = $plugin_options['qr_reference_format'];
 
-	$product                = $plugin_options['product'];
-	$qr_reference           = $plugin_options['qr_reference'];
-	$address                = $plugin_options['address'];
-	$lang                   = $plugin_options['lang'] ? $plugin_options['lang'] : "de";
+    $product = $plugin_options['product'];
+    $qr_reference = $plugin_options['qr_reference'];
+    $address = $plugin_options['address'];
+    $lang = $plugin_options['lang'] ? $plugin_options['lang'] : "de";
 
-	$date                   = date('Y-m-d');
-	$due_date_raw           = strtotime($date . " + ".$sqrip_due_date." days");
-    $due_date               = date('Y-m-d', $due_date_raw);
+    $date = date('Y-m-d');
+    $due_date_raw = strtotime($date . " + " . $sqrip_due_date . " days");
+    $due_date = date('Y-m-d', $due_date_raw);
 
     $additional_information = $plugin_options['additional_information'];
 
-    if($additional_information) {
+    if ($additional_information) {
         $additional_information = sqrip_additional_information_shortcodes($additional_information, $lang, $due_date_raw, $order_number);
     }
 
-	if ($iban == '') {
-		$err_msg = __( 'Please add IBAN in the settings of your webshop or on the sqrip dashboard.', 'sqrip-swiss-qr-invoice' );
-		wc_add_notice($err_msg, 'error');
-		return false;
-	}
+    if ($iban == '') {
+        $err_msg = __('Please add IBAN in the settings of your webshop or on the sqrip dashboard.', 'sqrip-swiss-qr-invoice');
+        wc_add_notice($err_msg, 'error');
+        return false;
+    }
 
-	if ($product == '') {
-		$err_msg = __( 'Please select a product in the settings.', 'sqrip-swiss-qr-invoice' );
-		wc_add_notice($err_msg, 'error');
-		return false;
-	}
+    if ($product == '') {
+        $err_msg = __('Please select a product in the settings.', 'sqrip-swiss-qr-invoice');
+        wc_add_notice($err_msg, 'error');
+        return false;
+    }
 
-	$body = [
-		"iban" => [
-			"iban"  => $iban,
-		],
-		"payment_information" =>
-			[
-				"currency_symbol"   => $currency_symbol,
-				"amount"            => $amount,
-                "message"           => $additional_information
-			],
-		"lang"      => $lang,
-		"product"   => $product,
-		"source"    => "woocommerce"
-	];
+    $body = [
+        "iban" => [
+            "iban" => $iban,
+        ],
+        "payment_information" =>
+            [
+                "currency_symbol" => $currency_symbol,
+                "amount" => $amount,
+                "message" => $additional_information
+            ],
+        "lang" => $lang,
+        "product" => $product,
+        "source" => "woocommerce"
+    ];
 
-	// If the user selects "Order Number" the API request will include param "qr_reference"
-	if ( $qr_reference == "order_number" ) {
-		$body['payment_information']['qr_reference'] = strval($order_number);
-	}
+    // If the user selects "Order Number" the API request will include param "qr_reference"
+    if ($qr_reference == "order_number") {
+        $body['payment_information']['qr_reference'] = strval($order_number);
+    }
 
     $iban_type = sqrip_validation_iban($iban, $token);
 
@@ -176,7 +186,11 @@ function sqrip_prepare_qr_code_request_body($currency_symbol, $amount, $order_nu
         $body['payment_information']['initial_digits'] = intval($initial_digits);
     }
 
-	return $body;
+    if (isset($iban_type->message) && $iban_type->message == 'Valid simple IBAN' && $initial_digits) {
+        $body['payment_information']['initial_digits'] = $initial_digits;
+    }
+
+    return $body;
 }
 
 /*
@@ -184,48 +198,48 @@ function sqrip_prepare_qr_code_request_body($currency_symbol, $amount, $order_nu
  */
 function sqrip_get_payable_to_address($address = 'woocommerce')
 {
-	if(!$address) {
-		return false;
-	}
+    if (!$address) {
+        return false;
+    }
 
     switch ($address) {
-    	case 'sqrip':
-    		$result = sqrip_get_user_details();
-    		break;
-    	
-    	case 'woocommerce':
+        case 'sqrip':
+            $result = sqrip_get_user_details();
+            break;
 
-            if ( empty(get_option( 'woocommerce_store_address' )) || empty(get_option( 'woocommerce_store_address_2' )) ) {
+        case 'woocommerce':
+
+            if (empty(get_option('woocommerce_store_address')) || empty(get_option('woocommerce_store_address_2'))) {
 
                 $result = [];
-                
+
             } else {
 
-        		// The country/state
-    		    $store_raw_country = get_option( 'woocommerce_default_country' );
+                // The country/state
+                $store_raw_country = get_option('woocommerce_default_country');
 
-    		    // Split the country/state
-    		    $split_country = explode( ":", $store_raw_country );
+                // Split the country/state
+                $split_country = explode(":", $store_raw_country);
 
-    		    // Country and state separated:
-    		    $store_country = $split_country[0];
-                $address = get_option( 'woocommerce_store_address' );
-                $address .= get_option( 'woocommerce_store_address_2' ) ? ' / '.get_option( 'woocommerce_store_address_2' ) : "";
-                
-    		    $result = array(
-    		        'name' => get_bloginfo('name'),
-    		        'street' => $address,
-    		        'town' => get_option( 'woocommerce_store_city' ),
-    		        'postal_code' => get_option( 'woocommerce_store_postcode' ),
-    		        'country_code' => $store_country,
-    		    );
+                // Country and state separated:
+                $store_country = $split_country[0];
+                $address = get_option('woocommerce_store_address');
+                $address .= get_option('woocommerce_store_address_2') ? ' / ' . get_option('woocommerce_store_address_2') : "";
+
+                $result = array(
+                    'name' => get_bloginfo('name'),
+                    'street' => $address,
+                    'town' => get_option('woocommerce_store_city'),
+                    'postal_code' => get_option('woocommerce_store_postcode'),
+                    'country_code' => $store_country,
+                );
 
             }
-    		break;
+            break;
 
         case 'individual':
-            // sqrip Plugin Options 
-            $plugin_options     = get_option('woocommerce_sqrip_settings', array());
+            // sqrip Plugin Options
+            $plugin_options = get_option('woocommerce_sqrip_settings', array());
 
             $result = array(
                 'name' => $plugin_options['address_name'],
@@ -236,37 +250,38 @@ function sqrip_get_payable_to_address($address = 'woocommerce')
             );
             break;
     }
-   
-    return $result;            
+
+    return $result;
 }
 
 
-function sqrip_get_payable_to_address_txt($address){
+function sqrip_get_payable_to_address_txt($address)
+{
 
     $address_arr = sqrip_get_payable_to_address($address);
 
-    if ( !$address_arr ) {
+    if (!$address_arr) {
         return false;
     }
 
-    return $address_txt = $address_arr['name'].', '.$address_arr['street'].', '.$address_arr['town'].' '.$address_arr['postal_code'];
+    return $address_txt = $address_arr['name'] . ', ' . $address_arr['street'] . ', ' . $address_arr['town'] . ' ' . $address_arr['postal_code'];
 }
 
 
 /*
- *  Get user details from sqrip api 
+ *  Get user details from sqrip api
  */
 function sqrip_get_user_details($token = "", $return = "address")
 {
-	$endpoint = 'details';
+    $endpoint = 'details';
 
-    $body_decode   = sqrip_remote_request($endpoint, '', 'GET', $token); 
+    $body_decode = sqrip_remote_request($endpoint, '', 'GET', $token);
 
     if ($return == "full") {
         return $body_decode;
     }
 
-    $result = []; 
+    $result = [];
 
     if ($body_decode) {
 
@@ -280,10 +295,10 @@ function sqrip_get_user_details($token = "", $return = "address")
 
         } elseif (isset($body_decode->user)) {
 
-            $name = $body_decode->user->first_name.' '.$body_decode->user->last_name;
+            $name = $body_decode->user->first_name . ' ' . $body_decode->user->last_name;
 
         }
-        
+
         if ($address) {
             $result = array(
                 'town' => $address->city,
@@ -308,13 +323,13 @@ function sqrip_validation_iban($iban, $tokens)
 
     $body = '{
         "iban": {
-            "iban": "'.$iban.'",
+            "iban": "' . $iban . '",
             "iban_type": "simple"
         }
     }';
 
-    $res_decode  = sqrip_remote_request($endpoint, $body, $method = 'POST', $tokens);   
-    
+    $res_decode = sqrip_remote_request($endpoint, $body, $method = 'POST', $tokens);
+
     return $res_decode;
 }
 
@@ -334,13 +349,13 @@ function sqrip_verify_token($token)
 
     $body = '{
         "iban": {
-            "iban": "'.$iban.'",
-            "iban_type": "'.$iban_type.'"
+            "iban": "' . $iban . '",
+            "iban_type": "' . $iban_type . '"
         }
     }';
 
-    $res_decode  = sqrip_remote_request($endpoint, $body, $method = 'POST', $token);   
-    
+    $res_decode = sqrip_remote_request($endpoint, $body, $method = 'POST', $token);
+
     return $res_decode;
 }
 
@@ -350,9 +365,10 @@ function sqrip_verify_token($token)
  *
  * @return mixed
  */
-function sqrip_get_customer_iban($user) {
-	// TODO: make the field key customizable in the sqrip options
-	return get_user_meta($user->ID, 'iban_num', true);
+function sqrip_get_customer_iban($user)
+{
+    // TODO: make the field key customizable in the sqrip options
+    return get_user_meta($user->ID, 'iban_num', true);
 }
 
 /**
@@ -361,18 +377,20 @@ function sqrip_get_customer_iban($user) {
  * @param $iban string
  * @return bool|int
  */
-function sqrip_set_customer_iban($user, $iban) {
+function sqrip_set_customer_iban($user, $iban)
+{
     // TODO: make the field key customizable in the sqrip options
     return update_user_meta($user->ID, 'iban_num', $iban);
 }
 
-function sqrip_get_wc_emails(){
+function sqrip_get_wc_emails()
+{
     $emails = wc()->mailer()->get_emails();
     $options = [];
 
     if ($emails && is_array($emails)) {
         foreach ($emails as $email) {
-            $options[$email->id] =  $email->title;
+            $options[$email->id] = $email->title;
         }
     }
 
@@ -380,13 +398,14 @@ function sqrip_get_wc_emails(){
 }
 
 
-function sqrip_additional_information_shortcodes($additional_information, $lang, $due_date, $order_number) {
+function sqrip_additional_information_shortcodes($additional_information, $lang, $due_date, $order_number)
+{
 
     // get current language from WPML
-    $current_lang = apply_filters( 'wpml_current_language', NULL );
+    $current_lang = apply_filters('wpml_current_language', NULL);
 
     // get current language from plugin options
-    if(!$current_lang) {
+    if (!$current_lang) {
         $current_lang = sqrip_get_locale_by_lang($lang);
     }
     setlocale(LC_TIME, $current_lang);
@@ -394,10 +413,10 @@ function sqrip_additional_information_shortcodes($additional_information, $lang,
     $date_shortcodes = [];
     // finds [due_date format="{format}"]
     preg_match_all('/\[due_date format="(.*)"\]/', $additional_information, $date_shortcodes);
-    foreach($date_shortcodes[0] as $index=>$date_shortcode) {
+    foreach ($date_shortcodes[0] as $index => $date_shortcode) {
         $format = $date_shortcodes[1][$index];
         $due_date_format = strftime($format, $due_date);
-        if(!$due_date_format) {
+        if (!$due_date_format) {
             continue;
         }
         $additional_information = str_replace($date_shortcode, $due_date_format, $additional_information);
@@ -413,7 +432,8 @@ function sqrip_additional_information_shortcodes($additional_information, $lang,
  * @param $lang
  * @return void
  */
-function sqrip_get_locale_by_lang($lang) {
+function sqrip_get_locale_by_lang($lang)
+{
     $locales = [
         'de' => 'de_DE.UTF-8',
         'fr' => 'fr_FR.UTF-8',
@@ -421,13 +441,14 @@ function sqrip_get_locale_by_lang($lang) {
         'en' => 'en_US.UTF-8'
     ];
     $locale = $locales[$lang];
-    if(!$locale) {
+    if (!$locale) {
         $locale = $lang;
     }
     return $locale;
 }
 
-function sqrip_file_name($order_id) {
+function sqrip_file_name($order_id)
+{
     $order = wc_get_order($order_id);
     $order_date = '';
 
@@ -437,13 +458,7 @@ function sqrip_file_name($order_id) {
         $order_date = date("Ymd");
     }
 
-    /**
-     * Remove the File name setting 
-     * @deprecated 1.6
-     */
-    // $sqrip_file_name = sqrip_get_plugin_option('file_name');
-
-    $sqrip_file_name = '[shop_name]-[order_number][order_date]';
+    $sqrip_file_name = sqrip_get_plugin_option('file_name');
 
     // replace [order_number] with order number
     $sqrip_file_name = str_replace("[order_number]", $order_id, $sqrip_file_name);

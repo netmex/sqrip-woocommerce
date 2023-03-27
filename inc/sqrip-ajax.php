@@ -1,24 +1,25 @@
-<?php 
+<?php
+
 /**
  * sqrip Generate new qr code ajax
  *
  * @since 1.0
  */
 
-add_action( 'wp_ajax_sqrip_generate_new_qr_code', 'sqrip_generate_new_qr_code' );
+add_action('wp_ajax_sqrip_generate_new_qr_code', 'sqrip_generate_new_qr_code');
 
 function sqrip_generate_new_qr_code()
 {
     check_ajax_referer('sqrip-generate-new-qrcode', 'security');
 
-    $order_id = isset( $_POST['order_id'] ) ? absint( $_POST['order_id'] ) : 0;
-    $order    = wc_get_order( $order_id );
+    $order_id = isset($_POST['order_id']) ? absint($_POST['order_id']) : 0;
+    $order = wc_get_order($order_id);
 
-    if ( ! $order ) {
+    if (!$order) {
         return;
     }
 
-    $user_id   = $order->get_user_id();
+    $user_id = $order->get_user_id();
     $cur_user_id = get_current_user_id();
 
     if ($user_id == $cur_user_id) {
@@ -27,7 +28,16 @@ function sqrip_generate_new_qr_code()
 
         wp_send_json($process_payment);
     }
-      
+
+    die();
+}
+
+add_action('wp_ajax_sqrip_get_shop_name', 'sqrip_get_shop_name');
+
+function sqrip_get_shop_name()
+{
+    wp_send_json(get_bloginfo('name'));
+
     die();
 }
 
@@ -37,7 +47,7 @@ function sqrip_generate_new_qr_code()
  * @since 1.0.3
  */
 
-add_action( 'wp_ajax_sqrip_preview_address', 'sqrip_preview_address_ajax' );
+add_action('wp_ajax_sqrip_preview_address', 'sqrip_preview_address_ajax');
 
 function sqrip_preview_address_ajax()
 {
@@ -48,7 +58,7 @@ function sqrip_preview_address_ajax()
     $response = sqrip_get_payable_to_address($address);
 
     wp_send_json($response);
-      
+
     die();
 }
 
@@ -59,7 +69,7 @@ function sqrip_preview_address_ajax()
  * @since 1.0.3
  */
 
-add_action( 'wp_ajax_sqrip_validation_iban', 'sqrip_validation_iban_ajax' );
+add_action('wp_ajax_sqrip_validation_iban', 'sqrip_validation_iban_ajax');
 
 function sqrip_validation_iban_ajax()
 {
@@ -75,15 +85,15 @@ function sqrip_validation_iban_ajax()
         case 'Valid simple IBAN':
             $result['result'] = true;
             $result['qriban'] = false;
-            $result['message'] = __( "validated" , "sqrip" );
+            $result['message'] = __("validated", "sqrip");
             $result['description'] = __('This is a normal IBAN. The customer can make deposits without noting the reference number (RF...). Therefore, automatic matching with orders is not guaranteed throughout. Manual processing may be necessary. A QR-IBAN is required for automatic matching. This is available for the same bank account. Information about this is available from your bank.', 'sqrip-swiss-qr-invoice');
             $result['bank'] = $bank ? sprintf('Bank: <b>%s</b>', $bank) : '';
             break;
-        
+
         case 'Valid qr IBAN':
             $result['result'] = true;
             $result['qriban'] = true;
-            $result['message'] = __( "validated" , "sqrip" );
+            $result['message'] = __("validated", "sqrip");
             $result['description'] = __('This is a QR IBAN. The customer can make payments only by specifying a QR reference (number). You can uniquely assign the deposit to a customer / order. This enables automatic matching of payments received with orders. Want to automate this step? Contact us <a href="mailto:info@sqrip.ch">info@sqrip.ch</a>.', 'sqrip-swiss-qr-invoice');
             $result['bank'] = $bank ? sprintf('Bank: <b>%s</b>', $bank) : '';
             break;
@@ -91,13 +101,20 @@ function sqrip_validation_iban_ajax()
         default:
             $result['result'] = false;
             $result['qriban'] = false;
-            $result['message'] = __( "incorrect" , "sqrip" );
+            $result['message'] = __("incorrect", "sqrip");
             $result['description'] = __('The (QR-)IBAN of your account to which the transfer should be made is ERROR.', 'sqrip-swiss-qr-invoice');
             break;
     }
+    if ($response->will_need_confirmation) {
+        $result['result'] = false;
+        $result['qriban'] = false;
+        $result['message'] = __("incorrect", "sqrip");
+        $result['description'] = __("Action required:\nPlease confirm change of IBAN on <a href='https://api.sqrip.ch/login' target='_blank'>sqrip.ch</a> in order to continue the service.", 'sqrip-swiss-qr-invoice');
+        $result['bank'] = $bank ? sprintf('Bank: <b>%s</b>', $bank) : '';
+    }
 
     wp_send_json($result);
-      
+
     die();
 }
 
@@ -107,16 +124,16 @@ function sqrip_validation_iban_ajax()
  * @since 1.0.3
  */
 
-add_action( 'wp_ajax_sqrip_validation_token', 'sqrip_validation_token_ajax' );
+add_action('wp_ajax_sqrip_validation_token', 'sqrip_validation_token_ajax');
 
 function sqrip_validation_token_ajax()
 {
-    if ( !$_POST['token'] ) return;   
+    if (!$_POST['token']) return;
 
     $endpoint = 'details';
     $args = sqrip_prepare_remote_args('', 'GET', $_POST['token']);
-    $response = wp_remote_request(SQRIP_ENDPOINT.$endpoint, $args);
-    $response_code = wp_remote_retrieve_response_code( $response );
+    $response = wp_remote_request(SQRIP_ENDPOINT . $endpoint, $args);
+    $response_code = wp_remote_retrieve_response_code($response);
 
     switch ($response_code) {
         case 403:
@@ -133,7 +150,7 @@ function sqrip_validation_token_ajax()
             $result['message'] = $body_decode->message;
             // $result['message'] = __("Valid, active API Key", "sqrip-swiss-qr-invoice");
             break;
-        
+
         default:
             $result['result'] = false;
             $result['message'] = __("Invalid token", "sqrip-swiss-qr-invoice");
@@ -141,63 +158,67 @@ function sqrip_validation_token_ajax()
     }
 
     wp_send_json($result);
-      
+
     die();
 }
 
 
-add_action( 'wp_ajax_sqrip_mark_refund_paid', 'sqrip_mark_refund_paid' );
+add_action('wp_ajax_sqrip_mark_refund_paid', 'sqrip_mark_refund_paid');
 
 /**
  * Ajax action to mark a sqrip refund as paid
  */
 function sqrip_mark_refund_paid()
 {
-	check_ajax_referer('sqrip-mark-refund-paid', 'security');
+    check_ajax_referer('sqrip-mark-refund-paid', 'security');
 
-	$refund_id = isset( $_POST['refund_id'] ) ? absint( $_POST['refund_id'] ) : 0;
-	$refund    = wc_get_order( $refund_id );
+    $refund_id = isset($_POST['refund_id']) ? absint($_POST['refund_id']) : 0;
+    $refund = wc_get_order($refund_id);
 
-	if ( !$refund ) { return; }
+    if (!$refund) {
+        return;
+    }
 
-	// stores the current date and time
-	$date = date('Y-m-d H:i:s');
-	$refund->update_meta_data('sqrip_refund_paid', $date);
-	$refund->save();
+    // stores the current date and time
+    $date = date('Y-m-d H:i:s');
+    $refund->update_meta_data('sqrip_refund_paid', $date);
+    $refund->save();
 
     // add woocommerce message to original order
     $order = wc_get_order($refund->get_parent_id());
-    $order->add_order_note( __('sqrip refund was marked as \'paid\'', 'sqrip-swiss-qr-invoice') );
+    $order->add_order_note(__('sqrip refund was marked as \'paid\'', 'sqrip-swiss-qr-invoice'));
 
-	wp_send_json(['date' => $date, 'result' => 'success']);
+    wp_send_json(['date' => $date, 'result' => 'success']);
 
-	die();
+    die();
 }
 
-add_action( 'wp_ajax_sqrip_mark_refund_unpaid', 'sqrip_mark_refund_unpaid' );
+add_action('wp_ajax_sqrip_mark_refund_unpaid', 'sqrip_mark_refund_unpaid');
 
 /**
  * Ajax action to mark a sqrip refund as unpaid
  */
 function sqrip_mark_refund_unpaid()
 {
-	check_ajax_referer('sqrip-mark-refund-unpaid', 'security');
+    check_ajax_referer('sqrip-mark-refund-unpaid', 'security');
 
-	$refund_id = isset( $_POST['refund_id'] ) ? absint( $_POST['refund_id'] ) : 0;
-	$refund    = wc_get_order( $refund_id );
+    $refund_id = isset($_POST['refund_id']) ? absint($_POST['refund_id']) : 0;
+    $refund = wc_get_order($refund_id);
 
-	if ( !$refund ) { return; }
+    if (!$refund) {
+        return;
+    }
 
-	$refund->delete_meta_data('sqrip_refund_paid');
-	$refund->save();
+    $refund->delete_meta_data('sqrip_refund_paid');
+    $refund->save();
 
     // add woocommerce message to original order
     $order = wc_get_order($refund->get_parent_id());
-    $order->add_order_note( __('sqrip refund was marked as \'unbezahlt\'', 'sqrip-swiss-qr-invoice') );
+    $order->add_order_note(__('sqrip refund was marked as \'unbezahlt\'', 'sqrip-swiss-qr-invoice'));
 
-	wp_send_json(['result' => 'success']);
+    wp_send_json(['result' => 'success']);
 
-	die();
+    die();
 }
 
 /**
@@ -206,24 +227,24 @@ function sqrip_mark_refund_unpaid()
  * @since 1.5.5
  */
 
-add_action( 'wp_ajax_sqrip_validation_refund_token', 'sqrip_validate_refund_token' );
+add_action('wp_ajax_sqrip_validation_refund_token', 'sqrip_validate_refund_token');
 
 function sqrip_validate_refund_token()
 {
-    if ( !$_POST['token'] ) return; 
+    if (!$_POST['token']) return;
 
     $endpoint = 'verify-token';
 
-    $response = sqrip_remote_request( $endpoint, '', 'GET', $_POST['token'] );
+    $response = sqrip_remote_request($endpoint, '', 'GET', $_POST['token']);
 
     wp_send_json($response);
-      
+
     die();
 }
 
 
-add_action( 'wp_ajax_sqrip_payment_confirmed', 'sqrip_payment_confirmed' );
-add_action( 'wp_ajax_nopriv_sqrip_payment_confirmed', 'sqrip_payment_confirmed' );
+add_action('wp_ajax_sqrip_payment_confirmed', 'sqrip_payment_confirmed');
+add_action('wp_ajax_nopriv_sqrip_payment_confirmed', 'sqrip_payment_confirmed');
 
 function sqrip_payment_confirmed()
 {
@@ -242,10 +263,10 @@ function sqrip_payment_confirmed()
         return;
     }
 
-    $paged = isset($_GET['paged']) ? '&paged='.$_GET['paged'] : '';
+    $paged = isset($_GET['paged']) ? '&paged=' . $_GET['paged'] : '';
 
     $order->update_status($status_completed, 'order_note');
 
-    wp_redirect(get_admin_url().'edit.php?post_type=shop_order'.$paged);
+    wp_redirect(get_admin_url() . 'edit.php?post_type=shop_order' . $paged);
     die();
 }
