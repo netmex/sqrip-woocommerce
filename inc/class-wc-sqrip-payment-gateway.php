@@ -287,7 +287,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'class' => 'qrinvoice-tab'
             ),
             'delete_invoice_status' => array(
-                'title' => __('Delete QR-invoice once status has been changed to', 'sqrip-swiss-qr-invoice'),
+                'title' => __('Or delete QR-invoice once status has been changed to', 'sqrip-swiss-qr-invoice'),
                 'type' => 'multiselect',
                 'default' => 0,
                 'options' => wc_get_order_statuses(),

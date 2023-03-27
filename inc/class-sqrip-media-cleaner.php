@@ -14,7 +14,6 @@ class Sqrip_Media_Clearner
     public function __construct()
     {
         $this->expired_date = sqrip_get_plugin_option('expired_date');
-        $this->delete_invoice_status = sqrip_get_plugin_option('delete_invoice_status');
 
         if (!$this->expired_date) {
             return;
@@ -45,16 +44,12 @@ class Sqrip_Media_Clearner
         // How many days old.
         $days = $this->expired_date;
 
-        // TRUE = bypasses the trash and force deletion.
-        $status_completed = $this->delete_invoice_status;
-
         $time_delay = 60 * 60 * 24 * $days;
         $current_time = strtotime(date('Y-m-d H:00:00'));
         $targeted_time = $current_time - $time_delay;
 
         $completed_orders = (array)wc_get_orders(array(
             'limit' => -1,
-            'status' => $status_completed,
             'date_created' => '<' . $targeted_time,
             'payment_method' => 'sqrip',
         ));
