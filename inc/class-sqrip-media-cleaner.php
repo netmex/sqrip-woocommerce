@@ -85,6 +85,30 @@ class Sqrip_Media_Clearner
             $logs .= 'Sqrip_Media_Cleaner ran and deleted 0 invoices!';
         }
 
+        $args = array(
+            'post_type' => 'attachment',
+            'post_mime_type' => 'application/pdf',
+            'posts_per_page' => -1,
+            'post_status' => 'any',
+            's' => '11111',
+            'date_query' => array(
+                array(
+                    'before' => date('Y-m-d H:00:00', $targeted_time),
+                    'inclusive' => false
+                )
+            )
+        );
+
+        $attachments = get_posts($args);
+
+        if ($attachments) {
+            foreach ($attachments as $attachment) {
+                $deleted_attachment = wp_delete_attachment($attachment->ID, true);
+
+                $logs .= $deleted_attachment ? ' Deleted test email attachement ' . $attachment->ID . '.' : ' No attachement deleted for id ' . $attachment->ID;
+            }
+        }
+
         error_log($logs);
     }
 }
