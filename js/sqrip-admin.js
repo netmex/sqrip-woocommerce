@@ -326,7 +326,7 @@ jQuery(document).ready(function ($) {
         inputVal = inputVal.replace(/\[due_date format=".*?"]/, order_date);
         inputVal = inputVal.replace('[order_number]', order_number);
 
-        if (inputVal.length >= 140) {
+        if (inputVal.length >= 140 || (inputVal.match(/\n/g) || []).length > 4) {
             $(this).addClass('sqrip-rounded-red');
         } else {
             $(this).removeClass('sqrip-rounded-red');
