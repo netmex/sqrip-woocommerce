@@ -569,7 +569,7 @@ jQuery(document).ready(function ($) {
             }
         });
 
-        if (ip_suppress_generation.is(':checked')) {
+        if (ip_suppress_generation.is(':checked') && tab_active === 'qrinvoice') {
             $('.sqrip-new-order-status').show();
             $('.sqrip-new-default-order-status').show();
         } else {
@@ -580,7 +580,7 @@ jQuery(document).ready(function ($) {
 
     if (ip_suppress_generation.length) {
         ip_suppress_generation.on('change', function () {
-            if ($(this).is(':checked')) {
+            if ($(this).is(':checked') && tab_active === 'qrinvoice') {
                 ip_integration_order.closest('tr').hide();
                 $('.sqrip-new-order-status').show();
                 $('.sqrip-new-default-order-status').show();

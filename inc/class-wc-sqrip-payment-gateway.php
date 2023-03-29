@@ -725,11 +725,11 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         }
 
         if (isset($post_data['woocommerce_sqrip_enabled_new_payment_status']) && !empty($post_data['woocommerce_sqrip_enabled_new_payment_status']) && isset($post_data['woocommerce_sqrip_first_time_new_payment_status'])) {
-            $_POST['woocommerce_sqrip_payment_status_completed'] = 'wc-sqrip-payment-paid';
+            $_POST['woocommerce_sqrip_status_awaiting'] = 'wc-sqrip-payment-paid';
         }
 
         if (isset($post_data['woocommerce_sqrip_enabled_new_order_status']) && !empty($post_data['woocommerce_sqrip_enabled_new_order_status']) && isset($post_data['woocommerce_sqrip_first_time_new_order_status'])) {
-            $_POST['woocommerce_sqrip_payment_status_completed'] = 'wc-sqrip-order-paid';
+            $_POST['woocommerce_sqrip_order_status'] = 'wc-sqrip-order-paid';
         }
 
         return parent::process_admin_options();
