@@ -296,6 +296,11 @@ table.sqrip-table td p.sqrip-note {
     margin-bottom: 10px;
 }
 
+#woocommerce_sqrip_new_order_status {
+    display: block;
+    margin-bottom: 10px;
+}
+
 .sqrip-order-status th {
     padding-top: 0;
 }
@@ -321,6 +326,22 @@ table.sqrip-table td p.sqrip-note {
 }
 
 .sqrip-payment-status.sqrip-show td.forminp {
+    display: table-cell;
+}
+
+.sqrip-new-order-status th {
+    padding-top: 0;
+}
+
+.sqrip-new-order-status td.forminp {
+    display: none;
+}
+
+.sqrip-new-order-status.sqrip-show td.forminp {
+    display: table-cell;
+}
+
+.sqrip-new-order-status.sqrip-show td.forminp {
     display: table-cell;
 }
 

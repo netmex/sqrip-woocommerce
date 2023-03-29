@@ -12,17 +12,23 @@ jQuery(document).ready(function ($) {
         ip_qrref_format = $('#woocommerce_sqrip_qr_reference_format'),
         ip_order_stt = $('#woocommerce_sqrip_new_status'),
         ip_payment_stt = $('#woocommerce_sqrip_new_payment_status'),
+        ip_new_order_stt = $('#woocommerce_sqrip_new_order_status'),
+        ip_default_order_stt = $('#woocommerce_sqrip_order_status'),
         ip_refund_token = $('#woocommerce_sqrip_return_token'),
         btn_toggle_stt = $('.sqrip-toggle-order-satus'),
         btn_toggle_payment_stt = $('.sqrip-toggle-payment-satus'),
+        btn_toggle_order_stt = $('.sqrip-toggle-new-order-satus'),
         ip_enb_new_status = $('#woocommerce_sqrip_enabled_new_status'),
         ip_enb_new_payment_status = $('#woocommerce_sqrip_enabled_new_payment_status'),
+        ip_enb_new_order_status = $('#woocommerce_sqrip_enabled_new_order_status'),
         ip_ft_new_status = $('#woocommerce_sqrip_first_time_new_status'),
         ip_ft_new_payment_status = $('#woocommerce_sqrip_first_time_new_payment_status'),
+        ip_ft_new_order_status = $('#woocommerce_sqrip_first_time_new_order_status'),
         ip_suppress_generation = $('#woocommerce_sqrip_suppress_generation'),
         ip_integration_order = $('#woocommerce_sqrip_integration_order'),
         shop_name,
         nh = $('.sqrip-no-height'),
+        default_order_status = $('select[id*="order_status"]'),
         status_text = $('strong:contains("test-email-status")');
 
     $('select[id*="delete_invoice_status"]').select2({
@@ -533,15 +539,76 @@ jQuery(document).ready(function ($) {
         })
     }
 
+    if (ip_new_order_stt.length) {
+        ip_new_order_stt.closest('tr').addClass('sqrip-new-order-status');
+        ip_default_order_stt.closest('tr').addClass('sqrip-new-default-order-status');
+        ip_ft_new_order_status.prop('checked', false);
+
+        btn_create_new_order_html = '<button id="btn_create_new_order_stt" class="button-secondary sqrip-btn sqrip-btn-create-new-order-stt">' + sqrip.txt_order_create + '</button>';
+        ip_new_order_stt.after(btn_create_new_order_html);
+
+        btn_toggle_order_stt.on('click', function (e) {
+            e.preventDefault();
+
+            $(this).closest('tr').toggleClass('sqrip-show');
+        })
+
+        btn_create_new_order = $('#btn_create_new_order_stt');
+
+        btn_create_new_order.on('click', function (e) {
+            e.preventDefault();
+
+            if (!ip_new_order_stt.val()) {
+                ip_new_order_stt.focus();
+            } else {
+                ip_enb_new_order_status.prop('checked', true);
+                ip_ft_new_order_status.prop('checked', true);
+                setTimeout(function () {
+                    btn_save.trigger('click');
+                }, 200);
+            }
+        });
+
+        if (ip_suppress_generation.is(':checked')) {
+            $('.sqrip-new-order-status').show();
+            $('.sqrip-new-default-order-status').show();
+        } else {
+            $('.sqrip-new-order-status').hide();
+            $('.sqrip-new-default-order-status').hide();
+        }
+    }
+
     if (ip_suppress_generation.length) {
         ip_suppress_generation.on('change', function () {
             if ($(this).is(':checked')) {
                 ip_integration_order.closest('tr').hide();
+                $('.sqrip-new-order-status').show();
+                $('.sqrip-new-default-order-status').show();
             } else {
                 ip_integration_order.closest('tr').show();
+                $('.sqrip-new-order-status').hide();
+                $('.sqrip-new-default-order-status').hide();
             }
-        })
+
+            if (default_order_status.val() === 'wc-sqrip-default-order' && ip_suppress_generation.is(':checked')) {
+                default_order_status.addClass('sqrip-rounded-red');
+            } else {
+                default_order_status.removeClass('sqrip-rounded-red');
+            }
+
+            validate_form()
+        });
     }
+
+    default_order_status.on('change', function () {
+        if ($(this).val() === 'wc-sqrip-default-order') {
+            default_order_status.addClass('sqrip-rounded-red');
+        } else {
+            default_order_status.removeClass('sqrip-rounded-red');
+        }
+
+        validate_form()
+    });
 
     if (nh.length) {
         nh.closest('tr').addClass('sqrip-no-height');

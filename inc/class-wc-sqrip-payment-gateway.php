@@ -76,6 +76,9 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 
         $tooltip = sprintf('<span class="sqrip-tooltip"><span>%s</span></span>', __('Do not set this too low! Remove input to disable the setting.', 'sqrip-swiss-qr-invoice'));
 
+        $suppressed_qr_invoice_orders = wc_get_order_statuses();
+        $suppressed_qr_invoice_orders = ['wc-sqrip-default-order' => 'Please select an option'] + $suppressed_qr_invoice_orders;
+
         $this->form_fields = array(
             'tabs' => array(
                 'type' => 'tab',
@@ -270,6 +273,36 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'description' => __('If you enable this, the order status for orders with sqrip will change to \'Payment pending\', a confirmation e-mail will be sent and the order will wait for you to generate qr-invoices manually. This is helpful, if you generally need to adjust pricing or quantity after an order has been placed.', 'sqrip-swiss-qr-invoice'),
                 'default' => 'no',
                 'class' => 'qrinvoice-tab'
+            ),
+            'order_status' => array(
+                'title' => __('Select status for new orders without automatic QR-invoices', 'sqrip-swiss-qr-invoice'),
+                'type' => 'select',
+                'options' => $suppressed_qr_invoice_orders,
+                'default' => 'wc-sqrip-default-order',
+                'class' => 'qrinvoice-tab'
+            ),
+            'new_order_status' => array(
+                'title' => '',
+                'type' => 'text',
+                'class' => 'qrinvoice-tab',
+                'default' => __('', 'sqrip-swiss-qr-invoice'),
+                'description' => __('What is the order status that waits for confirmation of made payment to your bank account?', 'sqrip-swiss-qr-invoice') . '</ br>' . sprintf(__('This selects the status with which new orders are created if the QR-Invoice generation suppression is active. If there is no suitable status available, you can create one right %s', 'sqrip-swiss-qr-invoice'), '<a href="#" class="sqrip-toggle-new-order-satus">' . __('here', 'sqrip-swiss-qr-invoice') . '</a>'),
+            ),
+            'enabled_new_order_status' => array(
+                'title' => '',
+                'type' => 'checkbox',
+                'label' => ' ',
+                'default' => 'no',
+                'css' => 'visibility: hidden; position: absolute',
+                'class' => 'qrinvoice-tab sqrip-no-height'
+            ),
+            'first_time_new_order_status' => array(
+                'title' => '',
+                'type' => 'checkbox',
+                'label' => ' ',
+                'default' => 'no',
+                'css' => 'visibility: hidden; position: absolute',
+                'class' => 'qrinvoice-tab sqrip-no-height'
             ),
             'integration_order' => array(
                 'title' => __('Show QR-invoice on confirmation page', 'sqrip-swiss-qr-invoice'),
@@ -693,6 +726,10 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 
         if (isset($post_data['woocommerce_sqrip_enabled_new_payment_status']) && !empty($post_data['woocommerce_sqrip_enabled_new_payment_status']) && isset($post_data['woocommerce_sqrip_first_time_new_payment_status'])) {
             $_POST['woocommerce_sqrip_payment_status_completed'] = 'wc-sqrip-payment-paid';
+        }
+
+        if (isset($post_data['woocommerce_sqrip_enabled_new_order_status']) && !empty($post_data['woocommerce_sqrip_enabled_new_order_status']) && isset($post_data['woocommerce_sqrip_first_time_new_order_status'])) {
+            $_POST['woocommerce_sqrip_payment_status_completed'] = 'wc-sqrip-order-paid';
         }
 
         return parent::process_admin_options();
