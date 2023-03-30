@@ -198,7 +198,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 ),
                 'default' => 'either',
                 'class' => 'qrinvoice-tab',
-                'description' => __('What information about the client should sqrip use in QR-invoices.', 'sqrip-swiss-qr-invoice'),
+                'description' => __('What information about the client should sqrip use in QR-invoices', 'sqrip-swiss-qr-invoice'),
             ),
             'qr_reference_format' => array(
                 'title' => __('Initiate QR-Ref# with these 6 digits', 'sqrip-swiss-qr-invoice'),
@@ -270,7 +270,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'title' => __('Suppress QR-Invoice generation at checkout', 'sqrip-swiss-qr-invoice'),
                 'label' => __('Don\'t generate QR-invoice at checkout but manually', 'sqrip-swiss-qr-invoice'),
                 'type' => 'checkbox',
-                'description' => __('If you enable this, the order status for orders with sqrip will change to \'Payment pending\', a confirmation e-mail will be sent and the order will wait for you to generate qr-invoices manually. This is helpful, if you generally need to adjust pricing or quantity after an order has been placed.', 'sqrip-swiss-qr-invoice'),
+                'description' => __('If you enable this, the order status for orders with sqrip will change to \'Payment pending\', a confirmation e-mail will be sent and the order will wait for you to generate qr-invoices manually. This is helpful if you may need to adjust pricing or quantity after an order has been placed', 'sqrip-swiss-qr-invoice'),
                 'default' => 'no',
                 'class' => 'qrinvoice-tab'
             ),
@@ -314,7 +314,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             ),
             'email_attached' => array(
                 'title' => __('Attach QR-Invoice to E-Mail template', 'sqrip-swiss-qr-invoice'),
-                'description' => __('Select email template to which the QR-invoice is attached.', 'sqrip-swiss-qr-invoice'),
+                'description' => __('Select email template to which the QR-invoice is attached', 'sqrip-swiss-qr-invoice'),
                 'type' => 'select',
                 'options' => sqrip_get_wc_emails(),
                 'class' => 'qrinvoice-tab'
@@ -329,7 +329,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             'expired_date' => array(
                 'title' => __('Delete any generated QR-invoice after ', 'sqrip-swiss-qr-invoice'),
                 'label' => sprintf('%s %s', __('days.', 'sqrip-swiss-qr-invoice'), $tooltip),
-                'description' => __('Keep the size of your media library small. sqrip deletes all qr-invoice files that are not needed anymore.', 'sqrip-swiss-qr-invoice'),
+                'description' => __('Keep the size of your media library small. sqrip deletes all qr-invoice files that are not needed anymore', 'sqrip-swiss-qr-invoice'),
                 'type' => 'number',
                 'default' => "",
                 'css' => "width:70px",
@@ -883,7 +883,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             $wp_mail = wp_mail($to, $subject, $body, $headers, $attachments);
 
             if ($wp_mail) {
-                $settings->add_message(__('<span id="test-email-status">Test email has been sent! <a href="' . $sqrip_qr_pdf_url . '" target="_blank">Click here</a> to open.</span>', 'sqrip-swiss-qr-invoice'));
+                $settings->add_message(__('<span id="test-email-status">Test email has been sent! <a href="' . $sqrip_qr_pdf_url . '" target="_blank">Click here</a> to view the invoice.</span>', 'sqrip-swiss-qr-invoice'));
             } else {
                 $settings->add_error(__('E-Mail can not be sent, please check WP MAIL SMTP', 'sqrip-swiss-qr-invoice'));
             }

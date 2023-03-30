@@ -546,7 +546,7 @@ add_filter('wp_insert_post_data', function ($data, $postarr, $unsanitized_postar
                 // TODO: replace with attachment ID and store this in meta instead of actual file
                 $sqrip_class_payment = new WC_Sqrip_Payment_Gateway;
 
-                $sqrip_qr_pdf_attachment_id = $sqrip_class_payment->file_upload($sqrip_pdf, '.pdf');
+                $sqrip_qr_pdf_attachment_id = $sqrip_class_payment->file_upload($sqrip_pdf, '.pdf', '', $order->ID);
                 // $sqrip_qr_png_attachment_id = $sqrip_class_payment->file_upload($sqrip_png, '.png');
 
                 $sqrip_qr_pdf_url = wp_get_attachment_url($sqrip_qr_pdf_attachment_id);
