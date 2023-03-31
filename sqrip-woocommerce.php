@@ -268,7 +268,7 @@ if (!function_exists('sqrip_add_fields_for_order_details')) {
                 <?php if ($reference_id) { ?>
                     <li>
                         <b><?php echo __('Reference number', 'sqrip-swiss-qr-invoice'); ?>
-                            :</b><br><?php echo $reference_id == "deleted" ? __('Deteled', 'sqrip-swiss-qr-invoice') : esc_html($reference_id_formatted); ?>
+                            :</b><br><?php echo $reference_id == "deleted" ? __('Deleted', 'sqrip-swiss-qr-invoice') : esc_html($reference_id_formatted); ?>
                     </li>
                 <?php } ?>
 
