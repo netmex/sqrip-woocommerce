@@ -145,7 +145,7 @@ add_action('admin_enqueue_scripts', function () {
                     __('Send test to %s', 'sqrip-swiss-qr-invoice'),
                     esc_html(get_option('admin_email'))
                 ),
-                'txt_send_test_email_warning' => __('You have no free credits, a paid credit will be charged', 'sqrip-swiss-qr-invoice'),
+                'txt_send_test_email_warning' => __('You have no free credits anymore, a paid credit will be charged', 'sqrip-swiss-qr-invoice'),
                 'txt_send_test_email_no_credit' => __('You have no credits left', 'sqrip-swiss-qr-invoice'),
                 'details' => $sqrip_details,
                 'field_required_txt' => __('This field is required', 'sqrip-swiss-qr-invoice')
@@ -302,7 +302,7 @@ if (!function_exists('sqrip_add_fields_for_order_details')) {
 
         } else {
             if (sqrip_get_plugin_option('enabled') == 'no') {
-                echo '<p>' . __('Please note that the sqrip payment method is disabled in sqrip plugin settings.', 'sqrip-swiss-qr-invoice') . '</p>';
+                echo '<p>' . __('Please note that the sqrip payment method is disabled in the sqrip plugin settings.', 'sqrip-swiss-qr-invoice') . '</p>';
             } else {
                 echo '<p>' . __('Automatic QR-invoice generation by sqrip is disabled.', 'sqrip-swiss-qr-invoice') . '</p>';
                 echo '<button class="button button-secondary sqrip-initiate-payment">' . __('Generate QR Invoice', 'sqrip-swiss-qr-invoice') . '</button>';
@@ -580,7 +580,7 @@ add_filter('wp_insert_post_data', function ($data, $postarr, $unsanitized_postar
                         isset($error_arr['payable_by.name']) ||
                         isset($error_arr['payable_by.company'])
                     ) {
-                        $errors_output = __('Please submit at least either Name / Last name or Company name to generate the invoice', 'sqrip-swiss-qr-invoice');
+                        $errors_output = __('Please submit at least either Name / Last name or Company name to generate the qr-invoice', 'sqrip-swiss-qr-invoice');
                     }
 
                 }
