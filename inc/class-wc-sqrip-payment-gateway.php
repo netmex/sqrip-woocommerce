@@ -745,6 +745,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         $address = $post_data['woocommerce_sqrip_address'];
         $qr_reference = $post_data['woocommerce_sqrip_qr_reference'];
         $initial_digits = $post_data['woocommerce_sqrip_qr_reference_format'];
+        $payer = $post_data['woocommerce_sqrip_payer'];
         $lang = isset($post_data['woocommerce_sqrip_lang']) ? $post_data['woocommerce_sqrip_lang'] : "de";
         $order_id = "11111";
 
@@ -769,7 +770,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             ],
             "payable_by" =>
                 [
-                    "name" => "Sophie Mustermann",
+                    "name" => "netmex digital gmbh",
                     "street" => "Laurenzenvorstadt 11",
                     "postal_code" => 5000,
                     "town" => "Aarau",
@@ -787,7 +788,6 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             "source" => "woocommerce"
         ];
 
-        $payer = $plugin_options['payer'];
         if ($payer == 'both') {
             $body['payable_by']['name'] = "Sophie Mustermann\nnetmex digital gmbh";
         }
