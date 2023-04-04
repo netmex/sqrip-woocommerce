@@ -3,8 +3,8 @@ Contributors: sqrip
 Donate link: https://sqrip.ch/
 Tags: woocommerce, payment, sqrip, qrcode, qr, scan, Kontoabgleich, swiss qr invoice, QR-Rechnung, EBICS, QR-facture, bulletins de versement, Einzahlungsschein, QR-Einzahlungsschein, bulletins de versement, Swiss QR Code, code QR, QR-fattura, polizze di versamento
 Requires at least: 4.7
-Tested up to: 6.1
-Stable tag: 1.6
+Tested up to: 6.2
+Stable tag: 1.7
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -41,7 +41,7 @@ d) (QR) reference number
 The reference number is either created randomly or calculated on the basis of the order number. Inital 6 digits can be defined for easier identification. It automatically adapts to the IBAN format used.
 
 e) additional information
-On up to three lines additional information can be added to the QR invoice. This includes 
+On up to five lines or 160 characters additional information can be added to the QR invoice. This includes 
 - the due date (The time given to the payer to settle the invoice may be communicated as text on the payment part.).
 - the order number (Be aware: sqrip not use the order# of the plugin "WoCommerce Sequential Order Numbers")
 - any additional text (e.g. URL of webshop, thank you message)
@@ -65,13 +65,26 @@ i) Test e-mail
 With one click, you can test the settings and see how the QR invoice is received by your customers.
 
 j) Add sqrip payment method manually
-Add sqrip as payment method for manually created orders.
+- Suppress the creation of the QR invoice at checkout and define the status of the order.
+- Add sqrip as payment method for manually created orders.
 
 k) Use sqrip QR-Codes for Refunds
 Scan the QR-Code with your Banking App to initiate refunds. Remember: IBAN of client required!
 
 l) Manual payment comparison
 Once an order has a defined order status you can confirm that the payment was done by the client and the status of the order can be changed to another status. If there is no suitable status available, you can create one in seconds. You can confirm the payments either on the list of orders or on the order detail page. 
+
+m) Payer Name
+For corporate payers, choose to show either the Company name or the Firstname / Name. Or show all names together.
+
+n) File Name
+The QR invoice file names can be defined individually. Add date, order number and any other information as shop name to make the QR invoice more personal.
+
+o) Delete unneeded QR invoice automatically
+Keeps the size of the media library small. sqrip deletes all QR invoice files if
+- certain status of the order are met (e.g. Cancelled);
+- x days after the creation have passed.
+
 
 = Requirements =
 1. Besides a current WordPress and WooCommerce installation, an account on sqrip.ch is required.
@@ -112,6 +125,19 @@ Yes. We are already working on comparing the reconciliation of orders/purchases 
 4. sqrip API Key
 
 == Changelog ==
+= 1.7 : April 2023 =
+* To save space in your media library on your server the QR Invoices (PDF) are automatically deleted, if certain status of the order are met (e.g. Cancelled) or x days after the creation have passed;
+* Inital 6 digits are now available for regular IBAN. Letters are possible (e.g. "RF39 SQRI PX11 1115 2023 0331 0");
+* The reference numbers are now shown in groups;
+* Define a suitable order status when waiting for payments or when no QR invoice has been created;
+* Show message when the (QR-)IBAN in the plugin is different from the one on api.sqrip.ch;
+* Bug fixing.
+
+We made users (even more) happy with these changes:
+* Give individual names to your QR invoice files. Add your shop name, the order number and the order date (e.g. QRRechnung_babytuch_20230331_Bestellung_2503.pdf).
+* For corporate payers with a contact person both names can be added to the QR invoice. Optional only one of them is shown;
+* Manually created orders do not need the e-mail of the client anymore.
+
 = 1.6 : March 2023 =
 * Validation of API keys shows API key name for better identification;
 * A hint placed right of the button for sending test e-mails tells you if a bought credit is used for it;
