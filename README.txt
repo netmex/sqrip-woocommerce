@@ -41,7 +41,7 @@ d) (QR) reference number
 The reference number is either created randomly or calculated on the basis of the order number. Inital 6 digits can be defined for easier identification. It automatically adapts to the IBAN format used.
 
 e) additional information
-On up to five lines or 160 characters additional information can be added to the QR invoice. This includes 
+On up to five lines or 140 characters additional information can be added to the QR invoice. This includes 
 - the due date (The time given to the payer to settle the invoice may be communicated as text on the payment part.).
 - the order number (Be aware: sqrip not use the order# of the plugin "WoCommerce Sequential Order Numbers")
 - any additional text (e.g. URL of webshop, thank you message)
@@ -127,7 +127,7 @@ Yes. We are already working on comparing the reconciliation of orders/purchases 
 == Changelog ==
 = 1.7 : April 2023 =
 * To save space in your media library on your server the QR Invoices (PDF) are automatically deleted, if certain status of the order are met (e.g. Cancelled) or x days after the creation have passed;
-* Inital 6 digits are now available for regular IBAN. Letters are possible (e.g. "RF39 SQRI PX11 1115 2023 0331 0");
+* Inital 6 digits for Reference Numbers are now available in combination with regular IBAN. Letters are possible (e.g. "RF39 SQRI PX11 1115 2023 0331 0");
 * The reference numbers are now shown in groups;
 * Define a suitable order status when waiting for payments or when no QR invoice has been created;
 * Show message when the (QR-)IBAN in the plugin is different from the one on api.sqrip.ch;
