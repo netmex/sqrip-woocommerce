@@ -236,7 +236,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'type' => 'textarea',
                 'class' => 'qrinvoice-tab',
                 'maxlength' => 140,
-                'default' => __("[order_date] [shop_name] Invoice Order: #[order_number]", "sqrip-swiss-qr-invoice"),
+                'default' => __("[order_date]_Invoice_for_Order_[order_number]", "sqrip-swiss-qr-invoice"),
                 'description' => __('The only characters allowed are A-Z, dashes (-) and underscores (_). Any spaces will be replaced with underscores (_). You can also use the following variables:<br>[order_number] — your full order number;<br>[order_date] — in yymmdd format, e.g. 230210 for Feb. 10 2023;<br>[shop_name] — can only be used if the shop name conforms with the "characters allowed" rule, otherwise the setting will be highlighted in red.', 'sqrip-swiss-qr-invoice'),
             ),
             'product' => array(
