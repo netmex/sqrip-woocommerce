@@ -270,7 +270,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'title' => __('Suppress QR-Invoice generation at checkout', 'sqrip-swiss-qr-invoice'),
                 'label' => __('Don\'t generate QR-invoice at checkout but manually', 'sqrip-swiss-qr-invoice'),
                 'type' => 'checkbox',
-                'description' => __('If you enable this, the order status for orders with sqrip will change to \'Payment pending\', a confirmation e-mail will be sent and the order will wait for you to generate qr-invoices manually. This is helpful if you may need to adjust pricing or quantity after an order has been placed', 'sqrip-swiss-qr-invoice'),
+                'description' => __('If you enable this, the order status for orders with sqrip will change to the selected one, a confirmation e-mail will be sent and the order will wait for you to generate qr-invoices manually. This is helpful if you may need to adjust pricing or quantity after an order has been placed', 'sqrip-swiss-qr-invoice'),
                 'default' => 'no',
                 'class' => 'qrinvoice-tab'
             ),
