@@ -229,7 +229,7 @@ if (!function_exists('sqrip_add_fields_for_order_details')) {
         $pdf_file = get_post_meta($order_id, 'sqrip_pdf_file_url', true);
 
         $reference_id_formatted = $reference_id;
-        if (str_contains(strtolower($reference_id_formatted), 'rf')) {
+        if (strpos(strtolower($reference_id_formatted), 'rf') !== false) {
             $reference_id_formatted = substr_replace($reference_id_formatted, " ", 4, 0);
             $reference_id_formatted = substr_replace($reference_id_formatted, " ", 9, 0);
             $reference_id_formatted = substr_replace($reference_id_formatted, " ", 14, 0);
@@ -902,7 +902,7 @@ function sqrip_add_custom_order_status_actions_button($actions, $order)
 
         if ($reference_id && $reference_id != "deleted") {
             $reference_id_formatted = $reference_id;
-            if (str_contains(strtolower($reference_id_formatted), 'rf')) {
+            if (strpos(strtolower($reference_id_formatted), 'rf') !== false) {
                 $reference_id_formatted = substr_replace($reference_id_formatted, " ", 4, 0);
                 $reference_id_formatted = substr_replace($reference_id_formatted, " ", 9, 0);
                 $reference_id_formatted = substr_replace($reference_id_formatted, " ", 14, 0);
