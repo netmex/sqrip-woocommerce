@@ -463,5 +463,45 @@ function sqrip_file_name($order_id)
     // replace [order_number] with order number
     $sqrip_file_name = str_replace("[shop_name]", get_bloginfo('name'), $sqrip_file_name);
 
+    $sqrip_file_name = sqrip_rename_if_duplicates_present($sqrip_file_name);
+
+    if (!preg_match('/^([\w-]+)(?=\.[\w]+$)/', $sqrip_file_name . '.pdf')) {
+        $sqrip_file_name = "$order_date" . '_' . get_bloginfo('name') . '_invoice-order_' . "$order_id";
+    }
+
     return $sqrip_file_name;
+}
+
+function sqrip_rename_if_duplicates_present($sqrip_file_name)
+{
+    $args = array(
+        'post_type' => 'attachment',
+        'post_mime_type' => 'application/pdf',
+        'posts_per_page' => -1,
+        'post_status' => 'any',
+        's' => $sqrip_file_name
+    );
+    $attachmentsWithSameFileName = count(get_posts($args));
+    if ($attachmentsWithSameFileName > 0) {
+        $args = array(
+            'post_type' => 'attachment',
+            'post_mime_type' => 'application/pdf',
+            'posts_per_page' => -1,
+            'post_status' => 'any',
+            's' => $sqrip_file_name . '_'
+        );
+        $attachmentsWithCountFileName = count(get_posts($args)) + 1;
+
+        $sqrip_file_name = $sqrip_file_name . '_' . sqrip_format_number($attachmentsWithCountFileName);
+    }
+
+    return $sqrip_file_name;
+}
+
+function sqrip_format_number($number)
+{
+    if ($number >= 0 && $number <= 999) {
+        return sprintf("%03d", $number);
+    }
+    return $number;
 }
