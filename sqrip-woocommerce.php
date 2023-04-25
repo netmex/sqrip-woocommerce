@@ -544,6 +544,7 @@ add_filter('wp_insert_post_data', function ($data, $postarr, $unsanitized_postar
                 $order->update_meta_data('sqrip_qr_pdf_attachment_id', $sqrip_qr_pdf_attachment_id);
                 $order->update_meta_data('sqrip_pdf_file_url', $sqrip_qr_pdf_url);
                 $order->update_meta_data('sqrip_pdf_file_path', $sqrip_qr_pdf_path);
+                $order->update_meta_data('sqrip_refund_iban_num', get_user_meta($order->get_user_id(), 'iban_num', true));
 
                 // $order->update_meta_data('sqrip_png_file_url', $sqrip_qr_png_url);
                 // $order->update_meta_data('sqrip_png_file_path', $sqrip_qr_png_path);
@@ -723,6 +724,23 @@ function sqrip_save_extra_user_profile_fields($user_id)
     sqrip_set_customer_iban($user, $_POST['iban']);
 
 }
+
+function post_custom_field_updated($meta_id, $post_id, $meta_key, $meta_value)
+{
+    global $order;
+
+    if (!is_a($order, 'WC_Order')) {
+        $order = wc_get_order($post_id);
+    }
+
+    $user_id = $order->get_user_id();
+
+    if ($meta_key === 'sqrip_refund_iban_num') {
+        update_user_meta($user_id, 'iban_num', $meta_value);
+    }
+}
+
+add_action('updated_post_meta', 'post_custom_field_updated', 10, 4);
 
 // Disable the Zip/postcode validation
 add_filter('woocommerce_validate_postcode', '__return_true');
@@ -960,6 +978,9 @@ add_action('woocommerce_thankyou', function ($order_id) {
 add_action('woocommerce_admin_order_data_after_order_details', function ($order) {
     $sqrip_suppress_generation = sqrip_get_plugin_option('suppress_generation');
     $sqrip_default_order_status = sqrip_get_plugin_option('order_status');
+
+    $order->update_meta_data('sqrip_refund_iban_num', get_user_meta($order->get_user_id(), 'iban_num', true));
+    $order->save();
 
     if ($sqrip_suppress_generation == 'yes' && $sqrip_default_order_status) {
         ?>

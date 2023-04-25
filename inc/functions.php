@@ -375,6 +375,18 @@ function sqrip_get_customer_iban($user)
  */
 function sqrip_set_customer_iban($user, $iban)
 {
+    $args = array(
+        'customer' => $user->ID,
+        'status' => 'any',
+    );
+    $order_query = new WC_Order_Query($args);
+    $orders = $order_query->get_orders();
+
+    foreach ($orders as $order) {
+        $order->update_meta_data('sqrip_refund_iban_num', $iban);
+        $order->save();
+    }
+
     // TODO: make the field key customizable in the sqrip options
     return update_user_meta($user->ID, 'iban_num', $iban);
 }

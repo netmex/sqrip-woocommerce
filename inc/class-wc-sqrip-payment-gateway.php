@@ -957,6 +957,9 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         $user = $order->get_user();
         $iban = sqrip_get_customer_iban($user);
 
+        $order->update_meta_data('sqrip_refund_iban_num', $iban);
+        $order->save();
+
         if (!$iban) {
             // Add note to the order for your reference
             $order->add_order_note(
@@ -1155,6 +1158,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             $order->update_meta_data('sqrip_qr_pdf_attachment_id', $sqrip_qr_pdf_attachment_id);
             $order->update_meta_data('sqrip_pdf_file_url', $sqrip_qr_pdf_url);
             $order->update_meta_data('sqrip_pdf_file_path', $sqrip_qr_pdf_path);
+            $order->update_meta_data('sqrip_refund_iban_num', get_user_meta($order->get_user_id(), 'iban_num', true));
 
             // $order->update_meta_data('sqrip_png_file_url', $sqrip_qr_png_url);
             // $order->update_meta_data('sqrip_png_file_path', $sqrip_qr_png_path);
