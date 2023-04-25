@@ -979,6 +979,9 @@ add_action('woocommerce_admin_order_data_after_order_details', function ($order)
     $sqrip_suppress_generation = sqrip_get_plugin_option('suppress_generation');
     $sqrip_default_order_status = sqrip_get_plugin_option('order_status');
 
+    $order->update_meta_data('sqrip_refund_iban_num', get_user_meta($order->get_user_id(), 'iban_num', true));
+    $order->save();
+
     if ($sqrip_suppress_generation == 'yes' && $sqrip_default_order_status) {
         ?>
         <script>
