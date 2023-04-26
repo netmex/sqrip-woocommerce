@@ -1,10 +1,10 @@
-=== sqrip – Swiss QR Invoice ===
+=== sqrip.ch ===
 Contributors: sqrip
 Donate link: https://sqrip.ch/
 Tags: woocommerce, payment, sqrip, qrcode, qr, scan, Kontoabgleich, swiss qr invoice, QR-Rechnung, EBICS, QR-facture, bulletins de versement, Einzahlungsschein, QR-Einzahlungsschein, bulletins de versement, Swiss QR Code, code QR, QR-fattura, polizze di versamento
 Requires at least: 4.7
 Tested up to: 6.2
-Stable tag: 1.7
+Stable tag: 1.7.1
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -125,6 +125,12 @@ Yes. We are already working on comparing the reconciliation of orders/purchases 
 4. sqrip API Key
 
 == Changelog ==
+
+= 1.7.1 : April 2023 =
+* Link to updated QR Invoice corrected;
+* Individual file naming corrected;
+* Minor Bug fixes.
+
 = 1.7 : April 2023 =
 * To save space in your media library on your server the QR Invoices (PDF) are automatically deleted, if certain status of the order are met (e.g. Cancelled) or x days after the creation have passed;
 * Inital 6 digits for Reference Numbers are now available in combination with regular IBAN. Letters are possible (e.g. "RF39 SQRI PX11 1115 2023 0331 0");
