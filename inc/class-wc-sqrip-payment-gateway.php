@@ -818,6 +818,10 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 
         }
 
+        if (!$additional_information) {
+            unset($body['payment_information']['message']);
+        }
+
         $body = wp_json_encode($body);
 
         $args = [
