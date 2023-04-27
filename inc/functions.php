@@ -186,6 +186,10 @@ function sqrip_prepare_qr_code_request_body($currency_symbol, $amount, $order_nu
         $body['payment_information']['initial_digits'] = $initial_digits;
     }
 
+    if (!$additional_information) {
+        unset($body['payment_information']['message']);
+    }
+
     return $body;
 }
 
