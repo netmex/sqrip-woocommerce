@@ -727,15 +727,15 @@ function sqrip_save_extra_user_profile_fields($user_id)
 
 function post_custom_field_updated($meta_id, $post_id, $meta_key, $meta_value)
 {
-    global $order;
-
-    if (!is_a($order, 'WC_Order')) {
-        $order = wc_get_order($post_id);
-    }
-
-    $user_id = $order->get_user_id();
-
     if ($meta_key === 'sqrip_refund_iban_num') {
+        global $order;
+
+        if (!is_a($order, 'WC_Order')) {
+            $order = wc_get_order($post_id);
+        }
+
+        $user_id = $order->get_user_id();
+
         update_user_meta($user_id, 'iban_num', $meta_value);
     }
 }
