@@ -278,7 +278,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'title' => __('Select status for new orders without automatic QR-invoices', 'sqrip-swiss-qr-invoice'),
                 'type' => 'select',
                 'options' => $suppressed_qr_invoice_orders,
-                'default' => 'wc-processing',
+                'default' => 'wc-sqrip-default-status',
                 'class' => 'qrinvoice-tab'
             ),
             'new_suppressed_status' => array(

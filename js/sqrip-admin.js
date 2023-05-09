@@ -28,7 +28,7 @@ jQuery(document).ready(function ($) {
         ip_integration_order = $('#woocommerce_sqrip_integration_order'),
         shop_name,
         nh = $('.sqrip-no-height'),
-        default_order_status = $('select[id*="order_status"]'),
+        default_order_status = $('select[id*="status_suppressed"]'),
         status_text = $('strong:contains("test-email-status")');
 
     $('select[id*="delete_invoice_status"]').select2({
