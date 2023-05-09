@@ -970,10 +970,13 @@ add_action('woocommerce_thankyou', function ($order_id) {
     $order = wc_get_order($order_id);
 
     $sqrip_suppress_generation = sqrip_get_plugin_option('suppress_generation');
-    $sqrip_default_order_status = sqrip_get_plugin_option('order_status');
+    $sqrip_default_order_status = sqrip_get_plugin_option('status_suppressed');
+    $sqrip_default_awaiting_order_status = sqrip_get_plugin_option('status_awaiting');
 
     if ($sqrip_suppress_generation == 'yes' && $sqrip_default_order_status) {
         $order->update_status($sqrip_default_order_status);
+    } else {
+        $order->update_status($sqrip_default_awaiting_order_status);
     }
 }, 10, 3);
 

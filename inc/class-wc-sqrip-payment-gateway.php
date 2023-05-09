@@ -1167,8 +1167,6 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             // $order->update_meta_data('sqrip_png_file_url', $sqrip_qr_png_url);
             // $order->update_meta_data('sqrip_png_file_path', $sqrip_qr_png_path);
 
-            // Update order status
-            $order->update_status('on-hold');
             // Empty the cart (Very important step)
             $woocommerce->cart->empty_cart();
             $order->save();
