@@ -13,6 +13,7 @@ jQuery(document).ready(function ($) {
         ip_order_stt = $('#woocommerce_sqrip_new_status'),
         ip_aworder_stt = $('#woocommerce_sqrip_new_awaiting_status'),
         ip_suorder_stt = $('#woocommerce_sqrip_new_suppressed_status'),
+        ip_default_order_stt = $('#woocommerce_sqrip_status_suppressed'),
         ip_refund_token = $('#woocommerce_sqrip_return_token'),
         btn_toggle_stt = $('.sqrip-toggle-order-status'),
         btn_toggle_awaiting_stt = $('.sqrip-toggle-awaiting-status'),
@@ -394,12 +395,15 @@ jQuery(document).ready(function ($) {
             init_ip_qrref_format();
             $('.sqrip-btn-send-test-email').show();
             $('.sqrip-test-warning').show();
-        }
 
-        // else if (data == "comparison") {
-        //     toggle_service_options(ebics_service.is(':checked'), $('.ebics-service'));
-        //     toggle_service_options(camt_service.is(':checked'), $('.camt-service'));
-        // }
+            if (ip_suppress_generation.is(':checked') && tab_active === 'qrinvoice') {
+                $('.sqrip-new-order-status').show();
+                $('.sqrip-new-default-order-status').show();
+            } else {
+                $('.sqrip-new-order-status').hide();
+                $('.sqrip-new-default-order-status').hide();
+            }
+        }
     }
 
     function init_ip_qrref_format() {
@@ -539,7 +543,8 @@ jQuery(document).ready(function ($) {
     }
 
     if (ip_suorder_stt.length) {
-        ip_suorder_stt.closest('tr').addClass('sqrip-order-status');
+        ip_suorder_stt.closest('tr').addClass('sqrip-new-order-status');
+        ip_default_order_stt.closest('tr').addClass('sqrip-new-default-order-status');
         ip_ft_new_sustatus.prop('checked', false);
 
         btn_create_suorder_html = '<button id="btn_create_suorder_stt" class="button-secondary sqrip-btn sqrip-btn-create-order-stt">' + sqrip.txt_suppressed_create + '</button>';
@@ -565,7 +570,15 @@ jQuery(document).ready(function ($) {
                     btn_save.trigger('click');
                 }, 200);
             }
-        })
+        });
+
+        if (ip_suppress_generation.is(':checked') && tab_active === 'qrinvoice') {
+            $('.sqrip-new-order-status').show();
+            $('.sqrip-new-default-order-status').show();
+        } else {
+            $('.sqrip-new-order-status').hide();
+            $('.sqrip-new-default-order-status').hide();
+        }
     }
 
     if (ip_suppress_generation.length) {
@@ -580,7 +593,7 @@ jQuery(document).ready(function ($) {
                 $('.sqrip-new-default-order-status').hide();
             }
 
-            if (default_order_status.val() === 'wc-sqrip-default-order' && ip_suppress_generation.is(':checked')) {
+            if (default_order_status.val() === 'wc-sqrip-default-status' && ip_suppress_generation.is(':checked')) {
                 default_order_status.addClass('sqrip-rounded-red');
             } else {
                 default_order_status.removeClass('sqrip-rounded-red');
@@ -591,7 +604,7 @@ jQuery(document).ready(function ($) {
     }
 
     default_order_status.on('change', function () {
-        if ($(this).val() === 'wc-sqrip-default-order') {
+        if ($(this).val() === 'wc-sqrip-default-status') {
             default_order_status.addClass('sqrip-rounded-red');
         } else {
             default_order_status.removeClass('sqrip-rounded-red');

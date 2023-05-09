@@ -76,6 +76,9 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 
         $tooltip = sprintf('<span class="sqrip-tooltip"><span>%s</span></span>', __('Do not set this too low! Remove input to disable the setting.', 'sqrip-swiss-qr-invoice'));
 
+        $suppressed_qr_invoice_orders = wc_get_order_statuses();
+        $suppressed_qr_invoice_orders = ['wc-sqrip-default-status' => 'Please select an option'] + $suppressed_qr_invoice_orders;
+
         $this->form_fields = array(
             'tabs' => array(
                 'type' => 'tab',
@@ -271,6 +274,36 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'default' => 'no',
                 'class' => 'qrinvoice-tab'
             ),
+            'status_suppressed' => array(
+                'title' => __('Select status for new orders without automatic QR-invoices', 'sqrip-swiss-qr-invoice'),
+                'type' => 'select',
+                'options' => $suppressed_qr_invoice_orders,
+                'default' => 'wc-processing',
+                'class' => 'qrinvoice-tab'
+            ),
+            'new_suppressed_status' => array(
+                'title' => '',
+                'type' => 'text',
+                'class' => 'qrinvoice-tab',
+                'default' => __('Suppressed status', 'sqrip-swiss-qr-invoice'),
+                'description' => __('What is the order status that waits for confirmation of made payment to your bank account?', 'sqrip-swiss-qr-invoice') . '</ br>' . sprintf(__('This selects the status with which new orders are created if the QR-Invoice generation suppression is active. If there is no suitable status available, you can create one right %s', 'sqrip-swiss-qr-invoice'), '<a href="#" class="sqrip-toggle-suppressed-status">' . __('here', 'sqrip-swiss-qr-invoice') . '</a>'),
+            ),
+            'enabled_new_sustatus' => array(
+                'title' => '',
+                'type' => 'checkbox',
+                'label' => ' ',
+                'default' => 'no',
+                'css' => 'visibility: hidden; position: absolute',
+                'class' => 'comparison-tab sqrip-no-height'
+            ),
+            'first_time_new_sustatus' => array(
+                'title' => '',
+                'type' => 'checkbox',
+                'label' => ' ',
+                'default' => 'no',
+                'css' => 'visibility: hidden; position: absolute',
+                'class' => 'comparison-tab sqrip-no-height'
+            ),
             'integration_order' => array(
                 'title' => __('Show QR-invoice on confirmation page', 'sqrip-swiss-qr-invoice'),
                 'label' => __('Offer QR invoice for download', 'sqrip-swiss-qr-invoice'),
@@ -368,36 +401,6 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'class' => 'comparison-tab sqrip-no-height'
             ),
             'first_time_new_awstatus' => array(
-                'title' => '',
-                'type' => 'checkbox',
-                'label' => ' ',
-                'default' => 'no',
-                'css' => 'visibility: hidden; position: absolute',
-                'class' => 'comparison-tab sqrip-no-height'
-            ),
-            'status_suppressed' => array(
-                'title' => __('Select status for new orders without automatic QR-invoices', 'sqrip-swiss-qr-invoice'),
-                'type' => 'select',
-                'options' => wc_get_order_statuses(),
-                'default' => 'wc-processing',
-                'class' => 'comparison-tab'
-            ),
-            'new_suppressed_status' => array(
-                'title' => '',
-                'type' => 'text',
-                'class' => 'comparison-tab',
-                'default' => __('Suppressed status', 'sqrip-swiss-qr-invoice'),
-                'description' => __('What is the order status that waits for confirmation of made payment to your bank account?', 'sqrip-swiss-qr-invoice') . '</ br>' . sprintf(__('This selects the status with which new orders are created if the QR-Invoice generation suppression is active. If there is no suitable status available, you can create one right %s', 'sqrip-swiss-qr-invoice'), '<a href="#" class="sqrip-toggle-suppressed-status">' . __('here', 'sqrip-swiss-qr-invoice') . '</a>'),
-            ),
-            'enabled_new_sustatus' => array(
-                'title' => '',
-                'type' => 'checkbox',
-                'label' => ' ',
-                'default' => 'no',
-                'css' => 'visibility: hidden; position: absolute',
-                'class' => 'comparison-tab sqrip-no-height'
-            ),
-            'first_time_new_sustatus' => array(
                 'title' => '',
                 'type' => 'checkbox',
                 'label' => ' ',
