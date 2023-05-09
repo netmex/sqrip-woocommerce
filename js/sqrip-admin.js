@@ -14,8 +14,9 @@ jQuery(document).ready(function ($) {
         ip_aworder_stt = $('#woocommerce_sqrip_new_awaiting_status'),
         ip_suorder_stt = $('#woocommerce_sqrip_new_suppressed_status'),
         ip_refund_token = $('#woocommerce_sqrip_return_token'),
-        btn_toggle_stt = $('.sqrip-toggle-order-satus'),
-        btn_toggle_payment_stt = $('.sqrip-toggle-payment-satus'),
+        btn_toggle_stt = $('.sqrip-toggle-order-status'),
+        btn_toggle_awaiting_stt = $('.sqrip-toggle-awaiting-status'),
+        btn_toggle_suppressed_stt = $('.sqrip-toggle-suppressed-status'),
         ip_enb_new_status = $('#woocommerce_sqrip_enabled_new_status'),
         ip_ft_new_status = $('#woocommerce_sqrip_first_time_new_status'),
         ip_enb_new_awstatus = $('#woocommerce_sqrip_enabled_new_awstatus'),
@@ -511,8 +512,14 @@ jQuery(document).ready(function ($) {
         ip_aworder_stt.closest('tr').addClass('sqrip-order-status');
         ip_ft_new_awstatus.prop('checked', false);
 
-        btn_create_aworder_html = '<button id="btn_create_aworder_stt" class="button-secondary sqrip-btn sqrip-btn-create-order-stt">' + sqrip.txt_create + '</button>';
+        btn_create_aworder_html = '<button id="btn_create_aworder_stt" class="button-secondary sqrip-btn sqrip-btn-create-order-stt">' + sqrip.txt_awaiting_create + '</button>';
         ip_aworder_stt.after(btn_create_aworder_html);
+
+        btn_toggle_awaiting_stt.on('click', function (e) {
+            e.preventDefault();
+
+            $(this).closest('tr').toggleClass('sqrip-show');
+        })
 
         btn_create_aworder = $('#btn_create_aworder_stt');
 
@@ -535,8 +542,14 @@ jQuery(document).ready(function ($) {
         ip_suorder_stt.closest('tr').addClass('sqrip-order-status');
         ip_ft_new_sustatus.prop('checked', false);
 
-        btn_create_suorder_html = '<button id="btn_create_suorder_stt" class="button-secondary sqrip-btn sqrip-btn-create-order-stt">' + sqrip.txt_create + '</button>';
+        btn_create_suorder_html = '<button id="btn_create_suorder_stt" class="button-secondary sqrip-btn sqrip-btn-create-order-stt">' + sqrip.txt_suppressed_create + '</button>';
         ip_suorder_stt.after(btn_create_suorder_html);
+
+        btn_toggle_suppressed_stt.on('click', function (e) {
+            e.preventDefault();
+
+            $(this).closest('tr').toggleClass('sqrip-show');
+        })
 
         btn_create_suorder = $('#btn_create_suorder_stt');
 

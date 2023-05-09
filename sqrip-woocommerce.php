@@ -128,6 +128,8 @@ add_action('admin_enqueue_scripts', function () {
         wp_enqueue_script('sqrip-admin', plugins_url('js/sqrip-admin.js', __FILE__), array('jquery'), '1.5.5', true);
 
         $sqrip_new_status = sqrip_get_plugin_option('enabled_new_status');
+        $sqrip_new_awaiting_status = sqrip_get_plugin_option('enabled_new_awstatus');
+        $sqrip_new_suppressed_status = sqrip_get_plugin_option('enabled_new_sustatus');
 
         $sqrip_details = sqrip_get_user_details('', 'full');
 
@@ -137,6 +139,8 @@ add_action('admin_enqueue_scripts', function () {
                 'txt_check_connection' => __('Connection test', 'sqrip-swiss-qr-invoice'),
                 'txt_validate_iban' => __('Check', 'sqrip-swiss-qr-invoice'),
                 'txt_create' => $sqrip_new_status == 'yes' ? __('Update', 'sqrip-swiss-qr-invoice') : __('Create', 'sqrip-swiss-qr-invoice'),
+                'txt_awaiting_create' => $sqrip_new_awaiting_status == 'yes' ? __('Update', 'sqrip-swiss-qr-invoice') : __('Create', 'sqrip-swiss-qr-invoice'),
+                'txt_suppressed_create' => $sqrip_new_suppressed_status == 'yes' ? __('Update', 'sqrip-swiss-qr-invoice') : __('Create', 'sqrip-swiss-qr-invoice'),
                 'txt_send_test_email' => sprintf(
                     __('Send test to %s', 'sqrip-swiss-qr-invoice'),
                     esc_html(get_option('admin_email'))

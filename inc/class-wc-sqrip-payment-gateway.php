@@ -327,7 +327,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'type' => 'text',
                 'class' => 'comparison-tab',
                 'default' => __('Completed, Paid', 'sqrip-swiss-qr-invoice'),
-                'description' => __('To what order status should we change your order, once the payment has been confirmed?', 'sqrip-swiss-qr-invoice') . '</ br>' . sprintf(__('If there is no suitable status available, you can create one right %s', 'sqrip-swiss-qr-invoice'), '<a href="#" class="sqrip-toggle-order-satus">' . __('here', 'sqrip-swiss-qr-invoice') . '</a>'),
+                'description' => __('To what order status should we change your order, once the payment has been confirmed?', 'sqrip-swiss-qr-invoice') . '</ br>' . sprintf(__('If there is no suitable status available, you can create one right %s', 'sqrip-swiss-qr-invoice'), '<a href="#" class="sqrip-toggle-order-status">' . __('here', 'sqrip-swiss-qr-invoice') . '</a>'),
             ),
             'enabled_new_status' => array(
                 'title' => '',
@@ -357,7 +357,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'type' => 'text',
                 'class' => 'comparison-tab',
                 'default' => __('Awaiting payment', 'sqrip-swiss-qr-invoice'),
-                'description' => $description . '</br></br>' . sprintf(__('If there is no suitable status available, you can create one right %s', 'sqrip-swiss-qr-invoice'), '<a href="#" class="sqrip-toggle-order-satus">' . __('here', 'sqrip-swiss-qr-invoice') . '</a>'),
+                'description' => $description . '</br></br>' . sprintf(__('If there is no suitable status available, you can create one right %s', 'sqrip-swiss-qr-invoice'), '<a href="#" class="sqrip-toggle-awaiting-status">' . __('here', 'sqrip-swiss-qr-invoice') . '</a>'),
             ),
             'enabled_new_awstatus' => array(
                 'title' => '',
@@ -376,18 +376,18 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'class' => 'comparison-tab sqrip-no-height'
             ),
             'status_suppressed' => array(
-                'title' => __('Status of awaiting payment orders', 'sqrip-swiss-qr-invoice'),
+                'title' => __('Select status for new orders without automatic QR-invoices', 'sqrip-swiss-qr-invoice'),
                 'type' => 'select',
                 'options' => wc_get_order_statuses(),
-                'default' => 'wc-pending',
+                'default' => 'wc-processing',
                 'class' => 'comparison-tab'
             ),
             'new_suppressed_status' => array(
                 'title' => '',
                 'type' => 'text',
                 'class' => 'comparison-tab',
-                'default' => __('Awaiting payment', 'sqrip-swiss-qr-invoice'),
-                'description' => $description . '</br></br>' . sprintf(__('If there is no suitable status available, you can create one right %s', 'sqrip-swiss-qr-invoice'), '<a href="#" class="sqrip-toggle-order-satus">' . __('here', 'sqrip-swiss-qr-invoice') . '</a>'),
+                'default' => __('Suppressed status', 'sqrip-swiss-qr-invoice'),
+                'description' => __('What is the order status that waits for confirmation of made payment to your bank account?', 'sqrip-swiss-qr-invoice') . '</ br>' . sprintf(__('This selects the status with which new orders are created if the QR-Invoice generation suppression is active. If there is no suitable status available, you can create one right %s', 'sqrip-swiss-qr-invoice'), '<a href="#" class="sqrip-toggle-suppressed-status">' . __('here', 'sqrip-swiss-qr-invoice') . '</a>'),
             ),
             'enabled_new_sustatus' => array(
                 'title' => '',
@@ -726,7 +726,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         }
 
         if (isset($post_data['woocommerce_sqrip_enabled_new_sustatus']) && !empty($post_data['woocommerce_sqrip_enabled_new_sustatus']) && isset($post_data['woocommerce_sqrip_first_time_new_sustatus'])) {
-            $_POST['woocommerce_sqrip_status_supppressed'] = 'wc-sqrip-suppressed';
+            $_POST['woocommerce_sqrip_status_suppressed'] = 'wc-sqrip-suppressed';
         }
 
         return parent::process_admin_options();
