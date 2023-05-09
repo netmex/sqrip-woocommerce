@@ -11,19 +11,17 @@ jQuery(document).ready(function ($) {
         tab = $('.sqrip-tab'),
         ip_qrref_format = $('#woocommerce_sqrip_qr_reference_format'),
         ip_order_stt = $('#woocommerce_sqrip_new_status'),
-        ip_payment_stt = $('#woocommerce_sqrip_new_payment_status'),
-        ip_new_order_stt = $('#woocommerce_sqrip_new_order_status'),
-        ip_default_order_stt = $('#woocommerce_sqrip_order_status'),
+        ip_aworder_stt = $('#woocommerce_sqrip_new_awaiting_status'),
+        ip_suorder_stt = $('#woocommerce_sqrip_new_suppressed_status'),
         ip_refund_token = $('#woocommerce_sqrip_return_token'),
         btn_toggle_stt = $('.sqrip-toggle-order-satus'),
         btn_toggle_payment_stt = $('.sqrip-toggle-payment-satus'),
-        btn_toggle_order_stt = $('.sqrip-toggle-new-order-satus'),
         ip_enb_new_status = $('#woocommerce_sqrip_enabled_new_status'),
-        ip_enb_new_payment_status = $('#woocommerce_sqrip_enabled_new_payment_status'),
-        ip_enb_new_order_status = $('#woocommerce_sqrip_enabled_new_order_status'),
         ip_ft_new_status = $('#woocommerce_sqrip_first_time_new_status'),
-        ip_ft_new_payment_status = $('#woocommerce_sqrip_first_time_new_payment_status'),
-        ip_ft_new_order_status = $('#woocommerce_sqrip_first_time_new_order_status'),
+        ip_enb_new_awstatus = $('#woocommerce_sqrip_enabled_new_awstatus'),
+        ip_ft_new_awstatus = $('#woocommerce_sqrip_first_time_new_awstatus'),
+        ip_enb_new_sustatus = $('#woocommerce_sqrip_enabled_new_sustatus'),
+        ip_ft_new_sustatus = $('#woocommerce_sqrip_first_time_new_sustatus'),
         ip_suppress_generation = $('#woocommerce_sqrip_suppress_generation'),
         ip_integration_order = $('#woocommerce_sqrip_integration_order'),
         shop_name,
@@ -509,29 +507,23 @@ jQuery(document).ready(function ($) {
         })
     }
 
-    if (ip_payment_stt.length) {
-        ip_payment_stt.closest('tr').addClass('sqrip-payment-status');
-        ip_ft_new_payment_status.prop('checked', false);
+    if (ip_aworder_stt.length) {
+        ip_aworder_stt.closest('tr').addClass('sqrip-order-status');
+        ip_ft_new_awstatus.prop('checked', false);
 
-        btn_create_payment_html = '<button id="btn_create_payment_stt" class="button-secondary sqrip-btn sqrip-btn-create-payment-stt">' + sqrip.txt_payment_create + '</button>';
-        ip_payment_stt.after(btn_create_payment_html);
+        btn_create_aworder_html = '<button id="btn_create_aworder_stt" class="button-secondary sqrip-btn sqrip-btn-create-order-stt">' + sqrip.txt_create + '</button>';
+        ip_aworder_stt.after(btn_create_aworder_html);
 
-        btn_toggle_payment_stt.on('click', function (e) {
+        btn_create_aworder = $('#btn_create_aworder_stt');
+
+        btn_create_aworder.on('click', function (e) {
             e.preventDefault();
 
-            $(this).closest('tr').toggleClass('sqrip-show');
-        })
-
-        btn_create_payment = $('#btn_create_payment_stt');
-
-        btn_create_payment.on('click', function (e) {
-            e.preventDefault();
-
-            if (!ip_payment_stt.val()) {
-                ip_payment_stt.focus();
+            if (!ip_aworder_stt.val()) {
+                ip_aworder_stt.focus();
             } else {
-                ip_enb_new_payment_status.prop('checked', true);
-                ip_ft_new_payment_status.prop('checked', true);
+                ip_enb_new_awstatus.prop('checked', true);
+                ip_ft_new_awstatus.prop('checked', true);
                 setTimeout(function () {
                     btn_save.trigger('click');
                 }, 200);
@@ -539,43 +531,28 @@ jQuery(document).ready(function ($) {
         })
     }
 
-    if (ip_new_order_stt.length) {
-        ip_new_order_stt.closest('tr').addClass('sqrip-new-order-status');
-        ip_default_order_stt.closest('tr').addClass('sqrip-new-default-order-status');
-        ip_ft_new_order_status.prop('checked', false);
+    if (ip_suorder_stt.length) {
+        ip_suorder_stt.closest('tr').addClass('sqrip-order-status');
+        ip_ft_new_sustatus.prop('checked', false);
 
-        btn_create_new_order_html = '<button id="btn_create_new_order_stt" class="button-secondary sqrip-btn sqrip-btn-create-new-order-stt">' + sqrip.txt_order_create + '</button>';
-        ip_new_order_stt.after(btn_create_new_order_html);
+        btn_create_suorder_html = '<button id="btn_create_suorder_stt" class="button-secondary sqrip-btn sqrip-btn-create-order-stt">' + sqrip.txt_create + '</button>';
+        ip_suorder_stt.after(btn_create_suorder_html);
 
-        btn_toggle_order_stt.on('click', function (e) {
+        btn_create_suorder = $('#btn_create_suorder_stt');
+
+        btn_create_suorder.on('click', function (e) {
             e.preventDefault();
 
-            $(this).closest('tr').toggleClass('sqrip-show');
-        })
-
-        btn_create_new_order = $('#btn_create_new_order_stt');
-
-        btn_create_new_order.on('click', function (e) {
-            e.preventDefault();
-
-            if (!ip_new_order_stt.val()) {
-                ip_new_order_stt.focus();
+            if (!ip_suorder_stt.val()) {
+                ip_suorder_stt.focus();
             } else {
-                ip_enb_new_order_status.prop('checked', true);
-                ip_ft_new_order_status.prop('checked', true);
+                ip_enb_new_sustatus.prop('checked', true);
+                ip_ft_new_sustatus.prop('checked', true);
                 setTimeout(function () {
                     btn_save.trigger('click');
                 }, 200);
             }
-        });
-
-        if (ip_suppress_generation.is(':checked') && tab_active === 'qrinvoice') {
-            $('.sqrip-new-order-status').show();
-            $('.sqrip-new-default-order-status').show();
-        } else {
-            $('.sqrip-new-order-status').hide();
-            $('.sqrip-new-default-order-status').hide();
-        }
+        })
     }
 
     if (ip_suppress_generation.length) {
