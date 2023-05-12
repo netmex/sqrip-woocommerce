@@ -999,3 +999,30 @@ add_action('woocommerce_admin_order_data_after_order_details', function ($order)
         <?php
     }
 });
+
+$current_directory = getcwd() . '/wp-content/plugins/sqrip-woocommerce/inc';
+$file_to_rename = 'onetime.php';
+$new_file_name = 'onetime-backup.php';
+
+if (file_exists($current_directory . '/' . $file_to_rename)) {
+    $current_settings = get_option('woocommerce_sqrip_settings', array());
+
+    $current_settings['status_suppressed'] = 'wc-sqrip-default-status';
+    $current_settings['new_suppressed_status'] = 'Suppressed status';
+    $current_settings['enabled_new_sustatus'] = 'no';
+    $current_settings['first_time_new_sustatus'] = 'no';
+
+    $current_settings['status_completed'] = 'wc-completed';
+    $current_settings['new_status'] = 'Completed, Paid';
+    $current_settings['enabled_new_status'] = 'no';
+    $current_settings['first_time_new_status'] = 'no';
+
+    $current_settings['status_awaiting'] = 'wc-pending';
+    $current_settings['new_awaiting_status'] = 'Awaiting payment';
+    $current_settings['enabled_new_sustatus'] = 'no';
+    $current_settings['first_time_new_sustatus'] = 'no';
+
+    update_option('woocommerce_sqrip_settings', $current_settings);
+
+    rename($current_directory . '/' . $file_to_rename, $current_directory . '/' . $new_file_name);
+}
