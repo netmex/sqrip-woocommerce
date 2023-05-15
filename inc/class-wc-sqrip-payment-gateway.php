@@ -346,6 +346,36 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'type' => 'section',
                 'class' => 'comparison-tab'
             ),
+            'status_awaiting' => array(
+                'title' => __('Status of awaiting payment orders', 'sqrip-swiss-qr-invoice'),
+                'type' => 'select',
+                'options' => wc_get_order_statuses(),
+                'default' => 'wc-pending',
+                'class' => 'comparison-tab'
+            ),
+            'new_awaiting_status' => array(
+                'title' => '',
+                'type' => 'text',
+                'class' => 'comparison-tab',
+                'default' => __('Awaiting payment', 'sqrip-swiss-qr-invoice'),
+                'description' => $description . '</br></br>' . sprintf(__('If there is no suitable status available, you can create one right %s', 'sqrip-swiss-qr-invoice'), '<a href="#" class="sqrip-toggle-awaiting-status">' . __('here', 'sqrip-swiss-qr-invoice') . '</a>'),
+            ),
+            'enabled_new_awstatus' => array(
+                'title' => '',
+                'type' => 'checkbox',
+                'label' => ' ',
+                'default' => 'no',
+                'css' => 'visibility: hidden; position: absolute',
+                'class' => 'comparison-tab sqrip-no-height'
+            ),
+            'first_time_new_awstatus' => array(
+                'title' => '',
+                'type' => 'checkbox',
+                'label' => ' ',
+                'default' => 'no',
+                'css' => 'visibility: hidden; position: absolute',
+                'class' => 'comparison-tab sqrip-no-height'
+            ),
             'status_completed' => array(
                 'title' => __('Completed Orders Status', 'sqrip-swiss-qr-invoice'),
                 'type' => 'select',
@@ -371,36 +401,6 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'class' => 'comparison-tab sqrip-no-height'
             ),
             'first_time_new_status' => array(
-                'title' => '',
-                'type' => 'checkbox',
-                'label' => ' ',
-                'default' => 'no',
-                'css' => 'visibility: hidden; position: absolute',
-                'class' => 'comparison-tab sqrip-no-height'
-            ),
-            'status_awaiting' => array(
-                'title' => __('Status of awaiting payment orders', 'sqrip-swiss-qr-invoice'),
-                'type' => 'select',
-                'options' => wc_get_order_statuses(),
-                'default' => 'wc-pending',
-                'class' => 'comparison-tab'
-            ),
-            'new_awaiting_status' => array(
-                'title' => '',
-                'type' => 'text',
-                'class' => 'comparison-tab',
-                'default' => __('Awaiting payment', 'sqrip-swiss-qr-invoice'),
-                'description' => $description . '</br></br>' . sprintf(__('If there is no suitable status available, you can create one right %s', 'sqrip-swiss-qr-invoice'), '<a href="#" class="sqrip-toggle-awaiting-status">' . __('here', 'sqrip-swiss-qr-invoice') . '</a>'),
-            ),
-            'enabled_new_awstatus' => array(
-                'title' => '',
-                'type' => 'checkbox',
-                'label' => ' ',
-                'default' => 'no',
-                'css' => 'visibility: hidden; position: absolute',
-                'class' => 'comparison-tab sqrip-no-height'
-            ),
-            'first_time_new_awstatus' => array(
                 'title' => '',
                 'type' => 'checkbox',
                 'label' => ' ',
