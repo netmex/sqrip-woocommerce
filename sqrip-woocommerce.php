@@ -128,8 +128,8 @@ add_action('admin_enqueue_scripts', function () {
         wp_enqueue_script('sqrip-admin', plugins_url('js/sqrip-admin.js', __FILE__), array('jquery'), '1.5.5', true);
 
         $sqrip_new_status = sqrip_get_plugin_option('enabled_new_status');
-        $sqrip_new_payment_status = sqrip_get_plugin_option('enabled_new_payment_status');
-        $sqrip_new_order_status = sqrip_get_plugin_option('enabled_new_order_status');
+        $sqrip_new_awaiting_status = sqrip_get_plugin_option('enabled_new_awstatus');
+        $sqrip_new_suppressed_status = sqrip_get_plugin_option('enabled_new_sustatus');
 
         $sqrip_details = sqrip_get_user_details('', 'full');
 
@@ -139,8 +139,8 @@ add_action('admin_enqueue_scripts', function () {
                 'txt_check_connection' => __('Connection test', 'sqrip-swiss-qr-invoice'),
                 'txt_validate_iban' => __('Check', 'sqrip-swiss-qr-invoice'),
                 'txt_create' => $sqrip_new_status == 'yes' ? __('Update', 'sqrip-swiss-qr-invoice') : __('Create', 'sqrip-swiss-qr-invoice'),
-                'txt_payment_create' => $sqrip_new_payment_status == 'yes' ? __('Update', 'sqrip-swiss-qr-invoice') : __('Create', 'sqrip-swiss-qr-invoice'),
-                'txt_order_create' => $sqrip_new_order_status == 'yes' ? __('Update', 'sqrip-swiss-qr-invoice') : __('Create', 'sqrip-swiss-qr-invoice'),
+                'txt_awaiting_create' => $sqrip_new_awaiting_status == 'yes' ? __('Update', 'sqrip-swiss-qr-invoice') : __('Create', 'sqrip-swiss-qr-invoice'),
+                'txt_suppressed_create' => $sqrip_new_suppressed_status == 'yes' ? __('Update', 'sqrip-swiss-qr-invoice') : __('Create', 'sqrip-swiss-qr-invoice'),
                 'txt_send_test_email' => sprintf(
                     __('Send test to %s', 'sqrip-swiss-qr-invoice'),
                     esc_html(get_option('admin_email'))
@@ -768,49 +768,98 @@ function sqrip_register_new_order_status()
 
 add_action('init', 'sqrip_register_new_order_status');
 
-function sqrip_register_new_payment_status()
+// Register new status
+function sqrip_register_new_order_awstatus()
 {
-    $sqrip_new_payment_status = sqrip_get_plugin_option('new_payment_status');
-    $enabled_new_payment_status = sqrip_get_plugin_option('enabled_new_payment_status');
+    $sqrip_new_status = sqrip_get_plugin_option('new_awaiting_status');
+    $enabled_new_status = sqrip_get_plugin_option('enabled_new_awstatus');
 
-    if (!$sqrip_new_payment_status || $enabled_new_payment_status == "no") {
+    if (!$sqrip_new_status || $enabled_new_status == "no") {
         return;
     }
 
-    register_post_status('wc-sqrip-payment-paid', array(
-        'label' => $sqrip_new_payment_status,
+    register_post_status('wc-sqrip-awaiting', array(
+        'label' => $sqrip_new_status,
         'public' => true,
         'show_in_admin_status_list' => true,
         'show_in_admin_all_list' => true,
         'exclude_from_search' => false,
-        'label_count' => _n_noop($sqrip_new_payment_status . ' <span class="count">(%s)</span>', $sqrip_new_payment_status . ' <span class="count">(%s)</span>')
+        'label_count' => _n_noop($sqrip_new_status . ' <span class="count">(%s)</span>', $sqrip_new_status . ' <span class="count">(%s)</span>')
 
     ));
 }
 
-add_action('init', 'sqrip_register_new_order_default_status');
+add_action('init', 'sqrip_register_new_order_awstatus');
 
-function sqrip_register_new_order_default_status()
+// Register new status
+function sqrip_register_new_order_sustatus()
 {
-    $sqrip_new_order_status = sqrip_get_plugin_option('new_order_status');
-    $enabled_new_order_status = sqrip_get_plugin_option('enabled_new_order_status');
+    $sqrip_new_status = sqrip_get_plugin_option('new_suppressed_status');
+    $enabled_new_status = sqrip_get_plugin_option('enabled_new_sustatus');
 
-    if (!$sqrip_new_order_status || $enabled_new_order_status == "no") {
+    if (!$sqrip_new_status || $enabled_new_status == "no") {
         return;
     }
 
-    register_post_status('wc-sqrip-order-paid', array(
-        'label' => $sqrip_new_order_status,
+    register_post_status('wc-sqrip-suppressed', array(
+        'label' => $sqrip_new_status,
         'public' => true,
         'show_in_admin_status_list' => true,
         'show_in_admin_all_list' => true,
         'exclude_from_search' => false,
-        'label_count' => _n_noop($sqrip_new_order_status . ' <span class="count">(%s)</span>', $sqrip_new_order_status . ' <span class="count">(%s)</span>')
+        'label_count' => _n_noop($sqrip_new_status . ' <span class="count">(%s)</span>', $sqrip_new_status . ' <span class="count">(%s)</span>')
 
     ));
 }
 
-add_action('init', 'sqrip_register_new_order_default_status');
+add_action('init', 'sqrip_register_new_order_sustatus');
+
+// Add custom status to order status list
+function sqrip_add_new_order_awstatuses($order_statuses)
+{
+    $sqrip_new_status = sqrip_get_plugin_option('new_awaiting_status');
+    $enabled_new_status = sqrip_get_plugin_option('enabled_new_awstatus');
+
+    if (!$sqrip_new_status || $enabled_new_status == "no") {
+        return $order_statuses;
+    }
+
+    $new_order_statuses = array();
+
+    foreach ($order_statuses as $key => $status) {
+        $new_order_statuses[$key] = $status;
+        if ('wc-pending' === $key) {
+            $new_order_statuses['wc-sqrip-awaiting'] = $sqrip_new_status;
+        }
+    }
+    return $new_order_statuses;
+}
+
+add_filter('wc_order_statuses', 'sqrip_add_new_order_awstatuses');
+
+
+// Add custom status to order status list
+function sqrip_add_new_order_sustatuses($order_statuses)
+{
+    $sqrip_new_status = sqrip_get_plugin_option('new_suppressed_status');
+    $enabled_new_status = sqrip_get_plugin_option('enabled_new_sustatus');
+
+    if (!$sqrip_new_status || $enabled_new_status == "no") {
+        return $order_statuses;
+    }
+
+    $new_order_statuses = array();
+
+    foreach ($order_statuses as $key => $status) {
+        $new_order_statuses[$key] = $status;
+        if ('wc-processing' === $key) {
+            $new_order_statuses['wc-sqrip-suppressed'] = $sqrip_new_status;
+        }
+    }
+    return $new_order_statuses;
+}
+
+add_filter('wc_order_statuses', 'sqrip_add_new_order_sustatuses');
 
 // Add custom status to order status list
 function sqrip_add_new_order_statuses($order_statuses)
@@ -836,53 +885,6 @@ function sqrip_add_new_order_statuses($order_statuses)
 }
 
 add_filter('wc_order_statuses', 'sqrip_add_new_order_statuses');
-
-// Add custom status to order status list
-function sqrip_add_new_payment_statuses($payment_statuses)
-{
-    $sqrip_new_payment_status = sqrip_get_plugin_option('new_payment_status');
-    $enabled_new_payment_status = sqrip_get_plugin_option('enabled_new_payment_status');
-
-    if (!$sqrip_new_payment_status || $enabled_new_payment_status == "no") {
-        return $payment_statuses;
-    }
-
-    $new_payment_statuses = array();
-
-    foreach ($payment_statuses as $key => $status) {
-        $new_payment_statuses[$key] = $status;
-        if ('wc-pending' === $key) {
-            $new_payment_statuses['wc-sqrip-payment-paid'] = $sqrip_new_payment_status;
-        }
-    }
-    return $new_payment_statuses;
-}
-
-add_filter('wc_order_statuses', 'sqrip_add_new_payment_statuses');
-
-// Add custom status to order status list
-function sqrip_add_new_order_default_statuses($order_statuses)
-{
-    $sqrip_new_order_status = sqrip_get_plugin_option('new_order_status');
-    $enabled_new_order_status = sqrip_get_plugin_option('enabled_new_order_status');
-
-    if (!$sqrip_new_order_status || $enabled_new_order_status == "no") {
-        return $order_statuses;
-    }
-
-    $new_order_statuses = array();
-
-    foreach ($order_statuses as $key => $status) {
-        $new_order_statuses[$key] = $status;
-        if ('wc-pending' === $key) {
-            $new_order_statuses['wc-sqrip-order-paid'] = $sqrip_new_order_status;
-        }
-    }
-
-    return $new_order_statuses;
-}
-
-add_filter('wc_order_statuses', 'sqrip_add_new_order_default_statuses');
 
 // Add your custom order status action button (for orders with "processing" status)
 add_filter('woocommerce_admin_order_actions', 'sqrip_add_custom_order_status_actions_button', 100, 2);
@@ -968,10 +970,13 @@ add_action('woocommerce_thankyou', function ($order_id) {
     $order = wc_get_order($order_id);
 
     $sqrip_suppress_generation = sqrip_get_plugin_option('suppress_generation');
-    $sqrip_default_order_status = sqrip_get_plugin_option('order_status');
+    $sqrip_default_order_status = sqrip_get_plugin_option('status_suppressed');
+    $sqrip_default_awaiting_order_status = sqrip_get_plugin_option('status_awaiting');
 
     if ($sqrip_suppress_generation == 'yes' && $sqrip_default_order_status) {
         $order->update_status($sqrip_default_order_status);
+    } else {
+        $order->update_status($sqrip_default_awaiting_order_status);
     }
 }, 10, 3);
 
@@ -994,3 +999,30 @@ add_action('woocommerce_admin_order_data_after_order_details', function ($order)
         <?php
     }
 });
+
+$current_directory = getcwd() . '/wp-content/plugins/sqrip-woocommerce/inc';
+$file_to_rename = 'onetime.php';
+$new_file_name = 'onetime-backup.php';
+
+if (file_exists($current_directory . '/' . $file_to_rename)) {
+    $current_settings = get_option('woocommerce_sqrip_settings', array());
+
+    $current_settings['status_suppressed'] = 'wc-sqrip-default-status';
+    $current_settings['new_suppressed_status'] = 'Suppressed status';
+    $current_settings['enabled_new_sustatus'] = 'no';
+    $current_settings['first_time_new_sustatus'] = 'no';
+
+    $current_settings['status_completed'] = 'wc-completed';
+    $current_settings['new_status'] = 'Completed, Paid';
+    $current_settings['enabled_new_status'] = 'no';
+    $current_settings['first_time_new_status'] = 'no';
+
+    $current_settings['status_awaiting'] = 'wc-pending';
+    $current_settings['new_awaiting_status'] = 'Awaiting payment';
+    $current_settings['enabled_new_awstatus'] = 'no';
+    $current_settings['first_time_new_awstatus'] = 'no';
+
+    update_option('woocommerce_sqrip_settings', $current_settings);
+
+    rename($current_directory . '/' . $file_to_rename, $current_directory . '/' . $new_file_name);
+}

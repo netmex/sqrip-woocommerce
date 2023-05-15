@@ -77,7 +77,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         $tooltip = sprintf('<span class="sqrip-tooltip"><span>%s</span></span>', __('Do not set this too low! Remove input to disable the setting.', 'sqrip-swiss-qr-invoice'));
 
         $suppressed_qr_invoice_orders = wc_get_order_statuses();
-        $suppressed_qr_invoice_orders = ['wc-sqrip-default-order' => 'Please select an option'] + $suppressed_qr_invoice_orders;
+        $suppressed_qr_invoice_orders = ['wc-sqrip-default-status' => 'Please select an option'] + $suppressed_qr_invoice_orders;
 
         $this->form_fields = array(
             'tabs' => array(
@@ -274,35 +274,35 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'default' => 'no',
                 'class' => 'qrinvoice-tab'
             ),
-            'order_status' => array(
+            'status_suppressed' => array(
                 'title' => __('Select status for new orders without automatic QR-invoices', 'sqrip-swiss-qr-invoice'),
                 'type' => 'select',
                 'options' => $suppressed_qr_invoice_orders,
-                'default' => 'wc-sqrip-default-order',
+                'default' => 'wc-sqrip-default-status',
                 'class' => 'qrinvoice-tab'
             ),
-            'new_order_status' => array(
+            'new_suppressed_status' => array(
                 'title' => '',
                 'type' => 'text',
                 'class' => 'qrinvoice-tab',
-                'default' => __('', 'sqrip-swiss-qr-invoice'),
-                'description' => __('What is the order status that waits for confirmation of made payment to your bank account?', 'sqrip-swiss-qr-invoice') . '</ br>' . sprintf(__('This selects the status with which new orders are created if the QR-Invoice generation suppression is active. If there is no suitable status available, you can create one right %s', 'sqrip-swiss-qr-invoice'), '<a href="#" class="sqrip-toggle-new-order-satus">' . __('here', 'sqrip-swiss-qr-invoice') . '</a>'),
+                'default' => __('Suppressed status', 'sqrip-swiss-qr-invoice'),
+                'description' => __('What is the order status that waits for confirmation of made payment to your bank account?', 'sqrip-swiss-qr-invoice') . '</ br>' . sprintf(__('This selects the status with which new orders are created if the QR-Invoice generation suppression is active. If there is no suitable status available, you can create one right %s', 'sqrip-swiss-qr-invoice'), '<a href="#" class="sqrip-toggle-suppressed-status">' . __('here', 'sqrip-swiss-qr-invoice') . '</a>'),
             ),
-            'enabled_new_order_status' => array(
+            'enabled_new_sustatus' => array(
                 'title' => '',
                 'type' => 'checkbox',
                 'label' => ' ',
                 'default' => 'no',
                 'css' => 'visibility: hidden; position: absolute',
-                'class' => 'qrinvoice-tab sqrip-no-height'
+                'class' => 'comparison-tab sqrip-no-height'
             ),
-            'first_time_new_order_status' => array(
+            'first_time_new_sustatus' => array(
                 'title' => '',
                 'type' => 'checkbox',
                 'label' => ' ',
                 'default' => 'no',
                 'css' => 'visibility: hidden; position: absolute',
-                'class' => 'qrinvoice-tab sqrip-no-height'
+                'class' => 'comparison-tab sqrip-no-height'
             ),
             'integration_order' => array(
                 'title' => __('Show QR-invoice on confirmation page', 'sqrip-swiss-qr-invoice'),
@@ -353,14 +353,14 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'default' => 'wc-pending',
                 'class' => 'comparison-tab'
             ),
-            'new_payment_status' => array(
+            'new_awaiting_status' => array(
                 'title' => '',
                 'type' => 'text',
                 'class' => 'comparison-tab',
-                'default' => __('Open, Pending', 'sqrip-swiss-qr-invoice'),
-                'description' => __('What is the order status that waits for confirmation of made payment to your bank account?', 'sqrip-swiss-qr-invoice') . '</ br>' . sprintf(__('If there is no suitable status available, you can create one right %s', 'sqrip-swiss-qr-invoice'), '<a href="#" class="sqrip-toggle-payment-satus">' . __('here', 'sqrip-swiss-qr-invoice') . '</a>'),
+                'default' => __('Awaiting payment', 'sqrip-swiss-qr-invoice'),
+                'description' => $description . '</br></br>' . sprintf(__('If there is no suitable status available, you can create one right %s', 'sqrip-swiss-qr-invoice'), '<a href="#" class="sqrip-toggle-awaiting-status">' . __('here', 'sqrip-swiss-qr-invoice') . '</a>'),
             ),
-            'enabled_new_payment_status' => array(
+            'enabled_new_awstatus' => array(
                 'title' => '',
                 'type' => 'checkbox',
                 'label' => ' ',
@@ -368,7 +368,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'css' => 'visibility: hidden; position: absolute',
                 'class' => 'comparison-tab sqrip-no-height'
             ),
-            'first_time_new_payment_status' => array(
+            'first_time_new_awstatus' => array(
                 'title' => '',
                 'type' => 'checkbox',
                 'label' => ' ',
@@ -390,7 +390,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'type' => 'text',
                 'class' => 'comparison-tab',
                 'default' => __('Completed, Paid', 'sqrip-swiss-qr-invoice'),
-                'description' => __('To what order status should we change your order, once the payment has been confirmed?', 'sqrip-swiss-qr-invoice') . '</ br>' . sprintf(__('If there is no suitable status available, you can create one right %s', 'sqrip-swiss-qr-invoice'), '<a href="#" class="sqrip-toggle-order-satus">' . __('here', 'sqrip-swiss-qr-invoice') . '</a>'),
+                'description' => __('To what order status should we change your order, once the payment has been confirmed?', 'sqrip-swiss-qr-invoice') . '</ br>' . sprintf(__('If there is no suitable status available, you can create one right %s', 'sqrip-swiss-qr-invoice'), '<a href="#" class="sqrip-toggle-order-status">' . __('here', 'sqrip-swiss-qr-invoice') . '</a>'),
             ),
             'enabled_new_status' => array(
                 'title' => '',
@@ -724,12 +724,12 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             $_POST['woocommerce_sqrip_status_completed'] = 'wc-sqrip-paid';
         }
 
-        if (isset($post_data['woocommerce_sqrip_enabled_new_payment_status']) && !empty($post_data['woocommerce_sqrip_enabled_new_payment_status']) && isset($post_data['woocommerce_sqrip_first_time_new_payment_status'])) {
-            $_POST['woocommerce_sqrip_status_awaiting'] = 'wc-sqrip-payment-paid';
+        if (isset($post_data['woocommerce_sqrip_enabled_new_awstatus']) && !empty($post_data['woocommerce_sqrip_enabled_new_awstatus']) && isset($post_data['woocommerce_sqrip_first_time_new_awstatus'])) {
+            $_POST['woocommerce_sqrip_status_awaiting'] = 'wc-sqrip-awaiting';
         }
 
-        if (isset($post_data['woocommerce_sqrip_enabled_new_order_status']) && !empty($post_data['woocommerce_sqrip_enabled_new_order_status']) && isset($post_data['woocommerce_sqrip_first_time_new_order_status'])) {
-            $_POST['woocommerce_sqrip_order_status'] = 'wc-sqrip-order-paid';
+        if (isset($post_data['woocommerce_sqrip_enabled_new_sustatus']) && !empty($post_data['woocommerce_sqrip_enabled_new_sustatus']) && isset($post_data['woocommerce_sqrip_first_time_new_sustatus'])) {
+            $_POST['woocommerce_sqrip_status_suppressed'] = 'wc-sqrip-suppressed';
         }
 
         return parent::process_admin_options();
@@ -1167,8 +1167,6 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             // $order->update_meta_data('sqrip_png_file_url', $sqrip_qr_png_url);
             // $order->update_meta_data('sqrip_png_file_path', $sqrip_qr_png_path);
 
-            // Update order status
-            $order->update_status('on-hold');
             // Empty the cart (Very important step)
             $woocommerce->cart->empty_cart();
             $order->save();
