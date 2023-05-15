@@ -1019,8 +1019,8 @@ if (file_exists($current_directory . '/' . $file_to_rename)) {
 
     $current_settings['status_awaiting'] = 'wc-pending';
     $current_settings['new_awaiting_status'] = 'Awaiting payment';
-    $current_settings['enabled_new_sustatus'] = 'no';
-    $current_settings['first_time_new_sustatus'] = 'no';
+    $current_settings['enabled_new_awstatus'] = 'no';
+    $current_settings['first_time_new_awstatus'] = 'no';
 
     update_option('woocommerce_sqrip_settings', $current_settings);
 
