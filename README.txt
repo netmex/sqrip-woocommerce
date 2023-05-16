@@ -126,9 +126,12 @@ Yes. We are already working on comparing the reconciliation of orders/purchases 
 
 == Changelog ==
 
-= 1.7.1 : April 2023 =
+= 1.7.1 : May 2023 – Service Update =
 * Link to updated QR Invoice corrected;
 * Individual file naming corrected;
+* Potential error in attribution of files to e-mails corrected;
+* Empty "additional information" field does no longer trigger an error;
+* In case of a refund to a shop client: hint to unknown IBAN is shown;
 * Minor Bug fixes.
 
 = 1.7 : April 2023 =
