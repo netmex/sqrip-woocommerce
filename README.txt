@@ -45,7 +45,7 @@ On up to five lines or 140 characters additional information can be added to the
 - the due date (The time given to the payer to settle the invoice may be communicated as text on the payment part.).
 - the order number (Be aware: sqrip not use the order# of the plugin "WoCommerce Sequential Order Numbers")
 - any additional text (e.g. URL of webshop, thank you message)
-This fiels supports WPML.
+This field supports WPML.
 
 f) Integration
 Define the e-mail to which the qr-invoice will be attached to.
@@ -127,9 +127,9 @@ Yes. We are already working on comparing the reconciliation of orders/purchases 
 == Changelog ==
 
 = 1.7.2 : May 2023 – Service Update =
-* Link to updated QR Invoice corrected;
+* Link to updated QR invoice corrected;
 * Individual file naming corrected;
-* Potential error in attribution of files to e-mails corrected;
+* Potential error in attribution of QR invoices to e-mails corrected;
 * Empty "additional information" field does no longer trigger an error;
 * In case of a refund to a shop client: hint to unknown IBAN is shown;
 * Minor Bug fixes.
