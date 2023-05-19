@@ -981,15 +981,16 @@ add_action('woocommerce_order_status_changed', function ($post_id, $old_status, 
 
 add_action('woocommerce_thankyou', function ($order_id) {
     $order = wc_get_order($order_id);
+    if ($order->get_payment_method() == 'sqrip') {
+        $sqrip_suppress_generation = sqrip_get_plugin_option('suppress_generation');
+        $sqrip_default_order_status = sqrip_get_plugin_option('status_suppressed');
+        $sqrip_default_awaiting_order_status = sqrip_get_plugin_option('status_awaiting');
 
-    $sqrip_suppress_generation = sqrip_get_plugin_option('suppress_generation');
-    $sqrip_default_order_status = sqrip_get_plugin_option('status_suppressed');
-    $sqrip_default_awaiting_order_status = sqrip_get_plugin_option('status_awaiting');
-
-    if ($sqrip_suppress_generation == 'yes' && $sqrip_default_order_status) {
-        $order->update_status($sqrip_default_order_status);
-    } else {
-        $order->update_status($sqrip_default_awaiting_order_status);
+        if ($sqrip_suppress_generation == 'yes' && $sqrip_default_order_status) {
+            $order->update_status($sqrip_default_order_status);
+        } else {
+            $order->update_status($sqrip_default_awaiting_order_status);
+        }
     }
 }, 10, 3);
 
@@ -1001,26 +1002,28 @@ add_action('woocommerce_admin_order_data_after_order_details', function ($order)
     $order->update_meta_data('sqrip_refund_iban_num', get_user_meta($order->get_user_id(), 'iban_num', true));
     $order->save();
 
-    if ($sqrip_suppress_generation == 'yes' && $sqrip_default_order_status) {
-        ?>
-        <script>
-            jQuery(document).ready(function ($) {
-                if (window.location.href.indexOf("post-new") > -1) {
-                    $('select[name="order_status"]').val('<?php echo $sqrip_default_order_status; ?>').trigger('change');
-                }
-            });
-        </script>
-        <?php
-    } else {
-        ?>
-        <script>
-            jQuery(document).ready(function ($) {
-                if (window.location.href.indexOf("post-new") > -1) {
-                    $('select[name="order_status"]').val('<?php echo $sqrip_default_awaiting_order_status; ?>').trigger('change');
-                }
-            });
-        </script>
-        <?php
+    if ($order->get_payment_method() == 'sqrip') {
+        if ($sqrip_suppress_generation == 'yes' && $sqrip_default_order_status) {
+            ?>
+            <script>
+                jQuery(document).ready(function ($) {
+                    if (window.location.href.indexOf("post-new") > -1) {
+                        $('select[name="order_status"]').val('<?php echo $sqrip_default_order_status; ?>').trigger('change');
+                    }
+                });
+            </script>
+            <?php
+        } else {
+            ?>
+            <script>
+                jQuery(document).ready(function ($) {
+                    if (window.location.href.indexOf("post-new") > -1) {
+                        $('select[name="order_status"]').val('<?php echo $sqrip_default_awaiting_order_status; ?>').trigger('change');
+                    }
+                });
+            </script>
+            <?php
+        }
     }
 });
 
