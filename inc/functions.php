@@ -482,7 +482,7 @@ function sqrip_file_name($order_id)
     $sqrip_file_name = sqrip_rename_if_duplicates_present($sqrip_file_name);
 
     if (!preg_match('/^([\w-]+)(?=\.[\w]+$)/', $sqrip_file_name . '.pdf')) {
-        $sqrip_file_name = "$order_date" . '_' . get_bloginfo('name') . '_invoice-order_' . "$order_id";
+        $sqrip_file_name = "$order_date" . '-' . get_bloginfo('name') . '-invoice-order-' . "$order_id";
     }
 
     return $sqrip_file_name;
