@@ -894,7 +894,7 @@ function sqrip_add_custom_order_status_actions_button($actions, $order)
 
     $status_awaiting = sqrip_get_plugin_option('status_awaiting');
     $status_awaiting = str_replace('wc-', '', $status_awaiting);
-    if ($order->has_status(array($status_awaiting))) {
+    if ($order->has_status(array($status_awaiting)) && sqrip_get_plugin_option('payment_comparison_enabled')) {
 
         // The key slug defined for your action button
         $action_slug = 'sqrip_payment_confirmed';
