@@ -29,7 +29,10 @@ jQuery(document).ready(function ($) {
         shop_name,
         nh = $('.sqrip-no-height'),
         default_order_status = $('select[id*="status_suppressed"]'),
-        status_text = $('strong:contains("test-email-status")');
+        status_text = $('strong:contains("test-email-status")'),
+        ip_payment_comparison_enabled = $('#woocommerce_sqrip_payment_comparison_enabled'),
+        ip_sqrip_status_awaiting = $('#woocommerce_sqrip_status_awaiting'),
+        ip_sqrip_status_completed = $('#woocommerce_sqrip_status_completed');
 
     $('select[id*="delete_invoice_status"]').select2({
         allowClear: true
@@ -404,6 +407,22 @@ jQuery(document).ready(function ($) {
                 $('.sqrip-new-default-order-status').hide();
             }
         }
+
+        if (data === 'comparison') {
+            if (!ip_payment_comparison_enabled.is(':checked')) {
+                ip_sqrip_status_awaiting.attr('disabled', true);
+                ip_sqrip_status_completed.attr('disabled', true);
+                ip_aworder_stt.attr('disabled', true);
+                ip_order_stt.attr('disabled', true);
+                $('.sqrip-btn-create-order-stt').attr('disabled', true);
+            } else {
+                ip_sqrip_status_awaiting.attr('disabled', false);
+                ip_sqrip_status_completed.attr('disabled', false);
+                ip_aworder_stt.attr('disabled', false);
+                ip_order_stt.attr('disabled', false);
+                $('.sqrip-btn-create-order-stt').attr('disabled', false);
+            }
+        }
     }
 
     function init_ip_qrref_format() {
@@ -600,6 +619,24 @@ jQuery(document).ready(function ($) {
             }
 
             validate_form()
+        });
+    }
+
+    if (ip_payment_comparison_enabled.length) {
+        ip_payment_comparison_enabled.on('change', function () {
+            if (!$(this).is(':checked')) {
+                ip_sqrip_status_awaiting.attr('disabled', true);
+                ip_sqrip_status_completed.attr('disabled', true);
+                ip_aworder_stt.attr('disabled', true);
+                ip_order_stt.attr('disabled', true);
+                $('.sqrip-btn-create-order-stt').attr('disabled', true);
+            } else {
+                ip_sqrip_status_awaiting.attr('disabled', false);
+                ip_sqrip_status_completed.attr('disabled', false);
+                ip_aworder_stt.attr('disabled', false);
+                ip_order_stt.attr('disabled', false);
+                $('.sqrip-btn-create-order-stt').attr('disabled', false);
+            }
         });
     }
 
