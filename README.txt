@@ -4,7 +4,7 @@ Donate link: https://sqrip.ch/
 Tags: woocommerce, payment, sqrip, qrcode, qr, scan, Kontoabgleich, swiss qr invoice, QR-Rechnung, EBICS, QR-facture, bulletins de versement, Einzahlungsschein, QR-Einzahlungsschein, bulletins de versement, Swiss QR Code, code QR, QR-fattura, polizze di versamento
 Requires at least: 4.7
 Tested up to: 6.2
-Stable tag: 1.7.2
+Stable tag: 1.7.3
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -125,6 +125,11 @@ Yes. We are already working on comparing the reconciliation of orders/purchases 
 4. sqrip API Key
 
 == Changelog ==
+
+= 1.7.3 : May 2023 – Service Update =
+* Issues with file name adjustments solved;
+* Payment Comparison can be turned off, preventing order status mix-up;
+* Problems in some instances with the API token verification resolved.
 
 = 1.7.2 : May 2023 – Service Update =
 * Link to updated QR invoice corrected;
