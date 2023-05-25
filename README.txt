@@ -119,10 +119,13 @@ Yes. We are already working on comparing the reconciliation of orders/purchases 
 - Only free is even cheaper. A QR bill is available from 5 centimes. For transactions with credit card or Twint, only the fixed amounts are higher.
 
 == Screenshots ==
-1. Connection settings and designation
-2. Payee
-3. Display
-4. sqrip API Key
+1. Connection settings and naming
+2. Payee information
+3. QR invoice detail settings
+4. File naming and format
+5. Process definition and house keeping
+6. Manual Payment Comparison
+7. Refund functionality
 
 == Changelog ==
 
