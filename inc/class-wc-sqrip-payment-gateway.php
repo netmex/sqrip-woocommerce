@@ -350,7 +350,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'title' => __('Activate/Deactivate Payment Comparison', 'sqrip-swiss-qr-invoice'),
                 'label' => __('Activate sqrip for Payment Comparison', 'sqrip-swiss-qr-invoice'),
                 'type' => 'checkbox',
-                'description' => __('If activated, sqrip will add an action for orders with the status specified in setting 1 (Awaiting payment), to change the status to the one specified in setting 2 (Confirmed).', 'sqrip-swiss-qr-invoice'),
+                'description' => __('If activated, sqrip shows in the list of orders, in column "actions" (adjust view if needed), at any order that has reached order status 1 (e.g. "awaiting payment") a symbol. By clicking on that symbol the order status will be changed to the one specified in Status 2 (e.g. "Confirmed, Paid").', 'sqrip-swiss-qr-invoice'),
                 'default' => 'no',
                 'class' => 'comparison-tab'
             ),
