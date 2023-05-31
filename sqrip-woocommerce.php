@@ -970,10 +970,18 @@ add_action('woocommerce_thankyou', function ($order_id) {
     $order = wc_get_order($order_id);
     if ($order->get_payment_method() == 'sqrip') {
         $sqrip_suppress_generation = sqrip_get_plugin_option('suppress_generation');
-        $sqrip_default_order_status = sqrip_get_plugin_option('status_suppressed');
+        $sqrip_payment_comparison_enabled = sqrip_get_plugin_option('payment_comparison_enabled');
+        $sqrip_default_suppressed_status = sqrip_get_plugin_option('status_suppressed');
+        $sqrip_default_order_status = sqrip_get_plugin_option('status_awaiting');
 
-        if ($sqrip_suppress_generation == 'yes' && $sqrip_default_order_status) {
-            $order->update_status($sqrip_default_order_status);
+        if ($sqrip_suppress_generation == 'yes' && $sqrip_default_suppressed_status) {
+            $order->update_status($sqrip_default_suppressed_status);
+        } else {
+            if ($sqrip_payment_comparison_enabled == 'yes' && $sqrip_default_order_status) {
+                $order->update_status($sqrip_default_order_status);
+            } else {
+                $order->update_status('on-hold');
+            }
         }
     }
 }, 10, 3);
