@@ -410,16 +410,36 @@ jQuery(document).ready(function ($) {
 
         if (data === 'comparison') {
             if (!ip_payment_comparison_enabled.is(':checked')) {
-                ip_sqrip_status_awaiting.attr('disabled', true);
-                ip_sqrip_status_completed.attr('disabled', true);
-                ip_aworder_stt.attr('disabled', true);
-                ip_order_stt.attr('disabled', true);
+                ip_sqrip_status_awaiting.css({
+                    'pointer-events': 'none',
+                    'background-color': '#f2f2f2',
+                    'cursor': 'not-allowed',
+                    'opacity': '0.7'
+                });
+                ip_sqrip_status_completed.css({
+                    'pointer-events': 'none',
+                    'background-color': '#f2f2f2',
+                    'cursor': 'not-allowed',
+                    'opacity': '0.7'
+                });
+                ip_aworder_stt.prop('readonly', true);
+                ip_order_stt.prop('readonly', true);
                 $('.sqrip-btn-create-order-stt').attr('disabled', true);
             } else {
-                ip_sqrip_status_awaiting.attr('disabled', false);
-                ip_sqrip_status_completed.attr('disabled', false);
-                ip_aworder_stt.attr('disabled', false);
-                ip_order_stt.attr('disabled', false);
+                ip_sqrip_status_awaiting.css({
+                    'pointer-events': 'auto',
+                    'background-color': '',
+                    'cursor': '',
+                    'opacity': ''
+                });
+                ip_sqrip_status_completed.css({
+                    'pointer-events': 'auto',
+                    'background-color': '',
+                    'cursor': '',
+                    'opacity': ''
+                });
+                ip_aworder_stt.prop('readonly', false);
+                ip_order_stt.prop('readonly', false);
                 $('.sqrip-btn-create-order-stt').attr('disabled', false);
             }
         }
@@ -623,21 +643,38 @@ jQuery(document).ready(function ($) {
     }
 
     if (ip_payment_comparison_enabled.length) {
-        console.log('enabledlength');
         ip_payment_comparison_enabled.on('change', function () {
             if (!$(this).is(':checked')) {
-                console.log('true');
-                ip_sqrip_status_awaiting.attr('disabled', true);
-                ip_sqrip_status_completed.attr('disabled', true);
-                ip_aworder_stt.attr('disabled', true);
-                ip_order_stt.attr('disabled', true);
+                ip_sqrip_status_awaiting.css({
+                    'pointer-events': 'none',
+                    'background-color': '#f2f2f2',
+                    'cursor': 'not-allowed',
+                    'opacity': '0.7'
+                });
+                ip_sqrip_status_completed.css({
+                    'pointer-events': 'none',
+                    'background-color': '#f2f2f2',
+                    'cursor': 'not-allowed',
+                    'opacity': '0.7'
+                });
+                ip_aworder_stt.prop('readonly', true);
+                ip_order_stt.prop('readonly', true);
                 $('.sqrip-btn-create-order-stt').attr('disabled', true);
             } else {
-                console.log('false');
-                ip_sqrip_status_awaiting.attr('disabled', false);
-                ip_sqrip_status_completed.attr('disabled', false);
-                ip_aworder_stt.attr('disabled', false);
-                ip_order_stt.attr('disabled', false);
+                ip_sqrip_status_awaiting.css({
+                    'pointer-events': 'auto',
+                    'background-color': '',
+                    'cursor': '',
+                    'opacity': ''
+                });
+                ip_sqrip_status_completed.css({
+                    'pointer-events': 'auto',
+                    'background-color': '',
+                    'cursor': '',
+                    'opacity': ''
+                });
+                ip_aworder_stt.prop('readonly', false);
+                ip_order_stt.prop('readonly', false);
                 $('.sqrip-btn-create-order-stt').attr('disabled', false);
             }
         });
