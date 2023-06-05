@@ -289,7 +289,7 @@ if (!function_exists('sqrip_add_fields_for_order_details')) {
                     <button class="button button-secondary sqrip-re-generate-qrcode"><?php echo $btn_txt; ?></button>
                 </li>
 
-                <?php if ($status_awaiting == $order_status): ?>
+                <?php if ($status_awaiting == $order_status && sqrip_get_plugin_option('payment_comparison_enabled') == 'yes'): ?>
                     <li>
                         <button class="button button-primary sqrip-payment-confirmed">
                             <?php echo __('Confirm payment', 'sqrip-swiss-qr-invoice'); ?>
@@ -894,7 +894,7 @@ function sqrip_add_custom_order_status_actions_button($actions, $order)
 
     $status_awaiting = sqrip_get_plugin_option('status_awaiting');
     $status_awaiting = str_replace('wc-', '', $status_awaiting);
-    if ($order->has_status(array($status_awaiting)) && sqrip_get_plugin_option('payment_comparison_enabled')) {
+    if ($order->has_status(array($status_awaiting)) && sqrip_get_plugin_option('payment_comparison_enabled') == 'yes') {
 
         // The key slug defined for your action button
         $action_slug = 'sqrip_payment_confirmed';
@@ -970,10 +970,12 @@ add_action('woocommerce_thankyou', function ($order_id) {
     $order = wc_get_order($order_id);
     if ($order->get_payment_method() == 'sqrip') {
         $sqrip_suppress_generation = sqrip_get_plugin_option('suppress_generation');
-        $sqrip_default_order_status = sqrip_get_plugin_option('status_suppressed');
+        $sqrip_default_suppressed_status = sqrip_get_plugin_option('status_suppressed');
 
-        if ($sqrip_suppress_generation == 'yes' && $sqrip_default_order_status) {
-            $order->update_status($sqrip_default_order_status);
+        if ($sqrip_suppress_generation == 'yes' && $sqrip_default_suppressed_status) {
+            $order->update_status($sqrip_default_suppressed_status);
+        } else {
+            $order->update_status('on-hold');
         }
     }
 }, 10, 3);

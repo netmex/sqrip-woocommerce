@@ -350,7 +350,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'title' => __('Activate/Deactivate Payment Comparison', 'sqrip-swiss-qr-invoice'),
                 'label' => __('Activate sqrip for Payment Comparison', 'sqrip-swiss-qr-invoice'),
                 'type' => 'checkbox',
-                'description' => __('If activated, sqrip shows in the list of orders, in column "actions" (adjust view if needed), at any order that has reached order status 1 (e.g. "awaiting payment") a symbol. By clicking on that symbol the order status will be changed to the one specified in Status 2 (e.g. "Confirmed, Paid").', 'sqrip-swiss-qr-invoice'),
+                'description' => '</br>' . __('If activated, sqrip shows in the list of orders, in column "actions" (adjust view if needed), at any order that has reached order status 1 (e.g. "awaiting payment") a symbol. By clicking on that symbol the order status will be changed to the one specified in Status 2 (e.g. "Confirmed, Paid").', 'sqrip-swiss-qr-invoice'),
                 'default' => 'no',
                 'class' => 'comparison-tab'
             ),
@@ -398,7 +398,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'type' => 'text',
                 'class' => 'comparison-tab',
                 'default' => __('Completed, Paid', 'sqrip-swiss-qr-invoice'),
-                'description' => __('To what order status should we change your order, once the payment has been confirmed?', 'sqrip-swiss-qr-invoice') . '</ br>' . sprintf(__('If there is no suitable status available, you can create one right %s', 'sqrip-swiss-qr-invoice'), '<a href="#" class="sqrip-toggle-order-status">' . __('here', 'sqrip-swiss-qr-invoice') . '</a>'),
+                'description' => __('To what order status should we change your order, once the payment has been confirmed?', 'sqrip-swiss-qr-invoice') . '</br></br>' . sprintf(__('If there is no suitable status available, you can create one right %s', 'sqrip-swiss-qr-invoice'), '<a href="#" class="sqrip-toggle-order-status">' . __('here', 'sqrip-swiss-qr-invoice') . '</a>'),
             ),
             'enabled_new_status' => array(
                 'title' => '',
