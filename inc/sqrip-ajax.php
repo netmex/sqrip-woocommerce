@@ -265,7 +265,7 @@ function sqrip_payment_confirmed()
 
     $paged = isset($_GET['paged']) ? '&paged=' . $_GET['paged'] : '';
 
-    $order->update_status($status_completed, 'order_note');
+    $order->update_status($status_completed, '');
 
     wp_redirect(get_admin_url() . 'edit.php?post_type=shop_order' . $paged);
     die();
