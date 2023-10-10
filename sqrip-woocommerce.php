@@ -335,7 +335,8 @@ function sqrip_add_qrcode_in_email_after_order_table($order, $sent_to_admin, $pl
     $array_in = array('both', 'body');
 
     if ($email->id === $email_attached && $payment_method === 'sqrip' && in_array($integration_email, $array_in)) {
-        $order_id = $order->id;
+        // $order_id = $order->id;
+        $order_id = method_exists($order, 'get_id') ? $order->get_id() : $order->id;
         $png_file = get_post_meta($order_id, 'sqrip_png_file_url', true);
 
         echo $png_file ? '<div class="sqrip-qrcode-png"><p>' . esc_html__('Use the QR invoice below to pay the outstanding balance.', 'sqrip-swiss-qr-invoice') . '</p><img src="' . esc_url($png_file) . '" alt="' . esc_attr('sqrip QR-Code', 'sqrip-swiss-qr-invoice') . '" width="200"/></div>' : '';
@@ -369,7 +370,8 @@ function sqrip_attach_qrcode_pdf_to_email($attachments, $email_id, $order)
     $array_in = array('both', 'attachment');
 
     if ($email_id === $email_attached && $payment_method === 'sqrip' && in_array($integration_email, $array_in)) {
-        $order_id = $order->id;
+        // $order_id = $order->id;
+        $order_id = method_exists($order, 'get_id') ? $order->get_id() : $order->id;
 
         $pdf_file_path = get_post_meta($order_id, 'sqrip_pdf_file_path', true);
 
