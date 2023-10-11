@@ -353,7 +353,7 @@ add_filter('woocommerce_email_attachments', 'sqrip_attach_qrcode_pdf_to_email', 
 
 function sqrip_attach_qrcode_pdf_to_email($attachments, $email_id, $order)
 {
-    if (empty($order) || !isset($email_id) || !method_exists($order, 'get_payment_method')) {
+    if (empty($order) || !isset($email_id) || !(is_object($order) && method_exists($order, 'get_payment_method'))) {
         return $attachments;
     }
 
