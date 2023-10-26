@@ -148,6 +148,7 @@ function sqrip_validation_token_ajax()
             $result['result'] = true;
 
             $result['message'] = $body_decode->message;
+            $result['credits_left'] = $body_decode->credits_left;
             // $result['message'] = __("Valid, active API Key", "sqrip-swiss-qr-invoice");
             break;
 

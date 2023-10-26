@@ -84,9 +84,14 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'type' => 'tab',
                 'tabs' => [
                     [
+                        'id' => 'services',
+                        'title' => __('Services', 'sqrip-swiss-qr-invoice'),
+                        'class' => 'active',
+                    ],
+                    [
                         'id' => 'qrinvoice',
                         'title' => __('QR-Invoice', 'sqrip-swiss-qr-invoice'),
-                        'class' => 'active',
+                        'class' => '',
                     ],
                     [
                         'id' => 'comparison',
@@ -104,7 +109,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             'section_activation' => array(
                 'title' => __('Activation & Connection', 'sqrip-swiss-qr-invoice'),
                 'type' => 'section',
-                'class' => 'qrinvoice-tab'
+                'class' => 'services-tab'
             ),
             'enabled' => array(
                 'title' => __('Activate sqrip', 'sqrip-swiss-qr-invoice'),
@@ -112,13 +117,19 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'type' => 'checkbox',
                 'description' => '',
                 'default' => 'no',
-                'class' => 'qrinvoice-tab'
+                'class' => 'services-tab'
             ),
             'token' => array(
                 'title' => __('API key', 'sqrip-swiss-qr-invoice'),
                 'type' => 'textarea',
                 'description' => __('Open an account at <a href="https://sqrip.ch" target="_blank">https://sqrip.ch</a>, create an API key, copy and paste it here. Done!', 'sqrip-swiss-qr-invoice'),
-                'class' => 'qrinvoice-tab'
+                'class' => 'services-tab'
+            ),
+            'remaining_credits' => array(
+                'title' => __('Remaining Credits', 'sqrip-swiss-qr-invoice'),
+                'type' => 'number',
+                'description' => '',
+                'class' => 'services-tab'
             ),
             'section_display' => array(
                 'title' => __('Display', 'sqrip-swiss-qr-invoice'),

@@ -32,7 +32,10 @@ jQuery(document).ready(function ($) {
         status_text = $('strong:contains("test-email-status")'),
         ip_payment_comparison_enabled = $('#woocommerce_sqrip_payment_comparison_enabled'),
         ip_sqrip_status_awaiting = $('#woocommerce_sqrip_status_awaiting'),
-        ip_sqrip_status_completed = $('#woocommerce_sqrip_status_completed');
+        ip_sqrip_enabled = $('#woocommerce_sqrip_enabled'),
+        ip_sqrip_status_completed = $('#woocommerce_sqrip_status_completed'),
+        ip_sqrip_remaining_credits = $('#woocommerce_sqrip_remaining_credits');
+        ip_sqrip_remaining_credits.prop("readonly", true);
 
     $('select[id*="delete_invoice_status"]').select2({
         allowClear: true
@@ -50,6 +53,27 @@ jQuery(document).ready(function ($) {
         error: function (jqXHR, textStatus, errorThrown) {
             console.log('The following error occured: ' + textStatus, errorThrown);
         }
+    })
+    $.ajax({
+        type: "post",
+        url: sqrip.ajax_url,
+        data: {
+            action: "sqrip_validation_token",
+            token: ip_token.val()
+        },
+        success: function (response) {
+            if (response) {
+                if (response.credits_left) {
+                    // console.log({response}, response.credits_left)
+                    ip_sqrip_remaining_credits.val(response.credits_left);
+                } else {
+                    ip_sqrip_remaining_credits.val(0);
+                }
+            }
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+            console.log('The following error occured: ' + textStatus, errorThrown);
+        },
     })
 
     if (status_text.html()) {
@@ -264,8 +288,34 @@ jQuery(document).ready(function ($) {
         });
     }
 
+    //Hide other tabs if sqrip is not enabled
+    if (!ip_sqrip_enabled.is(':checked')) {
+        $('.sqrip-tab').each(function (i, e) {
+            if ($(this).data('tab') !== "services") {
+                $(this).hide();
+            }
+        })
+    }
+
+    ip_sqrip_enabled.on('change', function (e) {
+        if ($(this).is(':checked')) {
+            $('.sqrip-tab').each(function (i, e) {
+                if ($(this).data('tab') !== "services") {
+                    // console.log($(this).data('tab'))
+                    $(this).show();
+                }
+            })
+        } else {
+            $('.sqrip-tab').each(function (i, e) {
+                if ($(this).data('tab') !== "services") {
+                    $(this).hide();
+                }
+            })
+        }
+    })
+
     tab_active = window.location.hash.slice(1);
-    if (!tab_active) tab_active = "qrinvoice";
+    if (!tab_active) tab_active = "services";
     sqrip_tab_init(tab_active);
 
     tab.on('click', function (e) {
