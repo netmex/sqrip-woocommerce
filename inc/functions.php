@@ -427,7 +427,7 @@ function sqrip_additional_information_shortcodes($additional_information, $lang,
     preg_match_all('/\[due_date format="(.*)"\]/', $additional_information, $date_shortcodes);
     foreach ($date_shortcodes[0] as $index => $date_shortcode) {
         $format = $date_shortcodes[1][$index];
-        $due_date_format = strftime($format, $due_date);
+        $due_date_format = ucwords(\IntlDateFormatter::formatObject(\DateTime::createFromFormat('U', $due_date), $format));
         if (!$due_date_format) {
             continue;
         }

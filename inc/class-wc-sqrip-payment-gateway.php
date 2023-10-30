@@ -286,7 +286,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'class' => 'qrinvoice-tab'
             ),
             'status_suppressed' => array(
-                'title' => __('Select status for new orders without automatic QR-invoices', 'sqrip-swiss-qr-invoice'),
+                'title' => __('Define Status when QR-Invoice is suppressed', 'sqrip-swiss-qr-invoice'),
                 'type' => 'select',
                 'options' => $suppressed_qr_invoice_orders,
                 'default' => 'wc-sqrip-default-status',
@@ -308,6 +308,36 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'class' => 'comparison-tab sqrip-no-height'
             ),
             'first_time_new_sustatus' => array(
+                'title' => '',
+                'type' => 'checkbox',
+                'label' => ' ',
+                'default' => 'no',
+                'css' => 'visibility: hidden; position: absolute',
+                'class' => 'comparison-tab sqrip-no-height'
+            ),
+            'qr_order_status' => array(
+                'title' => __('Status of Orders made with payment method \'qr invoice\':', 'sqrip-swiss-qr-invoice'),
+                'type' => 'select',
+                'options' => $suppressed_qr_invoice_orders,
+                'class' => 'qrinvoice-tab',
+                'default' => 'wc-sqrip-default-status',
+            ),
+            'new_qr_order_status' => array(
+                'title' => '',
+                'type' => 'text',
+                'class' => 'qrinvoice-tab',
+                'default' => __('QR order status', 'sqrip-swiss-qr-invoice'),
+                'description' => sprintf(__('This is the status of a newly placed order with payment method \'sqrip\'. Should no status be suitable enough, please create one for your own %s.', 'sqrip-swiss-qr-invoice'), '<a href="#" class="sqrip-toggle-qr-order-status">' . __('here', 'sqrip-swiss-qr-invoice') . '</a>'),
+            ),
+            'enabled_new_qrstatus' => array(
+                'title' => '',
+                'type' => 'checkbox',
+                'label' => ' ',
+                'default' => 'no',
+                'css' => 'visibility: hidden; position: absolute',
+                'class' => 'comparison-tab sqrip-no-height'
+            ),
+            'first_time_new_qrstatus' => array(
                 'title' => '',
                 'type' => 'checkbox',
                 'label' => ' ',
@@ -749,6 +779,10 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 
         if (isset($post_data['woocommerce_sqrip_enabled_new_sustatus']) && !empty($post_data['woocommerce_sqrip_enabled_new_sustatus']) && isset($post_data['woocommerce_sqrip_first_time_new_sustatus'])) {
             $_POST['woocommerce_sqrip_status_suppressed'] = 'wc-sqrip-suppressed';
+        }
+
+        if (isset($post_data['woocommerce_sqrip_enabled_new_qrstatus']) && !empty($post_data['woocommerce_sqrip_enabled_new_qrstatus']) && isset($post_data['woocommerce_sqrip_first_time_new_qrstatus'])) {
+            $_POST['woocommerce_sqrip_qr_order_status'] = 'wc-sqrip-qrstatus';
         }
 
         return parent::process_admin_options();

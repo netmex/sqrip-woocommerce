@@ -26,6 +26,11 @@ jQuery(document).ready(function ($) {
         ip_ft_new_sustatus = $('#woocommerce_sqrip_first_time_new_sustatus'),
         ip_suppress_generation = $('#woocommerce_sqrip_suppress_generation'),
         ip_integration_order = $('#woocommerce_sqrip_integration_order'),
+        ip_enb_new_qrstatus = $('#woocommerce_sqrip_enabled_new_qrstatus'),
+        ip_qr_order_stt = $('#woocommerce_sqrip_qr_order_status'),
+        ip_new_qr_order_stt = $('#woocommerce_sqrip_new_qr_order_status'),
+        ip_ft_new_qrstatus = $('#woocommerce_sqrip_first_time_new_qrstatus'),
+        btn_toggle_qr_stt = $('.sqrip-toggle-qr-order-status'),
         shop_name,
         nh = $('.sqrip-no-height'),
         default_order_status = $('select[id*="status_suppressed"]'),
@@ -320,6 +325,7 @@ jQuery(document).ready(function ($) {
 
     tab.on('click', function (e) {
         e.preventDefault();
+        tab_active = $(this).data('tab');
         sqrip_tab_init($(this).data('tab'));
     })
 
@@ -668,6 +674,35 @@ jQuery(document).ready(function ($) {
             $('.sqrip-new-order-status').hide();
             $('.sqrip-new-default-order-status').hide();
         }
+    }
+    
+    if (ip_new_qr_order_stt.length) {
+        ip_ft_new_qrstatus.prop('checked', false);
+
+        btn_create_qrorder_html = '<button id="btn_create_qrorder_stt" class="button-secondary sqrip-btn sqrip-btn-create-qrorder-stt">' + sqrip.txt_qr_create + '</button>';
+        ip_new_qr_order_stt.after(btn_create_qrorder_html);
+
+        btn_toggle_qr_stt.on('click', function (e) {
+            e.preventDefault();
+
+            $(this).closest('tr').toggleClass('sqrip-show');
+        })
+
+        btn_create_qrorder = $('#btn_create_qrorder_stt');
+
+        btn_create_qrorder.on('click', function (e) {
+            e.preventDefault();
+
+            if (!ip_new_qr_order_stt.val()) {
+                ip_new_qr_order_stt.focus();
+            } else {
+                ip_enb_new_qrstatus.prop('checked', true);
+                ip_ft_new_qrstatus.prop('checked', true);
+                setTimeout(function () {
+                    btn_save.trigger('click');
+                }, 200);
+            }
+        });
     }
 
     if (ip_suppress_generation.length) {

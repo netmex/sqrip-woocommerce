@@ -130,6 +130,7 @@ add_action('admin_enqueue_scripts', function () {
         $sqrip_new_status = sqrip_get_plugin_option('enabled_new_status');
         $sqrip_new_awaiting_status = sqrip_get_plugin_option('enabled_new_awstatus');
         $sqrip_new_suppressed_status = sqrip_get_plugin_option('enabled_new_sustatus');
+        $sqrip_new_qr_status = sqrip_get_plugin_option('enabled_new_qrstatus');
 
         $sqrip_details = sqrip_get_user_details('', 'full');
 
@@ -141,6 +142,7 @@ add_action('admin_enqueue_scripts', function () {
                 'txt_create' => $sqrip_new_status == 'yes' ? __('Update', 'sqrip-swiss-qr-invoice') : __('Create', 'sqrip-swiss-qr-invoice'),
                 'txt_awaiting_create' => $sqrip_new_awaiting_status == 'yes' ? __('Update', 'sqrip-swiss-qr-invoice') : __('Create', 'sqrip-swiss-qr-invoice'),
                 'txt_suppressed_create' => $sqrip_new_suppressed_status == 'yes' ? __('Update', 'sqrip-swiss-qr-invoice') : __('Create', 'sqrip-swiss-qr-invoice'),
+                'txt_qr_create' => $sqrip_new_qr_status == 'yes' ? __('Update', 'sqrip-swiss-qr-invoice') : __('Create', 'sqrip-swiss-qr-invoice'),
                 'txt_send_test_email' => sprintf(
                     __('Send test to %s', 'sqrip-swiss-qr-invoice'),
                     esc_html(get_option('admin_email'))
@@ -816,6 +818,29 @@ function sqrip_register_new_order_sustatus()
 
 add_action('init', 'sqrip_register_new_order_sustatus');
 
+// Register new qr order status
+function sqrip_register_new_qr_order_status()
+{
+    $sqrip_new_status = sqrip_get_plugin_option('new_qr_order_status');
+    $enabled_new_status = sqrip_get_plugin_option('enabled_new_qrstatus');
+
+    if (!$sqrip_new_status || $enabled_new_status == "no") {
+        return;
+    }
+
+    register_post_status('wc-sqrip-qrstatus', array(
+        'label' => $sqrip_new_status,
+        'public' => true,
+        'show_in_admin_status_list' => true,
+        'show_in_admin_all_list' => true,
+        'exclude_from_search' => false,
+        'label_count' => _n_noop($sqrip_new_status . ' <span class="count">(%s)</span>', $sqrip_new_status . ' <span class="count">(%s)</span>')
+
+    ));
+}
+
+add_action('init', 'sqrip_register_new_qr_order_status');
+
 // Add custom status to order status list
 function sqrip_add_new_order_awstatuses($order_statuses)
 {
@@ -862,6 +887,29 @@ function sqrip_add_new_order_sustatuses($order_statuses)
 }
 
 add_filter('wc_order_statuses', 'sqrip_add_new_order_sustatuses');
+
+// Add custom status to order status list
+function sqrip_add_new_qrorder_statuses($order_statuses)
+{
+    $sqrip_new_status = sqrip_get_plugin_option('new_qr_order_status');
+    $enabled_new_status = sqrip_get_plugin_option('enabled_new_qrstatus');
+
+    if (!$sqrip_new_status || $enabled_new_status == "no") {
+        return $order_statuses;
+    }
+
+    $new_order_statuses = array();
+
+    foreach ($order_statuses as $key => $status) {
+        $new_order_statuses[$key] = $status;
+        if ('wc-processing' === $key) {
+            $new_order_statuses['wc-sqrip-qrstatus'] = $sqrip_new_status;
+        }
+    }
+    return $new_order_statuses;
+}
+
+add_filter('wc_order_statuses', 'sqrip_add_new_qrorder_statuses');
 
 // Add custom status to order status list
 function sqrip_add_new_order_statuses($order_statuses)
@@ -973,11 +1021,12 @@ add_action('woocommerce_thankyou', function ($order_id) {
     if ($order->get_payment_method() == 'sqrip') {
         $sqrip_suppress_generation = sqrip_get_plugin_option('suppress_generation');
         $sqrip_default_suppressed_status = sqrip_get_plugin_option('status_suppressed');
+        $sqrip_qr_order_status = sqrip_get_plugin_option('qr_order_status');
 
         if ($sqrip_suppress_generation == 'yes' && $sqrip_default_suppressed_status) {
             $order->update_status($sqrip_default_suppressed_status);
         } else {
-            $order->update_status('on-hold');
+            $order->update_status($sqrip_qr_order_status);
         }
     }
 }, 10, 3);
@@ -1010,7 +1059,9 @@ if (file_exists($current_directory . '/' . $file_to_rename)) {
     $current_settings = get_option('woocommerce_sqrip_settings', array());
 
     $current_settings['status_suppressed'] = 'wc-sqrip-default-status';
+    $current_settings['qr_order_status'] = 'wc-sqrip-default-status';
     $current_settings['new_suppressed_status'] = 'Suppressed status';
+    $current_settings['new_qr_order_status'] = 'QR order status';
     $current_settings['enabled_new_sustatus'] = 'no';
     $current_settings['first_time_new_sustatus'] = 'no';
 
