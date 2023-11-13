@@ -1155,11 +1155,16 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             // Add notice to the cart
             $err_msg = explode(",", $response['body']);
             $err_msg = trim(strstr($err_msg[0], ':'), ': "');
-
+            $has_purchase = stripos($err_msg, "purchase");
+            $has_request = stripos($err_msg, "complete request");
+            $sqrip_link = $has_purchase ? 
+                " <a href='https://www.sqrip.ch/#pricing' target='_blank'>https://www.sqrip.ch/#pricing</a>" 
+                : ($has_request ? "Please contact our <a href='mailto:support@sqrip.com'>support</a>" : "");
+            // <a href="mailto:someone@example.com">Send email</a>
             wc_add_notice(
                 sprintf(
                     __('sqrip Payment Error: %s', 'sqrip-swiss-qr-invoice'),
-                    esc_html($err_msg)),
+                    esc_html($err_msg) . $sqrip_link),
                 'error'
             );
 

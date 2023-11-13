@@ -16,7 +16,7 @@ if (!in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
     return;
 }
 
-define('SQRIP_ENDPOINT', 'https://api.sqrip.ch/api/');
+define('SQRIP_ENDPOINT', 'https://beta.sqrip.ch/api/');
 define('SQRIP_PLUGIN_BASENAME', plugin_basename(__FILE__));
 
 require_once __DIR__ . '/inc/functions.php';
@@ -576,7 +576,7 @@ add_filter('wp_insert_post_data', function ($data, $postarr, $unsanitized_postar
                 set_transient('sqrip_admin_action_errors', sprintf(
                     __('<b>%s</b> %s</br>%s', 'sqrip-swiss-qr-invoice'),
                     $error_title,
-                    esc_html($response_body->message),
+                    esc_html($response_body->message),//." <a href='https://www.sqrip.ch/#pricing' target='_blank'>https://www.sqrip.ch/#pricing</a>"
                     esc_html($errors_output)
                 ), 60);
 
@@ -1050,6 +1050,63 @@ add_action('woocommerce_admin_order_data_after_order_details', function ($order)
         <?php
     }
 });
+
+// Adding to admin order list bulk dropdown custom change order statuses
+add_filter( 'bulk_actions-edit-shop_order', 'bulk_change_order_sqrip_statuses', 20, 1 );
+function bulk_change_order_sqrip_statuses( $actions ) {
+    $sqrip_new_status = sqrip_get_plugin_option('new_status');
+    $sqrip_new_qr_status = sqrip_get_plugin_option('new_qr_order_status');
+    $sqrip_new_aw_status = sqrip_get_plugin_option('new_awaiting_status');
+    $sqrip_new_su_status = sqrip_get_plugin_option('new_suppressed_status');
+    $sqrip_qr_order_status = sqrip_get_plugin_option('qr_order_status');
+
+    if ($sqrip_new_status) {
+        $actions['sqrip_new_status'] = __( 'Change status to '. $sqrip_new_status, 'woocommerce' );
+    }
+    if ($sqrip_new_qr_status) {
+        $actions['sqrip_new_qr_order_status'] = __( 'Change status to '. $sqrip_new_qr_status, 'woocommerce' );
+    }
+    if ($sqrip_new_aw_status) {
+        $actions['sqrip_new_awaiting_status'] = __( 'Change status to '. $sqrip_new_aw_status, 'woocommerce' );
+    }
+    if ($sqrip_new_su_status) {
+        $actions['sqrip_new_suppressed_status'] = __( 'Change status to '. $sqrip_new_su_status, 'woocommerce' );
+    }
+
+    return $actions;
+}
+
+// Make the action for bulk sqrip status change
+add_filter( 'handle_bulk_actions-edit-shop_order', 'sqrip_handle_bulk_action_edit_shop_order', 10, 3 );
+function sqrip_handle_bulk_action_edit_shop_order( $redirect_to, $action, $post_ids ) {
+    
+    if ( !in_array($action, ['sqrip_new_status', 'sqrip_new_qr_order_status', 'sqrip_new_awaiting_status', 'sqrip_new_suppressed_status']) )
+        return $redirect_to; // Exit
+    
+    $order_statuses = [
+        'sqrip_new_status' => 'wc-sqrip-paid', 
+        'sqrip_new_qr_order_status' => 'wc-sqrip-qrstatus', 
+        'sqrip_new_awaiting_status' => 'wc-sqrip-awaiting', 
+        'sqrip_new_suppressed_status' => 'wc-sqrip-suppressed'
+    ];
+
+    $processed_ids = array();
+
+    foreach ( $post_ids as $post_id ) {
+        $order = wc_get_order( $post_id );
+        $new_order_status = $order_statuses[$action];
+
+        $order->update_status($new_order_status);
+
+        $processed_ids[] = $post_id;
+    }
+
+    return $redirect_to = add_query_arg( array(
+        $action => '1',
+        'processed_count' => count( $processed_ids ),
+        'processed_ids' => implode( ',', $processed_ids ),
+    ), $redirect_to );
+}
 
 $current_directory = getcwd() . '/wp-content/plugins/sqrip-woocommerce/inc';
 $file_to_rename = 'onetime.php';
