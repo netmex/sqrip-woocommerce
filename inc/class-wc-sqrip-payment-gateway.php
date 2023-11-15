@@ -1158,8 +1158,8 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             $has_purchase = stripos($err_msg, "purchase");
             $has_request = stripos($err_msg, "complete request");
             $sqrip_link = $has_purchase ? 
-                " <a href='https://www.sqrip.ch/#pricing' target='_blank'>https://www.sqrip.ch/#pricing</a>" 
-                : ($has_request ? "Please contact our <a href='mailto:support@sqrip.com'>support</a>" : "");
+                "here <a href='https://www.sqrip.ch/#pricing' target='_blank'>https://www.sqrip.ch/#pricing</a>" 
+                : ($has_request ? "And we don't yet know why. Please contact our <a href='mailto:support@sqrip.com'>support</a>" : "");
             // <a href="mailto:someone@example.com">Send email</a>
             wc_add_notice(
                 sprintf(

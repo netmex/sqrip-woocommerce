@@ -102,7 +102,7 @@ function sqrip_validation_iban_ajax()
             $result['result'] = false;
             $result['qriban'] = false;
             $result['message'] = __("incorrect", "sqrip");
-            $result['description'] = __('The (QR-)IBAN of your account to which the transfer should be made is ERROR.', 'sqrip-swiss-qr-invoice');
+            $result['description'] = __('It seems that an invalid (QR-)IBAN has been submitted. Please check the designated transfers-receiving IBAN you submitted.', 'sqrip-swiss-qr-invoice');
             break;
     }
     if ($response->will_need_confirmation) {
@@ -138,7 +138,7 @@ function sqrip_validation_token_ajax()
     switch ($response_code) {
         case 403:
             $result['result'] = false;
-            $result['message'] = __("Valid token inactive", "sqrip-swiss-qr-invoice");
+            $result['message'] = __("Your API key appears to be inactive. Please check that your API key is set to active in the sqrip settings.", "sqrip-swiss-qr-invoice");
 
             break;
 
