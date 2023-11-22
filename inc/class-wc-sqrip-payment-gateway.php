@@ -119,6 +119,14 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'default' => 'no',
                 'class' => 'services-tab'
             ),
+            'turn_off_if_error' => array(
+                'title' => __('Auto turn off', 'sqrip-swiss-qr-invoice'),
+                'label' => __('Auto turn off sqrip services if error occurs', 'sqrip-swiss-qr-invoice'),
+                'type' => 'checkbox',
+                'description' => '',
+                'default' => 'no',
+                'class' => 'services-tab'
+            ),
             'token' => array(
                 'title' => __('API key', 'sqrip-swiss-qr-invoice'),
                 'type' => 'textarea',
@@ -936,6 +944,11 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             //         $attachments[] = $sqrip_qr_pdf_path;
             //         break;
             // }
+            
+            if (isset($response_body->total_codes_left) && $response_body->total_codes_left <= 0) {
+                // turn off sqrip if auto turn-off enabled
+                sqrip_auto_turn_off();
+            }
 
             $wp_mail = wp_mail($to, $subject, $body, $headers, $attachments);
 
@@ -945,6 +958,9 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 $settings->add_error(__('E-Mail can not be sent, please check WP MAIL SMTP', 'sqrip-swiss-qr-invoice'));
             }
         } else {
+            // turn off sqrip if auto turn-off enabled
+            sqrip_auto_turn_off();
+
             $message = isset($response_body->message) ? $response_body->message : 'Connection error!';
 
             $settings->add_error(
@@ -1072,6 +1088,9 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 )
             );
 
+            // turn off sqrip if auto turn-off enabled
+            sqrip_auto_turn_off();
+
             return false;
         }
 
@@ -1087,6 +1106,11 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             $order->update_meta_data('sqrip_refund_qr_attachment_id', $sqrip_qr_png_attachment_id);
             $order->save(); // without calling save() the meta data is not updated
 
+            if (isset($response_body->total_codes_left) && $response_body->total_codes_left <= 0) {
+                // turn off sqrip if auto turn-off enabled
+                sqrip_auto_turn_off();
+            }
+
             return true;
         } else {
             // Add note to the order for your reference
@@ -1096,6 +1120,9 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                     esc_html($response_body->message)
                 )
             );
+
+            // turn off sqrip if auto turn-off enabled
+            sqrip_auto_turn_off();
 
             return false;
         }
@@ -1158,8 +1185,8 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             $has_purchase = stripos($err_msg, "purchase");
             $has_request = stripos($err_msg, "complete request");
             $sqrip_link = $has_purchase ? 
-                "here <a href='https://www.sqrip.ch/#pricing' target='_blank'>https://www.sqrip.ch/#pricing</a>" 
-                : ($has_request ? "And we don't yet know why. Please contact our <a href='mailto:support@sqrip.com'>support</a>" : "");
+                " here <a href='https://www.sqrip.ch/#pricing' target='_blank'>https://www.sqrip.ch/#pricing</a>" 
+                : ($has_request ? " And we don't yet know why. Please contact our <a href='mailto:support@sqrip.com'>support</a>" : "");
             // <a href="mailto:someone@example.com">Send email</a>
             wc_add_notice(
                 sprintf(
@@ -1175,6 +1202,9 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                     esc_html($err_msg)
                 )
             );
+
+            // turn off sqrip if auto turn-off enabled
+            sqrip_auto_turn_off();
 
             return false;
         }
@@ -1229,6 +1259,11 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             $woocommerce->cart->empty_cart();
             $order->save();
 
+            if (isset($response_body->total_codes_left) && $response_body->total_codes_left <= 0) {
+                // turn off sqrip if auto turn-off enabled
+                sqrip_auto_turn_off();
+            }
+
             // Redirect to thank you page
             return array(
                 'result' => 'success',
@@ -1251,6 +1286,9 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                     esc_html($response_body->message)
                 )
             );
+
+            // turn off sqrip if auto turn-off enabled
+            sqrip_auto_turn_off();
 
             return false; // Bail early
         }

@@ -521,3 +521,16 @@ function sqrip_format_number($number)
     }
     return $number;
 }
+
+/**
+ * Turn off sqrip if error if auto turn-of enabled
+ * since 1.8
+ */
+function sqrip_auto_turn_off() {
+    $plugin_options = get_option('woocommerce_sqrip_settings', array());
+    
+    if ($plugin_options && isset($plugin_options['turn_off_if_error']) && $plugin_options['turn_off_if_error'] == 'yes') {
+        $plugin_options['enabled'] = 'no';
+        update_option('woocommerce_sqrip_settings', $plugin_options);
+    }
+}

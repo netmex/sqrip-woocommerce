@@ -39,8 +39,10 @@ jQuery(document).ready(function ($) {
         ip_sqrip_status_awaiting = $('#woocommerce_sqrip_status_awaiting'),
         ip_sqrip_enabled = $('#woocommerce_sqrip_enabled'),
         ip_sqrip_status_completed = $('#woocommerce_sqrip_status_completed'),
-        ip_sqrip_remaining_credits = $('#woocommerce_sqrip_remaining_credits');
+        ip_sqrip_remaining_credits = $('#woocommerce_sqrip_remaining_credits'),
+        ip_sqrip_turn_off_if_error = $('#woocommerce_sqrip_turn_off_if_error');
         ip_sqrip_remaining_credits.prop("readonly", true);
+        ip_sqrip_remaining_credits.addClass('sqrip-no-border');
 
     $('select[id*="delete_invoice_status"]').select2({
         allowClear: true
@@ -73,6 +75,19 @@ jQuery(document).ready(function ($) {
                     ip_sqrip_remaining_credits.val(response.credits_left);
                 } else {
                     ip_sqrip_remaining_credits.val(0);
+                }
+
+                if (ip_sqrip_turn_off_if_error.is(':checked')) {
+                    // const label_for_turn_off = $('label[for*=woocommerce_sqrip_turn_off_if_error]');
+
+                    if (response.result == false) {
+                        output_html = '<p class="sqrip-description">These errors prevent sqrip from working properly - Please resolve the following issues:<br/><ul><li>'+response.message+'</li></ul></p>';
+                        ip_sqrip_turn_off_if_error.closest('td.forminp').append(output_html);
+                    }
+                    if (response.credits_left == 0) {
+                        output_html = '<p class="sqrip-description">These errors prevent sqrip from working properly - Please resolve the following issues:<br/><ul><li>No Credits left</li></ul></p>';
+                        ip_sqrip_turn_off_if_error.closest('td.forminp').append(output_html);
+                    }
                 }
             }
         },

@@ -154,7 +154,7 @@ function sqrip_validation_token_ajax()
 
         default:
             $result['result'] = false;
-            $result['message'] = __("Invalid token", "sqrip-swiss-qr-invoice");
+            $result['message'] = __("We can't seem to find the API key you're using in our database. Please check your API key, your sqrip settings, then contact our support.", "sqrip-swiss-qr-invoice");
             break;
     }
 

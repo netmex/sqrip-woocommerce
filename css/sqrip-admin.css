@@ -412,3 +412,11 @@ tr.sqrip-no-height {
     overflow: hidden;
     position: absolute;
 }
+
+.sqrip-no-border,
+.sqrip-no-border :active,
+.sqrip-no-border :focus,
+.sqrip-no-border :focus-visible {
+    border: none !important;
+    box-shadow: none !important;
+}
