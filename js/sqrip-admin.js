@@ -43,6 +43,8 @@ jQuery(document).ready(function ($) {
         ip_sqrip_turn_off_if_error = $('#woocommerce_sqrip_turn_off_if_error');
         ip_sqrip_remaining_credits.prop("readonly", true);
         ip_sqrip_remaining_credits.addClass('sqrip-no-border');
+        ip_sqrip_turn_off_if_error.closest('fieldset').addClass('negative-top-margin')
+        ip_sqrip_remaining_credits.closest('fieldset').addClass('negative-top-margin')
 
     $('select[id*="delete_invoice_status"]').select2({
         allowClear: true
@@ -692,6 +694,8 @@ jQuery(document).ready(function ($) {
     }
     
     if (ip_new_qr_order_stt.length) {
+        ip_new_qr_order_stt.closest('tr').addClass('sqrip-order-status');
+        ip_qr_order_stt.closest('tr').addClass('sqrip-qr-order-status');
         ip_ft_new_qrstatus.prop('checked', false);
 
         btn_create_qrorder_html = '<button id="btn_create_qrorder_stt" class="button-secondary sqrip-btn sqrip-btn-create-qrorder-stt">' + sqrip.txt_qr_create + '</button>';

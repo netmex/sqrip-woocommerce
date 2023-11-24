@@ -78,6 +78,13 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 
         $suppressed_qr_invoice_orders = wc_get_order_statuses();
         $suppressed_qr_invoice_orders = ['wc-sqrip-default-status' => 'Please select an option'] + $suppressed_qr_invoice_orders;
+        
+        $qr_order_status_options = wc_get_order_statuses();
+        if (isset($qr_order_status_options['wc-on-hold'])) {
+            $qr_order_status_options['wc-on-hold'] = $qr_order_status_options['wc-on-hold']." (default)";
+        } else {
+            $qr_order_status_options['on-hold'] = "Sqrip On-hold (default)";
+        }
 
         $this->form_fields = array(
             'tabs' => array(
@@ -324,18 +331,18 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'class' => 'comparison-tab sqrip-no-height'
             ),
             'qr_order_status' => array(
-                'title' => __('Status of Orders made with payment method \'qr invoice\':', 'sqrip-swiss-qr-invoice'),
+                'title' => __('Status of Orders made with payment method \'sqrip\':', 'sqrip-swiss-qr-invoice'),
                 'type' => 'select',
-                'options' => $suppressed_qr_invoice_orders,
+                'options' => $qr_order_status_options,
                 'class' => 'qrinvoice-tab',
-                'default' => 'wc-sqrip-default-status',
+                'default' => 'wc-on-hold',
             ),
             'new_qr_order_status' => array(
                 'title' => '',
                 'type' => 'text',
                 'class' => 'qrinvoice-tab',
                 'default' => __('QR order status', 'sqrip-swiss-qr-invoice'),
-                'description' => sprintf(__('This is the status of a newly placed order with payment method \'sqrip\'. Should no status be suitable enough, please create one for your own %s.', 'sqrip-swiss-qr-invoice'), '<a href="#" class="sqrip-toggle-qr-order-status">' . __('here', 'sqrip-swiss-qr-invoice') . '</a>'),
+                'description' => sprintf(__('Set the status of a newly placed order with payment method \'sqrip\' so it matches your shop process. Should no status be suitable, please create one for your own %s.', 'sqrip-swiss-qr-invoice'), '<a href="#" class="sqrip-toggle-qr-order-status">' . __('here', 'sqrip-swiss-qr-invoice') . '</a>'),
             ),
             'enabled_new_qrstatus' => array(
                 'title' => '',

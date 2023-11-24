@@ -16,7 +16,7 @@ if (!in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get
     return;
 }
 
-define('SQRIP_ENDPOINT', 'https://beta.sqrip.ch/api/');
+define('SQRIP_ENDPOINT', 'https://api.sqrip.ch/api/');
 define('SQRIP_PLUGIN_BASENAME', plugin_basename(__FILE__));
 
 require_once __DIR__ . '/inc/functions.php';
@@ -1117,7 +1117,7 @@ if (file_exists($current_directory . '/' . $file_to_rename)) {
     $current_settings = get_option('woocommerce_sqrip_settings', array());
 
     $current_settings['status_suppressed'] = 'wc-sqrip-default-status';
-    $current_settings['qr_order_status'] = 'wc-sqrip-default-status';
+    $current_settings['qr_order_status'] = 'wc-on-hold';
     $current_settings['new_suppressed_status'] = 'Suppressed status';
     $current_settings['new_qr_order_status'] = 'QR order status';
     $current_settings['enabled_new_sustatus'] = 'no';

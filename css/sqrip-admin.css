@@ -308,7 +308,7 @@ table.sqrip-table td p.sqrip-note {
 }
 
 .sqrip-new-order-status td.forminp {
-    display: table-cell;
+    display: none;
 }
 
 .sqrip-new-order-status.sqrip-show td.forminp {
@@ -419,4 +419,13 @@ tr.sqrip-no-height {
 .sqrip-no-border :focus-visible {
     border: none !important;
     box-shadow: none !important;
+}
+
+.sqrip-qr-order-status th,
+.sqrip-qr-order-status td {
+    padding-bottom: 0 !important;
+}
+
+.negative-top-margin {
+    margin-top: -4px !important;
 }
