@@ -46,6 +46,14 @@ jQuery(document).ready(function ($) {
         ip_sqrip_turn_off_if_error.closest('fieldset').addClass('negative-top-margin')
         ip_sqrip_remaining_credits.closest('fieldset').addClass('negative-top-margin')
 
+    function handleResponseMessage(message) {
+        let displayMessage = message.replace('. ', '.<br/>');
+        displayMessage = displayMessage.replace('settings', "<a href='https://api.sqrip.ch' target='_blank'>settings</a>");
+        displayMessage = displayMessage.replace('support', "<a href='mailto:support@sqrip.ch'>support</a>");
+
+        return displayMessage;
+    }
+
     $('select[id*="delete_invoice_status"]').select2({
         allowClear: true
     });
@@ -74,21 +82,37 @@ jQuery(document).ready(function ($) {
             if (response) {
                 if (response.credits_left) {
                     // console.log({response}, response.credits_left)
-                    ip_sqrip_remaining_credits.val(response.credits_left);
+                    ip_sqrip_remaining_credits.val(response.credits_left+"");
                 } else {
-                    ip_sqrip_remaining_credits.val(0);
+                    ip_sqrip_remaining_credits.val("N/A");
                 }
 
                 if (ip_sqrip_turn_off_if_error.is(':checked')) {
                     // const label_for_turn_off = $('label[for*=woocommerce_sqrip_turn_off_if_error]');
+                    const sqripEnabledStatus = ip_sqrip_enabled.is(':checked') ? ' activated.' : ' deactivated.';
+                    const errorResolveText = 'The plugin is currently'+ sqripEnabledStatus + 
+                        ' These errors prevent sqrip from working properly.<br/>Please resolve the following issues:';
+
+                    let displayMessage = handleResponseMessage(response.message);
+                    // displayMessage = displayMessage.replace('support', '')
+                    let hasError = false;
 
                     if (response.result == false) {
-                        output_html = '<p class="sqrip-description">These errors prevent sqrip from working properly - Please resolve the following issues:<br/><ul><li>'+response.message+'</li></ul></p>';
+                        output_html = '<p class="sqrip-description">'+ errorResolveText + '<br/><ul><li>'+displayMessage+'</li></ul></p>';
                         ip_sqrip_turn_off_if_error.closest('td.forminp').append(output_html);
+                        hasError = true;
                     }
                     if (response.credits_left == 0) {
-                        output_html = '<p class="sqrip-description">These errors prevent sqrip from working properly - Please resolve the following issues:<br/><ul><li>No Credits left</li></ul></p>';
+                        output_html = '<p class="sqrip-description">'+ errorResolveText + '<br/><ul><li>No Credits left. Please purchase Credits here <a href="https://www.sqrip.ch/#pricing" target="_blank">https://www.sqrip.ch/#pricing</a></li></ul></p>';
                         ip_sqrip_turn_off_if_error.closest('td.forminp').append(output_html);
+                        hasError = true;
+                    }
+
+                    if (hasError && ip_sqrip_enabled.is(':checked')) {
+                        ip_sqrip_enabled.prop('checked', false);
+                        setTimeout(function () {
+                            btn_save.trigger('click');
+                        }, 200);
                     }
                 }
             }
@@ -136,8 +160,10 @@ jQuery(document).ready(function ($) {
                             result = "error";
                         }
 
-                        output_html = '<div class="sqrip-notice mt-10 ' + result + '">';
-                        output_html += '<p>' + response.message + '</p>';
+                        let displayMessage = handleResponseMessage(response.message);
+
+                        output_html = '<br/><div class="sqrip-notice mt-10 ' + result + '">';
+                        output_html += '<p>' + displayMessage + '</p>';
                         output_html += '</div>';
                         _this.after(output_html);
 
@@ -577,8 +603,10 @@ jQuery(document).ready(function ($) {
                             success = "error";
                         }
 
-                        output_html = '<div class="sqrip-notice ' + success + '">';
-                        output_html += '<p>' + response.message + '</p>';
+                        let displayMessage = handleResponseMessage(response.message);
+
+                        output_html = '<br/><div class="sqrip-notice ' + success + '">';
+                        output_html += '<p>' + displayMessage + '</p>';
                         output_html += '</div>';
                         _this.after(output_html);
 

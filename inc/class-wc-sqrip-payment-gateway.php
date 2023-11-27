@@ -142,7 +142,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             ),
             'remaining_credits' => array(
                 'title' => __('Remaining Credits', 'sqrip-swiss-qr-invoice'),
-                'type' => 'number',
+                'type' => 'text',
                 'description' => '',
                 'class' => 'services-tab'
             ),
@@ -1193,7 +1193,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             $has_request = stripos($err_msg, "complete request");
             $sqrip_link = $has_purchase ? 
                 " here <a href='https://www.sqrip.ch/#pricing' target='_blank'>https://www.sqrip.ch/#pricing</a>" 
-                : ($has_request ? " And we don't yet know why. Please contact our <a href='mailto:support@sqrip.com'>support</a>" : "");
+                : ($has_request ? " And we don't yet know why. Please contact our <a href='mailto:support@sqrip.ch'>support</a>" : "");
             // <a href="mailto:someone@example.com">Send email</a>
             wc_add_notice(
                 sprintf(

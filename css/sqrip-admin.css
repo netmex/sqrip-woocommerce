@@ -31,7 +31,8 @@ table.form-table .sqrip-notice {
     font-weight: bold;
     display: inline-block;
     line-height: 1;
-    height: 25px;
+    /* height: 25px; */
+    height: fit-content;
     margin-left: 15px;
     /*margin-top: 0 !important;*/
 }
