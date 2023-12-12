@@ -134,6 +134,13 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'default' => 'no',
                 'class' => 'services-tab'
             ),
+            'current_status' => array(
+                'title' => __('Current sqrip status', 'sqrip-swiss-qr-invoice'),
+                'type' => 'text',
+                'description' => '',
+                'default' => '',
+                'class' => 'services-tab'
+            ),
             'token' => array(
                 'title' => __('API key', 'sqrip-swiss-qr-invoice'),
                 'type' => 'textarea',
@@ -1194,11 +1201,12 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             $sqrip_link = $has_purchase ? 
                 " here <a href='https://www.sqrip.ch/#pricing' target='_blank'>https://www.sqrip.ch/#pricing</a>" 
                 : ($has_request ? " And we don't yet know why. Please contact our <a href='mailto:support@sqrip.ch'>support</a>" : "");
+            $customer_msg = "It seems we couldn't provide you with a QR-invoice at this time. Please try later, contact the shop or use a different payment method.";
             // <a href="mailto:someone@example.com">Send email</a>
             wc_add_notice(
                 sprintf(
                     __('sqrip Payment Error: %s', 'sqrip-swiss-qr-invoice'),
-                    esc_html($err_msg) . $sqrip_link),
+                    esc_html($customer_msg)),
                 'error'
             );
 
@@ -1206,7 +1214,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             $order->add_order_note(
                 sprintf(
                     __('sqrip Payment Error: %s', 'sqrip-swiss-qr-invoice'),
-                    esc_html($err_msg)
+                    esc_html($err_msg) . $sqrip_link
                 )
             );
 
@@ -1278,10 +1286,11 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             );
         } else {
 
+            $customer_msg = "It seems we couldn't provide you with a QR-invoice at this time. Please try later, contact the shop or use a different payment method.";
             wc_add_notice(
                 sprintf(
                     __('Error: %s', 'sqrip-swiss-qr-invoice'),
-                    esc_html($response_body->message)
+                    esc_html($customer_msg)
                 ),
                 'error'
             );

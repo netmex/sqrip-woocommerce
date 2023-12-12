@@ -40,8 +40,11 @@ jQuery(document).ready(function ($) {
         ip_sqrip_enabled = $('#woocommerce_sqrip_enabled'),
         ip_sqrip_status_completed = $('#woocommerce_sqrip_status_completed'),
         ip_sqrip_remaining_credits = $('#woocommerce_sqrip_remaining_credits'),
-        ip_sqrip_turn_off_if_error = $('#woocommerce_sqrip_turn_off_if_error');
+        ip_sqrip_turn_off_if_error = $('#woocommerce_sqrip_turn_off_if_error'),
+        ip_sqrip_current_status = $('#woocommerce_sqrip_current_status');
         ip_sqrip_remaining_credits.prop("readonly", true);
+        ip_sqrip_current_status.prop("readonly", true);
+        ip_sqrip_current_status.addClass('sqrip-no-border');
         ip_sqrip_remaining_credits.addClass('sqrip-no-border');
         ip_sqrip_turn_off_if_error.closest('fieldset').addClass('negative-top-margin')
         ip_sqrip_remaining_credits.closest('fieldset').addClass('negative-top-margin')
@@ -83,30 +86,84 @@ jQuery(document).ready(function ($) {
                 if (response.credits_left) {
                     // console.log({response}, response.credits_left)
                     ip_sqrip_remaining_credits.val(response.credits_left+"");
-                } else {
+                }
+                else if (response.credits_left == 0) {
+                    ip_sqrip_remaining_credits.val("0");
+                }
+                else {
                     ip_sqrip_remaining_credits.val("N/A");
                 }
 
+                let displayMessage = handleResponseMessage(response.message);
+                // displayMessage = displayMessage.replace('support', '')
+                let hasError = false;
+                let statusList = '';
+
+                if (response.credits_left == 0) {
+                    // output_html = '<p class="sqrip-description">'+ errorResolveText + '<br/><ul><li>No Credits left. Please purchase Credits here <a href="https://www.sqrip.ch/#pricing" target="_blank">https://www.sqrip.ch/#pricing</a></li></ul></p>';
+                    // ip_sqrip_turn_off_if_error.closest('td.forminp').append(output_html);
+                    hasError = true;
+                    statusList += '<li>Not enough Credits available. Please purchase Credits here <a href="https://www.sqrip.ch/#pricing" target="_blank">https://www.sqrip.ch/#pricing</a></li>';
+                } else if (response.credits_left > 0) {
+                    statusList += '<li>Enough Credits available.</li>';
+                } else {
+                    // if !response.credits_left
+                    statusList += '<li>Unable to fetch Credits available.</li>';
+                }
+                
+                if (response.result == false) {
+                    // output_html = '<p class="sqrip-description">'+ errorResolveText + '<br/><ul><li>'+displayMessage+'</li></ul></p>';
+                    // ip_sqrip_turn_off_if_error.closest('td.forminp').append(output_html);
+                    hasError = true;
+
+                    // if (displayMessage.includes('inactive')) {
+                        statusList += '<li>'+displayMessage+'</li>';
+                    // }
+                } else {
+                    statusList += '<li>API key is correct and active.</li>';
+                }
+
+                if (!ip_sqrip_enabled.is(':checked')) {
+                    statusList = '<li>sqrip is turned off</li>' + statusList;
+                }
+
+                // Check IBAN validity
+                $.ajax({
+                    type: "post",
+                    url: sqrip.ajax_url,
+                    data: {
+                        action: "sqrip_validation_iban",
+                        iban: ip_iban.val(),
+                        token: ip_token.val()
+                    },
+                    success: function (response) {
+                        if (response) {
+                            if (response.result) {
+                                statusList += '<li>(QR)-IBAN validated.</li>';
+                            } else {
+                                statusList += '<li>(QR)-IBAN incorrect.</li>';
+                            }
+                        }
+                        statusList = '<ul class="sqrip-status-list">'+statusList+'</ul>';
+                        // ip_sqrip_turn_off_if_error.closest('td.forminp').append(statusList);
+                        ip_sqrip_current_status.after(statusList);
+                        ip_sqrip_current_status.hide()
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        statusList = '<ul class="sqrip-status-list">'+statusList+'</ul>';
+                        // ip_sqrip_turn_off_if_error.closest('td.forminp').append(statusList);
+                        ip_sqrip_current_status.after(statusList);
+                        ip_sqrip_current_status.hide()
+                        console.log('The following error occured: ' + textStatus, errorThrown);
+                    }
+                })
+                
+
                 if (ip_sqrip_turn_off_if_error.is(':checked')) {
                     // const label_for_turn_off = $('label[for*=woocommerce_sqrip_turn_off_if_error]');
-                    const sqripEnabledStatus = ip_sqrip_enabled.is(':checked') ? ' activated.' : ' deactivated.';
+                    const sqripEnabledStatus = ip_sqrip_enabled.is(':checked') ? ' active.' : ' deactivated.';
                     const errorResolveText = 'The plugin is currently'+ sqripEnabledStatus + 
                         ' These errors prevent sqrip from working properly.<br/>Please resolve the following issues:';
-
-                    let displayMessage = handleResponseMessage(response.message);
-                    // displayMessage = displayMessage.replace('support', '')
-                    let hasError = false;
-
-                    if (response.result == false) {
-                        output_html = '<p class="sqrip-description">'+ errorResolveText + '<br/><ul><li>'+displayMessage+'</li></ul></p>';
-                        ip_sqrip_turn_off_if_error.closest('td.forminp').append(output_html);
-                        hasError = true;
-                    }
-                    if (response.credits_left == 0) {
-                        output_html = '<p class="sqrip-description">'+ errorResolveText + '<br/><ul><li>No Credits left. Please purchase Credits here <a href="https://www.sqrip.ch/#pricing" target="_blank">https://www.sqrip.ch/#pricing</a></li></ul></p>';
-                        ip_sqrip_turn_off_if_error.closest('td.forminp').append(output_html);
-                        hasError = true;
-                    }
 
                     if (hasError && ip_sqrip_enabled.is(':checked')) {
                         ip_sqrip_enabled.prop('checked', false);
@@ -115,6 +172,7 @@ jQuery(document).ready(function ($) {
                         }, 200);
                     }
                 }
+
             }
         },
         error: function (jqXHR, textStatus, errorThrown) {

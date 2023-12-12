@@ -430,3 +430,9 @@ tr.sqrip-no-height {
 .negative-top-margin {
     margin-top: -4px !important;
 }
+
+.sqrip-status-list {
+    list-style-type: disc !important;
+    margin-top: 4px;
+    margin-left: 22px;
+}
