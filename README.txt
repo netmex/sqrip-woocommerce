@@ -4,7 +4,7 @@ Donate link: https://sqrip.ch/
 Tags: woocommerce, payment, sqrip, qrcode, qr, scan, Kontoabgleich, swiss qr invoice, QR-Rechnung, EBICS, QR-facture, bulletins de versement, Einzahlungsschein, QR-Einzahlungsschein, bulletins de versement, Swiss QR Code, code QR, QR-fattura, polizze di versamento
 Requires at least: 4.7
 Tested up to: 6.4
-Stable tag: 1.7.5
+Stable tag: 1.8
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -85,6 +85,11 @@ Keeps the size of the media library small. sqrip deletes all QR invoice files if
 - certain status of the order are met (e.g. Cancelled);
 - x days after the creation have passed.
 
+p) Adjustable to your process 
+sqrip is flexible enough to be adopted to your individual process. 
+- Define your own order status for payments made ith sqrip;
+- Define the moment you expect the payment to arrive (prior to shippment or thereafter);
+- Define the status after payment has arrived.
 
 = Requirements =
 1. Besides a current WordPress and WooCommerce installation, an account on sqrip.ch is required.
@@ -103,7 +108,7 @@ Keeps the size of the media library small. sqrip deletes all QR invoice files if
 - A (QR) IBAN.
 
 = How much will a QR invoice cost me? = 
-We charge according to actually used QR invoices. One QR invoice costs 1 credit. Credits can be purchased in packages of 100 pcs. (for CHF 20) to 20'000 pcs. (for CHF 1'000) - each plus 7.7% VAT. The lowest price for a QR-bill is therefore 5 centimes (CHF 0.05).
+We charge according to actually used QR invoices. One QR invoice costs 1 credit. Credits can be purchased in packages of 100 pcs. (for CHF 20) to 20'000 pcs. (for CHF 1'000) - each plus VAT. The lowest price for a QR-bill is therefore 5 centimes (CHF 0.05).
 
 = Can I try the solution for free? =
 Yes. Registration (http://api.sqrip.ch/login) is free of charge. No credit card details are required. There are 20 credits to try it out. With this you can test all functions (test e-mail!). Afterwards you can buy packages with credits. If you do not like the service, you can simply delete the account again.
@@ -128,6 +133,15 @@ Yes. We are already working on comparing the reconciliation of orders/purchases 
 7. Refund functionality
 
 == Changelog ==
+
+= 1.8 : January 2024 – Major Service Update =
+* Working with PHP 8.2 and Wordpress 6.4;
+* Added a new Tab "Services";
+* Added 'Current sqrip status': See what's wrong to fix it quickly.
+* Added 'Auto Turn-off' functionality: Should any parameter be wrong (e.g. no credits left, API key inactive, unknown errors), sqrip will turn itself off in order to prevent any errors visible for the shop clients;
+* Define an individual status for orders made with the sqrip payment method;
+* The status can be changed for multiple orders now, incl. to the status defined by the merchant;
+* Minor bug fixing.
 
 = 1.7.5 : November 2023 – Service Update =
 * Adding the Service Tab;
