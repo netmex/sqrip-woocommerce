@@ -1023,6 +1023,15 @@ add_action('woocommerce_thankyou', function ($order_id) {
         $sqrip_default_suppressed_status = sqrip_get_plugin_option('status_suppressed');
         $sqrip_qr_order_status = sqrip_get_plugin_option('qr_order_status');
 
+        if (!$sqrip_qr_order_status) {
+            $sqrip_qr_order_status = 'wc-on-hold';
+
+            //set default value for qr_order_status v1.8
+            $plugin_options = get_option('woocommerce_sqrip_settings', array());
+            $plugin_options['qr_order_status'] = 'wc-on-hold';
+            update_option('woocommerce_sqrip_settings', $plugin_options);
+        }
+
         if ($sqrip_suppress_generation == 'yes' && $sqrip_default_suppressed_status) {
             $order->update_status($sqrip_default_suppressed_status);
         } else {
@@ -1116,22 +1125,50 @@ $new_file_name = 'onetime-backup.php';
 if (file_exists($current_directory . '/' . $file_to_rename)) {
     $current_settings = get_option('woocommerce_sqrip_settings', array());
 
-    $current_settings['status_suppressed'] = 'wc-sqrip-default-status';
-    $current_settings['qr_order_status'] = 'wc-on-hold';
-    $current_settings['new_suppressed_status'] = 'Suppressed status';
-    $current_settings['new_qr_order_status'] = 'QR order status';
-    $current_settings['enabled_new_sustatus'] = 'no';
-    $current_settings['first_time_new_sustatus'] = 'no';
-
-    $current_settings['status_completed'] = 'wc-completed';
-    $current_settings['new_status'] = 'Completed, Paid';
-    $current_settings['enabled_new_status'] = 'no';
-    $current_settings['first_time_new_status'] = 'no';
-
-    $current_settings['status_awaiting'] = 'wc-pending';
-    $current_settings['new_awaiting_status'] = 'Awaiting payment';
-    $current_settings['enabled_new_awstatus'] = 'no';
-    $current_settings['first_time_new_awstatus'] = 'no';
+    if (!$current_settings['status_suppressed']) {
+        $current_settings['status_suppressed'] = 'wc-sqrip-default-status';
+    }
+    if (!$current_settings['qr_order_status']) {
+        $current_settings['qr_order_status'] = 'wc-on-hold';
+    }
+    if (!$current_settings['new_suppressed_status']) {
+        $current_settings['new_suppressed_status'] = 'Suppressed status';
+    }
+    if (!$current_settings['new_qr_order_status']) {
+        $current_settings['new_qr_order_status'] = 'QR order status';
+    }
+    if (!$current_settings['enabled_new_sustatus']) {
+        $current_settings['enabled_new_sustatus'] = 'no';
+    }
+    if (!$current_settings['first_time_new_sustatus']) {
+        $current_settings['first_time_new_sustatus'] = 'no';
+    }
+    
+    if (!$current_settings['status_completed']) {
+        $current_settings['status_completed'] = 'wc-completed';
+    }
+    if (!$current_settings['new_status']) {
+        $current_settings['new_status'] = 'Completed, Paid';
+    }
+    if (!$current_settings['enabled_new_status']) {
+        $current_settings['enabled_new_status'] = 'no';
+    }
+    if (!$current_settings['first_time_new_status']) {
+        $current_settings['first_time_new_status'] = 'no';
+    }    
+    
+    if (!$current_settings['status_awaiting']) {
+        $current_settings['status_awaiting'] = 'wc-pending';
+    }
+    if (!$current_settings['new_awaiting_status']) {
+        $current_settings['new_awaiting_status'] = 'Awaiting payment';
+    }
+    if (!$current_settings['enabled_new_awstatus']) {
+        $current_settings['enabled_new_awstatus'] = 'no';
+    }
+    if (!$current_settings['first_time_new_awstatus']) {
+        $current_settings['first_time_new_awstatus'] = 'no';
+    }
 
     update_option('woocommerce_sqrip_settings', $current_settings);
 
