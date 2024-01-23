@@ -432,7 +432,21 @@ tr.sqrip-no-height {
 }
 
 .sqrip-status-list {
-    list-style-type: disc !important;
+    list-style-type: none !important;
     margin-top: 4px;
-    margin-left: 22px;
+}
+
+.sqrip-status-list li span {
+    display: inline-block;
+    height: 13px;
+    width: 13px;
+    vertical-align: middle;
+    margin-right: 2px;
+    background-color: red;
+    border: 1px solid black;
+    border-radius: 50px;
+}
+
+.status-success {
+    background-color: #16c60c !important;
 }
