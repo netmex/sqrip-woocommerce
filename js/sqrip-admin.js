@@ -38,6 +38,7 @@ jQuery(document).ready(function ($) {
         ip_payment_comparison_enabled = $('#woocommerce_sqrip_payment_comparison_enabled'),
         ip_sqrip_status_awaiting = $('#woocommerce_sqrip_status_awaiting'),
         ip_sqrip_enabled = $('#woocommerce_sqrip_enabled'),
+        ip_sqrip_refund_enabled = $('#woocommerce_sqrip_return_enabled'),
         ip_sqrip_status_completed = $('#woocommerce_sqrip_status_completed'),
         ip_sqrip_remaining_credits = $('#woocommerce_sqrip_remaining_credits'),
         ip_sqrip_turn_off_if_error = $('#woocommerce_sqrip_turn_off_if_error'),
@@ -425,7 +426,33 @@ jQuery(document).ready(function ($) {
                 }
             })
         }
-    })
+    });
+
+    const toggleFeatures = [
+        {
+            text: "comparison",
+            item: ip_payment_comparison_enabled
+        },
+        {
+            text: "refunds",
+            item: ip_sqrip_refund_enabled
+        },
+    ];
+
+    toggleFeatures.forEach((feature) => {
+        //Hide tab if feature is not enabled
+        if (!feature.item.is(':checked')) {
+            $('.sqrip-tab[data-tab="' + feature.text + '"]').hide();
+        }
+        //toggle tab on feature change
+        feature.item.on('change', function (e) {
+            if ($(this).is(':checked')) {
+                $('.sqrip-tab[data-tab="' + feature.text + '"]').show();
+            } else {
+                $('.sqrip-tab[data-tab="' + feature.text + '"]').hide();
+            }
+        })
+    });
 
     tab_active = window.location.hash.slice(1);
     if (!tab_active) tab_active = "services";

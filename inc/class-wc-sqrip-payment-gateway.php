@@ -113,8 +113,19 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                     ]
                 ]
             ),
+            'section_connection' => array(
+                'title' => __('Connection', 'sqrip-swiss-qr-invoice'),
+                'type' => 'section',
+                'class' => 'services-tab'
+            ),
+            'token' => array(
+                'title' => __('API key', 'sqrip-swiss-qr-invoice'),
+                'type' => 'textarea',
+                'description' => __('Open an account at <a href="https://sqrip.ch" target="_blank">https://sqrip.ch</a>, create an API key, copy and paste it here. Done!', 'sqrip-swiss-qr-invoice'),
+                'class' => 'services-tab'
+            ),
             'section_activation' => array(
-                'title' => __('Activation & Connection', 'sqrip-swiss-qr-invoice'),
+                'title' => __('Activation & Status', 'sqrip-swiss-qr-invoice'),
                 'type' => 'section',
                 'class' => 'services-tab'
             ),
@@ -126,6 +137,19 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'default' => 'no',
                 'class' => 'services-tab'
             ),
+            'remaining_credits' => array(
+                'title' => __('Remaining Credits', 'sqrip-swiss-qr-invoice'),
+                'type' => 'text',
+                'description' => '',
+                'class' => 'services-tab'
+            ), 
+            'current_status' => array(
+                'title' => __('Current sqrip status', 'sqrip-swiss-qr-invoice'),
+                'type' => 'text',
+                'description' => '',
+                'default' => '',
+                'class' => 'services-tab'
+            ), 
             'turn_off_if_error' => array(
                 'title' => __('Auto turn off', 'sqrip-swiss-qr-invoice'),
                 'label' => __('Auto turn off sqrip services if error occurs', 'sqrip-swiss-qr-invoice'),
@@ -134,23 +158,25 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'default' => 'no',
                 'class' => 'services-tab'
             ),
-            'current_status' => array(
-                'title' => __('Current sqrip status', 'sqrip-swiss-qr-invoice'),
-                'type' => 'text',
-                'description' => '',
-                'default' => '',
+            'section_features' => array(
+                'title' => __('Features', 'sqrip-swiss-qr-invoice'),
+                'type' => 'section',
                 'class' => 'services-tab'
             ),
-            'token' => array(
-                'title' => __('API key', 'sqrip-swiss-qr-invoice'),
-                'type' => 'textarea',
-                'description' => __('Open an account at <a href="https://sqrip.ch" target="_blank">https://sqrip.ch</a>, create an API key, copy and paste it here. Done!', 'sqrip-swiss-qr-invoice'),
+            'payment_comparison_enabled' => array(
+                'title' => __('Activate/Deactivate Payment Comparison', 'sqrip-swiss-qr-invoice'),
+                'label' => __('Activate sqrip for Payment Comparison', 'sqrip-swiss-qr-invoice'),
+                'type' => 'checkbox',
+                'description' => '</br>' . __('If activated, sqrip will add an action for orders with the status specified in setting 1 (Awaiting payment), to change the status to the one specified in setting 2 (Confirmed).', 'sqrip-swiss-qr-invoice'),
+                'default' => 'no',
                 'class' => 'services-tab'
             ),
-            'remaining_credits' => array(
-                'title' => __('Remaining Credits', 'sqrip-swiss-qr-invoice'),
-                'type' => 'text',
-                'description' => '',
+            'return_enabled' => array(
+                'title' => __('Activate/Deactivate Refunds', 'sqrip-swiss-qr-invoice'),
+                'label' => __('Activate sqrip for Refunds', 'sqrip-swiss-qr-invoice'),
+                'type' => 'checkbox',
+                'description' => __('If activated, sqrip makes refunding easier by creating a QR-code that can be scanned with the banking app to initiate a bank transfer to the client.', 'sqrip-swiss-qr-invoice'),
+                'default' => 'no',
                 'class' => 'services-tab'
             ),
             'section_display' => array(
@@ -409,14 +435,6 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'type' => 'section',
                 'class' => 'comparison-tab'
             ),
-            'payment_comparison_enabled' => array(
-                'title' => __('Activate/Deactivate Payment Comparison', 'sqrip-swiss-qr-invoice'),
-                'label' => __('Activate sqrip for Payment Comparison', 'sqrip-swiss-qr-invoice'),
-                'type' => 'checkbox',
-                'description' => '</br>' . __('If activated, sqrip will add an action for orders with the status specified in setting 1 (Awaiting payment), to change the status to the one specified in setting 2 (Confirmed).', 'sqrip-swiss-qr-invoice'),
-                'default' => 'no',
-                'class' => 'comparison-tab'
-            ),
             'status_awaiting' => array(
                 'title' => __('Status of awaiting payment orders', 'sqrip-swiss-qr-invoice'),
                 'type' => 'select',
@@ -478,14 +496,6 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'default' => 'no',
                 'css' => 'visibility: hidden; position: absolute',
                 'class' => 'comparison-tab sqrip-no-height'
-            ),
-            'return_enabled' => array(
-                'title' => __('Activate/Deactivate Refunds', 'sqrip-swiss-qr-invoice'),
-                'label' => __('Activate sqrip for Refunds', 'sqrip-swiss-qr-invoice'),
-                'type' => 'checkbox',
-                'description' => __('If activated, sqrip makes refunding easier by creating a QR-code that can be scanned with the banking app to initiate a bank transfer to the client.', 'sqrip-swiss-qr-invoice'),
-                'default' => 'no',
-                'class' => 'refunds-tab'
             ),
             'return_token' => array(
                 'title' => __('API key for Refunds', 'sqrip-swiss-qr-invoice'),
