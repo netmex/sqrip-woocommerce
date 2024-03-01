@@ -4,6 +4,54 @@ if (!class_exists('WC_Payment_Gateway')) return;
 
 class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 {
+	/**
+	 * Due date for order invoice
+	 *
+	 * @var string
+	 */
+    public $due_date;
+
+    /**
+	 * IBAN account number
+	 *
+	 * @var string
+	 */
+    public $iban;
+
+    /**
+	 * sqrip API key token
+	 *
+	 * @var string
+	 */
+    public $token;
+
+    /**
+	 * Purchased product
+	 *
+	 * @var string
+	 */
+    public $product;
+
+    /**
+	 * Store owner address
+	 *
+	 * @var string
+	 */
+    public $address;
+
+    /**
+	 * Enable refunds with sqrip
+	 *
+	 * @var string
+	 */
+    public $return_enabled;
+
+    /**
+	 * sqrip API key token for refunds
+	 *
+	 * @var string
+	 */
+    public $return_token;
 
     /**
      * Class constructor add payment gateway information

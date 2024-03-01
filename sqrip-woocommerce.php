@@ -1118,6 +1118,24 @@ function sqrip_handle_bulk_action_edit_shop_order( $redirect_to, $action, $post_
     ), $redirect_to );
 }
 
+/**
+ * Registers WooCommerce Blocks integration.
+ *
+ */
+add_action( 'woocommerce_blocks_loaded', 'woocommerce_gateway_netmex_sqrip_woocommerce_block_support' );
+
+function woocommerce_gateway_netmex_sqrip_woocommerce_block_support() {
+    if ( class_exists( 'Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType' ) ) {
+        require_once 'inc/blocks/class-wc-sqrip-payments-blocks.php';
+        add_action(
+            'woocommerce_blocks_payment_method_type_registration',
+            function( Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry ) {
+                $payment_method_registry->register( new WC_Gateway_Sqrip_Blocks_Support() );
+            }
+        );
+    }
+}
+
 $current_directory = getcwd() . '/wp-content/plugins/sqrip-woocommerce/inc';
 $file_to_rename = 'onetime.php';
 $new_file_name = 'onetime-backup.php';
