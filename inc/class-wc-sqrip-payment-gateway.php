@@ -334,8 +334,8 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'title' => __('Additional Information', 'sqrip-swiss-qr-invoice'),
                 'type' => 'textarea',
                 'class' => 'sqrip-additional-information',
-                'default' => __("Due date: [due_date format=\"%Y-%m-%d\"]\nOrder: [order_number]\nThank you for your purchase!", "sqrip-swiss-qr-invoice"),
-                'description' => __('Will be displayed on the QR invoice in the section “Additional information”. The result shown in invoices cannot exceed 140 symbols and 5 rows.<br>The following short codes are available:<br>[order_number] the order number.<br>[due_date format="%Y-%m-%d"] to insert the due date of the invoice.<br><a href="https://www.php.net/strftime" target="_blank">Supported formats</a> are:<br>%Y-%m-%d -> 2022-04-06<br>%m.%d.%y -> 04.06.22<br>%d. %B %Y -> 06. April 2022<br>%e. %b %Y -> 6. Apr 2022', 'sqrip-swiss-qr-invoice'),
+                'default' => __("Due date: [due_date format=\"Y-m-d\"]\nOrder: [order_number]\nThank you for your purchase!", "sqrip-swiss-qr-invoice"),
+                'description' => __('Will be displayed on the QR invoice in the section “Additional information”. The result shown in invoices cannot exceed 140 symbols and 5 rows.<br>The following short codes are available:<br>[order_number] the order number.<br>[due_date format="Y-m-d"] to insert the due date of the invoice.<br><a href="https://www.php.net/strftime" target="_blank">Supported formats</a> are:<br>Y-m-d -> 2022-04-06<br>d.m.y -> 04.06.22<br>d. F Y -> 06. April 2022<br>j. M Y -> 6. Apr 2022', 'sqrip-swiss-qr-invoice'),
                 'class' => 'qrinvoice-tab'
             ),
             'file_name' => array(

@@ -398,7 +398,7 @@ function sqrip_set_customer_iban($user, $iban)
 function sqrip_get_wc_emails()
 {
     $emails = wc()->mailer()->get_emails();
-    $options = [];
+    $options = ["sqrip-do-not-attach" => __('Do not attach to any e-mail', 'sqrip-swiss-qr-invoice'),];
 
     if ($emails && is_array($emails)) {
         foreach ($emails as $email) {
@@ -427,7 +427,10 @@ function sqrip_additional_information_shortcodes($additional_information, $lang,
     preg_match_all('/\[due_date format="(.*)"\]/', $additional_information, $date_shortcodes);
     foreach ($date_shortcodes[0] as $index => $date_shortcode) {
         $format = $date_shortcodes[1][$index];
-        $due_date_format = ucwords(\IntlDateFormatter::formatObject(\DateTime::createFromFormat('U', $due_date), $format));
+        $due_date = date_timestamp_set(new DateTime(), $due_date);
+        $due_date_format = date_format($due_date, $format);
+        // $due_date_format = strftime($format, $due_date);
+
         if (!$due_date_format) {
             continue;
         }
