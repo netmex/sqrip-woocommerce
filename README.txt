@@ -1,10 +1,10 @@
-=== sqrip – Swiss QR Invoice ===
+=== sqrip.ch ===
 Contributors: sqrip
 Donate link: https://sqrip.ch/
 Tags: woocommerce, payment, sqrip, qrcode, qr, scan, Kontoabgleich, swiss qr invoice, QR-Rechnung, EBICS, QR-facture, bulletins de versement, Einzahlungsschein, QR-Einzahlungsschein, bulletins de versement, Swiss QR Code, code QR, QR-fattura, polizze di versamento
 Requires at least: 4.7
-Tested up to: 6.2
-Stable tag: 1.7
+Tested up to: 6.4
+Stable tag: 1.8
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -41,11 +41,11 @@ d) (QR) reference number
 The reference number is either created randomly or calculated on the basis of the order number. Inital 6 digits can be defined for easier identification. It automatically adapts to the IBAN format used.
 
 e) additional information
-On up to five lines or 160 characters additional information can be added to the QR invoice. This includes 
+On up to five lines or 140 characters additional information can be added to the QR invoice. This includes 
 - the due date (The time given to the payer to settle the invoice may be communicated as text on the payment part.).
 - the order number (Be aware: sqrip not use the order# of the plugin "WoCommerce Sequential Order Numbers")
 - any additional text (e.g. URL of webshop, thank you message)
-This fiels supports WPML.
+This field supports WPML.
 
 f) Integration
 Define the e-mail to which the qr-invoice will be attached to.
@@ -85,6 +85,11 @@ Keeps the size of the media library small. sqrip deletes all QR invoice files if
 - certain status of the order are met (e.g. Cancelled);
 - x days after the creation have passed.
 
+p) Adjustable to your process 
+sqrip is flexible enough to be adopted to your individual process. 
+- Define your own order status for payments made with sqrip;
+- Define the moment you expect the payment to arrive (prior to shipment or thereafter);
+- Define the status after payment has arrived.
 
 = Requirements =
 1. Besides a current WordPress and WooCommerce installation, an account on sqrip.ch is required.
@@ -103,7 +108,7 @@ Keeps the size of the media library small. sqrip deletes all QR invoice files if
 - A (QR) IBAN.
 
 = How much will a QR invoice cost me? = 
-We charge according to actually used QR invoices. One QR invoice costs 1 credit. Credits can be purchased in packages of 100 pcs. (for CHF 20) to 20'000 pcs. (for CHF 1'000) - each plus 7.7% VAT. The lowest price for a QR-bill is therefore 5 centimes (CHF 0.05).
+We charge according to actually used QR invoices. One QR invoice costs 1 credit. Credits can be purchased in packages of 100 pcs. (for CHF 20) to 20'000 pcs. (for CHF 1'000) - each plus VAT. The lowest price for a QR-bill is therefore 5 centimes (CHF 0.05).
 
 = Can I try the solution for free? =
 Yes. Registration (http://api.sqrip.ch/login) is free of charge. No credit card details are required. There are 20 credits to try it out. With this you can test all functions (test e-mail!). Afterwards you can buy packages with credits. If you do not like the service, you can simply delete the account again.
@@ -119,15 +124,53 @@ Yes. We are already working on comparing the reconciliation of orders/purchases 
 - Only free is even cheaper. A QR bill is available from 5 centimes. For transactions with credit card or Twint, only the fixed amounts are higher.
 
 == Screenshots ==
-1. Connection settings and designation
-2. Payee
-3. Display
-4. sqrip API Key
+1. Connection settings and naming
+2. Payee information
+3. QR invoice detail settings
+4. File naming and format
+5. Process definition and house keeping
+6. Manual Payment Comparison
+7. Refund functionality
 
 == Changelog ==
+
+= 1.8 : March 2024 – Major Service Update =
+* Working with PHP 8.2, Wordpress 6.4 and Block Checkout;
+* Added a new Tab "Services";
+* Added the number of remaining credits;
+* Added 'Current sqrip status': See what's wrong to fix it quickly.
+* Added 'Auto Turn-off' functionality: Should any parameter be wrong (e.g. no credits left, API key inactive, unknown errors), sqrip will turn itself off in order to prevent any errors visible for the shop clients;
+* Define an individual status for orders made with the sqrip payment method;
+* The status can be changed for multiple orders now, incl. to the status defined by the merchant;
+* Should the QR bill not be attached to any e-mail, you can now select this option too;
+* Minor bug fixing.
+
+= 1.7.5 : November 2023 – Service Update =
+* Adding the Service Tab;
+* Assign you own status to new orders made with sqrip; 
+* Allows to select your own status in the list of orders;
+* Easy to understand error messages;
+* Minor bug fixing.
+
+= 1.7.4 : June 2023 – Service Update =
+* Automatic changes in order status are prevented. 
+
+= 1.7.3 : May 2023 – Service Update =
+* Issues with file name adjustments solved;
+* Payment Comparison can be turned off, preventing order status mix-up;
+* Problems in some instances with the API token verification resolved.
+
+= 1.7.2 : May 2023 – Service Update =
+* Link to updated QR invoice corrected;
+* Individual file naming corrected;
+* Potential error in attribution of QR invoices to e-mails corrected;
+* Empty "additional information" field does no longer trigger an error;
+* In case of a refund to a shop client: hint to unknown IBAN is shown;
+* Minor Bug fixes.
+
 = 1.7 : April 2023 =
 * To save space in your media library on your server the QR Invoices (PDF) are automatically deleted, if certain status of the order are met (e.g. Cancelled) or x days after the creation have passed;
-* Inital 6 digits are now available for regular IBAN. Letters are possible (e.g. "RF39 SQRI PX11 1115 2023 0331 0");
+* Inital 6 digits for Reference Numbers are now available in combination with regular IBAN. Letters are possible (e.g. "RF39 SQRI PX11 1115 2023 0331 0");
 * The reference numbers are now shown in groups;
 * Define a suitable order status when waiting for payments or when no QR invoice has been created;
 * Show message when the (QR-)IBAN in the plugin is different from the one on api.sqrip.ch;

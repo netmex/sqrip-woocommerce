@@ -75,6 +75,7 @@ jQuery(document).ready(function ($) {
             console.log('The following error occured: ' + textStatus, errorThrown);
         }
     })
+
     $.ajax({
         type: "post",
         url: sqrip.ajax_url,
