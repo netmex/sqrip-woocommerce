@@ -995,7 +995,7 @@ add_action('woocommerce_order_status_changed', function ($post_id, $old_status, 
 
     $new_status = "wc-" . $new_status;
 
-    if (in_array($new_status, $delete_invoice_status)) {
+    if (in_array($new_status, $delete_invoice_status) && $old_status != 'checkout-draft') {
         $order_id = $post_id;
         $att_id = get_post_meta($order_id, 'sqrip_qr_pdf_attachment_id', true);
 
