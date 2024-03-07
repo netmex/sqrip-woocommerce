@@ -31,7 +31,8 @@ table.form-table .sqrip-notice {
     font-weight: bold;
     display: inline-block;
     line-height: 1;
-    height: 25px;
+    /* height: 25px; */
+    height: fit-content;
     margin-left: 15px;
     /*margin-top: 0 !important;*/
 }
@@ -286,7 +287,7 @@ table.sqrip-table td p.sqrip-note {
     background-color: #fff;
 }
 
-#woocommerce_sqrip_new_status, #woocommerce_sqrip_new_awaiting_status, #woocommerce_sqrip_new_suppressed_status {
+#woocommerce_sqrip_new_status, #woocommerce_sqrip_new_awaiting_status, #woocommerce_sqrip_new_suppressed_status, #woocommerce_sqrip_new_qr_order_status {
     display: block;
     margin-bottom: 10px;
 }
@@ -411,4 +412,41 @@ tr.sqrip-no-height {
     max-height: 1px;
     overflow: hidden;
     position: absolute;
+}
+
+.sqrip-no-border,
+.sqrip-no-border :active,
+.sqrip-no-border :focus,
+.sqrip-no-border :focus-visible {
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.sqrip-qr-order-status th,
+.sqrip-qr-order-status td {
+    padding-bottom: 0 !important;
+}
+
+.negative-top-margin {
+    margin-top: -4px !important;
+}
+
+.sqrip-status-list {
+    list-style-type: none !important;
+    margin-top: 4px;
+}
+
+.sqrip-status-list li span {
+    display: inline-block;
+    height: 13px;
+    width: 13px;
+    vertical-align: middle;
+    margin-right: 2px;
+    background-color: red;
+    border: 1px solid black;
+    border-radius: 50px;
+}
+
+.status-success {
+    background-color: #16c60c !important;
 }

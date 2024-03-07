@@ -87,8 +87,8 @@ Keeps the size of the media library small. sqrip deletes all QR invoice files if
 
 p) Adjustable to your process 
 sqrip is flexible enough to be adopted to your individual process. 
-- Define your own order status for payments made ith sqrip;
-- Define the moment you expect the payment to arrive (prior to shippment or thereafter);
+- Define your own order status for payments made with sqrip;
+- Define the moment you expect the payment to arrive (prior to shipment or thereafter);
 - Define the status after payment has arrived.
 
 = Requirements =

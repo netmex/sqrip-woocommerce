@@ -102,7 +102,7 @@ function sqrip_validation_iban_ajax()
             $result['result'] = false;
             $result['qriban'] = false;
             $result['message'] = __("incorrect", "sqrip");
-            $result['description'] = __('The (QR-)IBAN of your account to which the transfer should be made is ERROR.', 'sqrip-swiss-qr-invoice');
+            $result['description'] = __('It seems that an invalid (QR-)IBAN has been submitted. Please check the designated transfers-receiving IBAN you submitted.', 'sqrip-swiss-qr-invoice');
             break;
     }
     if ($response->will_need_confirmation) {
@@ -138,7 +138,7 @@ function sqrip_validation_token_ajax()
     switch ($response_code) {
         case 403:
             $result['result'] = false;
-            $result['message'] = __("Valid token inactive", "sqrip-swiss-qr-invoice");
+            $result['message'] = __("Your API key appears to be inactive. Please check that your API key is set to active in the sqrip settings.", "sqrip-swiss-qr-invoice");
 
             break;
 
@@ -148,12 +148,14 @@ function sqrip_validation_token_ajax()
             $result['result'] = true;
 
             $result['message'] = $body_decode->message;
+            $result['credits_left'] = $body_decode->credits_left;
             // $result['message'] = __("Valid, active API Key", "sqrip-swiss-qr-invoice");
             break;
 
         default:
             $result['result'] = false;
-            $result['message'] = __("Invalid token", "sqrip-swiss-qr-invoice");
+            $result['response_code'] = $response_code;
+            $result['message'] = __("We can't seem to find the API key you're using in our database. Please check your API key, your sqrip settings, then contact our support.", "sqrip-swiss-qr-invoice");
             break;
     }
 
@@ -265,7 +267,7 @@ function sqrip_payment_confirmed()
 
     $paged = isset($_GET['paged']) ? '&paged=' . $_GET['paged'] : '';
 
-    $order->update_status($status_completed, 'order_note');
+    $order->update_status($status_completed, '');
 
     wp_redirect(get_admin_url() . 'edit.php?post_type=shop_order' . $paged);
     die();

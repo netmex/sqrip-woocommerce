@@ -4,7 +4,7 @@
  * Plugin Name:             sqrip.ch
  * Plugin URI:              https://sqrip.ch/
  * Description:             sqrip – A comprehensive, flexible and clever WooCommerce finance tool for the most widely used payment method in Switzerland: the bank transfers.
- * Version:                 1.7.4
+ * Version:                 1.8
  * Author:                  netmex digital gmbh
  * Author URI:              https://sqrip.ch/
  */
@@ -130,6 +130,7 @@ add_action('admin_enqueue_scripts', function () {
         $sqrip_new_status = sqrip_get_plugin_option('enabled_new_status');
         $sqrip_new_awaiting_status = sqrip_get_plugin_option('enabled_new_awstatus');
         $sqrip_new_suppressed_status = sqrip_get_plugin_option('enabled_new_sustatus');
+        $sqrip_new_qr_status = sqrip_get_plugin_option('enabled_new_qrstatus');
 
         $sqrip_details = sqrip_get_user_details('', 'full');
 
@@ -141,6 +142,7 @@ add_action('admin_enqueue_scripts', function () {
                 'txt_create' => $sqrip_new_status == 'yes' ? __('Update', 'sqrip-swiss-qr-invoice') : __('Create', 'sqrip-swiss-qr-invoice'),
                 'txt_awaiting_create' => $sqrip_new_awaiting_status == 'yes' ? __('Update', 'sqrip-swiss-qr-invoice') : __('Create', 'sqrip-swiss-qr-invoice'),
                 'txt_suppressed_create' => $sqrip_new_suppressed_status == 'yes' ? __('Update', 'sqrip-swiss-qr-invoice') : __('Create', 'sqrip-swiss-qr-invoice'),
+                'txt_qr_create' => $sqrip_new_qr_status == 'yes' ? __('Update', 'sqrip-swiss-qr-invoice') : __('Create', 'sqrip-swiss-qr-invoice'),
                 'txt_send_test_email' => sprintf(
                     __('Send test to %s', 'sqrip-swiss-qr-invoice'),
                     esc_html(get_option('admin_email'))
@@ -335,7 +337,8 @@ function sqrip_add_qrcode_in_email_after_order_table($order, $sent_to_admin, $pl
     $array_in = array('both', 'body');
 
     if ($email->id === $email_attached && $payment_method === 'sqrip' && in_array($integration_email, $array_in)) {
-        $order_id = $order->id;
+        // $order_id = $order->id;
+        $order_id = method_exists($order, 'get_id') ? $order->get_id() : $order->id;
         $png_file = get_post_meta($order_id, 'sqrip_png_file_url', true);
 
         echo $png_file ? '<div class="sqrip-qrcode-png"><p>' . esc_html__('Use the QR invoice below to pay the outstanding balance.', 'sqrip-swiss-qr-invoice') . '</p><img src="' . esc_url($png_file) . '" alt="' . esc_attr('sqrip QR-Code', 'sqrip-swiss-qr-invoice') . '" width="200"/></div>' : '';
@@ -352,7 +355,7 @@ add_filter('woocommerce_email_attachments', 'sqrip_attach_qrcode_pdf_to_email', 
 
 function sqrip_attach_qrcode_pdf_to_email($attachments, $email_id, $order)
 {
-    if (empty($order) || !isset($email_id) || !method_exists($order, 'get_payment_method')) {
+    if (empty($order) || !isset($email_id) || !(is_object($order) && method_exists($order, 'get_payment_method'))) {
         return $attachments;
     }
 
@@ -369,7 +372,8 @@ function sqrip_attach_qrcode_pdf_to_email($attachments, $email_id, $order)
     $array_in = array('both', 'attachment');
 
     if ($email_id === $email_attached && $payment_method === 'sqrip' && in_array($integration_email, $array_in)) {
-        $order_id = $order->id;
+        // $order_id = $order->id;
+        $order_id = method_exists($order, 'get_id') ? $order->get_id() : $order->id;
 
         $pdf_file_path = get_post_meta($order_id, 'sqrip_pdf_file_path', true);
 
@@ -572,7 +576,7 @@ add_filter('wp_insert_post_data', function ($data, $postarr, $unsanitized_postar
                 set_transient('sqrip_admin_action_errors', sprintf(
                     __('<b>%s</b> %s</br>%s', 'sqrip-swiss-qr-invoice'),
                     $error_title,
-                    esc_html($response_body->message),
+                    esc_html($response_body->message),//." <a href='https://www.sqrip.ch/#pricing' target='_blank'>https://www.sqrip.ch/#pricing</a>"
                     esc_html($errors_output)
                 ), 60);
 
@@ -814,6 +818,29 @@ function sqrip_register_new_order_sustatus()
 
 add_action('init', 'sqrip_register_new_order_sustatus');
 
+// Register new qr order status
+function sqrip_register_new_qr_order_status()
+{
+    $sqrip_new_status = sqrip_get_plugin_option('new_qr_order_status');
+    $enabled_new_status = sqrip_get_plugin_option('enabled_new_qrstatus');
+
+    if (!$sqrip_new_status || $enabled_new_status == "no") {
+        return;
+    }
+
+    register_post_status('wc-sqrip-qrstatus', array(
+        'label' => $sqrip_new_status,
+        'public' => true,
+        'show_in_admin_status_list' => true,
+        'show_in_admin_all_list' => true,
+        'exclude_from_search' => false,
+        'label_count' => _n_noop($sqrip_new_status . ' <span class="count">(%s)</span>', $sqrip_new_status . ' <span class="count">(%s)</span>')
+
+    ));
+}
+
+add_action('init', 'sqrip_register_new_qr_order_status');
+
 // Add custom status to order status list
 function sqrip_add_new_order_awstatuses($order_statuses)
 {
@@ -860,6 +887,29 @@ function sqrip_add_new_order_sustatuses($order_statuses)
 }
 
 add_filter('wc_order_statuses', 'sqrip_add_new_order_sustatuses');
+
+// Add custom status to order status list
+function sqrip_add_new_qrorder_statuses($order_statuses)
+{
+    $sqrip_new_status = sqrip_get_plugin_option('new_qr_order_status');
+    $enabled_new_status = sqrip_get_plugin_option('enabled_new_qrstatus');
+
+    if (!$sqrip_new_status || $enabled_new_status == "no") {
+        return $order_statuses;
+    }
+
+    $new_order_statuses = array();
+
+    foreach ($order_statuses as $key => $status) {
+        $new_order_statuses[$key] = $status;
+        if ('wc-processing' === $key) {
+            $new_order_statuses['wc-sqrip-qrstatus'] = $sqrip_new_status;
+        }
+    }
+    return $new_order_statuses;
+}
+
+add_filter('wc_order_statuses', 'sqrip_add_new_qrorder_statuses');
 
 // Add custom status to order status list
 function sqrip_add_new_order_statuses($order_statuses)
@@ -945,7 +995,7 @@ add_action('woocommerce_order_status_changed', function ($post_id, $old_status, 
 
     $new_status = "wc-" . $new_status;
 
-    if (in_array($new_status, $delete_invoice_status)) {
+    if (in_array($new_status, $delete_invoice_status) && $old_status != 'checkout-draft') {
         $order_id = $post_id;
         $att_id = get_post_meta($order_id, 'sqrip_qr_pdf_attachment_id', true);
 
@@ -971,11 +1021,21 @@ add_action('woocommerce_thankyou', function ($order_id) {
     if ($order->get_payment_method() == 'sqrip') {
         $sqrip_suppress_generation = sqrip_get_plugin_option('suppress_generation');
         $sqrip_default_suppressed_status = sqrip_get_plugin_option('status_suppressed');
+        $sqrip_qr_order_status = sqrip_get_plugin_option('qr_order_status');
+
+        if (!$sqrip_qr_order_status) {
+            $sqrip_qr_order_status = 'wc-on-hold';
+
+            //set default value for qr_order_status v1.8
+            $plugin_options = get_option('woocommerce_sqrip_settings', array());
+            $plugin_options['qr_order_status'] = 'wc-on-hold';
+            update_option('woocommerce_sqrip_settings', $plugin_options);
+        }
 
         if ($sqrip_suppress_generation == 'yes' && $sqrip_default_suppressed_status) {
             $order->update_status($sqrip_default_suppressed_status);
         } else {
-            $order->update_status('on-hold');
+            $order->update_status($sqrip_qr_order_status);
         }
     }
 }, 10, 3);
@@ -1000,6 +1060,82 @@ add_action('woocommerce_admin_order_data_after_order_details', function ($order)
     }
 });
 
+// Adding to admin order list bulk dropdown custom change order statuses
+add_filter( 'bulk_actions-edit-shop_order', 'bulk_change_order_sqrip_statuses', 20, 1 );
+function bulk_change_order_sqrip_statuses( $actions ) {
+    $sqrip_new_status = sqrip_get_plugin_option('new_status');
+    $sqrip_new_qr_status = sqrip_get_plugin_option('new_qr_order_status');
+    $sqrip_new_aw_status = sqrip_get_plugin_option('new_awaiting_status');
+    $sqrip_new_su_status = sqrip_get_plugin_option('new_suppressed_status');
+    $sqrip_qr_order_status = sqrip_get_plugin_option('qr_order_status');
+
+    if ($sqrip_new_status) {
+        $actions['sqrip_new_status'] = __( 'Change status to '. $sqrip_new_status, 'woocommerce' );
+    }
+    if ($sqrip_new_qr_status) {
+        $actions['sqrip_new_qr_order_status'] = __( 'Change status to '. $sqrip_new_qr_status, 'woocommerce' );
+    }
+    if ($sqrip_new_aw_status) {
+        $actions['sqrip_new_awaiting_status'] = __( 'Change status to '. $sqrip_new_aw_status, 'woocommerce' );
+    }
+    if ($sqrip_new_su_status) {
+        $actions['sqrip_new_suppressed_status'] = __( 'Change status to '. $sqrip_new_su_status, 'woocommerce' );
+    }
+
+    return $actions;
+}
+
+// Make the action for bulk sqrip status change
+// since 1.8
+add_filter( 'handle_bulk_actions-edit-shop_order', 'sqrip_handle_bulk_action_edit_shop_order', 10, 3 );
+function sqrip_handle_bulk_action_edit_shop_order( $redirect_to, $action, $post_ids ) {
+    
+    if ( !in_array($action, ['sqrip_new_status', 'sqrip_new_qr_order_status', 'sqrip_new_awaiting_status', 'sqrip_new_suppressed_status']) )
+        return $redirect_to; // Exit
+    
+    $order_statuses = [
+        'sqrip_new_status' => 'wc-sqrip-paid', 
+        'sqrip_new_qr_order_status' => 'wc-sqrip-qrstatus', 
+        'sqrip_new_awaiting_status' => 'wc-sqrip-awaiting', 
+        'sqrip_new_suppressed_status' => 'wc-sqrip-suppressed'
+    ];
+
+    $processed_ids = array();
+
+    foreach ( $post_ids as $post_id ) {
+        $order = wc_get_order( $post_id );
+        $new_order_status = $order_statuses[$action];
+
+        $order->update_status($new_order_status);
+
+        $processed_ids[] = $post_id;
+    }
+
+    return $redirect_to = add_query_arg( array(
+        $action => '1',
+        'processed_count' => count( $processed_ids ),
+        'processed_ids' => implode( ',', $processed_ids ),
+    ), $redirect_to );
+}
+
+/**
+ * Registers WooCommerce Blocks integration.
+ *
+ */
+add_action( 'woocommerce_blocks_loaded', 'woocommerce_gateway_netmex_sqrip_woocommerce_block_support' );
+
+function woocommerce_gateway_netmex_sqrip_woocommerce_block_support() {
+    if ( class_exists( 'Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType' ) ) {
+        require_once 'inc/blocks/class-wc-sqrip-payments-blocks.php';
+        add_action(
+            'woocommerce_blocks_payment_method_type_registration',
+            function( Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry ) {
+                $payment_method_registry->register( new WC_Gateway_Sqrip_Blocks_Support() );
+            }
+        );
+    }
+}
+
 $current_directory = getcwd() . '/wp-content/plugins/sqrip-woocommerce/inc';
 $file_to_rename = 'onetime.php';
 $new_file_name = 'onetime-backup.php';
@@ -1007,20 +1143,50 @@ $new_file_name = 'onetime-backup.php';
 if (file_exists($current_directory . '/' . $file_to_rename)) {
     $current_settings = get_option('woocommerce_sqrip_settings', array());
 
-    $current_settings['status_suppressed'] = 'wc-sqrip-default-status';
-    $current_settings['new_suppressed_status'] = 'Suppressed status';
-    $current_settings['enabled_new_sustatus'] = 'no';
-    $current_settings['first_time_new_sustatus'] = 'no';
-
-    $current_settings['status_completed'] = 'wc-completed';
-    $current_settings['new_status'] = 'Completed, Paid';
-    $current_settings['enabled_new_status'] = 'no';
-    $current_settings['first_time_new_status'] = 'no';
-
-    $current_settings['status_awaiting'] = 'wc-pending';
-    $current_settings['new_awaiting_status'] = 'Awaiting payment';
-    $current_settings['enabled_new_awstatus'] = 'no';
-    $current_settings['first_time_new_awstatus'] = 'no';
+    if (!$current_settings['status_suppressed']) {
+        $current_settings['status_suppressed'] = 'wc-sqrip-default-status';
+    }
+    if (!$current_settings['qr_order_status']) {
+        $current_settings['qr_order_status'] = 'wc-on-hold';
+    }
+    if (!$current_settings['new_suppressed_status']) {
+        $current_settings['new_suppressed_status'] = 'Suppressed status';
+    }
+    if (!$current_settings['new_qr_order_status']) {
+        $current_settings['new_qr_order_status'] = 'QR order status';
+    }
+    if (!$current_settings['enabled_new_sustatus']) {
+        $current_settings['enabled_new_sustatus'] = 'no';
+    }
+    if (!$current_settings['first_time_new_sustatus']) {
+        $current_settings['first_time_new_sustatus'] = 'no';
+    }
+    
+    if (!$current_settings['status_completed']) {
+        $current_settings['status_completed'] = 'wc-completed';
+    }
+    if (!$current_settings['new_status']) {
+        $current_settings['new_status'] = 'Completed, Paid';
+    }
+    if (!$current_settings['enabled_new_status']) {
+        $current_settings['enabled_new_status'] = 'no';
+    }
+    if (!$current_settings['first_time_new_status']) {
+        $current_settings['first_time_new_status'] = 'no';
+    }    
+    
+    if (!$current_settings['status_awaiting']) {
+        $current_settings['status_awaiting'] = 'wc-pending';
+    }
+    if (!$current_settings['new_awaiting_status']) {
+        $current_settings['new_awaiting_status'] = 'Awaiting payment';
+    }
+    if (!$current_settings['enabled_new_awstatus']) {
+        $current_settings['enabled_new_awstatus'] = 'no';
+    }
+    if (!$current_settings['first_time_new_awstatus']) {
+        $current_settings['first_time_new_awstatus'] = 'no';
+    }
 
     update_option('woocommerce_sqrip_settings', $current_settings);
 

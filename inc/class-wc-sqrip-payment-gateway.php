@@ -4,6 +4,54 @@ if (!class_exists('WC_Payment_Gateway')) return;
 
 class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 {
+	/**
+	 * Due date for order invoice
+	 *
+	 * @var string
+	 */
+    public $due_date;
+
+    /**
+	 * IBAN account number
+	 *
+	 * @var string
+	 */
+    public $iban;
+
+    /**
+	 * sqrip API key token
+	 *
+	 * @var string
+	 */
+    public $token;
+
+    /**
+	 * Purchased product
+	 *
+	 * @var string
+	 */
+    public $product;
+
+    /**
+	 * Store owner address
+	 *
+	 * @var string
+	 */
+    public $address;
+
+    /**
+	 * Enable refunds with sqrip
+	 *
+	 * @var string
+	 */
+    public $return_enabled;
+
+    /**
+	 * sqrip API key token for refunds
+	 *
+	 * @var string
+	 */
+    public $return_token;
 
     /**
      * Class constructor add payment gateway information
@@ -78,15 +126,27 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 
         $suppressed_qr_invoice_orders = wc_get_order_statuses();
         $suppressed_qr_invoice_orders = ['wc-sqrip-default-status' => 'Please select an option'] + $suppressed_qr_invoice_orders;
+        
+        $qr_order_status_options = wc_get_order_statuses();
+        if (isset($qr_order_status_options['wc-on-hold'])) {
+            $qr_order_status_options['wc-on-hold'] = $qr_order_status_options['wc-on-hold']." (default)";
+        } else {
+            $qr_order_status_options['on-hold'] = "Sqrip On-hold (default)";
+        }
 
         $this->form_fields = array(
             'tabs' => array(
                 'type' => 'tab',
                 'tabs' => [
                     [
+                        'id' => 'services',
+                        'title' => __('Services', 'sqrip-swiss-qr-invoice'),
+                        'class' => 'active',
+                    ],
+                    [
                         'id' => 'qrinvoice',
                         'title' => __('QR-Invoice', 'sqrip-swiss-qr-invoice'),
-                        'class' => 'active',
+                        'class' => '',
                     ],
                     [
                         'id' => 'comparison',
@@ -101,10 +161,21 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                     ]
                 ]
             ),
-            'section_activation' => array(
-                'title' => __('Activation & Connection', 'sqrip-swiss-qr-invoice'),
+            'section_connection' => array(
+                'title' => __('Connection', 'sqrip-swiss-qr-invoice'),
                 'type' => 'section',
-                'class' => 'qrinvoice-tab'
+                'class' => 'services-tab'
+            ),
+            'token' => array(
+                'title' => __('API key', 'sqrip-swiss-qr-invoice'),
+                'type' => 'textarea',
+                'description' => __('Open an account at <a href="https://sqrip.ch" target="_blank">https://sqrip.ch</a>, create an API key, copy and paste it here. Done!', 'sqrip-swiss-qr-invoice'),
+                'class' => 'services-tab'
+            ),
+            'section_activation' => array(
+                'title' => __('Activation & Status', 'sqrip-swiss-qr-invoice'),
+                'type' => 'section',
+                'class' => 'services-tab'
             ),
             'enabled' => array(
                 'title' => __('Activate sqrip', 'sqrip-swiss-qr-invoice'),
@@ -112,13 +183,49 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'type' => 'checkbox',
                 'description' => '',
                 'default' => 'no',
-                'class' => 'qrinvoice-tab'
+                'class' => 'services-tab'
             ),
-            'token' => array(
-                'title' => __('API key', 'sqrip-swiss-qr-invoice'),
-                'type' => 'textarea',
-                'description' => __('Open an account at <a href="https://sqrip.ch" target="_blank">https://sqrip.ch</a>, create an API key, copy and paste it here. Done!', 'sqrip-swiss-qr-invoice'),
-                'class' => 'qrinvoice-tab'
+            'remaining_credits' => array(
+                'title' => __('Remaining Credits', 'sqrip-swiss-qr-invoice'),
+                'type' => 'text',
+                'description' => '',
+                'class' => 'services-tab'
+            ), 
+            'current_status' => array(
+                'title' => __('Current sqrip status', 'sqrip-swiss-qr-invoice'),
+                'type' => 'text',
+                'description' => '',
+                'default' => '',
+                'class' => 'services-tab'
+            ), 
+            'turn_off_if_error' => array(
+                'title' => __('Auto turn off', 'sqrip-swiss-qr-invoice'),
+                'label' => __('Auto turn off sqrip services if error occurs', 'sqrip-swiss-qr-invoice'),
+                'type' => 'checkbox',
+                'description' => '',
+                'default' => 'no',
+                'class' => 'services-tab'
+            ),
+            'section_features' => array(
+                'title' => __('Features', 'sqrip-swiss-qr-invoice'),
+                'type' => 'section',
+                'class' => 'services-tab'
+            ),
+            'payment_comparison_enabled' => array(
+                'title' => __('Activate/Deactivate Payment Comparison', 'sqrip-swiss-qr-invoice'),
+                'label' => __('Activate sqrip for Payment Comparison', 'sqrip-swiss-qr-invoice'),
+                'type' => 'checkbox',
+                'description' => '</br>' . __('If activated, sqrip will add an action for orders with the status specified in setting 1 (Awaiting payment), to change the status to the one specified in setting 2 (Confirmed).', 'sqrip-swiss-qr-invoice'),
+                'default' => 'no',
+                'class' => 'services-tab'
+            ),
+            'return_enabled' => array(
+                'title' => __('Activate/Deactivate Refunds', 'sqrip-swiss-qr-invoice'),
+                'label' => __('Activate sqrip for Refunds', 'sqrip-swiss-qr-invoice'),
+                'type' => 'checkbox',
+                'description' => __('If activated, sqrip makes refunding easier by creating a QR-code that can be scanned with the banking app to initiate a bank transfer to the client.', 'sqrip-swiss-qr-invoice'),
+                'default' => 'no',
+                'class' => 'services-tab'
             ),
             'section_display' => array(
                 'title' => __('Display', 'sqrip-swiss-qr-invoice'),
@@ -227,8 +334,8 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'title' => __('Additional Information', 'sqrip-swiss-qr-invoice'),
                 'type' => 'textarea',
                 'class' => 'sqrip-additional-information',
-                'default' => __("Due date: [due_date format=\"%Y-%m-%d\"]\nOrder: [order_number]\nThank you for your purchase!", "sqrip-swiss-qr-invoice"),
-                'description' => __('Will be displayed on the QR invoice in the section “Additional information”. The result shown in invoices cannot exceed 140 symbols and 5 rows.<br>The following short codes are available:<br>[order_number] the order number.<br>[due_date format="%Y-%m-%d"] to insert the due date of the invoice.<br><a href="https://www.php.net/strftime" target="_blank">Supported formats</a> are:<br>%Y-%m-%d -> 2022-04-06<br>%m.%d.%y -> 04.06.22<br>%d. %B %Y -> 06. April 2022<br>%e. %b %Y -> 6. Apr 2022', 'sqrip-swiss-qr-invoice'),
+                'default' => __("Due date: [due_date format=\"Y-m-d\"]\nOrder: [order_number]\nThank you for your purchase!", "sqrip-swiss-qr-invoice"),
+                'description' => __('Will be displayed on the QR invoice in the section “Additional information”. The result shown in invoices cannot exceed 140 symbols and 5 rows.<br>The following short codes are available:<br>[order_number] the order number.<br>[due_date format="Y-m-d"] to insert the due date of the invoice.<br><a href="https://www.php.net/strftime" target="_blank">Supported formats</a> are:<br>Y-m-d -> 2022-04-06<br>d.m.y -> 04.06.22<br>d. F Y -> 06. April 2022<br>j. M Y -> 6. Apr 2022', 'sqrip-swiss-qr-invoice'),
                 'class' => 'qrinvoice-tab'
             ),
             'file_name' => array(
@@ -270,12 +377,12 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'title' => __('Suppress QR-Invoice generation at checkout', 'sqrip-swiss-qr-invoice'),
                 'label' => __('Don\'t generate QR-invoice at checkout but manually', 'sqrip-swiss-qr-invoice'),
                 'type' => 'checkbox',
-                'description' => __('If you enable this, the order status for orders with sqrip will change to the selected one, a confirmation e-mail will be sent and the order will wait for you to generate qr-invoices manually. This is helpful if you may need to adjust pricing or quantity after an order has been placed', 'sqrip-swiss-qr-invoice'),
+                'description' => __('If you enable this, the order status for orders with sqrip will change to \'Payment pending\', a confirmation e-mail will be sent and the order will wait for you to generate qr-invoices manually. This is helpful if you may need to adjust pricing or quantity after an order has been placed', 'sqrip-swiss-qr-invoice'),
                 'default' => 'no',
                 'class' => 'qrinvoice-tab'
             ),
             'status_suppressed' => array(
-                'title' => __('Select status for new orders without automatic QR-invoices', 'sqrip-swiss-qr-invoice'),
+                'title' => __('Define Status when QR-Invoice is suppressed', 'sqrip-swiss-qr-invoice'),
                 'type' => 'select',
                 'options' => $suppressed_qr_invoice_orders,
                 'default' => 'wc-sqrip-default-status',
@@ -297,6 +404,36 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'class' => 'comparison-tab sqrip-no-height'
             ),
             'first_time_new_sustatus' => array(
+                'title' => '',
+                'type' => 'checkbox',
+                'label' => ' ',
+                'default' => 'no',
+                'css' => 'visibility: hidden; position: absolute',
+                'class' => 'comparison-tab sqrip-no-height'
+            ),
+            'qr_order_status' => array(
+                'title' => __('Status of Orders made with payment method \'sqrip\':', 'sqrip-swiss-qr-invoice'),
+                'type' => 'select',
+                'options' => $qr_order_status_options,
+                'class' => 'qrinvoice-tab',
+                'default' => 'wc-on-hold',
+            ),
+            'new_qr_order_status' => array(
+                'title' => '',
+                'type' => 'text',
+                'class' => 'qrinvoice-tab',
+                'default' => __('QR order status', 'sqrip-swiss-qr-invoice'),
+                'description' => sprintf(__('Set the status of a newly placed order with payment method \'sqrip\' so it matches your shop process. Should no status be suitable, please create one for your own %s.', 'sqrip-swiss-qr-invoice'), '<a href="#" class="sqrip-toggle-qr-order-status">' . __('here', 'sqrip-swiss-qr-invoice') . '</a>'),
+            ),
+            'enabled_new_qrstatus' => array(
+                'title' => '',
+                'type' => 'checkbox',
+                'label' => ' ',
+                'default' => 'no',
+                'css' => 'visibility: hidden; position: absolute',
+                'class' => 'comparison-tab sqrip-no-height'
+            ),
+            'first_time_new_qrstatus' => array(
                 'title' => '',
                 'type' => 'checkbox',
                 'label' => ' ',
@@ -344,14 +481,6 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             'section_general_settings' => array(
                 'title' => __('General Settings', 'sqrip-swiss-qr-invoice'),
                 'type' => 'section',
-                'class' => 'comparison-tab'
-            ),
-            'payment_comparison_enabled' => array(
-                'title' => __('Activate/Deactivate Payment Comparison', 'sqrip-swiss-qr-invoice'),
-                'label' => __('Activate sqrip for Payment Comparison', 'sqrip-swiss-qr-invoice'),
-                'type' => 'checkbox',
-                'description' => '</br>' . __('If activated, sqrip shows in the list of orders, in column "actions" (adjust view if needed), at any order that has reached order status 1 (e.g. "awaiting payment") a symbol. By clicking on that symbol the order status will be changed to the one specified in Status 2 (e.g. "Confirmed, Paid").', 'sqrip-swiss-qr-invoice'),
-                'default' => 'no',
                 'class' => 'comparison-tab'
             ),
             'status_awaiting' => array(
@@ -415,14 +544,6 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'default' => 'no',
                 'css' => 'visibility: hidden; position: absolute',
                 'class' => 'comparison-tab sqrip-no-height'
-            ),
-            'return_enabled' => array(
-                'title' => __('Activate/Deactivate Refunds', 'sqrip-swiss-qr-invoice'),
-                'label' => __('Activate sqrip for Refunds', 'sqrip-swiss-qr-invoice'),
-                'type' => 'checkbox',
-                'description' => __('If activated, sqrip makes refunding easier by creating a QR-code that can be scanned with the banking app to initiate a bank transfer to the client.', 'sqrip-swiss-qr-invoice'),
-                'default' => 'no',
-                'class' => 'refunds-tab'
             ),
             'return_token' => array(
                 'title' => __('API key for Refunds', 'sqrip-swiss-qr-invoice'),
@@ -740,6 +861,10 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             $_POST['woocommerce_sqrip_status_suppressed'] = 'wc-sqrip-suppressed';
         }
 
+        if (isset($post_data['woocommerce_sqrip_enabled_new_qrstatus']) && !empty($post_data['woocommerce_sqrip_enabled_new_qrstatus']) && isset($post_data['woocommerce_sqrip_first_time_new_qrstatus'])) {
+            $_POST['woocommerce_sqrip_qr_order_status'] = 'wc-sqrip-qrstatus';
+        }
+
         return parent::process_admin_options();
     }
 
@@ -891,6 +1016,11 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             //         $attachments[] = $sqrip_qr_pdf_path;
             //         break;
             // }
+            
+            if (isset($response_body->total_codes_left) && $response_body->total_codes_left <= 0) {
+                // turn off sqrip if auto turn-off enabled
+                sqrip_auto_turn_off();
+            }
 
             $wp_mail = wp_mail($to, $subject, $body, $headers, $attachments);
 
@@ -900,6 +1030,9 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 $settings->add_error(__('E-Mail can not be sent, please check WP MAIL SMTP', 'sqrip-swiss-qr-invoice'));
             }
         } else {
+            // turn off sqrip if auto turn-off enabled
+            sqrip_auto_turn_off();
+
             $message = isset($response_body->message) ? $response_body->message : 'Connection error!';
 
             $settings->add_error(
@@ -1027,6 +1160,9 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 )
             );
 
+            // turn off sqrip if auto turn-off enabled
+            sqrip_auto_turn_off();
+
             return false;
         }
 
@@ -1042,6 +1178,11 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             $order->update_meta_data('sqrip_refund_qr_attachment_id', $sqrip_qr_png_attachment_id);
             $order->save(); // without calling save() the meta data is not updated
 
+            if (isset($response_body->total_codes_left) && $response_body->total_codes_left <= 0) {
+                // turn off sqrip if auto turn-off enabled
+                sqrip_auto_turn_off();
+            }
+
             return true;
         } else {
             // Add note to the order for your reference
@@ -1051,6 +1192,9 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                     esc_html($response_body->message)
                 )
             );
+
+            // turn off sqrip if auto turn-off enabled
+            sqrip_auto_turn_off();
 
             return false;
         }
@@ -1110,11 +1254,17 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             // Add notice to the cart
             $err_msg = explode(",", $response['body']);
             $err_msg = trim(strstr($err_msg[0], ':'), ': "');
-
+            $has_purchase = stripos($err_msg, "purchase");
+            $has_request = stripos($err_msg, "complete request");
+            $sqrip_link = $has_purchase ? 
+                " here <a href='https://www.sqrip.ch/#pricing' target='_blank'>https://www.sqrip.ch/#pricing</a>" 
+                : ($has_request ? " And we don't yet know why. Please contact our <a href='mailto:support@sqrip.ch'>support</a>" : "");
+            $customer_msg = "It seems we couldn't provide you with a QR-invoice at this time. Please try later, contact the shop or use a different payment method.";
+            // <a href="mailto:someone@example.com">Send email</a>
             wc_add_notice(
                 sprintf(
                     __('sqrip Payment Error: %s', 'sqrip-swiss-qr-invoice'),
-                    esc_html($err_msg)),
+                    esc_html($customer_msg)),
                 'error'
             );
 
@@ -1122,9 +1272,12 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             $order->add_order_note(
                 sprintf(
                     __('sqrip Payment Error: %s', 'sqrip-swiss-qr-invoice'),
-                    esc_html($err_msg)
+                    esc_html($err_msg) . $sqrip_link
                 )
             );
+
+            // turn off sqrip if auto turn-off enabled
+            sqrip_auto_turn_off();
 
             return false;
         }
@@ -1179,6 +1332,11 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             $woocommerce->cart->empty_cart();
             $order->save();
 
+            if (isset($response_body->total_codes_left) && $response_body->total_codes_left <= 0) {
+                // turn off sqrip if auto turn-off enabled
+                sqrip_auto_turn_off();
+            }
+
             // Redirect to thank you page
             return array(
                 'result' => 'success',
@@ -1186,10 +1344,11 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             );
         } else {
 
+            $customer_msg = "It seems we couldn't provide you with a QR-invoice at this time. Please try later, contact the shop or use a different payment method.";
             wc_add_notice(
                 sprintf(
                     __('Error: %s', 'sqrip-swiss-qr-invoice'),
-                    esc_html($response_body->message)
+                    esc_html($customer_msg)
                 ),
                 'error'
             );
@@ -1201,6 +1360,9 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                     esc_html($response_body->message)
                 )
             );
+
+            // turn off sqrip if auto turn-off enabled
+            sqrip_auto_turn_off();
 
             return false; // Bail early
         }
