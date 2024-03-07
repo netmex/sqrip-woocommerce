@@ -100,45 +100,48 @@ jQuery(document).ready(function ($) {
                 // displayMessage = displayMessage.replace('support', '')
                 let hasError = false;
                 let statusList = '';
+                let statusArr = [];
 
                 if (response.credits_left == 0) {
                     // output_html = '<p class="sqrip-description">'+ errorResolveText + '<br/><ul><li>No Credits left. Please purchase Credits here <a href="https://www.sqrip.ch/#pricing" target="_blank">https://www.sqrip.ch/#pricing</a></li></ul></p>';
                     // ip_sqrip_turn_off_if_error.closest('td.forminp').append(output_html);
                     hasError = true;
-                    statusList += '<li><span></span> Not enough Credits available. Please purchase Credits here <a href="https://www.sqrip.ch/#pricing" target="_blank">https://www.sqrip.ch/#pricing</a></li>';
+                    statusArr[1] = '<li><span></span> Not enough Credits available. Please purchase Credits here <a href="https://www.sqrip.ch/#pricing" target="_blank">https://www.sqrip.ch/#pricing</a></li>';
                 } else if (response.credits_left > 0) {
-                    statusList += '<li><span class="status-success"></span> Enough Credits available.</li>';
+                    statusArr[1] = '<li><span class="status-success"></span> Enough Credits ('+ response.credits_left +') available.</li>';
                 } else {
                     // if !response.credits_left
-                    statusList += '<li><span></span> Unable to fetch Credits available.</li>';
+                    statusArr[1] = '<li><span></span> Unable to fetch Credits available.</li>';
                 }
                 
                 if (response.result == false) {
                     // output_html = '<p class="sqrip-description">'+ errorResolveText + '<br/><ul><li>'+displayMessage+'</li></ul></p>';
                     // ip_sqrip_turn_off_if_error.closest('td.forminp').append(output_html);
                     hasError = true;
-                    statusList += '<li><span></span> '+displayMessage+'</li>';
+                    statusArr[3] = '<li><span></span> '+displayMessage+'</li>';
                 } else {
-                    statusList += '<li><span class="status-success"></span> API key is correct and active.</li>';
+                    statusArr[3] = '<li><span class="status-success"></span> API key is correct and active.</li>';
                 }
 
                 if (hasError && response.response_code == "") {                    
-                    statusList += '<li><span></span> sqrip-server not reachable</li>';
+                    statusArr[4] = '<li><span></span> sqrip-server not reachable</li>';
                 }else {
-                    statusList += '<li><span class="status-success"></span> Connected to sqrip-server</li>';                        
+                    statusArr[4] = '<li><span class="status-success"></span> Connected to sqrip-server</li>';                        
                 }
                 
-                function displayStatusList (statusList) {
+                function displayStatusList (statusArr) {
 
                     if (!ip_sqrip_enabled.is(':checked')) {
-                        statusList += '<li><span></span> sqrip is turned off</li>';
+                        statusArr[0] = '<li><span></span> sqrip plugin is turned off</li>';
                     } else {
-                        statusList += '<li><span class="status-success"></span> sqrip is turned on</li>';
+                        statusArr[0] = '<li><span class="status-success"></span> sqrip plugin is turned on</li>';
                     }
+
+                    let statusListString = statusArr.join('');
                     
-                    statusList = '<ul class="sqrip-status-list">'+statusList+'</ul>';
+                    statusListString = '<ul class="sqrip-status-list">'+statusListString+'</ul>';
                     // ip_sqrip_turn_off_if_error.closest('td.forminp').append(statusList);
-                    ip_sqrip_current_status.after(statusList);
+                    ip_sqrip_current_status.after(statusListString);
                     ip_sqrip_current_status.hide()
                 }
 
@@ -151,18 +154,18 @@ jQuery(document).ready(function ($) {
                         iban: ip_iban.val(),
                         token: ip_token.val()
                     },
-                    success: function (response) {
-                        if (response) {
-                            if (response.result) {
-                                statusList += '<li><span class="status-success"></span> (QR)-IBAN validated.</li>';
+                    success: function (responseIBAN) {
+                        if (responseIBAN) {
+                            if (responseIBAN.result) {
+                                statusArr[2] = '<li><span class="status-success"></span> (QR)-IBAN confirmed.</li>';
                             } else {
-                                statusList += '<li><span></span> (QR)-IBAN incorrect.</li>';
+                                statusArr[2] = '<li><span></span> (QR)-IBAN not confirmed.</li>';
                             }
                         }
-                        displayStatusList(statusList)
+                        displayStatusList(statusArr)
                     },
                     error: function (jqXHR, textStatus, errorThrown) {
-                        displayStatusList(statusList)
+                        displayStatusList(statusArr)
                         console.log('The following error occured: ' + textStatus, errorThrown);
                     }
                 })
