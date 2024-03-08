@@ -142,7 +142,7 @@ Yes. We are already working on comparing the reconciliation of orders/purchases 
 * Added 'Auto Turn-off' functionality: Should any parameter be wrong (e.g. no credits left, API key inactive, unknown errors), sqrip will turn itself off in order to prevent any errors visible for the shop clients;
 * Define an individual status for orders made with the sqrip payment method;
 * The status can be changed for multiple orders now, incl. to the status defined by the merchant;
-* Should the QR bill not be attached to any e-mail, you can now select this option too;
+* Select that no QR bill must be attached to any e-mail;
 * Minor bug fixing.
 
 = 1.7.5 : November 2023 – Service Update =
