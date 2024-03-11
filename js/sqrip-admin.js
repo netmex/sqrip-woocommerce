@@ -76,6 +76,8 @@ jQuery(document).ready(function ($) {
         }
     })
 
+    ip_sqrip_current_status.after('<div class="loader-box"><div>Loading...</div><div class="linear-loading"></div></div>');
+
     $.ajax({
         type: "post",
         url: sqrip.ajax_url,
@@ -141,6 +143,7 @@ jQuery(document).ready(function ($) {
                     
                     statusListString = '<ul class="sqrip-status-list">'+statusListString+'</ul>';
                     // ip_sqrip_turn_off_if_error.closest('td.forminp').append(statusList);
+                    $(".loader-box").remove();
                     ip_sqrip_current_status.after(statusListString);
                     ip_sqrip_current_status.hide()
                 }
