@@ -91,6 +91,9 @@ sqrip is flexible enough to be adopted to your individual process.
 - Define the moment you expect the payment to arrive (prior to shipment or thereafter);
 - Define the status after payment has arrived.
 
+q) Shows when something is wrong, turns off automatically
+Instead of showing technical, unuseful error messages to your clients, we turn the service off automatically and show you where to look at for resolving the issue.
+
 = Requirements =
 1. Besides a current WordPress and WooCommerce installation, an account on sqrip.ch is required.
 2. You need a (QR-)IBAN of a Swiss/Liechtenstein bank.
