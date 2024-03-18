@@ -4,7 +4,7 @@ Donate link: https://sqrip.ch/
 Tags: woocommerce, payment, sqrip, qrcode, qr, scan, Kontoabgleich, swiss qr invoice, QR-Rechnung, EBICS, QR-facture, bulletins de versement, Einzahlungsschein, QR-Einzahlungsschein, bulletins de versement, Swiss QR Code, code QR, QR-fattura, polizze di versamento
 Requires at least: 4.7
 Tested up to: 6.4
-Stable tag: 1.8
+Stable tag: 1.8.1
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -136,6 +136,9 @@ Yes. We are already working on comparing the reconciliation of orders/purchases 
 7. Refund functionality
 
 == Changelog ==
+
+= 1.8.1 : March 2024 – minor adjustments =
+* Date format adjusted to PHP 8.2.
 
 = 1.8 : March 2024 – Major Service Update =
 * Working with PHP 8.2, Wordpress 6.4 and Block Checkout;
