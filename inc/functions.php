@@ -414,7 +414,8 @@ function sqrip_additional_information_shortcodes($additional_information, $lang,
 {
 
     // get current language from WPML
-    $current_lang = apply_filters('wpml_current_language', NULL);
+    // $current_lang = apply_filters('wpml_current_language', NULL);
+    $current_lang = get_locale();
 
     // get current language from plugin options
     if (!$current_lang) {
@@ -427,8 +428,15 @@ function sqrip_additional_information_shortcodes($additional_information, $lang,
     preg_match_all('/\[due_date format="(.*)"\]/', $additional_information, $date_shortcodes);
     foreach ($date_shortcodes[0] as $index => $date_shortcode) {
         $format = $date_shortcodes[1][$index];
-        $due_date = date_timestamp_set(new DateTime(), $due_date);
-        $due_date_format = date_format($due_date, $format);
+        $formatter = new IntlDateFormatter(
+            $current_lang,
+            IntlDateFormatter::FULL,
+            IntlDateFormatter::NONE,
+            null,
+            null,
+            $format
+        );
+        $due_date_format = $formatter->format($due_date);
         // $due_date_format = strftime($format, $due_date);
 
         if (!$due_date_format) {
