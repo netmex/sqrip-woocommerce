@@ -78,6 +78,24 @@ jQuery(document).ready(function ($) {
 
     ip_sqrip_current_status.after('<div class="loader-box"><div>Loading...</div><div class="linear-loading"></div></div>');
 
+    
+    function displayStatusList (statusArr) {
+
+        if (!ip_sqrip_enabled.is(':checked')) {
+            statusArr[0] = '<li><span></span> sqrip plugin is turned off</li>';
+        } else {
+            statusArr[0] = '<li><span class="status-success"></span> sqrip plugin is turned on</li>';
+        }
+
+        let statusListString = statusArr.join('');
+        
+        statusListString = '<ul class="sqrip-status-list">'+statusListString+'</ul>';
+        // ip_sqrip_turn_off_if_error.closest('td.forminp').append(statusList);
+        $(".loader-box").remove();
+        ip_sqrip_current_status.after(statusListString);
+        ip_sqrip_current_status.hide()
+    }
+
     $.ajax({
         type: "post",
         url: sqrip.ajax_url,
@@ -86,7 +104,7 @@ jQuery(document).ready(function ($) {
             token: ip_token.val()
         },
         success: function (response) {
-            if (response) {
+            if (response && typeof response == "object") {
                 if (response.credits_left) {
                     // console.log({response}, response.credits_left)
                     ip_sqrip_remaining_credits.val(response.credits_left+"");
@@ -98,7 +116,7 @@ jQuery(document).ready(function ($) {
                     ip_sqrip_remaining_credits.val("N/A");
                 }
 
-                let displayMessage = handleResponseMessage(response.message);
+                let displayMessage = handleResponseMessage(response.message || "An error occurred!");
                 // displayMessage = displayMessage.replace('support', '')
                 let hasError = false;
                 let statusList = '';
@@ -131,22 +149,6 @@ jQuery(document).ready(function ($) {
                     statusArr[4] = '<li><span class="status-success"></span> Connected to sqrip-server</li>';                        
                 }
                 
-                function displayStatusList (statusArr) {
-
-                    if (!ip_sqrip_enabled.is(':checked')) {
-                        statusArr[0] = '<li><span></span> sqrip plugin is turned off</li>';
-                    } else {
-                        statusArr[0] = '<li><span class="status-success"></span> sqrip plugin is turned on</li>';
-                    }
-
-                    let statusListString = statusArr.join('');
-                    
-                    statusListString = '<ul class="sqrip-status-list">'+statusListString+'</ul>';
-                    // ip_sqrip_turn_off_if_error.closest('td.forminp').append(statusList);
-                    $(".loader-box").remove();
-                    ip_sqrip_current_status.after(statusListString);
-                    ip_sqrip_current_status.hide()
-                }
 
                 // Check IBAN validity
                 $.ajax({
@@ -188,10 +190,17 @@ jQuery(document).ready(function ($) {
                     }
                 }
 
+            } else {
+                let statusArr = [];
+                statusArr[1] = '<li><span></span> An error occurred! Unable to send status details request.</li>';
+                displayStatusList(statusArr);                
             }
         },
         error: function (jqXHR, textStatus, errorThrown) {
             console.log('The following error occured: ' + textStatus, errorThrown);
+            let statusArr = [];
+            statusArr[1] = '<li><span></span> An error occurred! Unable to send status details request.</li>';
+            displayStatusList(statusArr);
         },
     })
 
