@@ -150,30 +150,12 @@ jQuery(document).ready(function ($) {
                 }
                 
 
-                // Check IBAN validity
-                $.ajax({
-                    type: "post",
-                    url: sqrip.ajax_url,
-                    data: {
-                        action: "sqrip_validation_iban",
-                        iban: ip_iban.val(),
-                        token: ip_token.val()
-                    },
-                    success: function (responseIBAN) {
-                        if (responseIBAN) {
-                            if (responseIBAN.result) {
-                                statusArr[2] = '<li><span class="status-success"></span> (QR)-IBAN confirmed.</li>';
-                            } else {
-                                statusArr[2] = '<li><span></span> (QR)-IBAN not confirmed.</li>';
-                            }
-                        }
-                        displayStatusList(statusArr)
-                    },
-                    error: function (jqXHR, textStatus, errorThrown) {
-                        displayStatusList(statusArr)
-                        console.log('The following error occured: ' + textStatus, errorThrown);
-                    }
-                })
+                // Set IBAN validity from Check for reference format
+                if (ip_qrref_format.hasClass('qr-iban') || ip_qrref_format.hasClass('simple-iban')) {
+                    statusArr[2] = '<li class="iban-status-item"><span class="status-success"></span> (QR)-IBAN confirmed.</li>';
+                } else {
+                    statusArr[2] = '<li class="iban-status-item"><span></span> (QR)-IBAN not confirmed.</li>';                    
+                }
                 
 
                 if (ip_sqrip_turn_off_if_error.is(':checked')) {
@@ -190,6 +172,8 @@ jQuery(document).ready(function ($) {
                     }
                 }
 
+                displayStatusList(statusArr)
+
             } else {
                 let statusArr = [];
                 statusArr[1] = '<li><span></span> An error occurred! Unable to send status details request.</li>';
@@ -203,6 +187,16 @@ jQuery(document).ready(function ($) {
             displayStatusList(statusArr);
         },
     })
+
+    function updateIBANStatus(status) {
+        let item = $('.iban-status-item');
+
+        if (status == 'verified') {
+            item.html('<span class="status-success"></span> (QR)-IBAN confirmed.');
+        } else {
+            item.html('<span></span> (QR)-IBAN not confirmed.');
+        }
+    }
 
     if (status_text.html()) {
         status_text.html(status_text.html().replaceAll('&lt;', '<').replaceAll('&gt;', '>'));
@@ -365,6 +359,7 @@ jQuery(document).ready(function ($) {
                             ip_qrref_format.removeClass('simple-iban');
                             label_qr_reference_format.text('Initiate QR-Ref# with these 6 digits');
                             $('#simple-iban-description').remove();
+                            updateIBANStatus('verified');
                         }
                         if (response.result && !response.qriban) {
                             ip_qrref_format.closest('tr').show();
@@ -374,9 +369,11 @@ jQuery(document).ready(function ($) {
                             if (!$('#simple-iban-description').is(':visible')) {
                                 label_qr_reference_format.after('<p id="simple-iban-description" class="description">This is an example of a CR reference with this option enabled, with X-es representing the 6 characters: RF18 XXXX XX12 1231 1231 4703 4</p>')
                             }
+                            updateIBANStatus('verified');
                         }
                         if (!response.result) {
                             ip_qrref_format.closest('tr').hide();
+                            updateIBANStatus('unverified');
                         }
 
                         $("input[id*='qr_reference_format']").trigger('input');
