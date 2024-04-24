@@ -150,6 +150,25 @@ function sqrip_validation_token_ajax()
             $result['message'] = $body_decode->message;
             $result['credits_left'] = $body_decode->credits_left;
             // $result['message'] = __("Valid, active API Key", "sqrip-swiss-qr-invoice");
+
+            $address = isset($body_decode->user->address) ? $body_decode->user->address : [];
+
+            if ($address) {
+                $name = "";
+
+                if (isset($address->title)) {
+
+                    $name = $address->title;
+
+                } elseif (isset($body_decode->user)) {
+
+                    $name = $body_decode->user->first_name . ' ' . $body_decode->user->last_name;
+
+                }
+
+                $result['address_from_sqrip'] = $name . ', ' . $address->street . ', ' . $address->city . ' ' . $address->zip;
+            }
+
             break;
 
         default:
