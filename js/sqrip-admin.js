@@ -116,6 +116,17 @@ jQuery(document).ready(function ($) {
                     ip_sqrip_remaining_credits.val("N/A");
                 }
 
+                // Fill address value in Address setting
+                if (response.address_from_sqrip) {
+                    let from_sqrip_address_option = document.querySelector('#woocommerce_sqrip_address option[value=sqrip]');
+                    let address_text = from_sqrip_address_option.textContent;
+
+                    if (address_text.includes('Loading')) {
+                        address_text = address_text.replace('Loading...', response.address_from_sqrip);
+                        from_sqrip_address_option.textContent = address_text;
+                    }
+                }
+
                 let displayMessage = handleResponseMessage(response.message || "An error occurred!");
                 // displayMessage = displayMessage.replace('support', '')
                 let hasError = false;

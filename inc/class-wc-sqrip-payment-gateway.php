@@ -106,8 +106,9 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 
 
         $address_woocommerce = sqrip_get_payable_to_address_txt('woocommerce');
-        $address_sqrip = sqrip_get_payable_to_address_txt('sqrip');
-
+        // Replace Loading... in sqrip-admin.js with address response from "/details" AJAX call
+        $address_sqrip = "Loading...";
+        
         $address_options = [];
 
         if ($address_sqrip) {
