@@ -4,7 +4,7 @@
  * Plugin Name:             sqrip.ch
  * Plugin URI:              https://sqrip.ch/
  * Description:             sqrip – A comprehensive, flexible and clever WooCommerce finance tool for the most widely used payment method in Switzerland: the bank transfers.
- * Version:                 1.8.2
+ * Version:                 1.8.3
  * Author:                  netmex digital gmbh
  * Author URI:              https://sqrip.ch/
  */
