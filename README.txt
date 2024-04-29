@@ -137,6 +137,9 @@ Yes. We are already working on comparing the reconciliation of orders/purchases 
 
 == Changelog ==
 
+= 1.8.3 : April 2024 – Performance =
+* Performance improvement.
+
 = 1.8.2 : April 2024 – adjustments in API Call =
 * We reduced the amount of data needed to perform an API call.
 
