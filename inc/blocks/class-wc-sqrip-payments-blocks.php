@@ -46,9 +46,9 @@ final class WC_Gateway_Sqrip_Blocks_Support extends AbstractPaymentMethodType {
 	 * @return array
 	 */
 	public function get_payment_method_script_handles() {
-		$script_path       = '../../assets/js/frontend/blocks.js';
-		// $script_asset_path = ( __DIR__ ) . '/../../assets/js/frontend/blocks.asset.php';//works
-		$script_asset_path = plugin_dir_path( __FILE__ ) . '../../assets/js/frontend/blocks.asset.php';
+		$script_path       = '../../js/frontend/blocks.js';
+		// $script_asset_path = ( __DIR__ ) . '/../../js/frontend/blocks.asset.php';//works
+		$script_asset_path = plugin_dir_path( __FILE__ ) . '../../js/frontend/blocks.asset.php';
 		$script_asset      = file_exists( $script_asset_path )
 			? require( $script_asset_path )
 			: array(
