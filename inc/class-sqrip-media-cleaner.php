@@ -58,20 +58,38 @@ class Sqrip_Media_Clearner
 
         if ($completed_orders) {
             foreach ($completed_orders as $order) {
-                $order_id = $order->ID;
-                $att_id = get_post_meta($order_id, 'sqrip_qr_pdf_attachment_id', true);
+                $order_id = method_exists($order, 'get_id') ? $order->get_id() : $order->ID;
+                
+                $att_id = "";
+                $attach_url = "";
+                // Implement compatibility with WooCommerce HPOS
+                if ( \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled() ) {
+                    $order = wc_get_order($order_id);
+                    $att_id = $order->get_meta('sqrip_qr_pdf_attachment_id', true);
 
-                if (!$att_id) {
-                    $attach_url = get_post_meta($order_id, 'sqrip_pdf_file_url', true);
-                    $att_id = attachment_url_to_postid($attach_url);
+                    if (!$att_id) {
+                        $attach_url = $order->get_meta('sqrip_pdf_file_url', true);
+                        $att_id = attachment_url_to_postid($attach_url);
+                    }
+
+                    $deleted_att = wp_delete_attachment($att_id, true);
+                    $order->update_meta_data('sqrip_pdf_file_path', 'deleted');
+                    $order->update_meta_data('sqrip_pdf_file_url', 'deleted');
+                    $order->save();
+                } else {
+                    $att_id = get_post_meta($order_id, 'sqrip_qr_pdf_attachment_id', true);
+
+                    if (!$att_id) {
+                        $attach_url = get_post_meta($order_id, 'sqrip_pdf_file_url', true);
+                        $att_id = attachment_url_to_postid($attach_url);
+                    }
+
+                    $deleted_att = wp_delete_attachment($att_id, true);
+                    update_post_meta($order_id, 'sqrip_pdf_file_path', 'deleted');
+                    update_post_meta($order_id, 'sqrip_pdf_file_url', 'deleted');
                 }
 
-                $deleted_att = wp_delete_attachment($att_id, true);
-
                 $logs .= $deleted_att ? ' Deleted attachement ' . $att_id . ' in order #' . $order_id . '.' : ' No attachement deleted for order #' . $order_id;
-
-                update_post_meta($order_id, 'sqrip_pdf_file_path', 'deleted');
-                update_post_meta($order_id, 'sqrip_pdf_file_url', 'deleted');
 
                 $logs .= ' Deleted sqrip_reference_id, sqrip_qr_pdf_attachment_id, sqrip_pdf_file_path & sqrip_pdf_file_url for order #' . $order_id . '.';
 

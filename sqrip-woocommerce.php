@@ -201,6 +201,18 @@ function sqrip_enqueue_scripts()
 
 
 /**
+ * Declare plugin compatibility with WooCommerce HPOS (High Performance Order Storage)
+ * 
+ * @since 1.8.4
+ */
+add_action( 'before_woocommerce_init', function() {
+	if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
+		\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__, true );
+	}
+} );
+
+
+/**
  *  Adding Meta container admin shop_order pages
  *
  * @since 1.0
@@ -211,7 +223,17 @@ add_action('add_meta_boxes', 'sqrip_add_meta_boxes');
 if (!function_exists('sqrip_add_meta_boxes')) {
     function sqrip_add_meta_boxes()
     {
-        add_meta_box('sqrip_detail_fields', __('sqrip Payment', 'sqrip-swiss-qr-invoice'), 'sqrip_add_fields_for_order_details', 'shop_order', 'side', 'core');
+        $screen = class_exists( '\Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController' ) && wc_get_container()->get( \Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController::class )->custom_orders_table_usage_is_enabled()
+		? wc_get_page_screen_id( 'shop-order' )
+		: 'shop_order';
+        
+        add_meta_box('sqrip_detail_fields', __('sqrip Payment', 'sqrip-swiss-qr-invoice'), 'sqrip_add_fields_for_order_details', $screen, 'side', 'core');
+        /**
+         * Deprecated 
+         * Now using WooCommerce HPOS with backwards compatibility
+         * @since 1.8.4
+         */
+        // add_meta_box('sqrip_detail_fields', __('sqrip Payment', 'sqrip-swiss-qr-invoice'), 'sqrip_add_fields_for_order_details', 'shop_order', 'side', 'core');
     }
 }
 
@@ -221,14 +243,24 @@ if (!function_exists('sqrip_add_meta_boxes')) {
  */
 
 if (!function_exists('sqrip_add_fields_for_order_details')) {
-    function sqrip_add_fields_for_order_details()
+    function sqrip_add_fields_for_order_details( $post_or_order_object )
     {
-        global $post;
-        $order_id = $post->ID;
-        $payment_method = get_post_meta($order_id, '_payment_method', true);
+        $order = ( $post_or_order_object instanceof WP_Post ) ? wc_get_order( $post_or_order_object->ID ) : $post_or_order_object;
+        $order_id = $order->get_id();
 
-        $reference_id = get_post_meta($order_id, 'sqrip_reference_id', true);
-        $pdf_file = get_post_meta($order_id, 'sqrip_pdf_file_url', true);
+        $payment_method = '';
+        $reference_id = '';
+        $pdf_file = '';
+        $payment_method = $order->get_payment_method();
+
+        // Implement compatibility with WooCommerce HPOS since 1.8.4
+        if ( \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled() ) {
+            $reference_id = $order->get_meta('sqrip_reference_id', true);
+            $pdf_file = $order->get_meta('sqrip_pdf_file_url', true);
+        } else {
+            $reference_id = get_post_meta($order_id, 'sqrip_reference_id', true);
+            $pdf_file = get_post_meta($order_id, 'sqrip_pdf_file_url', true);
+        }
 
         $reference_id_formatted = $reference_id;
         if (strpos(strtolower($reference_id_formatted), 'rf') !== false) {
@@ -249,6 +281,10 @@ if (!function_exists('sqrip_add_fields_for_order_details')) {
         // check for legacy pdf meta file
         if (!$pdf_file) {
             $pdf_file = get_post_meta($order_id, 'sqrip_pdf_file', true);
+
+            if ( \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled() ) {            
+                $pdf_file = $order->get_meta('sqrip_pdf_file', true);
+            }
         }
 
         if ($reference_id || $pdf_file) {
@@ -375,7 +411,15 @@ function sqrip_attach_qrcode_pdf_to_email($attachments, $email_id, $order)
         // $order_id = $order->id;
         $order_id = method_exists($order, 'get_id') ? $order->get_id() : $order->id;
 
-        $pdf_file_path = get_post_meta($order_id, 'sqrip_pdf_file_path', true);
+        $pdf_file_path = '';
+        
+        // Implement compatibility with WooCommerce HPOS since 1.8.4
+        if ( \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled() ) {            
+            $pdf_file_path = $order->get_meta('sqrip_pdf_file_path', true);
+            // error_log("SQRIP:: Using HPOS pdf_file:: ".$pdf_file_path);
+        } else {
+            $pdf_file_path = get_post_meta($order_id, 'sqrip_pdf_file_path', true);
+        }
 
         // WARNING: attachments must be local file paths and not URLs
         if ($pdf_file_path) {
@@ -410,7 +454,16 @@ function sqrip_qr_action_order_details_after_order_table($order)
         $integration_order = array_key_exists('integration_order', $plugin_options) ? $plugin_options['integration_order'] : '';
 
         // $png_file = get_post_meta($order_id, 'sqrip_png_file_url', true);
-        $pdf_file = get_post_meta($order_id, 'sqrip_pdf_file_url', true);
+        $pdf_file = '';
+        
+        // Implement compatibility with WooCommerce HPOS since 1.8.4
+        if ( \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled() ) {
+            
+            $pdf_file = $order->get_meta('sqrip_pdf_file_url', true);
+            // error_log("SQRIP:: Using HPOS pdf_file:: ".$pdf_file);
+        } else {
+            $pdf_file = get_post_meta($order_id, 'sqrip_pdf_file_url', true);
+        }
 
         echo '<div class="sqrip-order-details">';
 
@@ -951,7 +1004,15 @@ function sqrip_add_custom_order_status_actions_button($actions, $order)
         // $status = $_GET['status'];
         $order_id = method_exists($order, 'get_id') ? $order->get_id() : $order->id;
 
-        $reference_id = get_post_meta($order_id, 'sqrip_reference_id', true);
+        $reference_id = "";
+        // Implement compatibility with WooCommerce HPOS since 1.8.4
+        if ( \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled() ) {
+            $reference_id = $order->get_meta('sqrip_reference_id', true);
+            // error_log("SQRIP:: Using HPOS pdf_file:: ".$pdf_file);
+        } else {
+            $reference_id = get_post_meta($order_id, 'sqrip_reference_id', true);
+        }
+
 
         if ($reference_id && $reference_id != "deleted") {
             $reference_id_formatted = $reference_id;
@@ -997,17 +1058,37 @@ add_action('woocommerce_order_status_changed', function ($post_id, $old_status, 
 
     if (in_array($new_status, $delete_invoice_status) && $old_status != 'checkout-draft') {
         $order_id = $post_id;
-        $att_id = get_post_meta($order_id, 'sqrip_qr_pdf_attachment_id', true);
 
-        if (!$att_id) {
-            $attach_url = get_post_meta($order_id, 'sqrip_pdf_file_url', true);
-            $att_id = attachment_url_to_postid($attach_url);
+        $att_id = "";
+        $attach_url = "";
+        // Implement compatibility with WooCommerce HPOS since 1.8.4
+        if ( \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled() ) {
+            $order = wc_get_order($order_id);
+            $att_id = $order->get_meta('sqrip_qr_pdf_attachment_id', true);
+
+            if (!$att_id) {
+                $attach_url = $order->get_meta('sqrip_pdf_file_url', true);
+                $att_id = attachment_url_to_postid($attach_url);
+            }
+            // error_log("HPOS ATT ID:: ".$att_id." URL:: ".$attach_url);
+
+            wp_delete_attachment($att_id, true);
+            $order->update_meta_data('sqrip_pdf_file_path', 'deleted');
+            $order->update_meta_data('sqrip_pdf_file_url', 'deleted');
+            $order->save();
+        } else {
+            $att_id = get_post_meta($order_id, 'sqrip_qr_pdf_attachment_id', true);
+
+            if (!$att_id) {
+                $attach_url = get_post_meta($order_id, 'sqrip_pdf_file_url', true);
+                $att_id = attachment_url_to_postid($attach_url);
+            }
+            // error_log("CLASS ATT ID:: ".$att_id." URL:: ".$attach_url);
+
+            wp_delete_attachment($att_id, true);
+            update_post_meta($order_id, 'sqrip_pdf_file_path', 'deleted');
+            update_post_meta($order_id, 'sqrip_pdf_file_url', 'deleted');
         }
-
-        wp_delete_attachment($att_id, true);
-
-        update_post_meta($order_id, 'sqrip_pdf_file_path', 'deleted');
-        update_post_meta($order_id, 'sqrip_pdf_file_url', 'deleted');
 
         $order = wc_get_order($order_id);
         $order_notes = __("The PDF file for order #$order_id has been deleted from the media library", 'sqrip-swiss-qr-invoice');
