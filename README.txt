@@ -4,7 +4,7 @@ Donate link: https://sqrip.ch/
 Tags: woocommerce, payment, sqrip, qrcode, qr, scan, Kontoabgleich, swiss qr invoice, QR-Rechnung, EBICS, QR-facture, bulletins de versement, Einzahlungsschein, QR-Einzahlungsschein, bulletins de versement, Swiss QR Code, code QR, QR-fattura, polizze di versamento
 Requires at least: 4.7
 Tested up to: 6.5.2
-Stable tag: 1.8.3
+Stable tag: 1.8.4
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -137,6 +137,11 @@ Yes. We are already working on comparing the reconciliation of orders/purchases 
 
 == Changelog ==
 
+= 1.8.4 : May 2024 – Compatibility =
+* Solved an issue that prevented the sqrip box to be shown on the order details page;
+* Killed the bug that prevented showing the qr-invoice in the e-mail or on the checkout page;
+* Made sure that the CRON-Job for deleting no longer needed documents in the media library is executed properly.
+
 = 1.8.3 : April 2024 – Performance =
 * Performance improvement.
 
@@ -148,7 +153,6 @@ Yes. We are already working on comparing the reconciliation of orders/purchases 
 
 = 1.8 : March 2024 – Major Service Update =
 * Working with PHP 8.2, Wordpress 6.4 and Block Checkout;
-* Added a new Tab "Services";
 * Added the number of remaining credits;
 * Added 'Current sqrip status': See what's wrong to fix it quickly.
 * Added 'Auto Turn-off' functionality: Should any parameter be wrong (e.g. no credits left, API key inactive, unknown errors), sqrip will turn itself off in order to prevent any errors visible for the shop clients;
@@ -158,7 +162,7 @@ Yes. We are already working on comparing the reconciliation of orders/purchases 
 * Minor bug fixing.
 
 = 1.7.5 : November 2023 – Service Update =
-* Adding the Service Tab;
+* Added a new Tab "Services";
 * Assign you own status to new orders made with sqrip; 
 * Allows to select your own status in the list of orders;
 * Easy to understand error messages;
