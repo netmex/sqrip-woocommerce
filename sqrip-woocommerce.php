@@ -63,6 +63,23 @@ function sqrip_init_gateway_class()
     require_once __DIR__ . '/inc/class-wc-sqrip-payment-gateway.php';
 }
 
+add_action('plugins_loaded', 'sqrip_media_cleaner_require');
+
+function sqrip_media_cleaner_require()
+{
+    require_once __DIR__ . '/inc/class-sqrip-media-cleaner.php';
+}
+
+/**
+ * Unschedule media clean cron job on sqrip deactivation
+ * @since 1.84
+ */
+register_deactivation_hook( __FILE__, 'sqrip_deactivation_action' ); 
+
+function sqrip_deactivation_action() {
+    $timestamp = wp_next_scheduled( 'sqrip_media_cleaner' );
+    wp_unschedule_event( $timestamp, 'sqrip_media_cleaner' );
+}
 
 /**
  *  Add admin notices
