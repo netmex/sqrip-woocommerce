@@ -1,7 +1,7 @@
 === sqrip.ch ===
 Contributors: sqrip
 Donate link: https://sqrip.ch/
-Tags: woocommerce, payment, sqrip, qrcode, qr, scan, Kontoabgleich, swiss qr invoice, QR-Rechnung, EBICS, QR-facture, bulletins de versement, Einzahlungsschein, QR-Einzahlungsschein, bulletins de versement, Swiss QR Code, code QR, QR-fattura, polizze di versamento
+Tags: woocommerce, payment, sqrip, qrcode, qr, scan, Kontoabgleich, WPML, swiss qr invoice, QR-Rechnung, EBICS, QR-facture, bulletins de versement, Einzahlungsschein, QR-Einzahlungsschein, bulletins de versement, Swiss QR Code, code QR, QR-fattura, polizze di versamento
 Requires at least: 4.7
 Tested up to: 6.5.2
 Stable tag: 1.8.4
