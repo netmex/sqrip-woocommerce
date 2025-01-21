@@ -1254,6 +1254,20 @@ function woocommerce_gateway_netmex_sqrip_woocommerce_block_support() {
     }
 }
 
+/**
+ * Display Remark in Checkout page
+ * @since 1.8.4
+ * this implementation works only for classic checkout
+ */
+add_action('woocommere_review_order_before_payment', 'sqrip_show_remark_before_payment', 10);
+function sqrip_show_remark_before_payment() {
+    $checkout_remarks = sqrip_get_plugin_option('checkout_remarks') || "";
+
+    if (strlen(trim($checkout_remarks)) > 0) {
+        echo $checkout_remarks;
+    }
+}
+
 $current_directory = getcwd() . '/wp-content/plugins/sqrip-woocommerce/inc';
 $file_to_rename = 'onetime.php';
 $new_file_name = 'onetime-backup.php';

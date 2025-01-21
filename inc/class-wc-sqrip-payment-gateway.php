@@ -348,6 +348,13 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'default' => __("[order_date]_[shop_name]_invoice-order_[order_number]", "sqrip-swiss-qr-invoice"),
                 'description' => __('The only characters allowed are A-Z, dashes (-) and underscores (_). Any spaces will be replaced with underscores (_). You can also use the following variables:<br>[order_number] — your full order number;<br>[order_date] — in yymmdd format, e.g. 230210 for Feb. 10 2023;<br>[shop_name] — can only be used if the shop name conforms with the "characters allowed" rule, otherwise the setting will be highlighted in red.', 'sqrip-swiss-qr-invoice'),
             ),
+            'checkout_remarks' => array(
+                'title' => __('Checkout Page Remarks', 'sqrip-swiss-qr-invoice'),
+                'type' => 'textarea',
+                'class' => 'sqrip-checkout-remarks',
+                'description' => __('Will be displayed in the Checkout page above the Payment Methods section.', 'sqrip-swiss-qr-invoice'),
+                'class' => 'qrinvoice-tab'
+            ),
             'product' => array(
                 'title' => __('Format', 'sqrip-swiss-qr-invoice'),
                 'type' => 'select',
@@ -835,7 +842,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 
     }
 
-    public function update_addidtional_services($post_data)
+    public function update_additional_services($post_data)
     {
         $endpoint = 'user-additional-service';
         $additional_services = [
@@ -870,7 +877,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 
         $this->update_iban($post_data);
 
-        $this->update_addidtional_services($post_data);
+        $this->update_additional_services($post_data);
 
         if (isset($post_data['woocommerce_sqrip_test_email'])) {
 
