@@ -835,6 +835,33 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 
     }
 
+    public function update_addidtional_services($post_data)
+    {
+        $endpoint = 'user-additional-service';
+        $additional_services = [
+            'refund' => 'return_enabled',
+            'payment_comparison' => 'payment_comparison_enabled',
+        ];
+        $services_arr = ["services" => []];
+
+        foreach ($additional_services as $key => $value) {
+            $post_data_value = isset($post_data['woocommerce_sqrip_'.$value])
+                ? ($post_data['woocommerce_sqrip_'.$value] == '1' ? 'yes' : 'no')
+                : 'no';
+            $current_value = sqrip_get_plugin_option(($value));
+
+            if ($post_data_value != $current_value) {
+                $services_arr["services"][$key] = $post_data_value;
+            }
+        }
+
+        if (count($services_arr["services"]) > 0) {
+            $body = json_encode($services_arr);
+
+            $response = sqrip_remote_request($endpoint, $body, "POST");
+        }
+    }
+
     public function process_admin_options()
     {
         $post_data = $this->get_post_data();
@@ -842,6 +869,8 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         $this->check_iban_status($post_data);
 
         $this->update_iban($post_data);
+
+        $this->update_addidtional_services($post_data);
 
         if (isset($post_data['woocommerce_sqrip_test_email'])) {
 
