@@ -461,7 +461,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             'email_attached' => array(
                 'title' => __('Attach QR-Invoice to E-Mail template', 'sqrip-swiss-qr-invoice'),
                 'description' => __('Select email template to which the QR-invoice is attached', 'sqrip-swiss-qr-invoice'),
-                'type' => 'select',
+                'type' => 'multiselect',
                 'options' => sqrip_get_wc_emails(),
                 'class' => 'qrinvoice-tab'
             ),

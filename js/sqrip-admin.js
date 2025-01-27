@@ -62,6 +62,10 @@ jQuery(document).ready(function ($) {
         allowClear: true
     });
 
+    $('select[id*="email_attached"]').select2({
+        allowClear: true
+    });
+
     $.ajax({
         type: "post",
         url: sqrip.ajax_url,

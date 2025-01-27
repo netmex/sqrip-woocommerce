@@ -398,7 +398,8 @@ function sqrip_set_customer_iban($user, $iban)
 function sqrip_get_wc_emails()
 {
     $emails = wc()->mailer()->get_emails();
-    $options = ["sqrip-do-not-attach" => __('Do not attach to any e-mail', 'sqrip-swiss-qr-invoice'),];
+    $options = [];
+    // $options = ["sqrip-do-not-attach" => __('Do not attach to any e-mail', 'sqrip-swiss-qr-invoice'),];
 
     if ($emails && is_array($emails)) {
         foreach ($emails as $email) {

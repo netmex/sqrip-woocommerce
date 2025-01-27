@@ -439,7 +439,7 @@ function sqrip_attach_qrcode_pdf_to_email($attachments, $email_id, $order)
 
     $array_in = array('both', 'attachment');
 
-    if ($email_id === $email_attached && $payment_method === 'sqrip' && in_array($integration_email, $array_in)) {
+    if (in_array($email_id, $email_attached) && $payment_method === 'sqrip' && in_array($integration_email, $array_in)) {
         // $order_id = $order->id;
         $order_id = method_exists($order, 'get_id') ? $order->get_id() : $order->id;
 
