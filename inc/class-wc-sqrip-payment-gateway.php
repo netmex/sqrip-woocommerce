@@ -460,10 +460,18 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             ),
             'email_attached' => array(
                 'title' => __('Attach QR-Invoice to E-Mail template', 'sqrip-swiss-qr-invoice'),
-                'description' => __('Select email template to which the QR-invoice is attached', 'sqrip-swiss-qr-invoice'),
+                'description' => __('Select email templates to which the QR-invoice are attached', 'sqrip-swiss-qr-invoice'),
                 'type' => 'multiselect',
                 'options' => sqrip_get_wc_emails(),
                 'class' => 'qrinvoice-tab'
+            ),
+            'send_copy_to_admin' => array(
+                'title' => __('Send a copy to the shop admin', 'sqrip-swiss-qr-invoice'),
+                'label' => __('Send a copy of the Email with PDF invoice to Admin', 'sqrip-swiss-qr-invoice'),
+                'type' => 'checkbox',
+                'description' => '',
+                'default' => 'no',
+                'class' => 'qrinvoice-tab '
             ),
             'delete_invoice_status' => array(
                 'title' => __('Delete QR-invoice once status has been changed to', 'sqrip-swiss-qr-invoice'),

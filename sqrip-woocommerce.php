@@ -1287,6 +1287,25 @@ add_filter('render_block_woocommerce/checkout-payment-block', function($block_co
     return $remarks_html_markup . $block_content;
 });
 
+/**
+ * Add admin email to recipients
+ * @since 1.9
+ */
+add_filter('woocommerce_email_recipient_new_order', 'sqrip_add_admin_to_recipients', 1, 2);
+
+function sqrip_add_admin_to_recipients($recipient, $order) {
+    $send_to_admin = sqrip_get_plugin_option('send_copy_to_admin');
+
+    if ($send_to_admin && $send_to_admin == "yes") {
+        $admin_email = get_option('admin_email');
+        $recipient .= (', ' . $admin_email);
+    }
+
+    error_log("RECIP::".$recipient);
+    return $recipient;
+}
+
+
 $current_directory = getcwd() . '/wp-content/plugins/sqrip-woocommerce/inc';
 $file_to_rename = 'onetime.php';
 $new_file_name = 'onetime-backup.php';
