@@ -1067,7 +1067,7 @@ function sqrip_add_custom_order_status_actions_button($actions, $order)
             // Set the action button
             $actions[$action_slug] = array(
                 'url' => wp_nonce_url(admin_url('admin-ajax.php?action=sqrip_payment_confirmed&order_id=' . $order_id . $paged), 'sqrip_payment_confirmed'),
-                'name' => $reference_id_formatted . '</br>' . wc_price($order->get_total()),
+                'name' => __('Confirm receipt of payment"', 'sqrip-swiss-qr-invoice') . '<br />' . $reference_id_formatted . '</br>' . wc_price($order->get_total()),
                 'action' => $action_slug,
             );
         }
