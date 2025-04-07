@@ -471,15 +471,16 @@ function sqrip_get_locale_by_lang($lang)
     return $locale;
 }
 
-function sqrip_file_name($order_id)
+function sqrip_file_name($order_id, $is_refund=false)
 {
     $order = wc_get_order($order_id);
     $order_date = '';
 
-    if ($order) {
-        $order_date = $order->get_date_created()->date('Ymd');
+    if ($order && !$is_refund) {
+        //todoIBAN
+        $order_date = $order->get_date_created()->date('YmdHis');
     } else {
-        $order_date = date("Ymd");
+        $order_date = date("YmdHis");
     }
 
     $sqrip_file_name = sqrip_get_plugin_option('file_name');

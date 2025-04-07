@@ -78,9 +78,17 @@ function sqrip_validation_iban_ajax()
     $iban = $_POST['iban'];
     $token = $_POST['token'];
 
+    $store_iban = $_POST['store_iban'];
+    $order_id = $_POST['order_id'];
+
     $response = sqrip_validation_iban($iban, $token);
     $result = [];
     $bank = isset($response->bank_data->bank) ? $response->bank_data->bank : '';
+
+    if ($store_iban == "true") {
+        update_post_meta($order_id, 'sqrip_refund_iban_num', $iban);
+    }
+
     switch ($response->message) {
         case 'Valid simple IBAN':
             $result['result'] = true;

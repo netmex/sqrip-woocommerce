@@ -1146,11 +1146,12 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 
         // replace sqrip IBAN with IBAN of customer
         $user = $order->get_user();
-        $iban = sqrip_get_customer_iban($user);
+        $iban = $user ? sqrip_get_customer_iban($user) : get_post_meta($order_id, 'sqrip_refund_iban_num', true);
 
         $order->update_meta_data('sqrip_refund_iban_num', $iban);
         $order->save();
 
+        //error_log('IBAN REFUND::'.$iban);
         if (!$iban) {
             // Add note to the order for your reference
             $order->add_order_note(
@@ -1164,7 +1165,9 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 
         // we need to switch payable_to and payable_by addresses
         // $address = sqrip_get_plugin_option('address');
-        $payable_by = sqrip_get_payable_to_address('woocommerce');
+        //todoIBAN
+        $address = sqrip_get_plugin_option('address');
+        $payable_by = sqrip_get_payable_to_address($address);
         $payable_to = sqrip_get_billing_address_from_order($order);
 
         // since the two addresses have different names for the
@@ -1191,6 +1194,8 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         $args = sqrip_prepare_remote_args($body, 'POST', $token);
         $response = wp_remote_post(SQRIP_ENDPOINT . $endpoint, $args);
 
+        //error_log("REFUND".json_encode($response));
+
         $status_code = $response['response']['code'];
 
         if ($status_code !== 200) {
@@ -1213,11 +1218,14 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         }
 
         $response_body = wp_remote_retrieve_body($response);
+        //error_log("REFUND RESPONSE::".$response_body);
         $response_body = json_decode($response_body);
 
         if (isset($response_body->reference)) {
             $sqrip_png = $response_body->png_file;
-            $sqrip_qr_png_attachment_id = $this->file_upload($sqrip_png, '.png', '', $order_id);
+            //todoIban
+            $sqrip_png = explode("path=", $sqrip_png)[1];
+            $sqrip_qr_png_attachment_id = $this->file_upload($sqrip_png, '.png', '', $order_id, true);
 
             $order->add_order_note(__('sqrip QR-Code für Rückerstattung erstellt.', 'sqrip-swiss-qr-invoice'));
 
@@ -1424,11 +1432,11 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
     /*
     *  sqrip QR Code PDF  Download in medialibrary and set
     */
-    public function file_upload($fileurl, $type, $token = "", $order_id = "")
+    public function file_upload($fileurl, $type, $token = "", $order_id = "", $is_refund = false)
     {
         include_once(ABSPATH . 'wp-admin/includes/image.php');
 
-        $sqrip_name = sqrip_file_name($order_id);
+        $sqrip_name = sqrip_file_name($order_id, $is_refund);
         $filename = $sqrip_name . $type;
         $file_path = sanitize_title($sqrip_name) . $type;
 

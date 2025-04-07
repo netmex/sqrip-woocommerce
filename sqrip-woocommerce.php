@@ -189,11 +189,11 @@ add_action('admin_enqueue_scripts', function () {
 
     global $post_type;
     $screen = get_current_screen();
-    // error_log("POST TYPE:: shop_order".json_encode($post_type)." :: ".json_encode($screen));
 
     if (is_object($screen) && in_array($screen->post_type, ['shop_order', 'shop_order_placehold'])) {
 
         wp_enqueue_script('sqrip-order', plugins_url('js/sqrip-order.js', __FILE__), array('jquery'), '1.1.1', true);
+        wp_enqueue_script('sqrip-refund', plugins_url('js/sqrip-refund.js', __FILE__), array('jquery'), '1.1.1', true);
 
         wp_localize_script('sqrip-order', 'sqrip',
             array(
@@ -284,11 +284,17 @@ if (!function_exists('sqrip_add_fields_for_order_details')) {
         $reference_id = '';
         $pdf_file = '';
         $payment_method = $order->get_payment_method();
+        $user = $order->get_user();
+        $refund_iban = $user ? sqrip_get_customer_iban($user) : get_post_meta($order_id, 'sqrip_refund_iban_num', true);
+        $sqrip_refund_token = sqrip_get_plugin_option('return_token');
 
         // Implement compatibility with WooCommerce HPOS since 1.8.4
         if ( \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled() ) {
             $reference_id = $order->get_meta('sqrip_reference_id', true);
             $pdf_file = $order->get_meta('sqrip_pdf_file_url', true);
+            if (!$refund_iban) {
+                $refund_iban = $order->get_meta('sqrip_refund_iban_num', true);
+            }
         } else {
             $reference_id = get_post_meta($order_id, 'sqrip_reference_id', true);
             $pdf_file = get_post_meta($order_id, 'sqrip_pdf_file_url', true);
@@ -378,6 +384,13 @@ if (!function_exists('sqrip_add_fields_for_order_details')) {
                 echo '<button class="button button-secondary sqrip-initiate-payment">' . __('Generate QR Invoice', 'sqrip-swiss-qr-invoice') . '</button>';
             }
         }
+
+        //IBANTODO::
+        // error_log("REF".$refund_iban);
+        if ($refund_iban) {
+            echo '<input type="hidden" id="sqrip-customer-iban" value="'.$refund_iban.'" />';
+        }
+        echo '<input type="hidden" id="sqrip-refund-token" value="'.$sqrip_refund_token.'" />';
     }
 }
 
@@ -438,8 +451,11 @@ function sqrip_attach_qrcode_pdf_to_email($attachments, $email_id, $order)
     $email_attached = sqrip_get_plugin_option('email_attached');
 
     $array_in = array('both', 'attachment');
+    $isEmailAttached = is_array($email_attached) ?
+        in_array($email_id, $email_attached) :
+        $email_id == $email_attached;
 
-    if (in_array($email_id, $email_attached) && $payment_method === 'sqrip' && in_array($integration_email, $array_in)) {
+    if ($isEmailAttached && $payment_method === 'sqrip' && in_array($integration_email, $array_in)) {
         // $order_id = $order->id;
         $order_id = method_exists($order, 'get_id') ? $order->get_id() : $order->id;
 
