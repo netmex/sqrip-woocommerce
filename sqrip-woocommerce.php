@@ -149,7 +149,7 @@ function sqrip_add_admin_notice()
  * @since 1.0
  */
 
-add_action('admin_enqueue_scripts', function () {
+add_action('admin_enqueue_scripts', function ($hook_suffix) {
 
     wp_enqueue_style('sqrip-admin', plugins_url('css/sqrip-admin.css', __FILE__), '', '1.1.1');
 
@@ -204,6 +204,11 @@ add_action('admin_enqueue_scripts', function () {
                 'field_required_txt' => __('This field is required', 'sqrip-swiss-qr-invoice')
             )
         );
+    }
+
+    if (in_array($hook_suffix, ['user-edit.php', 'profile.php'])) {
+        wp_enqueue_script('sqrip-customer-profile', plugins_url('js/sqrip-customer-profile.js', __FILE__), array('jquery'), '1.1.1', true);
+        wp_localize_script('sqrip-customer-profile', 'sqrip', array('ajax_url' => admin_url('admin-ajax.php')));
     }
 
 
@@ -385,8 +390,6 @@ if (!function_exists('sqrip_add_fields_for_order_details')) {
             }
         }
 
-        //IBANTODO::
-        // error_log("REF".$refund_iban);
         if ($refund_iban) {
             echo '<input type="hidden" id="sqrip-customer-iban" value="'.$refund_iban.'" />';
         }
@@ -788,6 +791,7 @@ function sqrip_extra_user_profile_fields($user)
 {
 
     $sqrip_return_enabled = sqrip_get_plugin_option('return_enabled');
+    $sqrip_refund_token = sqrip_get_plugin_option('return_token');
 
     if ($sqrip_return_enabled) {
         ?>
@@ -798,7 +802,9 @@ function sqrip_extra_user_profile_fields($user)
                 <td>
                     <input type="text" name="iban" id="iban"
                            value="<?php echo esc_attr(sqrip_get_customer_iban($user)); ?>" class="regular-text"/><br/>
+                           <button id="btn_sqrip_check_iban" class="button-secondary sqrip-btn-validate" style="margin-top: 10px;">Check</button><br/>
                     <span class="description"><?php _e("This iban will be used to generate a sqrip qr code in case of a refund."); ?></span>
+                    <input type="hidden" id="sqrip-refund-token" value="<?=$sqrip_refund_token; ?>" />
                 </td>
             </tr>
         </table>

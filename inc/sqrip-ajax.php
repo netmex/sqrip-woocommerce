@@ -78,8 +78,8 @@ function sqrip_validation_iban_ajax()
     $iban = $_POST['iban'];
     $token = $_POST['token'];
 
-    $store_iban = $_POST['store_iban'];
-    $order_id = $_POST['order_id'];
+    $store_iban = isset($_POST['store_iban']) ? $_POST['store_iban'] : null;
+    $order_id = isset($_POST['order_id']) ? $_POST['order_id'] : null;
 
     $response = sqrip_validation_iban($iban, $token);
     $result = [];

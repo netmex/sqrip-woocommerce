@@ -787,21 +787,27 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
     {
         $endpoint = 'iban-status';
         $iban = $post_data['woocommerce_sqrip_iban'];
+        $old_iban = sqrip_get_plugin_option('iban');
 
         $body = '{
             "iban": "' . $iban . '"
         }';
 
-        $response = sqrip_remote_request($endpoint, $body, 'POST');
+        //Only check iban status if IBAN is changed
+        if ($old_iban != $iban) {
 
-        if (isset($response->status) && $response->status == "inactive") {
-
-            unset($_POST['woocommerce_sqrip_enabled']);
-
-            $settings = new WC_Admin_Settings();
-
-            $settings->add_error(__('The (QR-)IBAN has been changed. Please confirm the new (QR-)IBAN in your sqrip.ch account.', 'sqrip-swiss-qr-invoice'));
+            $response = sqrip_remote_request($endpoint, $body, 'POST');
+    
+            if (isset($response->status) && $response->status == "inactive") {
+    
+                unset($_POST['woocommerce_sqrip_enabled']);
+    
+                $settings = new WC_Admin_Settings();
+    
+                $settings->add_error(__('The (QR-)IBAN has been changed. Please confirm the new (QR-)IBAN in your sqrip.ch account.', 'sqrip-swiss-qr-invoice'));
+            }
         }
+
 
     }
 
@@ -1151,7 +1157,6 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         $order->update_meta_data('sqrip_refund_iban_num', $iban);
         $order->save();
 
-        //error_log('IBAN REFUND::'.$iban);
         if (!$iban) {
             // Add note to the order for your reference
             $order->add_order_note(
@@ -1165,7 +1170,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 
         // we need to switch payable_to and payable_by addresses
         // $address = sqrip_get_plugin_option('address');
-        //todoIBAN
+
         $address = sqrip_get_plugin_option('address');
         $payable_by = sqrip_get_payable_to_address($address);
         $payable_to = sqrip_get_billing_address_from_order($order);
@@ -1223,7 +1228,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 
         if (isset($response_body->reference)) {
             $sqrip_png = $response_body->png_file;
-            //todoIban
+
             $sqrip_png = explode("path=", $sqrip_png)[1];
             $sqrip_qr_png_attachment_id = $this->file_upload($sqrip_png, '.png', '', $order_id, true);
 

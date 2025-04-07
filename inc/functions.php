@@ -477,7 +477,6 @@ function sqrip_file_name($order_id, $is_refund=false)
     $order_date = '';
 
     if ($order && !$is_refund) {
-        //todoIBAN
         $order_date = $order->get_date_created()->date('YmdHis');
     } else {
         $order_date = date("YmdHis");
