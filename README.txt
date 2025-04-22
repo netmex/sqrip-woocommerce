@@ -1,10 +1,10 @@
 === sqrip.ch ===
 Contributors: sqrip
 Donate link: https://sqrip.ch/
-Tags: woocommerce, payment, sqrip, qrcode, qr, scan, Kontoabgleich, WPML, swiss qr invoice, QR-Rechnung, EBICS, QR-facture, bulletins de versement, Einzahlungsschein, QR-Einzahlungsschein, bulletins de versement, Swiss QR Code, code QR, QR-fattura, polizze di versamento
+Tags: woocommerce, payment, sqrip, qrcode, qr, scan, Kontoabgleich, WPML, swiss qr invoice, QR-Rechnung, EBICS, QR-facture, bulletins de versement, Einzahlungsschein, QR-Einzahlungsschein, bulletins de versement, Swiss QR Code, code QR, QR-fattura, polizze di versamento, multi-store, multi-site, PDF Invoices, multiple invoice installments, 
 Requires at least: 4.7
-Tested up to: 6.5.2
-Stable tag: 1.8.4
+Tested up to: 6.8
+Stable tag: 1.9
 Requires PHP: 7.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -50,12 +50,15 @@ This field supports WPML.
 f) Integration
 Define the e-mail to which the qr-invoice will be attached to.
 It can also be offered for download on the confirmation page.
-If you generally need to adjust pricing or quantity after an order has been placed, you can suppress a QR invoice generation at the checkout and generate it manually later. 
+If you generally need to adjust pricing or quantity after an order has been placed, you can suppress a QR invoice generation at the checkout and generate it manually later;
+Merge the QR bill slip with the invoice created with the Plugin 'PDF Invoices & Packing Slips for WooCommerce' into one single PDF file;
+Use sqrip in multiple stores installed on the same server instance.
 
 g) E-mail enclosure
 The QR invoice can be enclosed with the e-mail in two ways:
-- page A4 (blank) with payment section at the bottom
-- only the payment section (formerly "payment slip") in A6 format.
+- page A4 (blank) with payment section at the bottom;
+- only the payment section (formerly "payment slip") in A6 format;
+- add the QR invoice to multiple e-mails;
 
 h) Language
 - The default language to be used on the QR invoice (de, fr, it, en) can be set per store.
@@ -75,7 +78,8 @@ l) Manual payment comparison
 Once an order has a defined order status you can confirm that the payment was done by the client and the status of the order can be changed to another status. If there is no suitable status available, you can create one in seconds. You can confirm the payments either on the list of orders or on the order detail page. 
 
 m) Payer Name
-For corporate payers, choose to show either the Company name or the Firstname / Name. Or show all names together.
+- For corporate payers, choose to show either the Company name or the Firstname / Name. Or show all names together.
+- sqrip is ready for 'structured addresses' for QR invoices.
 
 n) File Name
 The QR invoice file names can be defined individually. Add date, order number and any other information as shop name to make the QR invoice more personal.
@@ -89,10 +93,12 @@ p) Adjustable to your process
 sqrip is flexible enough to be adopted to your individual process. 
 - Define your own order status for payments made with sqrip;
 - Define the moment you expect the payment to arrive (prior to shipment or thereafter);
-- Define the status after payment has arrived.
+- Define the status after payment has arrived;
+- Use multiple payment installments (e.g. Pay 30% when the order is placed; Pay the remaining 70% 30 days after delivery);
 
 q) Shows when something is wrong, turns off automatically
 Instead of showing technical, unuseful error messages to your clients, we turn the service off automatically and show you where to look at for resolving the issue.
+
 
 = Requirements =
 1. Besides a current WordPress and WooCommerce installation, an account on sqrip.ch is required.
@@ -136,6 +142,16 @@ Yes. We are already working on comparing the reconciliation of orders/purchases 
 7. Refund functionality
 
 == Changelog ==
+= 1.9 : May 2025 – Features =
+* Adding the ability to use sqrip in multiple stores installed on the same server instance;
+* If you use the Plugin 'PDF Invoices & Packing Slips for WooCommerce' you can now combine the invoice and the QR slip into one single PDF file;
+* You can now split your invoices into multiple installments;
+* The QR bill can now be added to multiple e-mail templates;
+* Adding remarks on the checkout page;
+* The Refund IBAN of the client is now checked before a refund is initiated;
+* Refinements (Reference number layout; adding the sqrip logo to the payment options; WPML can now handle the description field too);
+* Minor bug fixing;
+* Making sure the plugin works with the latest versions of WP and WooCommerce.
 
 = 1.8.4 : May 2024 – Compatibility =
 * Solved an issue that prevented the sqrip box to be shown on the order details page;
