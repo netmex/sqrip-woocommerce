@@ -546,3 +546,111 @@ function sqrip_auto_turn_off() {
         update_option('woocommerce_sqrip_settings', $plugin_options);
     }
 }
+
+/**
+ * Returns the meta value for an order that matches the meta_key
+ * Checks if the WooCommerce HPOS is enabled
+ * @param $order
+ * @param $meta_key
+ *
+ * @return mixed
+ * since 1.9
+ */
+function sqrip_get_order_meta_value($order, $meta_key)
+{
+    $isHPOS = \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled();
+    $order_id = method_exists($order, 'get_id') ? $order->get_id() : $order->id;
+    $meta_value = $isHPOS ? 
+        $order->get_meta($meta_key, true) : 
+        get_post_meta($order_id, $meta_key, true);
+
+    return $meta_value;
+}
+
+/**
+ * Returns the formatted value for an invoice reference id
+ * @param $reference_id
+ *
+ * @return mixed
+ * since 1.9
+ */
+function sqrip_format_reference_id($reference_id, $order_id)
+{
+    $qr_basis = sqrip_get_plugin_option("qr_reference");
+    $reference_id_formatted = esc_html($reference_id);
+    $order_id = (string) $order_id;
+
+    switch ($qr_basis) {
+        case 'order_number':
+            error_log("Order Number Ref::");
+            if (strpos(strtolower($reference_id_formatted), 'rf') !== false) {
+                if (endsWith($reference_id_formatted, $order_id)) {
+                    $reference_id_formatted = sqrip_reference_id_format_with_order_id ($reference_id_formatted, $order_id, 4);
+                } else {
+                    $reference_id_formatted = sqrip_default_reference_id_formatting($reference_id_formatted);
+                }
+            } else {
+                $control_digit = substr($reference_id_formatted, -1);
+                $reference_without_control_digit = substr($reference_id_formatted, 0, -1);
+                $ref_ends_with_order_id = endsWith($reference_without_control_digit, $order_id);
+                error_log("Order Ref w/o control:-".json_encode($ref_ends_with_order_id)." ".$order_id);
+                
+                if ($ref_ends_with_order_id) {
+                    $reference_id_formatted = sqrip_reference_id_format_with_order_id ($reference_id_formatted, $order_id, 2)." ".$control_digit;
+                } else {
+                    $reference_id_formatted = sqrip_default_reference_id_formatting($reference_id_formatted);
+                }
+
+            }
+
+            break;
+        case 'random':
+            $reference_id_formatted = sqrip_default_reference_id_formatting($reference_id_formatted);
+            break;
+        
+        default:
+            $reference_id_formatted = sqrip_default_reference_id_formatting($reference_id_formatted);
+            break;
+    }
+
+    return $reference_id_formatted;
+}
+
+function sqrip_default_reference_id_formatting ($reference_id_formatted) {
+    if (strpos(strtolower($reference_id_formatted), 'rf') !== false) {
+        $reference_id_formatted = substr_replace($reference_id_formatted, " ", 4, 0);
+        $reference_id_formatted = substr_replace($reference_id_formatted, " ", 9, 0);
+        $reference_id_formatted = substr_replace($reference_id_formatted, " ", 14, 0);
+        $reference_id_formatted = substr_replace($reference_id_formatted, " ", 19, 0);
+        $reference_id_formatted = substr_replace($reference_id_formatted, " ", 24, 0);
+        $reference_id_formatted = substr_replace($reference_id_formatted, " ", 29, 0);
+    } else {
+        $reference_id_formatted = substr_replace($reference_id_formatted, " ", 2, 0);
+        $reference_id_formatted = substr_replace($reference_id_formatted, " ", 8, 0);
+        $reference_id_formatted = substr_replace($reference_id_formatted, " ", 14, 0);
+        $reference_id_formatted = substr_replace($reference_id_formatted, " ", 20, 0);
+        $reference_id_formatted = substr_replace($reference_id_formatted, " ", 26, 0);
+    }
+    return $reference_id_formatted;
+}
+
+function endsWith( $haystack, $needle ) {
+    $length = strlen( $needle );
+    if( !$length ) {
+        return true;
+    }
+    return substr( $haystack, -$length ) === $needle;
+}
+
+function sqrip_reference_id_format_with_order_id ($reference_id_formatted, $order_id, $start_length) {
+    $start_str = substr($reference_id_formatted, 0, $start_length);
+    $reference_id_formatted = substr($reference_id_formatted, $start_length);
+    $reference_id_formatted = substr($reference_id_formatted, 0, -strlen($order_id));
+
+    while (strlen($reference_id_formatted) > 5) {
+        $start_str .= " ".substr($reference_id_formatted, 0, 5);
+        $reference_id_formatted = substr($reference_id_formatted, 5);
+    }
+
+    return $start_str." ".$reference_id_formatted." <b>".$order_id."</b>";
+}
