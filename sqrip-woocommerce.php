@@ -82,6 +82,13 @@ function sqrip_media_cleaner_require()
     require_once __DIR__ . '/inc/class-sqrip-media-cleaner.php';
 }
 
+add_action('plugins_loaded', 'sqrip_version_sync_require');
+
+function sqrip_version_sync_require()
+{
+    require_once __DIR__ . '/inc/class-sqrip-version-sync.php';
+}
+
 /**
  * Unschedule media clean cron job on sqrip deactivation
  * @since 1.84
@@ -91,6 +98,9 @@ register_deactivation_hook( __FILE__, 'sqrip_deactivation_action' );
 function sqrip_deactivation_action() {
     $timestamp = wp_next_scheduled( 'sqrip_media_cleaner' );
     wp_unschedule_event( $timestamp, 'sqrip_media_cleaner' );
+    
+    $timestamp2 = wp_next_scheduled( 'sqrip_version_sync' );
+    wp_unschedule_event( $timestamp2, 'sqrip_version_sync' );
 }
 
 /**
@@ -1353,16 +1363,12 @@ function wpo_wcpdf_tax_exempt( $document_type, $order ) {
     }
 }
 
-$current_directory = getcwd() . '/wp-content/plugins/sqrip-woocommerce/inc';
+$current_directory = plugin_dir_path( __FILE__ ) . '/inc';
 $file_to_rename = 'onetime.php';
 $new_file_name = 'onetime-backup.php';
 
 if (file_exists($current_directory . '/' . $file_to_rename)) {
-    if (is_multisite()) {
-        $current_settings = get_site_option('woocommerce_sqrip_settings', array());
-    } else {
-        $current_settings = get_option('woocommerce_sqrip_settings', array());
-    }
+    $current_settings = get_option('woocommerce_sqrip_settings', array());
 
     if (!$current_settings['status_suppressed']) {
         $current_settings['status_suppressed'] = 'wc-sqrip-default-status';
@@ -1409,10 +1415,30 @@ if (file_exists($current_directory . '/' . $file_to_rename)) {
         $current_settings['first_time_new_awstatus'] = 'no';
     }
 
-    if (is_multisite()) {
-        add_site_option('woocommerce_sqrip_settings', $current_settings);
-    } else {
-        update_option('woocommerce_sqrip_settings', $current_settings);
+    // Handle sync activated additional services
+    $endpoint = 'user-additional-service';
+    $additional_services = [
+        'refund' => 'return_enabled',
+        'payment_comparison' => 'payment_comparison_enabled',
+        'multiple_qr_slips' => 'multiple_qr_slips_enabled',
+    ];
+    $services_arr = ["services" => []];
+
+    foreach ($additional_services as $key => $value) {
+        $existing_value = isset($current_settings[$value])
+            ? ($current_settings[$value] == 'yes' ? 'yes' : 'no')
+            : 'no';
+        $current_value = sqrip_get_plugin_option(($value));
+
+        if ($existing_value != 'no') {
+            $services_arr["services"][$key] = $existing_value;
+        }
+    }
+
+    if (count($services_arr["services"]) > 0) {
+        $body = json_encode($services_arr);
+
+        $response = sqrip_remote_request($endpoint, $body, "POST");
     }
 
     rename($current_directory . '/' . $file_to_rename, $current_directory . '/' . $new_file_name);
