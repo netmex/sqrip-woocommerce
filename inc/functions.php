@@ -144,6 +144,9 @@ function sqrip_prepare_qr_code_request_body($currency_symbol, $amount, $order_nu
     $due_date = date('Y-m-d', $due_date_raw);
 
     $additional_information = $plugin_options['additional_information'];
+    $partial_invoice_information = $plugin_options['partial_invoice_information'];
+    $multiple_qr_slips_enabled = $plugin_options['multiple_qr_slips_enabled'];
+    $number_of_invoices = $plugin_options['number_of_invoices'];
 
     if ($additional_information) {
         $additional_information = sqrip_additional_information_shortcodes($additional_information, $lang, $due_date_raw, $order_number);
@@ -165,6 +168,13 @@ function sqrip_prepare_qr_code_request_body($currency_symbol, $amount, $order_nu
         $product = 'Invoice Slip';
     }
 
+    if ($multiple_qr_slips_enabled && $partial_invoice_information) {
+        $partial_invoice_information = str_replace("[max_invoice]", $number_of_invoices, $partial_invoice_information);
+            
+    } else {
+        $partial_invoice_information = "";
+    }
+
     $body = [
         "iban" => [
             "iban" => $iban,
@@ -173,7 +183,8 @@ function sqrip_prepare_qr_code_request_body($currency_symbol, $amount, $order_nu
             [
                 "currency_symbol" => $currency_symbol,
                 "amount" => $amount,
-                "message" => $additional_information
+                "message" => $additional_information,
+                "partial_invoice_message" => $partial_invoice_information
             ],
         "lang" => $lang,
         "product" => $product,

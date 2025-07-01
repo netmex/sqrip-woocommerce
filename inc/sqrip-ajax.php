@@ -304,6 +304,28 @@ function sqrip_payment_confirmed()
 
     $paged = isset($_GET['paged']) ? '&paged=' . $_GET['paged'] : '';
 
+    $sqrip_paid_invoice = sqrip_get_order_meta_value($order, 'sqrip_paid_invoice_number');
+    $sqrip_invoice_count = sqrip_get_order_meta_value($order, 'sqrip_multiple_invoice_count');
+    
+    if ($sqrip_invoice_count && isset($sqrip_paid_invoice)) {
+        $sqrip_invoice_count = (int) $sqrip_invoice_count;
+        $sqrip_paid_invoice = (int) $sqrip_paid_invoice;
+        $sqrip_next_paid_invoice_number = $sqrip_paid_invoice + 1;
+        $payment_status = sqrip_get_plugin_option("partial_invoice_".$sqrip_next_paid_invoice_number."_status");
+
+        if ($payment_status) {
+            $order->update_status($payment_status, '');
+        }
+
+        $order->update_meta_data('sqrip_paid_invoice_number', $sqrip_next_paid_invoice_number);
+        $order->save();
+        
+        if ($sqrip_invoice_count > $sqrip_next_paid_invoice_number) {
+            wp_redirect(get_admin_url() . 'edit.php?post_type=shop_order' . $paged);
+            die();
+        }
+    }
+
     $order->update_status($status_completed, '');
 
     wp_redirect(get_admin_url() . 'edit.php?post_type=shop_order' . $paged);

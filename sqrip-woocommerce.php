@@ -98,7 +98,7 @@ register_deactivation_hook( __FILE__, 'sqrip_deactivation_action' );
 function sqrip_deactivation_action() {
     $timestamp = wp_next_scheduled( 'sqrip_media_cleaner' );
     wp_unschedule_event( $timestamp, 'sqrip_media_cleaner' );
-    
+
     $timestamp2 = wp_next_scheduled( 'sqrip_version_sync' );
     wp_unschedule_event( $timestamp2, 'sqrip_version_sync' );
 }
@@ -170,6 +170,9 @@ add_action('admin_enqueue_scripts', function ($hook_suffix) {
         $sqrip_new_awaiting_status = sqrip_get_plugin_option('enabled_new_awstatus');
         $sqrip_new_suppressed_status = sqrip_get_plugin_option('enabled_new_sustatus');
         $sqrip_new_qr_status = sqrip_get_plugin_option('enabled_new_qrstatus');
+        $sqrip_new_partial_invoice_1_status = sqrip_get_plugin_option('enabled_new_partial_invoice_1_status');
+        $sqrip_new_partial_invoice_2_status = sqrip_get_plugin_option('enabled_new_partial_invoice_2_status');
+        $sqrip_new_partial_invoice_3_status = sqrip_get_plugin_option('enabled_new_partial_invoice_3_status');
 
         $sqrip_details = sqrip_get_user_details('', 'full');
 
@@ -182,6 +185,9 @@ add_action('admin_enqueue_scripts', function ($hook_suffix) {
                 'txt_awaiting_create' => $sqrip_new_awaiting_status == 'yes' ? __('Update', 'sqrip-swiss-qr-invoice') : __('Create', 'sqrip-swiss-qr-invoice'),
                 'txt_suppressed_create' => $sqrip_new_suppressed_status == 'yes' ? __('Update', 'sqrip-swiss-qr-invoice') : __('Create', 'sqrip-swiss-qr-invoice'),
                 'txt_qr_create' => $sqrip_new_qr_status == 'yes' ? __('Update', 'sqrip-swiss-qr-invoice') : __('Create', 'sqrip-swiss-qr-invoice'),
+                'txt_partial_invoice_1_create' => $sqrip_new_partial_invoice_1_status == 'yes' ? __('Update', 'sqrip-swiss-qr-invoice') : __('Create', 'sqrip-swiss-qr-invoice'),
+                'txt_partial_invoice_2_create' => $sqrip_new_partial_invoice_2_status == 'yes' ? __('Update', 'sqrip-swiss-qr-invoice') : __('Create', 'sqrip-swiss-qr-invoice'),
+                'txt_partial_invoice_3_create' => $sqrip_new_partial_invoice_3_status == 'yes' ? __('Update', 'sqrip-swiss-qr-invoice') : __('Create', 'sqrip-swiss-qr-invoice'),
                 'txt_send_test_email' => sprintf(
                     __('Send test to %s', 'sqrip-swiss-qr-invoice'),
                     esc_html(get_option('admin_email'))
@@ -300,36 +306,45 @@ if (!function_exists('sqrip_add_fields_for_order_details')) {
         $pdf_file = '';
         $payment_method = $order->get_payment_method();
         $user = $order->get_user();
-        $refund_iban = $user ? sqrip_get_customer_iban($user) : get_post_meta($order_id, 'sqrip_refund_iban_num', true);
+        $isHPOS = \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled();
+        $refund_iban = $user ?
+            sqrip_get_customer_iban($user) :
+            sqrip_get_order_meta_value($order, 'sqrip_refund_iban_num');
         $sqrip_refund_token = sqrip_get_plugin_option('return_token');
 
         // Implement compatibility with WooCommerce HPOS since 1.8.4
-        if ( \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled() ) {
-            $reference_id = $order->get_meta('sqrip_reference_id', true);
-            $pdf_file = $order->get_meta('sqrip_pdf_file_url', true);
-            if (!$refund_iban) {
-                $refund_iban = $order->get_meta('sqrip_refund_iban_num', true);
+        $reference_id = sqrip_get_order_meta_value($order, 'sqrip_reference_id');
+        $reference_id_html = "";
+        $pdf_file_link = "";
+        $invoice_count = sqrip_get_order_meta_value($order, 'sqrip_multiple_invoice_count');
+
+        if ($invoice_count) {
+            $invoice_count = (int) $invoice_count;
+
+            for ($i=1; $i <= $invoice_count; $i++) {
+                $reference_id = sqrip_get_order_meta_value($order, 'sqrip_reference_id_'.$i);
+                $reference_id_formatted = sqrip_format_reference_id($reference_id, $order_id);
+                $reference_id_html .= "<p>" . $reference_id == "deleted" ? __('Deleted', 'sqrip-swiss-qr-invoice') : $reference_id_formatted . "</p>";
+
+                $pdf_file = sqrip_get_order_meta_value($order, 'sqrip_pdf_file_url_'.$i);
+                if ($pdf_file == "deleted") {
+                    $pdf_file_link .= "<p>".__('Deleted', 'sqrip-swiss-qr-invoice')."</p>";
+                } else {
+                    $pdf_file_link .= "<p><a target='_blank' href='".esc_url($pdf_file)."'><span class='dashicons dashicons-media-document'></span></a><p>";
+                }
             }
+
         } else {
-            $reference_id = get_post_meta($order_id, 'sqrip_reference_id', true);
-            $pdf_file = get_post_meta($order_id, 'sqrip_pdf_file_url', true);
+            $reference_id_formatted = sqrip_format_reference_id($reference_id, $order_id);
+            $reference_id_html = $reference_id == "deleted" ? __('Deleted', 'sqrip-swiss-qr-invoice') : $reference_id_formatted;
+            $pdf_file = sqrip_get_order_meta_value($order, 'sqrip_pdf_file_url');
+            if ($pdf_file == "deleted") {
+                $pdf_file_link = __('Deleted', 'sqrip-swiss-qr-invoice');
+            } else {
+                $pdf_file_link = "<a target='_blank' href='".esc_url($pdf_file)."'><span class='dashicons dashicons-media-document'></span></a>";
+            }
         }
 
-        $reference_id_formatted = $reference_id;
-        if (strpos(strtolower($reference_id_formatted), 'rf') !== false) {
-            $reference_id_formatted = substr_replace($reference_id_formatted, " ", 4, 0);
-            $reference_id_formatted = substr_replace($reference_id_formatted, " ", 9, 0);
-            $reference_id_formatted = substr_replace($reference_id_formatted, " ", 14, 0);
-            $reference_id_formatted = substr_replace($reference_id_formatted, " ", 19, 0);
-            $reference_id_formatted = substr_replace($reference_id_formatted, " ", 24, 0);
-            $reference_id_formatted = substr_replace($reference_id_formatted, " ", 29, 0);
-        } else {
-            $reference_id_formatted = substr_replace($reference_id_formatted, " ", 2, 0);
-            $reference_id_formatted = substr_replace($reference_id_formatted, " ", 8, 0);
-            $reference_id_formatted = substr_replace($reference_id_formatted, " ", 14, 0);
-            $reference_id_formatted = substr_replace($reference_id_formatted, " ", 20, 0);
-            $reference_id_formatted = substr_replace($reference_id_formatted, " ", 26, 0);
-        }
 
         // check for legacy pdf meta file
         if (!$pdf_file) {
@@ -356,23 +371,17 @@ if (!function_exists('sqrip_add_fields_for_order_details')) {
 
             <ul class="sqrip-payment">
 
-                <?php if ($reference_id) { ?>
+                <?php if ($reference_id_html) { ?>
                     <li>
                         <b><?php echo __('Reference number', 'sqrip-swiss-qr-invoice'); ?>
-                            :</b><br><?php echo $reference_id == "deleted" ? __('Deleted', 'sqrip-swiss-qr-invoice') : esc_html($reference_id_formatted); ?>
+                            :</b><br><?php echo $reference_id_html; ?>
                     </li>
                 <?php } ?>
 
-                <?php if ($pdf_file) { ?>
+                <?php if ($pdf_file_link) { ?>
                     <li>
                         <b><?php echo __('QR-Code PDF', 'sqrip-swiss-qr-invoice') ?> :</b>
-                        <?php if ($pdf_file == "deleted") : ?>
-                            <?php echo __('Deleted', 'sqrip-swiss-qr-invoice'); ?>
-                        <?php else : ?>
-                            <a target="_blank" href="<?php echo esc_url($pdf_file); ?>">
-                                <span class="dashicons dashicons-media-document"></span>
-                            </a>
-                        <?php endif; ?>
+                        <?php echo $pdf_file_link; ?>
                     </li>
                 <?php } ?>
 
@@ -468,24 +477,40 @@ function sqrip_attach_qrcode_pdf_to_email($attachments, $email_id, $order)
         in_array($email_id, $email_attached) :
         $email_id == $email_attached;
 
-    if ($isEmailAttached && $payment_method === 'sqrip' && in_array($integration_email, $array_in)) {
+    if ($payment_method === 'sqrip' && in_array($integration_email, $array_in)) {
         // $order_id = $order->id;
         $order_id = method_exists($order, 'get_id') ? $order->get_id() : $order->id;
 
         $pdf_file_path = '';
         
         // Implement compatibility with WooCommerce HPOS since 1.8.4
-        if ( \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled() ) {            
-            $pdf_file_path = $order->get_meta('sqrip_pdf_file_path', true);
-            // error_log("SQRIP:: Using HPOS pdf_file:: ".$pdf_file_path);
-        } else {
-            $pdf_file_path = get_post_meta($order_id, 'sqrip_pdf_file_path', true);
-        }
+        $isHPOS = \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled();
 
-        // WARNING: attachments must be local file paths and not URLs
-        if ($pdf_file_path) {
-            $attachments[] = $pdf_file_path;
+        $invoice_count = sqrip_get_order_meta_value($order, 'sqrip_multiple_invoice_count');
+        if ($invoice_count) {
+            $invoice_count = (int) $invoice_count;
+
+            for ($i=1; $i <= $invoice_count; $i++) { 
+                $pdf_file_path = sqrip_get_order_meta_value($order, 'sqrip_pdf_file_path_'.$i);
+                $email_to_attach = sqrip_get_order_meta_value($order, 'email_attached_invoice_'.$i);
+
+                if ($pdf_file_path) {
+                    if (is_array($email_to_attach) && in_array($email_id, $email_to_attach)) {
+                        $attachments[] = $pdf_file_path;
+                    } else if (!$email_to_attach && $isEmailAttached) {
+                        $attachments[] = $pdf_file_path;
+                    }
+                }
+            }
+
+        } else {
+            $pdf_file_path = sqrip_get_order_meta_value($order, 'sqrip_pdf_file_path');
+            // WARNING: attachments must be local file paths and not URLs
+            if ($pdf_file_path && $isEmailAttached) {
+                $attachments[] = $pdf_file_path;
+            }
         }
+        // error_log("SQRIP:: Using HPOS pdf_file:: ".$pdf_file_path);
     }
 
     return $attachments;
@@ -513,20 +538,41 @@ function sqrip_qr_action_order_details_after_order_table($order)
         $plugin_options = get_option('woocommerce_sqrip_settings', array());
 
         $integration_order = array_key_exists('integration_order', $plugin_options) ? $plugin_options['integration_order'] : '';
+        $sqrip_suppress_generation = sqrip_get_plugin_option('suppress_generation');
 
         // $png_file = get_post_meta($order_id, 'sqrip_png_file_url', true);
         $pdf_file = '';
+        $pdf_file_html = '';
         
         // Implement compatibility with WooCommerce HPOS since 1.8.4
-        if ( \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled() ) {
-            
-            $pdf_file = $order->get_meta('sqrip_pdf_file_url', true);
-            // error_log("SQRIP:: Using HPOS pdf_file:: ".$pdf_file);
+        $isHPOS = \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled();
+        // error_log("SQRIP:: Using HPOS pdf_file:: ".$pdf_file);
+        $invoice_count = sqrip_get_order_meta_value($order, 'sqrip_multiple_invoice_count');
+        if ($invoice_count) {
+            $invoice_count = (int) $invoice_count;
+
+            for ($i=1; $i <= $invoice_count; $i++) { 
+                $pdf_file = sqrip_get_order_meta_value($order, 'sqrip_pdf_file_url_'.$i);
+                if ($pdf_file) {
+                    $pdf_file_html .= '<p><a class="button button-sqrip-invoice" href="' . esc_url($pdf_file) . '" >' . __('Download Invoice', 'sqrip-swiss-qr-invoice') . ' <i class="dashicons dashicons-pdf"></i></a><p>';
+                }
+            }
+
         } else {
-            $pdf_file = get_post_meta($order_id, 'sqrip_pdf_file_url', true);
+            $pdf_file = sqrip_get_order_meta_value($order, 'sqrip_pdf_file_url');
+            if ($pdf_file) {
+                $pdf_file_html = '<a class="button button-sqrip-invoice" href="' . esc_url($pdf_file) . '" >' . __('Download Invoice', 'sqrip-swiss-qr-invoice') . ' <i class="dashicons dashicons-pdf"></i></a>';
+            }
         }
 
         echo '<div class="sqrip-order-details">';
+
+        //Display checkout remarks
+        $checkout_remarks = sqrip_get_plugin_option('checkout_remarks') ?? "";
+
+        if (strlen(trim($checkout_remarks)) > 0) {
+            echo $checkout_remarks;
+        }
 
         if ($integration_order == "yes" && $pdf_file) {
             /**
@@ -538,8 +584,11 @@ function sqrip_qr_action_order_details_after_order_table($order)
             // echo '<div class="sqrip-qrcode-png"><p>' . __( 'Use the QR invoice below to pay the outstanding balance.' , 'sqrip-swiss-qr-invoice') . '</p><a href="' . esc_url($png_file) . '" target="_blank"><img src="' . esc_url($png_file) . '" alt="'.esc_attr('sqrip QR-Code','sqrip-swiss-qr-invoice').'" width="300" /></a></div>';
 
             // Insert download button PDF
-            echo '<div class="sqrip-qrcode-pdf"><p>' . __('Use the QR invoice below to pay the outstanding balance.', 'sqrip-swiss-qr-invoice') . '</p><a class="button button-sqrip-invoice" href="' . esc_url($pdf_file) . '" >' . __('Download Invoice', 'sqrip-swiss-qr-invoice') . ' <i class="dashicons dashicons-pdf"></i></a></div>';
+            echo '<div class="sqrip-qrcode-pdf"><p>' . __('Use the QR invoice below to pay the outstanding balance.', 'sqrip-swiss-qr-invoice') . '</p>'. $pdf_file_html .'</div>';
         }
+
+        //add sqrip info to page
+        echo '<input type="hidden" id="sqrip-invoice-info" data-suppressed="'.$sqrip_suppress_generation.'"  />';
 
         /**
          *  Insert Generate New QR code PNG after customer details
@@ -613,6 +662,17 @@ add_action('woocommerce_process_shop_order_meta', function($post_id) {
 
         $body['payable_to'] = sqrip_get_payable_to_address($address);
 
+        $number_of_invoices = sqrip_get_plugin_option('number_of_invoices');
+        if ($number_of_invoices && $number_of_invoices > 1) {
+            $body["invoice_fractions"] = [];
+            for ($i=1; $i <= $number_of_invoices; $i++) {
+                $invoice_fraction = sqrip_get_plugin_option('invoice_fraction_'.$i);
+                if ($invoice_fraction) {
+                    $body["invoice_fractions"][$i] = $invoice_fraction;
+                }
+            }
+        }
+
         $args = sqrip_prepare_remote_args($body, 'POST');
 
         $endpoint = 'code';
@@ -641,29 +701,59 @@ add_action('woocommerce_process_shop_order_meta', function($post_id) {
                 $order->set_payment_method('sqrip');
             }
 
-            if (isset($response_body->reference)) {
-                $sqrip_pdf = $response_body->pdf_file;
-                // $sqrip_png       =    $response_body->png_file;
-                $sqrip_reference = $response_body->reference;
+            $is_multiple_invoices = $number_of_invoices && $number_of_invoices > 1;
+            $response_reference = $is_multiple_invoices && count($response_body) ? $response_body[0]->reference : $response_body->reference;
+    
+            if (isset($response_reference)) {
+                if ($is_multiple_invoices) {
+                    $num = 1;
+                    foreach ($response_body as $key => $invoice) {
+        
+                        $sqrip_pdf = $invoice->pdf_file;
+                        $sqrip_reference = $invoice->reference;
+            
+                        $sqrip_class_payment = new WC_Sqrip_Payment_Gateway;
 
-                // TODO: replace with attachment ID and store this in meta instead of actual file
-                $sqrip_class_payment = new WC_Sqrip_Payment_Gateway;
+                        $sqrip_qr_pdf_attachment_id = $sqrip_class_payment->file_upload($sqrip_pdf, '.pdf', '', $order->ID."-".$num);
+            
+                        $sqrip_qr_pdf_url = wp_get_attachment_url($sqrip_qr_pdf_attachment_id);
+                        $sqrip_qr_pdf_path = get_attached_file($sqrip_qr_pdf_attachment_id);
+    
+                        $order->update_meta_data('sqrip_reference_id_'.$num, $sqrip_reference);
+                        $order->update_meta_data('sqrip_qr_pdf_attachment_id_'.$num, $sqrip_qr_pdf_attachment_id);
+                        $order->update_meta_data('sqrip_pdf_file_url_'.$num, $sqrip_qr_pdf_url);
+                        $order->update_meta_data('sqrip_pdf_file_path_'.$num, $sqrip_qr_pdf_path);
+                        $num++;
+                    }
+    
+                    $order->add_order_note($order_notes);
+                    $order->update_meta_data('sqrip_multiple_invoice_count', $number_of_invoices);
+                }
+                else {
+        
+                    $sqrip_pdf = $response_body->pdf_file;
+                    // $sqrip_png       =    $response_body->png_file;
+                    $sqrip_reference = $response_body->reference;
+        
+                    // TODO: replace with attachment ID and store this in meta instead of actual file
+                    $sqrip_class_payment = new WC_Sqrip_Payment_Gateway;
 
-                $sqrip_qr_pdf_attachment_id = $sqrip_class_payment->file_upload($sqrip_pdf, '.pdf', '', $order->ID);
-                // $sqrip_qr_png_attachment_id = $sqrip_class_payment->file_upload($sqrip_png, '.png');
+                    $sqrip_qr_pdf_attachment_id = $sqrip_class_payment->file_upload($sqrip_pdf, '.pdf', '', $order->ID);
+        
+                    $sqrip_qr_pdf_url = wp_get_attachment_url($sqrip_qr_pdf_attachment_id);
+                    $sqrip_qr_pdf_path = get_attached_file($sqrip_qr_pdf_attachment_id);
+        
+                    // $sqrip_qr_png_url = wp_get_attachment_url($sqrip_qr_png_attachment_id);
+                    // $sqrip_qr_png_path = get_attached_file($sqrip_qr_png_attachment_id);
+        
+                    $order->add_order_note($order_notes);
+        
+                    $order->update_meta_data('sqrip_reference_id', $sqrip_reference);
+                    $order->update_meta_data('sqrip_qr_pdf_attachment_id', $sqrip_qr_pdf_attachment_id);
+                    $order->update_meta_data('sqrip_pdf_file_url', $sqrip_qr_pdf_url);
+                    $order->update_meta_data('sqrip_pdf_file_path', $sqrip_qr_pdf_path);
+                }
 
-                $sqrip_qr_pdf_url = wp_get_attachment_url($sqrip_qr_pdf_attachment_id);
-                $sqrip_qr_pdf_path = get_attached_file($sqrip_qr_pdf_attachment_id);
-
-                // $sqrip_qr_png_url = wp_get_attachment_url($sqrip_qr_png_attachment_id);
-                // $sqrip_qr_png_path = get_attached_file($sqrip_qr_png_attachment_id);
-
-                $order->add_order_note($order_notes);
-
-                $order->update_meta_data('sqrip_reference_id', $sqrip_reference);
-                $order->update_meta_data('sqrip_qr_pdf_attachment_id', $sqrip_qr_pdf_attachment_id);
-                $order->update_meta_data('sqrip_pdf_file_url', $sqrip_qr_pdf_url);
-                $order->update_meta_data('sqrip_pdf_file_path', $sqrip_qr_pdf_path);
                 $order->update_meta_data('sqrip_refund_iban_num', get_user_meta($order->get_user_id(), 'iban_num', true));
 
                 // $order->update_meta_data('sqrip_png_file_url', $sqrip_qr_png_url);
@@ -957,6 +1047,75 @@ function sqrip_register_new_qr_order_status()
 
 add_action('init', 'sqrip_register_new_qr_order_status');
 
+// Register new partial invoice 1 status
+function sqrip_register_new_partial_invoice_1_status()
+{
+    $sqrip_new_status = sqrip_get_plugin_option('new_partial_invoice_1_status');
+    $enabled_new_status = sqrip_get_plugin_option('enabled_new_partial_invoice_1_status');
+
+    if (!$sqrip_new_status || $enabled_new_status == "no") {
+        return;
+    }
+
+    register_post_status('wc-sqrip-partial-invoice-1-status', array(
+        'label' => $sqrip_new_status,
+        'public' => true,
+        'show_in_admin_status_list' => true,
+        'show_in_admin_all_list' => true,
+        'exclude_from_search' => false,
+        'label_count' => _n_noop($sqrip_new_status . ' <span class="count">(%s)</span>', $sqrip_new_status . ' <span class="count">(%s)</span>')
+
+    ));
+}
+
+add_action('init', 'sqrip_register_new_partial_invoice_1_status');
+
+// Register new partial invoice 2 status
+function sqrip_register_new_partial_invoice_2_status()
+{
+    $sqrip_new_status = sqrip_get_plugin_option('new_partial_invoice_2_status');
+    $enabled_new_status = sqrip_get_plugin_option('enabled_new_partial_invoice_2_status');
+
+    if (!$sqrip_new_status || $enabled_new_status == "no") {
+        return;
+    }
+
+    register_post_status('wc-sqrip-partial-invoice-2-status', array(
+        'label' => $sqrip_new_status,
+        'public' => true,
+        'show_in_admin_status_list' => true,
+        'show_in_admin_all_list' => true,
+        'exclude_from_search' => false,
+        'label_count' => _n_noop($sqrip_new_status . ' <span class="count">(%s)</span>', $sqrip_new_status . ' <span class="count">(%s)</span>')
+
+    ));
+}
+
+add_action('init', 'sqrip_register_new_partial_invoice_2_status');
+
+// Register new partial invoice 3 status
+function sqrip_register_new_partial_invoice_3_status()
+{
+    $sqrip_new_status = sqrip_get_plugin_option('new_partial_invoice_3_status');
+    $enabled_new_status = sqrip_get_plugin_option('enabled_new_partial_invoice_3_status');
+
+    if (!$sqrip_new_status || $enabled_new_status == "no") {
+        return;
+    }
+
+    register_post_status('wc-sqrip-partial-invoice-3-status', array(
+        'label' => $sqrip_new_status,
+        'public' => true,
+        'show_in_admin_status_list' => true,
+        'show_in_admin_all_list' => true,
+        'exclude_from_search' => false,
+        'label_count' => _n_noop($sqrip_new_status . ' <span class="count">(%s)</span>', $sqrip_new_status . ' <span class="count">(%s)</span>')
+
+    ));
+}
+
+add_action('init', 'sqrip_register_new_partial_invoice_3_status');
+
 // Add custom status to order status list
 function sqrip_add_new_order_awstatuses($order_statuses)
 {
@@ -1052,6 +1211,75 @@ function sqrip_add_new_order_statuses($order_statuses)
 
 add_filter('wc_order_statuses', 'sqrip_add_new_order_statuses');
 
+// Add custom status to order status list
+function sqrip_add_new_partial_invoice_1_status($order_statuses)
+{
+    $sqrip_new_partial_invoice_1_status = sqrip_get_plugin_option('new_partial_invoice_1_status');
+    $enabled_new_partial_invoice_1_status = sqrip_get_plugin_option('enabled_new_partial_invoice_1_status');
+
+    if (!$sqrip_new_partial_invoice_1_status || $enabled_new_partial_invoice_1_status == "no") {
+        return $order_statuses;
+    }
+
+    $new_order_statuses = array();
+
+    foreach ($order_statuses as $key => $status) {
+        $new_order_statuses[$key] = $status;
+        if ('wc-completed' === $key) {
+            $new_order_statuses['wc-sqrip-partial-invoice-1-status'] = $sqrip_new_partial_invoice_1_status;
+        }
+    }
+    return $new_order_statuses;
+}
+
+add_filter('wc_order_statuses', 'sqrip_add_new_partial_invoice_1_status');
+
+// Add custom status to order status list
+function sqrip_add_new_partial_invoice_2_status($order_statuses)
+{
+    $sqrip_new_partial_invoice_2_status = sqrip_get_plugin_option('new_partial_invoice_2_status');
+    $enabled_new_partial_invoice_2_status = sqrip_get_plugin_option('enabled_new_partial_invoice_2_status');
+
+    if (!$sqrip_new_partial_invoice_2_status || $enabled_new_partial_invoice_2_status == "no") {
+        return $order_statuses;
+    }
+
+    $new_order_statuses = array();
+
+    foreach ($order_statuses as $key => $status) {
+        $new_order_statuses[$key] = $status;
+        if ('wc-completed' === $key) {
+            $new_order_statuses['wc-sqrip-partial-invoice-2-status'] = $sqrip_new_partial_invoice_2_status;
+        }
+    }
+    return $new_order_statuses;
+}
+
+add_filter('wc_order_statuses', 'sqrip_add_new_partial_invoice_2_status');
+
+// Add custom status to order status list
+function sqrip_add_new_partial_invoice_3_status($order_statuses)
+{
+    $sqrip_new_partial_invoice_3_status = sqrip_get_plugin_option('new_partial_invoice_3_status');
+    $enabled_new_partial_invoice_3_status = sqrip_get_plugin_option('enabled_new_partial_invoice_3_status');
+
+    if (!$sqrip_new_partial_invoice_3_status || $enabled_new_partial_invoice_3_status == "no") {
+        return $order_statuses;
+    }
+
+    $new_order_statuses = array();
+
+    foreach ($order_statuses as $key => $status) {
+        $new_order_statuses[$key] = $status;
+        if ('wc-completed' === $key) {
+            $new_order_statuses['wc-sqrip-partial-invoice-3-status'] = $sqrip_new_partial_invoice_3_status;
+        }
+    }
+    return $new_order_statuses;
+}
+
+add_filter('wc_order_statuses', 'sqrip_add_new_partial_invoice_3_status');
+
 // Add your custom order status action button (for orders with "processing" status)
 add_filter('woocommerce_admin_order_actions', 'sqrip_add_custom_order_status_actions_button', 100, 2);
 function sqrip_add_custom_order_status_actions_button($actions, $order)
@@ -1060,7 +1288,10 @@ function sqrip_add_custom_order_status_actions_button($actions, $order)
 
     $status_awaiting = sqrip_get_plugin_option('status_awaiting');
     $status_awaiting = str_replace('wc-', '', $status_awaiting);
-    if ($order->has_status(array($status_awaiting)) && sqrip_get_plugin_option('payment_comparison_enabled') == 'yes') {
+    if (
+        ($order->has_status(array($status_awaiting)) && sqrip_get_plugin_option('payment_comparison_enabled') == 'yes')
+        || sqrip_get_plugin_option('multiple_qr_slips_enabled')
+    ) {
 
         // The key slug defined for your action button
         $action_slug = 'sqrip_payment_confirmed';
@@ -1069,37 +1300,32 @@ function sqrip_add_custom_order_status_actions_button($actions, $order)
 
         $reference_id = "";
         // Implement compatibility with WooCommerce HPOS since 1.8.4
-        if ( \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled() ) {
-            $reference_id = $order->get_meta('sqrip_reference_id', true);
-            // error_log("SQRIP:: Using HPOS pdf_file:: ".$pdf_file);
-        } else {
-            $reference_id = get_post_meta($order_id, 'sqrip_reference_id', true);
+        $reference_id = sqrip_get_order_meta_value($order, 'sqrip_reference_id');
+        $reference_id_html = "";
+        $invoice_count = sqrip_get_order_meta_value($order, 'sqrip_multiple_invoice_count');
+        $invoice_total = (float) $order->get_total();
+
+        if ($invoice_count) {
+            $sqrip_paid_invoice = sqrip_get_order_meta_value($order, 'sqrip_paid_invoice_number');
+            $sqrip_paid_invoice = (int) $sqrip_paid_invoice;
+            $sqrip_next_paid_invoice_number = $sqrip_paid_invoice + 1;
+            $invoice_fraction = sqrip_get_plugin_option('invoice_fraction_'.$sqrip_next_paid_invoice_number);
+
+            $invoice_total = ($invoice_fraction / 100) * $invoice_total;
+            $reference_id = sqrip_get_order_meta_value($order, 'sqrip_reference_id_'.$sqrip_next_paid_invoice_number);
         }
 
+        $reference_id_formatted = sqrip_format_reference_id($reference_id, $order_id);
+        // $reference_id_html = $reference_id == "deleted" ? __('Deleted', 'sqrip-swiss-qr-invoice') : $reference_id_formatted;
 
         if ($reference_id && $reference_id != "deleted") {
-            $reference_id_formatted = $reference_id;
-            if (strpos(strtolower($reference_id_formatted), 'rf') !== false) {
-                $reference_id_formatted = substr_replace($reference_id_formatted, " ", 4, 0);
-                $reference_id_formatted = substr_replace($reference_id_formatted, " ", 9, 0);
-                $reference_id_formatted = substr_replace($reference_id_formatted, " ", 14, 0);
-                $reference_id_formatted = substr_replace($reference_id_formatted, " ", 19, 0);
-                $reference_id_formatted = substr_replace($reference_id_formatted, " ", 24, 0);
-                $reference_id_formatted = substr_replace($reference_id_formatted, " ", 29, 0);
-            } else {
-                $reference_id_formatted = substr_replace($reference_id_formatted, " ", 2, 0);
-                $reference_id_formatted = substr_replace($reference_id_formatted, " ", 8, 0);
-                $reference_id_formatted = substr_replace($reference_id_formatted, " ", 14, 0);
-                $reference_id_formatted = substr_replace($reference_id_formatted, " ", 20, 0);
-                $reference_id_formatted = substr_replace($reference_id_formatted, " ", 26, 0);
-            }
 
             $paged = isset($_GET['paged']) ? '&paged=' . $_GET['paged'] : '';
 
             // Set the action button
             $actions[$action_slug] = array(
                 'url' => wp_nonce_url(admin_url('admin-ajax.php?action=sqrip_payment_confirmed&order_id=' . $order_id . $paged), 'sqrip_payment_confirmed'),
-                'name' => __('Confirm receipt of payment"', 'sqrip-swiss-qr-invoice') . '<br />' . $reference_id_formatted . '</br>' . wc_price($order->get_total()),
+                'name' => __('Confirm receipt of payment', 'sqrip-swiss-qr-invoice') . '<br />' . $reference_id_formatted . '</br>' . wc_price($invoice_total),
                 'action' => $action_slug,
             );
         }
@@ -1289,10 +1515,10 @@ function woocommerce_gateway_netmex_sqrip_woocommerce_block_support() {
 /**
  * Display Remark in Checkout page
  * @since 1.9
- * includes the action woocommere_review_order_before_payment (classic checkout) and
+ * includes the action woocommerce_review_order_before_payment (classic checkout) and
  * filter render_block_woocommerce/checkout-payment-block (checkout blocks)
  */
-add_action('woocommere_review_order_before_payment', 'sqrip_show_remark_before_payment', 10);
+add_action('woocommerce_review_order_before_payment', 'sqrip_show_remark_before_payment', 10);
 function sqrip_show_remark_before_payment() {
     $checkout_remarks = sqrip_get_plugin_option('checkout_remarks') ?? "";
 
@@ -1305,7 +1531,7 @@ function output_sqrip_remarks() {
     $checkout_remarks = sqrip_get_plugin_option('checkout_remarks') ?? "";
 
     ?>
-        <?= $checkout_remarks; ?>
+        <?php echo($checkout_remarks); ?>
     <?php
 }
 
@@ -1363,6 +1589,7 @@ function wpo_wcpdf_tax_exempt( $document_type, $order ) {
     }
 }
 
+
 $current_directory = plugin_dir_path( __FILE__ ) . '/inc';
 $file_to_rename = 'onetime.php';
 $new_file_name = 'onetime-backup.php';
@@ -1413,6 +1640,9 @@ if (file_exists($current_directory . '/' . $file_to_rename)) {
     }
     if (!$current_settings['first_time_new_awstatus']) {
         $current_settings['first_time_new_awstatus'] = 'no';
+    }
+    if (!$current_settings['new_partial_invoice_1_status']) {
+        $current_settings['new_partial_invoice_1_status'] = 'Partially paid';
     }
 
     // Handle sync activated additional services
