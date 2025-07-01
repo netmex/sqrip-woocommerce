@@ -43,6 +43,7 @@ jQuery(document).ready(function ($) {
         ip_sqrip_remaining_credits = $('#woocommerce_sqrip_remaining_credits'),
         ip_sqrip_turn_off_if_error = $('#woocommerce_sqrip_turn_off_if_error'),
         ip_sqrip_current_status = $('#woocommerce_sqrip_current_status');
+        ip_sqrip_pdf_invoice_integration = $('#woocommerce_sqrip_pdf_invoice_integration'),
         ip_sqrip_remaining_credits.prop("readonly", true);
         ip_sqrip_current_status.prop("readonly", true);
         ip_sqrip_current_status.addClass('sqrip-no-border');
@@ -945,4 +946,18 @@ jQuery(document).ready(function ($) {
     if (nh.length) {
         nh.closest('tr').addClass('sqrip-no-height');
     }
+    
+    //Hide QR-invoice download option if integrated with PDF invoice plugin
+    if (ip_sqrip_pdf_invoice_integration.is(':checked')) {
+        ip_integration_order.prop('checked', false);
+        ip_integration_order.closest('tr').hide();
+    }
+    $(ip_sqrip_pdf_invoice_integration).on('input', function () {
+        if (ip_sqrip_pdf_invoice_integration.is(':checked')) {
+            ip_integration_order.prop('checked', false);
+            ip_integration_order.closest('tr').hide();
+        } else {
+            ip_integration_order.closest('tr').show();
+        }
+    });
 });

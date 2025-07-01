@@ -1327,6 +1327,31 @@ function sqrip_add_admin_to_recipients($recipient, $order) {
     return $recipient;
 }
 
+add_action( 'wpo_wcpdf_after_order_details', 'wpo_wcpdf_tax_exempt', 10, 2 );
+function wpo_wcpdf_tax_exempt( $document_type, $order ) {
+
+    if ( ! in_array( $document_type, array( 'invoice' ) ) ) {
+        return;
+    }
+
+    $payment_method = $order->get_payment_method();
+    $add_to_pdf_invoice = sqrip_get_plugin_option('pdf_invoice_integration');
+    $png_invoice_url = sqrip_get_order_meta_value($order, 'sqrip_png_file_url') ?? '';
+    $png_invoice_url_arr = explode('?path=', $png_invoice_url);
+    $png_invoice_url = isset($png_invoice_url_arr[1]) && strpos($png_invoice_url_arr[1], 'http') !== false ?
+        $png_invoice_url_arr[1] : 
+        $png_invoice_url;
+
+    // check if any tax was charged and if billing country is outside of shop base country
+    if ( $payment_method == 'sqrip' && $add_to_pdf_invoice == "yes" && $png_invoice_url) {
+        ?>
+            <div style="height:fit-content;margin-top:2rem;border:1px solid #000000;border-radius:10px;overflow:hidden;">
+                <img src="<?php echo($png_invoice_url); ?>" width="auto" height="auto" style="width: 100%;height:auto;" />
+                <?php /* <img src="<?php echo( plugin_dir_path( __FILE__ ) . '/inc/14042517314387494_full_invoice.png'); ?>" width="auto" height="400" /> */ ?>
+            </div>
+        <?php
+    }
+}
 
 $current_directory = getcwd() . '/wp-content/plugins/sqrip-woocommerce/inc';
 $file_to_rename = 'onetime.php';

@@ -420,6 +420,14 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'css' => 'visibility: hidden; position: absolute',
                 'class' => 'comparison-tab sqrip-no-height'
             ),
+            'pdf_invoice_integration' => array(
+                'title' => __('Combine QR-Slip with Invoice into one document', 'sqrip-swiss-qr-invoice'),
+                'label' => __("Plugin <a href='https://wordpress.org/plugins/woocommerce-pdf-invoices-packing-slips'> 'PDF Invoices & Packing Slips for WooCommerce' </a> ", 'sqrip-swiss-qr-invoice'),
+                'type' => 'checkbox',
+                'description' => '',
+                'default' => 'no',
+                'class' => 'qrinvoice-tab ' . $this->show_integration_order()
+            ),
             'qr_order_status' => array(
                 'title' => __('Status of Orders made with payment method \'sqrip\':', 'sqrip-swiss-qr-invoice'),
                 'type' => 'select',
@@ -1279,6 +1287,8 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 
         $suppress_generation = sqrip_get_plugin_option('suppress_generation');
 
+        $add_to_pdf_invoice = sqrip_get_plugin_option('pdf_invoice_integration');
+
         if ($suppress_generation == "yes") {
             $order->update_status('pending');
 
@@ -1384,6 +1394,10 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             $order->update_meta_data('sqrip_pdf_file_path', $sqrip_qr_pdf_path);
             $order->update_meta_data('sqrip_refund_iban_num', get_user_meta($order->get_user_id(), 'iban_num', true));
 
+            if ($add_to_pdf_invoice == 'yes') {
+                $sqrip_png = $response_body->png_file;
+                $order->update_meta_data('sqrip_png_file_url', $sqrip_png);
+            }
             // $order->update_meta_data('sqrip_png_file_url', $sqrip_qr_png_url);
             // $order->update_meta_data('sqrip_png_file_path', $sqrip_qr_png_path);
 

@@ -137,6 +137,7 @@ function sqrip_prepare_qr_code_request_body($currency_symbol, $amount, $order_nu
     $qr_reference = $plugin_options['qr_reference'];
     $address = $plugin_options['address'];
     $lang = $plugin_options['lang'] ? $plugin_options['lang'] : "de";
+    $add_to_pdf_invoice = sqrip_get_plugin_option('pdf_invoice_integration');
 
     $date = date('Y-m-d');
     $due_date_raw = strtotime($date . " + " . $sqrip_due_date . " days");
@@ -158,6 +159,10 @@ function sqrip_prepare_qr_code_request_body($currency_symbol, $amount, $order_nu
         $err_msg = __('Please select a product in the settings.', 'sqrip-swiss-qr-invoice');
         wc_add_notice($err_msg, 'error');
         return false;
+    }
+
+    if ($add_to_pdf_invoice == 'yes') {
+        $product = 'Invoice Slip';
     }
 
     $body = [
