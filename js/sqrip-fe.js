@@ -33,4 +33,9 @@ jQuery( document ).ready(function($){
         })
     })
 
+    let invoice_info = $('#sqrip-invoice-info');
+    if (invoice_info.length && $(invoice_info).data('suppressed') == 'yes') {
+        $(".woocommerce-button.pay").hide();
+    }
+
 });

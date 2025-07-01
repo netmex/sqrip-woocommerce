@@ -137,12 +137,16 @@ function sqrip_prepare_qr_code_request_body($currency_symbol, $amount, $order_nu
     $qr_reference = $plugin_options['qr_reference'];
     $address = $plugin_options['address'];
     $lang = $plugin_options['lang'] ? $plugin_options['lang'] : "de";
+    $add_to_pdf_invoice = sqrip_get_plugin_option('pdf_invoice_integration');
 
     $date = date('Y-m-d');
     $due_date_raw = strtotime($date . " + " . $sqrip_due_date . " days");
     $due_date = date('Y-m-d', $due_date_raw);
 
     $additional_information = $plugin_options['additional_information'];
+    $partial_invoice_information = $plugin_options['partial_invoice_information'];
+    $multiple_qr_slips_enabled = $plugin_options['multiple_qr_slips_enabled'];
+    $number_of_invoices = $plugin_options['number_of_invoices'];
 
     if ($additional_information) {
         $additional_information = sqrip_additional_information_shortcodes($additional_information, $lang, $due_date_raw, $order_number);
@@ -160,6 +164,17 @@ function sqrip_prepare_qr_code_request_body($currency_symbol, $amount, $order_nu
         return false;
     }
 
+    if ($add_to_pdf_invoice == 'yes') {
+        $product = 'Invoice Slip';
+    }
+
+    if ($multiple_qr_slips_enabled && $partial_invoice_information) {
+        $partial_invoice_information = str_replace("[max_invoice]", $number_of_invoices, $partial_invoice_information);
+            
+    } else {
+        $partial_invoice_information = "";
+    }
+
     $body = [
         "iban" => [
             "iban" => $iban,
@@ -168,7 +183,8 @@ function sqrip_prepare_qr_code_request_body($currency_symbol, $amount, $order_nu
             [
                 "currency_symbol" => $currency_symbol,
                 "amount" => $amount,
-                "message" => $additional_information
+                "message" => $additional_information,
+                "partial_invoice_message" => $partial_invoice_information
             ],
         "lang" => $lang,
         "product" => $product,
@@ -398,7 +414,8 @@ function sqrip_set_customer_iban($user, $iban)
 function sqrip_get_wc_emails()
 {
     $emails = wc()->mailer()->get_emails();
-    $options = ["sqrip-do-not-attach" => __('Do not attach to any e-mail', 'sqrip-swiss-qr-invoice'),];
+    $options = [];
+    // $options = ["sqrip-do-not-attach" => __('Do not attach to any e-mail', 'sqrip-swiss-qr-invoice'),];
 
     if ($emails && is_array($emails)) {
         foreach ($emails as $email) {
@@ -470,15 +487,15 @@ function sqrip_get_locale_by_lang($lang)
     return $locale;
 }
 
-function sqrip_file_name($order_id)
+function sqrip_file_name($order_id, $is_refund=false)
 {
     $order = wc_get_order($order_id);
     $order_date = '';
 
-    if ($order) {
-        $order_date = $order->get_date_created()->date('Ymd');
+    if ($order && !$is_refund) {
+        $order_date = $order->get_date_created()->date('YmdHis');
     } else {
-        $order_date = date("Ymd");
+        $order_date = date("YmdHis");
     }
 
     $sqrip_file_name = sqrip_get_plugin_option('file_name');
@@ -544,4 +561,112 @@ function sqrip_auto_turn_off() {
         $plugin_options['enabled'] = 'no';
         update_option('woocommerce_sqrip_settings', $plugin_options);
     }
+}
+
+/**
+ * Returns the meta value for an order that matches the meta_key
+ * Checks if the WooCommerce HPOS is enabled
+ * @param $order
+ * @param $meta_key
+ *
+ * @return mixed
+ * since 1.9
+ */
+function sqrip_get_order_meta_value($order, $meta_key)
+{
+    $isHPOS = \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled();
+    $order_id = method_exists($order, 'get_id') ? $order->get_id() : $order->id;
+    $meta_value = $isHPOS ? 
+        $order->get_meta($meta_key, true) : 
+        get_post_meta($order_id, $meta_key, true);
+
+    return $meta_value;
+}
+
+/**
+ * Returns the formatted value for an invoice reference id
+ * @param $reference_id
+ *
+ * @return mixed
+ * since 1.9
+ */
+function sqrip_format_reference_id($reference_id, $order_id)
+{
+    $qr_basis = sqrip_get_plugin_option("qr_reference");
+    $reference_id_formatted = esc_html($reference_id);
+    $order_id = (string) $order_id;
+
+    switch ($qr_basis) {
+        case 'order_number':
+            error_log("Order Number Ref::");
+            if (strpos(strtolower($reference_id_formatted), 'rf') !== false) {
+                if (endsWith($reference_id_formatted, $order_id)) {
+                    $reference_id_formatted = sqrip_reference_id_format_with_order_id ($reference_id_formatted, $order_id, 4);
+                } else {
+                    $reference_id_formatted = sqrip_default_reference_id_formatting($reference_id_formatted);
+                }
+            } else {
+                $control_digit = substr($reference_id_formatted, -1);
+                $reference_without_control_digit = substr($reference_id_formatted, 0, -1);
+                $ref_ends_with_order_id = endsWith($reference_without_control_digit, $order_id);
+                error_log("Order Ref w/o control:-".json_encode($ref_ends_with_order_id)." ".$order_id);
+                
+                if ($ref_ends_with_order_id) {
+                    $reference_id_formatted = sqrip_reference_id_format_with_order_id ($reference_id_formatted, $order_id, 2)." ".$control_digit;
+                } else {
+                    $reference_id_formatted = sqrip_default_reference_id_formatting($reference_id_formatted);
+                }
+
+            }
+
+            break;
+        case 'random':
+            $reference_id_formatted = sqrip_default_reference_id_formatting($reference_id_formatted);
+            break;
+        
+        default:
+            $reference_id_formatted = sqrip_default_reference_id_formatting($reference_id_formatted);
+            break;
+    }
+
+    return $reference_id_formatted;
+}
+
+function sqrip_default_reference_id_formatting ($reference_id_formatted) {
+    if (strpos(strtolower($reference_id_formatted), 'rf') !== false) {
+        $reference_id_formatted = substr_replace($reference_id_formatted, " ", 4, 0);
+        $reference_id_formatted = substr_replace($reference_id_formatted, " ", 9, 0);
+        $reference_id_formatted = substr_replace($reference_id_formatted, " ", 14, 0);
+        $reference_id_formatted = substr_replace($reference_id_formatted, " ", 19, 0);
+        $reference_id_formatted = substr_replace($reference_id_formatted, " ", 24, 0);
+        $reference_id_formatted = substr_replace($reference_id_formatted, " ", 29, 0);
+    } else {
+        $reference_id_formatted = substr_replace($reference_id_formatted, " ", 2, 0);
+        $reference_id_formatted = substr_replace($reference_id_formatted, " ", 8, 0);
+        $reference_id_formatted = substr_replace($reference_id_formatted, " ", 14, 0);
+        $reference_id_formatted = substr_replace($reference_id_formatted, " ", 20, 0);
+        $reference_id_formatted = substr_replace($reference_id_formatted, " ", 26, 0);
+    }
+    return $reference_id_formatted;
+}
+
+function endsWith( $haystack, $needle ) {
+    $length = strlen( $needle );
+    if( !$length ) {
+        return true;
+    }
+    return substr( $haystack, -$length ) === $needle;
+}
+
+function sqrip_reference_id_format_with_order_id ($reference_id_formatted, $order_id, $start_length) {
+    $start_str = substr($reference_id_formatted, 0, $start_length);
+    $reference_id_formatted = substr($reference_id_formatted, $start_length);
+    $reference_id_formatted = substr($reference_id_formatted, 0, -strlen($order_id));
+
+    while (strlen($reference_id_formatted) > 5) {
+        $start_str .= " ".substr($reference_id_formatted, 0, 5);
+        $reference_id_formatted = substr($reference_id_formatted, 5);
+    }
+
+    return $start_str." ".$reference_id_formatted." <b>".$order_id."</b>";
 }

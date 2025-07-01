@@ -60,7 +60,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
     {
 
         $this->id = 'sqrip'; // payment gateway plugin ID
-        $this->icon = ''; // URL of the icon that will be displayed on checkout page near your gateway name
+        $this->icon = plugins_url('icon/icon-128x128.png', __FILE__); // URL of the icon that will be displayed on checkout page near your gateway name
         $this->has_fields = true; // in case you need a custom credit card form
         $this->method_title = __('sqrip – Swiss QR-Invoice API', 'sqrip-swiss-qr-invoice');
         $this->method_description = __('sqrip – Modern and clever WooCommerce tools for the most widely used payment method in Switzerland: the bank transfer.', 'sqrip-swiss-qr-invoice'); // will be displayed on the options page
@@ -135,6 +135,11 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             $qr_order_status_options['on-hold'] = "Sqrip On-hold (default)";
         }
 
+        $number_of_invoices = [
+            "2" => 2,
+            "3" => 3,
+        ];
+
         $this->form_fields = array(
             'tabs' => array(
                 'type' => 'tab',
@@ -147,6 +152,11 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                     [
                         'id' => 'qrinvoice',
                         'title' => __('QR-Invoice', 'sqrip-swiss-qr-invoice'),
+                        'class' => '',
+                    ],
+                    [
+                        'id' => 'multiple-qr-slips',
+                        'title' => __('Multiple QR-Slips', 'sqrip-swiss-qr-invoice'),
                         'class' => '',
                     ],
                     [
@@ -225,6 +235,14 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'label' => __('Activate sqrip for Refunds', 'sqrip-swiss-qr-invoice'),
                 'type' => 'checkbox',
                 'description' => __('If activated, sqrip makes refunding easier by creating a QR-code that can be scanned with the banking app to initiate a bank transfer to the client.', 'sqrip-swiss-qr-invoice'),
+                'default' => 'no',
+                'class' => 'services-tab'
+            ),
+            'multiple_qr_slips_enabled' => array(
+                'title' => __('Activate/Deactivate Multiple QR-slips', 'sqrip-swiss-qr-invoice'),
+                'label' => __('Activate Multiple QR-slips per order', 'sqrip-swiss-qr-invoice'),
+                'type' => 'checkbox',
+                'description' => __('If activated, sqrip generates multiple QR-slips per order based on specified percentages of total amount.', 'sqrip-swiss-qr-invoice'),
                 'default' => 'no',
                 'class' => 'services-tab'
             ),
@@ -322,6 +340,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                     'random' => __('Random number', 'sqrip-swiss-qr-invoice'),
                     'order_number' => __('Order number', 'sqrip-swiss-qr-invoice'),
                 ),
+                'default' => 'random',
                 'class' => 'qrinvoice-tab'
             ),
             'due_date' => array(
@@ -346,6 +365,13 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'maxlength' => 140,
                 'default' => __("[order_date]_[shop_name]_invoice-order_[order_number]", "sqrip-swiss-qr-invoice"),
                 'description' => __('The only characters allowed are A-Z, dashes (-) and underscores (_). Any spaces will be replaced with underscores (_). You can also use the following variables:<br>[order_number] — your full order number;<br>[order_date] — in yymmdd format, e.g. 230210 for Feb. 10 2023;<br>[shop_name] — can only be used if the shop name conforms with the "characters allowed" rule, otherwise the setting will be highlighted in red.', 'sqrip-swiss-qr-invoice'),
+            ),
+            'checkout_remarks' => array(
+                'title' => __('Checkout Page Remarks', 'sqrip-swiss-qr-invoice'),
+                'type' => 'textarea',
+                'class' => 'sqrip-checkout-remarks',
+                'description' => __('Will be displayed in the Checkout page above the Payment Methods section.', 'sqrip-swiss-qr-invoice'),
+                'class' => 'qrinvoice-tab'
             ),
             'product' => array(
                 'title' => __('Format', 'sqrip-swiss-qr-invoice'),
@@ -442,6 +468,14 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'css' => 'visibility: hidden; position: absolute',
                 'class' => 'comparison-tab sqrip-no-height'
             ),
+            'pdf_invoice_integration' => array(
+                'title' => __('Combine QR-Slip with Invoice into one document', 'sqrip-swiss-qr-invoice'),
+                'label' => __("Plugin <a href='https://wordpress.org/plugins/woocommerce-pdf-invoices-packing-slips'> 'PDF Invoices & Packing Slips for WooCommerce' </a> ", 'sqrip-swiss-qr-invoice'),
+                'type' => 'checkbox',
+                'description' => '',
+                'default' => 'no',
+                'class' => 'qrinvoice-tab ' . $this->show_integration_order()
+            ),
             'integration_order' => array(
                 'title' => __('Show QR-invoice on confirmation page', 'sqrip-swiss-qr-invoice'),
                 'label' => __('Offer QR invoice for download', 'sqrip-swiss-qr-invoice'),
@@ -452,10 +486,159 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             ),
             'email_attached' => array(
                 'title' => __('Attach QR-Invoice to E-Mail template', 'sqrip-swiss-qr-invoice'),
-                'description' => __('Select email template to which the QR-invoice is attached', 'sqrip-swiss-qr-invoice'),
-                'type' => 'select',
+                'description' => __('Select email templates to which the QR-invoice are attached', 'sqrip-swiss-qr-invoice'),
+                'type' => 'multiselect',
                 'options' => sqrip_get_wc_emails(),
                 'class' => 'qrinvoice-tab'
+            ),
+            'number_of_invoices' => array(
+                'title' => __('Number of qr-invoices to deliver', 'sqrip-swiss-qr-invoice'),
+                'description' => __('Select number of qr-invoices to send to customer', 'sqrip-swiss-qr-invoice'),
+                'type' => 'select',
+                'options' => $number_of_invoices,
+                'default' => "2",
+                'class' => 'multiple-qr-slips-tab'
+            ),
+            'partial_invoice_information' => array(
+                'title' => __('Partial Invoice Information', 'sqrip-swiss-qr-invoice'),
+                'type' => 'text',
+                'class' => 'sqrip-additional-information',
+                'default' => __("Partial payment [invoice] of [max_invoice]", "sqrip-swiss-qr-invoice"),
+                'description' => __('Will be displayed on the QR invoice under the section “Additional information”.', 'sqrip-swiss-qr-invoice'),
+                'class' => 'multiple-qr-slips-tab'
+            ),
+            'invoice_fraction_1' => array(
+                'title' => __('% of total amount in 1st qr-invoice', 'sqrip-swiss-qr-invoice'),
+                'type' => 'number',
+                'default' => 50,
+                'css' => "",
+                'class' => 'multiple-qr-slips-tab'
+            ),
+            'partial_invoice_1_status' => array(
+                'title' => __('Status of Orders after 1st partial payment', 'sqrip-swiss-qr-invoice'),
+                'type' => 'select',
+                'options' => $qr_order_status_options,
+                'class' => 'multiple-qr-slips-tab',
+                'default' => 'wc-on-hold',
+            ),
+            'new_partial_invoice_1_status' => array(
+                'title' => '',
+                'type' => 'text',
+                'class' => 'multiple-qr-slips-tab',
+                'default' => __('Partially paid', 'sqrip-swiss-qr-invoice'),
+                'description' => sprintf(__('Set the status of the 1st partial invoice so it matches your shop process. Should no status be suitable, please create one for your own %s.', 'sqrip-swiss-qr-invoice'), '<a href="#" class="sqrip-toggle-partial-invoice-1-status">' . __('here', 'sqrip-swiss-qr-invoice') . '</a>'),
+            ),
+            'enabled_new_partial_invoice_1_status' => array(
+                'title' => '',
+                'type' => 'checkbox',
+                'label' => ' ',
+                'default' => 'no',
+                'css' => 'visibility: hidden; position: absolute',
+                'class' => 'multiple-qr-slips-tab sqrip-no-height'
+            ),
+            'first_time_new_partial_invoice_1_status' => array(
+                'title' => '',
+                'type' => 'checkbox',
+                'label' => ' ',
+                'default' => 'no',
+                'css' => 'visibility: hidden; position: absolute',
+                'class' => 'multiple-qr-slips-tab sqrip-no-height'
+            ),
+            'invoice_fraction_2' => array(
+                'title' => __('% of total amount in 2nd qr-invoice', 'sqrip-swiss-qr-invoice'),
+                'type' => 'number',
+                'default' => 50,
+                'css' => "",
+                'class' => 'multiple-qr-slips-tab'
+            ),
+            'partial_invoice_2_status' => array(
+                'title' => __('Status of Orders after 2nd partial payment', 'sqrip-swiss-qr-invoice'),
+                'type' => 'select',
+                'options' => $qr_order_status_options,
+                'class' => 'multiple-qr-slips-tab',
+                'default' => 'wc-on-hold',
+            ),
+            'new_partial_invoice_2_status' => array(
+                'title' => '',
+                'type' => 'text',
+                'class' => 'multiple-qr-slips-tab',
+                'default' => __('Partially paid', 'sqrip-swiss-qr-invoice'),
+                'description' => sprintf(__('Set the status of the 2nd partial invoice so it matches your shop process. Should no status be suitable, please create one for your own %s.', 'sqrip-swiss-qr-invoice'), '<a href="#" class="sqrip-toggle-partial-invoice-2-status">' . __('here', 'sqrip-swiss-qr-invoice') . '</a>'),
+            ),
+            'enabled_new_partial_invoice_2_status' => array(
+                'title' => '',
+                'type' => 'checkbox',
+                'label' => ' ',
+                'default' => 'no',
+                'css' => 'visibility: hidden; position: absolute',
+                'class' => 'multiple-qr-slips-tab sqrip-no-height'
+            ),
+            'first_time_new_partial_invoice_2_status' => array(
+                'title' => '',
+                'type' => 'checkbox',
+                'label' => ' ',
+                'default' => 'no',
+                'css' => 'visibility: hidden; position: absolute',
+                'class' => 'multiple-qr-slips-tab sqrip-no-height'
+            ),
+            'email_attached_invoice_2' => array(
+                'title' => __('Attach 2nd QR-Invoice to E-Mail template', 'sqrip-swiss-qr-invoice'),
+                'description' => __('Select email templates to which the QR-invoice are attached', 'sqrip-swiss-qr-invoice'),
+                'type' => 'multiselect',
+                'options' => sqrip_get_wc_emails(),
+                'class' => 'multiple-qr-slips-tab'
+            ),
+            'invoice_fraction_3' => array(
+                'title' => __('% of total amount in 3rd qr-invoice', 'sqrip-swiss-qr-invoice'),
+                'type' => 'number',
+                'default' => 0,
+                'css' => "",
+                'class' => 'multiple-qr-slips-tab'
+            ),
+            'partial_invoice_3_status' => array(
+                'title' => __('Status of Orders after 3rd partial payment', 'sqrip-swiss-qr-invoice'),
+                'type' => 'select',
+                'options' => $qr_order_status_options,
+                'class' => 'multiple-qr-slips-tab',
+                'default' => 'wc-on-hold',
+            ),
+            'new_partial_invoice_3_status' => array(
+                'title' => '',
+                'type' => 'text',
+                'class' => 'multiple-qr-slips-tab',
+                'default' => __('Partially paid', 'sqrip-swiss-qr-invoice'),
+                'description' => sprintf(__('Set the status of the 3rd partial invoice so it matches your shop process. Should no status be suitable, please create one for your own %s.', 'sqrip-swiss-qr-invoice'), '<a href="#" class="sqrip-toggle-partial-invoice-3-status">' . __('here', 'sqrip-swiss-qr-invoice') . '</a>'),
+            ),
+            'enabled_new_partial_invoice_3_status' => array(
+                'title' => '',
+                'type' => 'checkbox',
+                'label' => ' ',
+                'default' => 'no',
+                'css' => 'visibility: hidden; position: absolute',
+                'class' => 'multiple-qr-slips-tab sqrip-no-height'
+            ),
+            'first_time_new_partial_invoice_3_status' => array(
+                'title' => '',
+                'type' => 'checkbox',
+                'label' => ' ',
+                'default' => 'no',
+                'css' => 'visibility: hidden; position: absolute',
+                'class' => 'multiple-qr-slips-tab sqrip-no-height'
+            ),
+            'email_attached_invoice_3' => array(
+                'title' => __('Attach 3rd QR-Invoice to E-Mail template', 'sqrip-swiss-qr-invoice'),
+                'description' => __('Select email templates to which the QR-invoice are attached', 'sqrip-swiss-qr-invoice'),
+                'type' => 'multiselect',
+                'options' => sqrip_get_wc_emails(),
+                'class' => 'multiple-qr-slips-tab'
+            ),
+            'send_copy_to_admin' => array(
+                'title' => __('Send a copy to the shop admin', 'sqrip-swiss-qr-invoice'),
+                'label' => __('Send a copy of the Email with PDF invoice to Admin', 'sqrip-swiss-qr-invoice'),
+                'type' => 'checkbox',
+                'description' => '',
+                'default' => 'no',
+                'class' => 'qrinvoice-tab '
             ),
             'delete_invoice_status' => array(
                 'title' => __('Delete QR-invoice once status has been changed to', 'sqrip-swiss-qr-invoice'),
@@ -771,21 +954,27 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
     {
         $endpoint = 'iban-status';
         $iban = $post_data['woocommerce_sqrip_iban'];
+        $old_iban = sqrip_get_plugin_option('iban');
 
         $body = '{
             "iban": "' . $iban . '"
         }';
 
-        $response = sqrip_remote_request($endpoint, $body, 'POST');
+        //Only check iban status if IBAN is changed
+        if ($old_iban != $iban) {
 
-        if (isset($response->status) && $response->status == "inactive") {
-
-            unset($_POST['woocommerce_sqrip_enabled']);
-
-            $settings = new WC_Admin_Settings();
-
-            $settings->add_error(__('The (QR-)IBAN has been changed. Please confirm the new (QR-)IBAN in your sqrip.ch account.', 'sqrip-swiss-qr-invoice'));
+            $response = sqrip_remote_request($endpoint, $body, 'POST');
+    
+            if (isset($response->status) && $response->status == "inactive") {
+    
+                unset($_POST['woocommerce_sqrip_enabled']);
+    
+                $settings = new WC_Admin_Settings();
+    
+                $settings->add_error(__('The (QR-)IBAN has been changed. Please confirm the new (QR-)IBAN in your sqrip.ch account.', 'sqrip-swiss-qr-invoice'));
+            }
         }
+
 
     }
 
@@ -834,6 +1023,34 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 
     }
 
+    public function update_additional_services($post_data)
+    {
+        $endpoint = 'user-additional-service';
+        $additional_services = [
+            'refund' => 'return_enabled',
+            'payment_comparison' => 'payment_comparison_enabled',
+            'multiple_qr_slips' => 'multiple_qr_slips_enabled',
+        ];
+        $services_arr = ["services" => []];
+
+        foreach ($additional_services as $key => $value) {
+            $post_data_value = isset($post_data['woocommerce_sqrip_'.$value])
+                ? ($post_data['woocommerce_sqrip_'.$value] == '1' ? 'yes' : 'no')
+                : 'no';
+            $current_value = sqrip_get_plugin_option(($value));
+
+            if ($post_data_value != $current_value) {
+                $services_arr["services"][$key] = $post_data_value;
+            }
+        }
+
+        if (count($services_arr["services"]) > 0) {
+            $body = json_encode($services_arr);
+
+            $response = sqrip_remote_request($endpoint, $body, "POST");
+        }
+    }
+
     public function process_admin_options()
     {
         $post_data = $this->get_post_data();
@@ -841,6 +1058,8 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         $this->check_iban_status($post_data);
 
         $this->update_iban($post_data);
+
+        $this->update_additional_services($post_data);
 
         if (isset($post_data['woocommerce_sqrip_test_email'])) {
 
@@ -864,6 +1083,18 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 
         if (isset($post_data['woocommerce_sqrip_enabled_new_qrstatus']) && !empty($post_data['woocommerce_sqrip_enabled_new_qrstatus']) && isset($post_data['woocommerce_sqrip_first_time_new_qrstatus'])) {
             $_POST['woocommerce_sqrip_qr_order_status'] = 'wc-sqrip-qrstatus';
+        }
+
+        if (isset($post_data['woocommerce_sqrip_enabled_new_partial_invoice_1_status']) && !empty($post_data['woocommerce_sqrip_enabled_new_partial_invoice_1_status']) && isset($post_data['woocommerce_sqrip_first_time_new_partial_invoice_1_status'])) {
+            $_POST['woocommerce_sqrip_partial_invoice_1_status'] = 'wc-sqrip-partial-invoice-1-status';
+        }
+
+        if (isset($post_data['woocommerce_sqrip_enabled_new_partial_invoice_2_status']) && !empty($post_data['woocommerce_sqrip_enabled_new_partial_invoice_2_status']) && isset($post_data['woocommerce_sqrip_first_time_new_partial_invoice_2_status'])) {
+            $_POST['woocommerce_sqrip_partial_invoice_2_status'] = 'wc-sqrip-partial-invoice-2-status';
+        }
+
+        if (isset($post_data['woocommerce_sqrip_enabled_new_partial_invoice_3_status']) && !empty($post_data['woocommerce_sqrip_enabled_new_partial_invoice_3_status']) && isset($post_data['woocommerce_sqrip_first_time_new_partial_invoice_3_status'])) {
+            $_POST['woocommerce_sqrip_partial_invoice_3_status'] = 'wc-sqrip-partial-invoice-3-status';
         }
 
         return parent::process_admin_options();
@@ -1101,7 +1332,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 
         // replace sqrip IBAN with IBAN of customer
         $user = $order->get_user();
-        $iban = sqrip_get_customer_iban($user);
+        $iban = $user ? sqrip_get_customer_iban($user) : get_post_meta($order_id, 'sqrip_refund_iban_num', true);
 
         $order->update_meta_data('sqrip_refund_iban_num', $iban);
         $order->save();
@@ -1119,7 +1350,9 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 
         // we need to switch payable_to and payable_by addresses
         // $address = sqrip_get_plugin_option('address');
-        $payable_by = sqrip_get_payable_to_address('woocommerce');
+
+        $address = sqrip_get_plugin_option('address');
+        $payable_by = sqrip_get_payable_to_address($address);
         $payable_to = sqrip_get_billing_address_from_order($order);
 
         // since the two addresses have different names for the
@@ -1146,6 +1379,8 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         $args = sqrip_prepare_remote_args($body, 'POST', $token);
         $response = wp_remote_post(SQRIP_ENDPOINT . $endpoint, $args);
 
+        //error_log("REFUND".json_encode($response));
+
         $status_code = $response['response']['code'];
 
         if ($status_code !== 200) {
@@ -1168,11 +1403,14 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         }
 
         $response_body = wp_remote_retrieve_body($response);
+        //error_log("REFUND RESPONSE::".$response_body);
         $response_body = json_decode($response_body);
 
         if (isset($response_body->reference)) {
             $sqrip_png = $response_body->png_file;
-            $sqrip_qr_png_attachment_id = $this->file_upload($sqrip_png, '.png', '', $order_id);
+
+            $sqrip_png = explode("path=", $sqrip_png)[1];
+            $sqrip_qr_png_attachment_id = $this->file_upload($sqrip_png, '.png', '', $order_id, true);
 
             $order->add_order_note(__('sqrip QR-Code für Rückerstattung erstellt.', 'sqrip-swiss-qr-invoice'));
 
@@ -1220,6 +1458,8 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         $address = sqrip_get_plugin_option('address');
 
         $suppress_generation = sqrip_get_plugin_option('suppress_generation');
+        
+        $add_to_pdf_invoice = sqrip_get_plugin_option('pdf_invoice_integration');
 
         if ($suppress_generation == "yes") {
             $order->update_status('pending');
@@ -1233,6 +1473,17 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         $body = sqrip_prepare_qr_code_request_body($currency_symbol, $amount, strval($order_id));
         $body["payable_by"] = sqrip_get_billing_address_from_order($order);
         $body['payable_to'] = sqrip_get_payable_to_address($address);
+
+        $number_of_invoices = sqrip_get_plugin_option('number_of_invoices');
+        if ($number_of_invoices && $number_of_invoices > 1) {
+            $body["invoice_fractions"] = [];
+            for ($i=1; $i <= $number_of_invoices; $i++) {
+                $invoice_fraction = sqrip_get_plugin_option('invoice_fraction_'.$i);
+                if ($invoice_fraction) {
+                    $body["invoice_fractions"][$i] = $invoice_fraction;
+                }
+            }
+        }
 
         $args = sqrip_prepare_remote_args($body, 'POST');
         $response = wp_remote_post(SQRIP_ENDPOINT . $endpoint, $args);
@@ -1284,46 +1535,80 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         }
 
         $response_body = wp_remote_retrieve_body($response);
+        // error_log($response_body);
         $response_body = json_decode($response_body);
+        $is_multiple_invoices = $number_of_invoices && $number_of_invoices > 1;
+        $response_reference = $is_multiple_invoices && count($response_body) ? $response_body[0]->reference : $response_body->reference;
 
-        if (isset($response_body->reference)) {
+        if (isset($response_reference)) {
 
-            $pdf_file_old = get_post_meta($order_id, 'sqrip_pdf_file_url', true);
+            if ($is_multiple_invoices) {
+                $num = 1;
+                foreach ($response_body as $key => $invoice) {
+    
+                    $sqrip_pdf = $invoice->pdf_file;
+                    $sqrip_reference = $invoice->reference;
+        
+                    $sqrip_qr_pdf_attachment_id = $this->file_upload($sqrip_pdf, '.pdf', '', $order_id."-".$num);
+        
+                    $sqrip_qr_pdf_url = wp_get_attachment_url($sqrip_qr_pdf_attachment_id);
+                    $sqrip_qr_pdf_path = get_attached_file($sqrip_qr_pdf_attachment_id);
 
-            if ($pdf_file_old) {
-
-                $pdf_file_old_id = attachment_url_to_postid($pdf_file_old);
-
-                if ($pdf_file_old_id) {
-
-                    require_once(ABSPATH . 'wp-settings.php');
-
-                    wp_delete_attachment($pdf_file_old_id, true);
-
+                    $order->update_meta_data('sqrip_reference_id_'.$num, $sqrip_reference);
+                    $order->update_meta_data('sqrip_qr_pdf_attachment_id_'.$num, $sqrip_qr_pdf_attachment_id);
+                    $order->update_meta_data('sqrip_pdf_file_url_'.$num, $sqrip_qr_pdf_url);
+                    $order->update_meta_data('sqrip_pdf_file_path_'.$num, $sqrip_qr_pdf_path);
+                    $num++;
                 }
 
+                $order->add_order_note(__('sqrip QR Invoices created.', 'sqrip-swiss-qr-invoice'));
+                $order->update_meta_data('sqrip_multiple_invoice_count', $number_of_invoices);
+                $order->update_meta_data('sqrip_paid_invoice_number', '0');
             }
+            else {
+                $pdf_file_old = get_post_meta($order_id, 'sqrip_pdf_file_url', true);
+    
+                if ($pdf_file_old) {
+    
+                    $pdf_file_old_id = attachment_url_to_postid($pdf_file_old);
+    
+                    if ($pdf_file_old_id) {
+    
+                        require_once(ABSPATH . 'wp-settings.php');
+    
+                        wp_delete_attachment($pdf_file_old_id, true);
+    
+                    }
+    
+                }
+    
+                $sqrip_pdf = $response_body->pdf_file;
+                // $sqrip_png       =    $response_body->png_file;
+                $sqrip_reference = $response_body->reference;
+    
+                // TODO: replace with attachment ID and store this in meta instead of actual file
+                $sqrip_qr_pdf_attachment_id = $this->file_upload($sqrip_pdf, '.pdf', '', $order_id);
+                // $sqrip_qr_png_attachment_id = $this->file_upload($sqrip_png, '.png');
+    
+                $sqrip_qr_pdf_url = wp_get_attachment_url($sqrip_qr_pdf_attachment_id);
+                $sqrip_qr_pdf_path = get_attached_file($sqrip_qr_pdf_attachment_id);
+    
+                // $sqrip_qr_png_url = wp_get_attachment_url($sqrip_qr_png_attachment_id);
+                // $sqrip_qr_png_path = get_attached_file($sqrip_qr_png_attachment_id);
+    
+                $order->add_order_note(__('sqrip QR Invoice created.', 'sqrip-swiss-qr-invoice'));
+    
+                $order->update_meta_data('sqrip_reference_id', $sqrip_reference);
+                $order->update_meta_data('sqrip_qr_pdf_attachment_id', $sqrip_qr_pdf_attachment_id);
+                $order->update_meta_data('sqrip_pdf_file_url', $sqrip_qr_pdf_url);
+                $order->update_meta_data('sqrip_pdf_file_path', $sqrip_qr_pdf_path);
 
-            $sqrip_pdf = $response_body->pdf_file;
-            // $sqrip_png       =    $response_body->png_file;
-            $sqrip_reference = $response_body->reference;
-
-            // TODO: replace with attachment ID and store this in meta instead of actual file
-            $sqrip_qr_pdf_attachment_id = $this->file_upload($sqrip_pdf, '.pdf', '', $order_id);
-            // $sqrip_qr_png_attachment_id = $this->file_upload($sqrip_png, '.png');
-
-            $sqrip_qr_pdf_url = wp_get_attachment_url($sqrip_qr_pdf_attachment_id);
-            $sqrip_qr_pdf_path = get_attached_file($sqrip_qr_pdf_attachment_id);
-
-            // $sqrip_qr_png_url = wp_get_attachment_url($sqrip_qr_png_attachment_id);
-            // $sqrip_qr_png_path = get_attached_file($sqrip_qr_png_attachment_id);
-
-            $order->add_order_note(__('sqrip QR Invoice created.', 'sqrip-swiss-qr-invoice'));
-
-            $order->update_meta_data('sqrip_reference_id', $sqrip_reference);
-            $order->update_meta_data('sqrip_qr_pdf_attachment_id', $sqrip_qr_pdf_attachment_id);
-            $order->update_meta_data('sqrip_pdf_file_url', $sqrip_qr_pdf_url);
-            $order->update_meta_data('sqrip_pdf_file_path', $sqrip_qr_pdf_path);
+                if ($add_to_pdf_invoice == 'yes') {
+                    $sqrip_png = $response_body->png_file;
+                    $order->update_meta_data('sqrip_png_file_url', $sqrip_png);
+                }
+            }
+            
             $order->update_meta_data('sqrip_refund_iban_num', get_user_meta($order->get_user_id(), 'iban_num', true));
 
             // $order->update_meta_data('sqrip_png_file_url', $sqrip_qr_png_url);
@@ -1333,11 +1618,11 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             $woocommerce->cart->empty_cart();
             $order->save();
 
-            if (isset($response_body->total_codes_left) && $response_body->total_codes_left <= 0) {
+            $invoice_info = $is_multiple_invoices ? $response_body[0] : $response_body;
+            if (isset($invoice_info->total_codes_left) && $invoice_info->total_codes_left <= 0) {
                 // turn off sqrip if auto turn-off enabled
                 sqrip_auto_turn_off();
             }
-
             // Redirect to thank you page
             return array(
                 'result' => 'success',
@@ -1379,11 +1664,11 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
     /*
     *  sqrip QR Code PDF  Download in medialibrary and set
     */
-    public function file_upload($fileurl, $type, $token = "", $order_id = "")
+    public function file_upload($fileurl, $type, $token = "", $order_id = "", $is_refund = false)
     {
         include_once(ABSPATH . 'wp-admin/includes/image.php');
 
-        $sqrip_name = sqrip_file_name($order_id);
+        $sqrip_name = sqrip_file_name($order_id, $is_refund);
         $filename = $sqrip_name . $type;
         $file_path = sanitize_title($sqrip_name) . $type;
 

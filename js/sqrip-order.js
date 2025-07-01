@@ -9,7 +9,7 @@ jQuery(document).ready(function ($) {
 
         e.preventDefault();
 
-        _form = $('form#post');
+        _form = $('form#order');
 
         if (_form.length) {
             _form.find('.sqrip-error').remove();
@@ -44,7 +44,7 @@ jQuery(document).ready(function ($) {
 
         e.preventDefault();
 
-        _form = $('form#post');
+        _form = $('form#order');
 
         if (_form.length) {
 
@@ -143,7 +143,7 @@ jQuery(document).ready(function ($) {
 
         e.preventDefault();
 
-        _form = $('form#post');
+        _form = $('form#order');
 
         $('body').addClass('sqrip-loading');
 

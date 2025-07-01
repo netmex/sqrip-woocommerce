@@ -287,7 +287,13 @@ table.sqrip-table td p.sqrip-note {
     background-color: #fff;
 }
 
-#woocommerce_sqrip_new_status, #woocommerce_sqrip_new_awaiting_status, #woocommerce_sqrip_new_suppressed_status, #woocommerce_sqrip_new_qr_order_status {
+#woocommerce_sqrip_new_status,
+#woocommerce_sqrip_new_awaiting_status,
+#woocommerce_sqrip_new_suppressed_status,
+#woocommerce_sqrip_new_qr_order_status,
+#woocommerce_sqrip_new_partial_invoice_1_status,
+#woocommerce_sqrip_new_partial_invoice_2_status,
+#woocommerce_sqrip_new_partial_invoice_3_status {
     display: block;
     margin-bottom: 10px;
 }
@@ -297,11 +303,11 @@ table.sqrip-table td p.sqrip-note {
 }
 
 .sqrip-order-status td.forminp {
-    display: none;
+    display: none !important;
 }
 
 .sqrip-order-status.sqrip-show td.forminp {
-    display: table-cell;
+    display: table-cell !important;
 }
 
 .sqrip-new-order-status th {
