@@ -216,6 +216,7 @@ add_action('admin_enqueue_scripts', function ($hook_suffix) {
                 'ajax_url' => admin_url('admin-ajax.php'),
                 'ajax_refund_paid_nonce' => wp_create_nonce('sqrip-mark-refund-paid'),
                 'ajax_refund_unpaid_nonce' => wp_create_nonce('sqrip-mark-refund-unpaid'),
+                'ajax_refund_nonce' => wp_create_nonce('sqrip-process-refund'),
                 'status_completed' => sqrip_get_plugin_option('status_completed'),
                 'field_required_txt' => __('This field is required', 'sqrip-swiss-qr-invoice')
             )

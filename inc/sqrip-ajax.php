@@ -84,9 +84,13 @@ function sqrip_validation_iban_ajax()
     $response = sqrip_validation_iban($iban, $token);
     $result = [];
     $bank = isset($response->bank_data->bank) ? $response->bank_data->bank : '';
+    $order = wc_get_order($order_id);
 
-    if ($store_iban == "true") {
-        update_post_meta($order_id, 'sqrip_refund_iban_num', $iban);
+    if ($store_iban == "true" && $order && current_user_can('manage_woocommerce')) {
+        check_ajax_referer('sqrip-process-refund', 'security');
+
+        $order->update_meta_data('sqrip_refund_iban_num', $iban);
+        $order->save();
     }
 
     switch ($response->message) {
