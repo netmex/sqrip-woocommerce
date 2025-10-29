@@ -487,26 +487,33 @@ jQuery(document).ready(function ($) {
                 $('.sqrip-tab[data-tab="' + feature.text + '"]').hide();
             }
 
-            toggleComparisonAndMultipleSlips();
+            toggleComparisonAndMultipleSlips(feature.text);
         })
     });
 
     toggleComparisonAndMultipleSlips();
     //Toggle "comparison" and "multiple-qr-slips"
-    function toggleComparisonAndMultipleSlips() {
-        if (ip_payment_comparison_enabled.is(':checked')) {
-            ip_multiple_qr_slips_enabled.attr("checked", false);
-            ip_multiple_qr_slips_enabled.attr("disabled", true);
+    function toggleComparisonAndMultipleSlips(feature) {
+        if (feature === 'comparison') {
+            if (ip_payment_comparison_enabled.is(':checked')) {
+                ip_multiple_qr_slips_enabled.prop("checked", false);
+                // ip_multiple_qr_slips_enabled.attr("disabled", true);
+            } else {
+                // ip_multiple_qr_slips_enabled.attr("disabled", false);
+                ip_multiple_qr_slips_enabled.prop("checked", true);
+            }
+
         } else {
-            ip_multiple_qr_slips_enabled.attr("disabled", false);
+
+            if (ip_multiple_qr_slips_enabled.is(':checked')) {
+                ip_payment_comparison_enabled.prop("checked", false);
+                // ip_payment_comparison_enabled.attr("disabled", true);
+            } else {
+                // ip_payment_comparison_enabled.attr("disabled", false);
+                ip_payment_comparison_enabled.prop("checked", true);
+            }
         }
 
-        if (ip_multiple_qr_slips_enabled.is(':checked')) {
-            ip_payment_comparison_enabled.attr("checked", false);
-            ip_payment_comparison_enabled.attr("disabled", true);
-        } else {
-            ip_payment_comparison_enabled.attr("disabled", false);
-        }
     }
 
     tab_active = window.location.hash.slice(1);
