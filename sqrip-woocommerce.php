@@ -104,6 +104,20 @@ function sqrip_deactivation_action() {
 }
 
 /**
+ * Add custom cron schedule interval
+ * @since 1.9
+ */
+function sqrip_cron_schedules($schedules){
+    if(!isset($schedules["weekly"])){
+        $schedules["weekly"] = array(
+            'interval' => 60 * 60 * 24 * 7,
+            'display' => __('Once every week'));
+    }
+    return $schedules;
+}
+add_filter('cron_schedules','sqrip_cron_schedules');
+
+/**
  *  Add admin notices
  *
  * @since 1.0

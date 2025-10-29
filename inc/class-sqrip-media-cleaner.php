@@ -56,7 +56,8 @@ class Sqrip_Media_Clearner
     
             $completed_orders = (array)wc_get_orders(array(
                 'limit' => -1,
-                'date_created' => $targeted_date,
+                'date_created' => '<' . $targeted_time,
+                // 'status' => array( 'wc-completed' ),
                 'payment_method' => 'sqrip',
             ));
     
