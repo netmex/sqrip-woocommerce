@@ -230,19 +230,19 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'default' => 'no',
                 'class' => 'services-tab'
             ),
-            'return_enabled' => array(
-                'title' => __('Activate/Deactivate Refunds', 'sqrip-swiss-qr-invoice'),
-                'label' => __('Activate sqrip for Refunds', 'sqrip-swiss-qr-invoice'),
-                'type' => 'checkbox',
-                'description' => __('If activated, sqrip makes refunding easier by creating a QR-code that can be scanned with the banking app to initiate a bank transfer to the client.', 'sqrip-swiss-qr-invoice'),
-                'default' => 'no',
-                'class' => 'services-tab'
-            ),
             'multiple_qr_slips_enabled' => array(
                 'title' => __('Activate/Deactivate Multiple QR-slips', 'sqrip-swiss-qr-invoice'),
                 'label' => __('Activate Multiple QR-slips per order', 'sqrip-swiss-qr-invoice'),
                 'type' => 'checkbox',
                 'description' => __('If activated, sqrip generates multiple QR-slips per order based on specified percentages of total amount.', 'sqrip-swiss-qr-invoice'),
+                'default' => 'no',
+                'class' => 'services-tab'
+            ),
+            'return_enabled' => array(
+                'title' => __('Activate/Deactivate Refunds', 'sqrip-swiss-qr-invoice'),
+                'label' => __('Activate sqrip for Refunds', 'sqrip-swiss-qr-invoice'),
+                'type' => 'checkbox',
+                'description' => __('If activated, sqrip makes refunding easier by creating a QR-code that can be scanned with the banking app to initiate a bank transfer to the client.', 'sqrip-swiss-qr-invoice'),
                 'default' => 'no',
                 'class' => 'services-tab'
             ),
@@ -483,6 +483,14 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'description' => '',
                 'default' => 'yes',
                 'class' => 'qrinvoice-tab ' . $this->show_integration_order()
+            ),
+            'invoice_download_button_align' => array(
+                'title' => '',
+                'label' => __('Position:', 'sqrip-swiss-qr-invoice'),
+                'type' => 'text',
+                'default' => 'left',
+                'css' => 'visibility: hidden; position: absolute',
+                'class' => 'qrinvoice-tab'
             ),
             'email_attached' => array(
                 'title' => __('Attach QR-Invoice to E-Mail template', 'sqrip-swiss-qr-invoice'),
@@ -1086,15 +1094,15 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         }
 
         if (isset($post_data['woocommerce_sqrip_enabled_new_partial_invoice_1_status']) && !empty($post_data['woocommerce_sqrip_enabled_new_partial_invoice_1_status']) && isset($post_data['woocommerce_sqrip_first_time_new_partial_invoice_1_status'])) {
-            $_POST['woocommerce_sqrip_partial_invoice_1_status'] = 'wc-sqrip-partial-invoice-1-status';
+            $_POST['woocommerce_sqrip_partial_invoice_1_status'] = 'wc-sqrip-part-pay-1';
         }
 
         if (isset($post_data['woocommerce_sqrip_enabled_new_partial_invoice_2_status']) && !empty($post_data['woocommerce_sqrip_enabled_new_partial_invoice_2_status']) && isset($post_data['woocommerce_sqrip_first_time_new_partial_invoice_2_status'])) {
-            $_POST['woocommerce_sqrip_partial_invoice_2_status'] = 'wc-sqrip-partial-invoice-2-status';
+            $_POST['woocommerce_sqrip_partial_invoice_2_status'] = 'wc-sqrip-part-pay-2';
         }
 
         if (isset($post_data['woocommerce_sqrip_enabled_new_partial_invoice_3_status']) && !empty($post_data['woocommerce_sqrip_enabled_new_partial_invoice_3_status']) && isset($post_data['woocommerce_sqrip_first_time_new_partial_invoice_3_status'])) {
-            $_POST['woocommerce_sqrip_partial_invoice_3_status'] = 'wc-sqrip-partial-invoice-3-status';
+            $_POST['woocommerce_sqrip_partial_invoice_3_status'] = 'wc-sqrip-part-pay-3';
         }
 
         return parent::process_admin_options();
@@ -1474,8 +1482,11 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         $body["payable_by"] = sqrip_get_billing_address_from_order($order);
         $body['payable_to'] = sqrip_get_payable_to_address($address);
 
+        $multiple_invoices_enabled = sqrip_get_plugin_option('multiple_qr_slips_enabled') == 'yes';
+        
         $number_of_invoices = sqrip_get_plugin_option('number_of_invoices');
-        if ($number_of_invoices && $number_of_invoices > 1) {
+        $is_multiple_invoices = $multiple_invoices_enabled && ($number_of_invoices && $number_of_invoices > 1);
+        if ($is_multiple_invoices) {
             $body["invoice_fractions"] = [];
             for ($i=1; $i <= $number_of_invoices; $i++) {
                 $invoice_fraction = sqrip_get_plugin_option('invoice_fraction_'.$i);
@@ -1537,7 +1548,6 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         $response_body = wp_remote_retrieve_body($response);
         // error_log($response_body);
         $response_body = json_decode($response_body);
-        $is_multiple_invoices = $number_of_invoices && $number_of_invoices > 1;
         $response_reference = $is_multiple_invoices && count($response_body) ? $response_body[0]->reference : $response_body->reference;
 
         if (isset($response_reference)) {
@@ -1548,6 +1558,8 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
     
                     $sqrip_pdf = $invoice->pdf_file;
                     $sqrip_reference = $invoice->reference;
+                    $sqrip_partial_amount = $invoice->amount;
+                    $partial_invoice_fraction = sqrip_get_plugin_option('invoice_fraction_'.$num);
         
                     $sqrip_qr_pdf_attachment_id = $this->file_upload($sqrip_pdf, '.pdf', '', $order_id."-".$num);
         
@@ -1558,6 +1570,8 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                     $order->update_meta_data('sqrip_qr_pdf_attachment_id_'.$num, $sqrip_qr_pdf_attachment_id);
                     $order->update_meta_data('sqrip_pdf_file_url_'.$num, $sqrip_qr_pdf_url);
                     $order->update_meta_data('sqrip_pdf_file_path_'.$num, $sqrip_qr_pdf_path);
+                    $order->update_meta_data('sqrip_partial_invoice_amount_'.$num, $sqrip_partial_amount);
+                    $order->update_meta_data('sqrip_partial_invoice_fraction_'.$num, $partial_invoice_fraction);
                     $num++;
                 }
 

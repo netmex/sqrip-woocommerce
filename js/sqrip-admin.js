@@ -45,7 +45,8 @@ jQuery(document).ready(function ($) {
         ip_sqrip_current_status = $('#woocommerce_sqrip_current_status'),
         ip_sqrip_pdf_invoice_integration = $('#woocommerce_sqrip_pdf_invoice_integration'),
         ip_multiple_qr_slips_enabled = $('#woocommerce_sqrip_multiple_qr_slips_enabled'),
-        ip_sqrip_number_of_invoices = $('#woocommerce_sqrip_number_of_invoices');
+        ip_sqrip_number_of_invoices = $('#woocommerce_sqrip_number_of_invoices'),
+        ip_sqrip_download_button_align = $('#woocommerce_sqrip_invoice_download_button_align');
         ip_sqrip_remaining_credits.prop("readonly", true);
         ip_sqrip_current_status.prop("readonly", true);
         ip_sqrip_current_status.addClass('sqrip-no-border');
@@ -1094,4 +1095,27 @@ jQuery(document).ready(function ($) {
             ip_integration_order.closest('tr').show();
         }
     });
+
+    //Add alignment radio input for download invoice button
+    if (ip_integration_order.length && ip_sqrip_download_button_align.length) {
+        ip_sqrip_download_button_align.closest('tr').addClass('hide-row');
+
+        const downloadAlignment = ip_sqrip_download_button_align.val() || 'left';
+        const downloadAlignmentHtml = `
+            <fieldset>
+                <span style="margin-right:1rem !important;">Position: </span>
+                <label style="margin-right:1rem !important;"><input type="radio" name="sqrip_download_btn_align" class="sqrip_download_btn_align" value="left" ${downloadAlignment === 'left' ? 'checked' : ''}> Links</label>
+                <label style="margin-right:1rem !important;"><input type="radio" name="sqrip_download_btn_align" class="sqrip_download_btn_align" value="center" ${downloadAlignment === 'center' ? 'checked' : ''}> Mitte</label>
+                <label style="margin-right:1rem !important;"><input type="radio" name="sqrip_download_btn_align" class="sqrip_download_btn_align" value="right" ${downloadAlignment === 'right' ? 'checked' : ''}> Rechts</label>
+            </fieldset>
+        `;
+        ip_integration_order.closest('td').append(downloadAlignmentHtml);
+        
+        $('.sqrip_download_btn_align').each(function (i, e) {
+            $(this).on("click", function() {
+                const alignValue = $(this).val();
+                ip_sqrip_download_button_align.val(alignValue);
+            })
+        })
+    }
 });
