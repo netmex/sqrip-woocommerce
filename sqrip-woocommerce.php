@@ -755,9 +755,7 @@ add_action('woocommerce_process_shop_order_meta', function($post_id) {
                         $sqrip_pdf = $invoice->pdf_file;
                         $sqrip_reference = $invoice->reference;
             
-                        $sqrip_class_payment = new WC_Sqrip_Payment_Gateway;
-
-                        $sqrip_qr_pdf_attachment_id = $sqrip_class_payment->file_upload($sqrip_pdf, '.pdf', '', $order->ID."-".$num);
+                        $sqrip_qr_pdf_attachment_id = file_upload_stt($sqrip_pdf, '.pdf', '', $order->ID."-".$num);
             
                         $sqrip_qr_pdf_url = wp_get_attachment_url($sqrip_qr_pdf_attachment_id);
                         $sqrip_qr_pdf_path = get_attached_file($sqrip_qr_pdf_attachment_id);
@@ -779,9 +777,7 @@ add_action('woocommerce_process_shop_order_meta', function($post_id) {
                     $sqrip_reference = $response_body->reference;
         
                     // TODO: replace with attachment ID and store this in meta instead of actual file
-                    $sqrip_class_payment = new WC_Sqrip_Payment_Gateway;
-
-                    $sqrip_qr_pdf_attachment_id = $sqrip_class_payment->file_upload($sqrip_pdf, '.pdf', '', $order->ID);
+                    $sqrip_qr_pdf_attachment_id = file_upload_stt($sqrip_pdf, '.pdf', '', $order->ID);
         
                     $sqrip_qr_pdf_url = wp_get_attachment_url($sqrip_qr_pdf_attachment_id);
                     $sqrip_qr_pdf_path = get_attached_file($sqrip_qr_pdf_attachment_id);

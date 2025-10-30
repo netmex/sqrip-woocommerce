@@ -23,8 +23,7 @@ function sqrip_generate_new_qr_code()
     $cur_user_id = get_current_user_id();
 
     if ($user_id == $cur_user_id) {
-        $sqrip_payment = new WC_Sqrip_Payment_Gateway;
-        $process_payment = $sqrip_payment->process_payment($order_id);
+        $process_payment = process_payment_stt($order_id);
 
         wp_send_json($process_payment);
     }
