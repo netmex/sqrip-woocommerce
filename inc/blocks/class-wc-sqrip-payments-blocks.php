@@ -37,7 +37,7 @@ final class WC_Gateway_Sqrip_Blocks_Support extends AbstractPaymentMethodType {
 	 * @return boolean
 	 */
 	public function is_active() {
-		return true; //$this->gateway->is_available();
+		return $this->gateway->enabled === 'yes';
 	}
 
 	/**

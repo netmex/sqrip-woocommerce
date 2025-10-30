@@ -74,7 +74,7 @@ function sqrip_validation_iban_ajax()
 {
     if (!$_POST['iban'] || !$_POST['token']) return;
 
-    $iban = $_POST['iban'];
+    $iban = htmlentities($_POST['iban'] || '');
     $token = $_POST['token'];
 
     $store_iban = isset($_POST['store_iban']) ? $_POST['store_iban'] : null;

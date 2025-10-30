@@ -345,20 +345,20 @@ if (!function_exists('sqrip_add_fields_for_order_details')) {
 
                 $qr_order_status_options = wc_get_order_statuses();
                 $payment_status = sqrip_get_plugin_option("partial_invoice_".$i."_status");
-                $status_fullname = __('Status changing to', 'sqrip-swiss-qr-invoice') . ": " . $payment_status && isset($qr_order_status_options[$payment_status]) ?
-                    $qr_order_status_options[$payment_status] : $payment_status;
+                $status_fullname = __('Status changing to', 'sqrip-swiss-qr-invoice') . ": " . ($payment_status && isset($qr_order_status_options[$payment_status]) ?
+                    $qr_order_status_options[$payment_status] : $payment_status);
                 //confirm btn
                 $sqrip_paid_invoice = sqrip_get_order_meta_value($order, 'sqrip_paid_invoice_number');
                 $sqrip_next_paid_invoice_number = (int) $sqrip_paid_invoice + 1;
                 $confirm_btn = $sqrip_next_paid_invoice_number > $i ? "<li><span class='sqrip-paid-invoice'>".__('Paid', 'sqrip-swiss-qr-invoice')." [".$i."/".$invoice_count."]</span></li>" : "";
                 if ($i == $sqrip_next_paid_invoice_number) {
                     $confirm_url = wp_nonce_url(admin_url('admin-ajax.php?action=sqrip_payment_confirmed&order_id=' . $order_id), 'sqrip_payment_confirmed');
-                    $confirm_btn = "<li><button class='button button-primary partial-payment-confirm-btn' data-confirm-url=".$confirm_url.">".__('Confirm payment', 'sqrip-swiss-qr-invoice')." [".$i."/".$invoice_count."]</button></li>";
+                    $confirm_btn = "<li><button class='button button-primary partial-payment-confirm-btn' data-confirm-url='".$confirm_url."'>".__('Confirm payment', 'sqrip-swiss-qr-invoice')." [".$i."/".$invoice_count."]</button></li>";
                 }
 
                 $reference_id = sqrip_get_order_meta_value($order, 'sqrip_reference_id_'.$i);
                 $reference_id_formatted = sqrip_format_reference_id($reference_id, $order_id);
-                $reference_id_html = "<p>" . $reference_id == "deleted" ? __('Deleted', 'sqrip-swiss-qr-invoice') : $reference_id_formatted . "</p>";
+                $reference_id_html = "<p>" . ($reference_id == "deleted" ? __('Deleted', 'sqrip-swiss-qr-invoice') : $reference_id_formatted ). "</p>";
 
                 $pdf_file = sqrip_get_order_meta_value($order, 'sqrip_pdf_file_url_'.$i);
                 if ($pdf_file == "deleted") {
@@ -452,9 +452,9 @@ if (!function_exists('sqrip_add_fields_for_order_details')) {
         }
 
         if ($refund_iban) {
-            echo '<input type="hidden" id="sqrip-customer-iban" value="'.$refund_iban.'" />';
+            echo '<input type="hidden" id="sqrip-customer-iban" value="'.esc_html($refund_iban).'" />';
         }
-        echo '<input type="hidden" id="sqrip-refund-token" value="'.$sqrip_refund_token.'" />';
+        echo '<input type="hidden" id="sqrip-refund-token" value="'.esc_html($sqrip_refund_token).'" />';
     }
 }
 
