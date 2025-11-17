@@ -499,9 +499,11 @@ jQuery(document).ready(function ($) {
             if (ip_payment_comparison_enabled.is(':checked')) {
                 ip_multiple_qr_slips_enabled.prop("checked", false);
                 // ip_multiple_qr_slips_enabled.attr("disabled", true);
+                $('.sqrip-tab[data-tab="multiple-qr-slips"]').hide();
             } else {
                 // ip_multiple_qr_slips_enabled.attr("disabled", false);
                 ip_multiple_qr_slips_enabled.prop("checked", true);
+                $('.sqrip-tab[data-tab="multiple-qr-slips"]').show();
             }
 
         } else {
@@ -509,9 +511,11 @@ jQuery(document).ready(function ($) {
             if (ip_multiple_qr_slips_enabled.is(':checked')) {
                 ip_payment_comparison_enabled.prop("checked", false);
                 // ip_payment_comparison_enabled.attr("disabled", true);
+                $('.sqrip-tab[data-tab="comparison"]').hide();
             } else {
                 // ip_payment_comparison_enabled.attr("disabled", false);
                 ip_payment_comparison_enabled.prop("checked", true);
+                $('.sqrip-tab[data-tab="comparison"]').show();
             }
         }
 
