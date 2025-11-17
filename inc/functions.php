@@ -96,7 +96,8 @@ function sqrip_get_billing_address_from_order($order)
 
     $billing_address = array(
         'name' => $order_data['billing']['first_name'] . ' ' . $order_data['billing']['last_name'],
-        'street' => $order_data['billing']['address_1'] . ($order_data['billing']['address_2'] ? ', ' . $order_data['billing']['address_2'] : ""),
+        'street' => $order_data['billing']['address_1'],
+        'building_number' => ($order_data['billing']['address_2'] ? $order_data['billing']['address_2'] : ""),
         'postal_code' => $order_data['billing']['postcode'],
         'town' => $order_data['billing']['city'],
         'country_code' => $order_data['billing']['country']
@@ -240,11 +241,12 @@ function sqrip_get_payable_to_address($address = 'woocommerce')
                 // Country and state separated:
                 $store_country = $split_country[0];
                 $address = get_option('woocommerce_store_address');
-                $address .= get_option('woocommerce_store_address_2') ? ' / ' . get_option('woocommerce_store_address_2') : "";
+                $building_number = get_option('woocommerce_store_address_2') ? get_option('woocommerce_store_address_2') : "";
 
                 $result = array(
                     'name' => get_bloginfo('name'),
                     'street' => $address,
+                    'building_number' => ($building_number ? $building_number : ""),
                     'town' => get_option('woocommerce_store_city'),
                     'postal_code' => get_option('woocommerce_store_postcode'),
                     'country_code' => $store_country,
@@ -260,6 +262,7 @@ function sqrip_get_payable_to_address($address = 'woocommerce')
             $result = array(
                 'name' => $plugin_options['address_name'],
                 'street' => $plugin_options['address_street'],
+                'building_number' => ($plugin_options['address_building_number'] ? $plugin_options['address_building_number'] : ""),
                 'town' => $plugin_options['address_city'],
                 'postal_code' => $plugin_options['address_postcode'],
                 'country_code' => $plugin_options['address_country'],

@@ -672,7 +672,7 @@ add_action('woocommerce_process_shop_order_meta', function($post_id) {
         $order_billing_first_name = $_POST['_billing_first_name'];
         $order_billing_last_name = $_POST['_billing_last_name'];
         $order_billing_address = $_POST['_billing_address_1'];
-        $order_billing_address .= $_POST['_billing_address_2'] ? ', ' . $_POST['_billing_address_2'] : "";
+        $order_billing_building_number = $_POST['_billing_address_2'] ? $_POST['_billing_address_2'] : "";
         $order_billing_city = $_POST['_billing_city'];
         $order_billing_postcode = $_POST['_billing_postcode'];
         $order_billing_country = $_POST['_billing_country'];
@@ -686,6 +686,7 @@ add_action('woocommerce_process_shop_order_meta', function($post_id) {
         $body["payable_by"] = array(
             'name' => "$order_billing_first_name $order_billing_last_name",
             'street' => $order_billing_address,
+            'building_number' => $order_billing_building_number,
             'postal_code' => $order_billing_postcode,
             'town' => $order_billing_city,
             'country_code' => $order_billing_country
@@ -839,6 +840,17 @@ add_action('woocommerce_process_shop_order_meta', function($post_id) {
 });
 
 add_action('woocommerce_after_order_refund_item_name', "sqrip_display_refund_qr_code", 10, 1);
+
+/**
+ * Make Building number (address line 2) required in checkout
+ * since 1.9
+ */
+function sqrip_make_building_number_required( $fields ) {
+    $fields['billing']['billing_address_2']['required'] = true;
+    
+    return $fields;
+}
+add_filter( 'woocommerce_checkout_fields', 'sqrip_make_building_number_required', 9999 );
 
 /**
  * Displays UI for marking a sqrip refund as completed within the WooCommerce UI

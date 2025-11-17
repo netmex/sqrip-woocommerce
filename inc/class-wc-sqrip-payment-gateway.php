@@ -293,6 +293,11 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'type' => 'text',
                 'class' => 'sqrip-address-individual',
             ),
+            'address_building_number' => array(
+                'title' => __('Building Number*', 'sqrip-swiss-qr-invoice'),
+                'type' => 'text',
+                'class' => 'sqrip-address-individual',
+            ),
             'address_postcode' => array(
                 'title' => __('ZIP*', 'sqrip-swiss-qr-invoice'),
                 'type' => 'text',
@@ -1180,6 +1185,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             $body['payable_to'] = array(
                 'name' => $post_data['woocommerce_sqrip_address_name'],
                 'street' => $post_data['woocommerce_sqrip_address_street'],
+                'building_number' => $post_data['woocommerce_sqrip_address_building_number'],
                 'town' => $post_data['woocommerce_sqrip_address_city'],
                 'postal_code' => $post_data['woocommerce_sqrip_address_postcode'],
                 'country_code' => $post_data['woocommerce_sqrip_address_country'],
