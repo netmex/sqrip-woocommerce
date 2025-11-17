@@ -631,6 +631,19 @@ jQuery(document).ready(function ($) {
         } else {
             btn_save.attr('disabled', false);
         }
+
+        let missingFields = "";
+
+        document.querySelectorAll('[required]').forEach(field => {
+            if (!field.value) {
+                missingFields += (field.name).replace("woocommerce_sqrip", "").split("_").join(" ") + ", ";
+            }
+        });
+
+        if (missingFields.length > 0) {
+            $(".sqrip-missing-fields-notice").remove();
+            btn_save.after('<div class="sqrip-notice error mt-10 sqrip-missing-fields-notice"><p>Please fill in: ' + missingFields.slice(0, -2) + '</p></div>');
+        }
     }
 
     function sqrip_tab_init(data) {
@@ -1118,4 +1131,10 @@ jQuery(document).ready(function ($) {
             })
         })
     }
+
+    document.querySelectorAll('button[type="submit"]').forEach(button => {
+        button.addEventListener('click', () => {
+            validate_form();
+        });
+    });
 });
