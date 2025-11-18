@@ -246,6 +246,13 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'default' => 'no',
                 'class' => 'services-tab'
             ),
+            'form_head_notice' => array(
+                'title' => '',
+                'type' => 'text',
+                'label' => ' ',
+                'css' => 'visibility: hidden; position: absolute',
+                'class' => 'services-tab'
+            ),
             'section_display' => array(
                 'title' => __('Display', 'sqrip-swiss-qr-invoice'),
                 'type' => 'section',
@@ -1530,6 +1537,14 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 : ($has_request ? " And we don't yet know why. Please contact our <a href='mailto:support@sqrip.ch'>support</a>" : "");
             $customer_msg = "It seems we couldn't provide you with a QR-invoice at this time. Please try later, contact the shop or use a different payment method.";
             // <a href="mailto:someone@example.com">Send email</a>
+
+            if (isset($response["body"]) && str_contains($response["body"], "building number")) {
+                $customer_msg = "The address building number is required. Please contact the shop for assistance.";
+                
+                $msg = 'Missing building number value is causing payment failures. Please ensure that the building number is included in the address.';
+                update_sqrip_options('form_head_notice', $msg);
+            }
+
             wc_add_notice(
                 sprintf(
                     __('sqrip Payment Error: %s', 'sqrip-swiss-qr-invoice'),
@@ -1549,6 +1564,11 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             sqrip_auto_turn_off();
 
             return false;
+        } else {
+            $form_head_notice = sqrip_get_plugin_option('form_head_notice');
+            if ($form_head_notice && str_contains($form_head_notice, 'building number')) {
+                update_sqrip_options('form_head_notice', '');
+            }
         }
 
         $response_body = wp_remote_retrieve_body($response);

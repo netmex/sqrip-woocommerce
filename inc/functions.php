@@ -975,3 +975,18 @@ function process_payment_stt($order_id)
         return false; // Bail early
     }
 }
+
+/**
+ * Update a single sqrip plugin option
+ * since 1.9
+ * 
+ * @param string $key
+ * @param mixed $value
+ *
+ * @return void
+ */
+function update_sqrip_options($key, $value) {
+    $plugin_options = get_option('woocommerce_sqrip_settings', array());
+    $plugin_options[$key] = $value;
+    update_option('woocommerce_sqrip_settings', $plugin_options);
+}

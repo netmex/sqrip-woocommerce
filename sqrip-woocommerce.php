@@ -842,15 +842,29 @@ add_action('woocommerce_process_shop_order_meta', function($post_id) {
 add_action('woocommerce_after_order_refund_item_name', "sqrip_display_refund_qr_code", 10, 1);
 
 /**
- * Make Building number (address line 2) required in checkout
+ * Make address line 2 required in checkout
  * since 1.9
  */
-function sqrip_make_building_number_required( $fields ) {
-    $fields['billing']['billing_address_2']['required'] = true;
+function sqrip_make_address_line_2_required( $fields ) {
+
+    if (isset($fields['billing']['billing_address_2'])) {
+        $fields['billing']['billing_address_2']['required'] = true;
+        $fields['billing']['billing_address_2']['placeholder'] = 'Building Number (required)';
+    } else {
+        $fields['billing']['billing_address_2'] = array(
+            'type'        => 'text',
+            'label'       => __('Building Number (required)', 'sqrip-swiss-qr-invoice'),
+            'placeholder' => __('Building Number', 'sqrip-swiss-qr-invoice'),
+            'class'       => array('form-row-wide', 'sqrip-building-number'),
+            'clear'       => true,
+            'required'    => true,
+            'priority'    => 50,
+        );
+    }
     
     return $fields;
 }
-add_filter( 'woocommerce_checkout_fields', 'sqrip_make_building_number_required', 9999 );
+add_filter( 'woocommerce_checkout_fields', 'sqrip_make_address_line_2_required', 9999 );
 
 /**
  * Displays UI for marking a sqrip refund as completed within the WooCommerce UI
