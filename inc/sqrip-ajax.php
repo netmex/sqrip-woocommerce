@@ -23,8 +23,7 @@ function sqrip_generate_new_qr_code()
     $cur_user_id = get_current_user_id();
 
     if ($user_id == $cur_user_id) {
-        $sqrip_payment = new WC_Sqrip_Payment_Gateway;
-        $process_payment = $sqrip_payment->process_payment($order_id);
+        $process_payment = process_payment_stt($order_id);
 
         wp_send_json($process_payment);
     }
@@ -75,7 +74,7 @@ function sqrip_validation_iban_ajax()
 {
     if (!$_POST['iban'] || !$_POST['token']) return;
 
-    $iban = $_POST['iban'];
+    $iban = htmlentities($_POST['iban'] || '');
     $token = $_POST['token'];
 
     $store_iban = isset($_POST['store_iban']) ? $_POST['store_iban'] : null;
@@ -84,9 +83,13 @@ function sqrip_validation_iban_ajax()
     $response = sqrip_validation_iban($iban, $token);
     $result = [];
     $bank = isset($response->bank_data->bank) ? $response->bank_data->bank : '';
+    $order = wc_get_order($order_id);
 
-    if ($store_iban == "true") {
-        update_post_meta($order_id, 'sqrip_refund_iban_num', $iban);
+    if ($store_iban == "true" && $order && current_user_can('manage_woocommerce')) {
+        check_ajax_referer('sqrip-process-refund', 'security');
+
+        $order->update_meta_data('sqrip_refund_iban_num', $iban);
+        $order->save();
     }
 
     switch ($response->message) {
@@ -303,6 +306,28 @@ function sqrip_payment_confirmed()
     }
 
     $paged = isset($_GET['paged']) ? '&paged=' . $_GET['paged'] : '';
+
+    $sqrip_paid_invoice = sqrip_get_order_meta_value($order, 'sqrip_paid_invoice_number');
+    $sqrip_invoice_count = sqrip_get_order_meta_value($order, 'sqrip_multiple_invoice_count');
+    
+    if ($sqrip_invoice_count && isset($sqrip_paid_invoice)) {
+        $sqrip_invoice_count = (int) $sqrip_invoice_count;
+        $sqrip_paid_invoice = (int) $sqrip_paid_invoice;
+        $sqrip_next_paid_invoice_number = $sqrip_paid_invoice + 1;
+        $payment_status = sqrip_get_plugin_option("partial_invoice_".$sqrip_next_paid_invoice_number."_status");
+
+        if ($payment_status) {
+            $order->update_status($payment_status, '');
+        }
+
+        $order->update_meta_data('sqrip_paid_invoice_number', $sqrip_next_paid_invoice_number);
+        $order->save();
+        
+        if ($sqrip_invoice_count > $sqrip_next_paid_invoice_number) {
+            wp_redirect(get_admin_url() . 'edit.php?post_type=shop_order' . $paged);
+            die();
+        }
+    }
 
     $order->update_status($status_completed, '');
 

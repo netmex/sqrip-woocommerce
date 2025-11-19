@@ -42,13 +42,18 @@ jQuery(document).ready(function ($) {
         ip_sqrip_status_completed = $('#woocommerce_sqrip_status_completed'),
         ip_sqrip_remaining_credits = $('#woocommerce_sqrip_remaining_credits'),
         ip_sqrip_turn_off_if_error = $('#woocommerce_sqrip_turn_off_if_error'),
-        ip_sqrip_current_status = $('#woocommerce_sqrip_current_status');
+        ip_sqrip_current_status = $('#woocommerce_sqrip_current_status'),
+        ip_sqrip_pdf_invoice_integration = $('#woocommerce_sqrip_pdf_invoice_integration'),
+        ip_multiple_qr_slips_enabled = $('#woocommerce_sqrip_multiple_qr_slips_enabled'),
+        ip_sqrip_number_of_invoices = $('#woocommerce_sqrip_number_of_invoices'),
+        ip_sqrip_form_head_notice = $('#woocommerce_sqrip_form_head_notice'),
+        ip_sqrip_download_button_align = $('#woocommerce_sqrip_invoice_download_button_align');
         ip_sqrip_remaining_credits.prop("readonly", true);
         ip_sqrip_current_status.prop("readonly", true);
         ip_sqrip_current_status.addClass('sqrip-no-border');
         ip_sqrip_remaining_credits.addClass('sqrip-no-border');
-        ip_sqrip_turn_off_if_error.closest('fieldset').addClass('negative-top-margin')
-        ip_sqrip_remaining_credits.closest('fieldset').addClass('negative-top-margin')
+        ip_sqrip_turn_off_if_error.closest('fieldset').addClass('negative-top-margin');
+        ip_sqrip_remaining_credits.closest('fieldset').addClass('negative-top-margin');
 
     function handleResponseMessage(message) {
         let displayMessage = message.replace('. ', '.<br/>');
@@ -65,6 +70,10 @@ jQuery(document).ready(function ($) {
     $('select[id*="email_attached"]').select2({
         allowClear: true
     });
+
+    if (ip_sqrip_form_head_notice.val()) {
+        $('.sqrip-tabs').siblings('table.form-table').find('th').first().prepend('<div class="sqrip-notice error mt-10 sqrip-form-head-notice"><p>'+ip_sqrip_form_head_notice.val()+'</p></div>');
+    }
 
     $.ajax({
         type: "post",
@@ -465,6 +474,10 @@ jQuery(document).ready(function ($) {
             text: "refunds",
             item: ip_sqrip_refund_enabled
         },
+        {
+            text: "multiple-qr-slips",
+            item: ip_multiple_qr_slips_enabled
+        },
     ];
 
     toggleFeatures.forEach((feature) => {
@@ -479,8 +492,39 @@ jQuery(document).ready(function ($) {
             } else {
                 $('.sqrip-tab[data-tab="' + feature.text + '"]').hide();
             }
+
+            toggleComparisonAndMultipleSlips(feature.text);
         })
     });
+
+    toggleComparisonAndMultipleSlips();
+    //Toggle "comparison" and "multiple-qr-slips"
+    function toggleComparisonAndMultipleSlips(feature) {
+        if (feature === 'comparison') {
+            if (ip_payment_comparison_enabled.is(':checked')) {
+                ip_multiple_qr_slips_enabled.prop("checked", false);
+                // ip_multiple_qr_slips_enabled.attr("disabled", true);
+                $('.sqrip-tab[data-tab="multiple-qr-slips"]').hide();
+            } else {
+                // ip_multiple_qr_slips_enabled.attr("disabled", false);
+                ip_multiple_qr_slips_enabled.prop("checked", true);
+                $('.sqrip-tab[data-tab="multiple-qr-slips"]').show();
+            }
+
+        } else {
+
+            if (ip_multiple_qr_slips_enabled.is(':checked')) {
+                ip_payment_comparison_enabled.prop("checked", false);
+                // ip_payment_comparison_enabled.attr("disabled", true);
+                $('.sqrip-tab[data-tab="comparison"]').hide();
+            } else {
+                // ip_payment_comparison_enabled.attr("disabled", false);
+                ip_payment_comparison_enabled.prop("checked", true);
+                $('.sqrip-tab[data-tab="comparison"]').show();
+            }
+        }
+
+    }
 
     tab_active = window.location.hash.slice(1);
     if (!tab_active) tab_active = "services";
@@ -596,6 +640,19 @@ jQuery(document).ready(function ($) {
         } else {
             btn_save.attr('disabled', false);
         }
+
+        let missingFields = "";
+
+        document.querySelectorAll('[required]').forEach(field => {
+            if (!field.value) {
+                missingFields += (field.name).replace("woocommerce_sqrip", "").split("_").join(" ") + ", ";
+            }
+        });
+
+        if (missingFields.length > 0) {
+            $(".sqrip-missing-fields-notice").remove();
+            btn_save.after('<div class="sqrip-notice error mt-10 sqrip-missing-fields-notice"><p>Please fill in: ' + missingFields.slice(0, -2) + '</p></div>');
+        }
     }
 
     function sqrip_tab_init(data) {
@@ -661,6 +718,10 @@ jQuery(document).ready(function ($) {
                 ip_order_stt.prop('readonly', false);
                 $('.sqrip-btn-create-order-stt').attr('disabled', false);
             }
+        }
+
+        if (tab_active == 'multiple-qr-slips') {
+            toggleMultipleInvoiceFields();
         }
     }
 
@@ -945,4 +1006,144 @@ jQuery(document).ready(function ($) {
     if (nh.length) {
         nh.closest('tr').addClass('sqrip-no-height');
     }
+
+    //Handle Multiple invoices
+    function toggleMultipleInvoiceFields() {
+        const storedNumOfInvoices = +(ip_sqrip_number_of_invoices.val());
+
+        for (let index = storedNumOfInvoices+1; index <= 3; index++) {
+            $(`#woocommerce_sqrip_invoice_fraction_${index}`).closest('tr').hide();
+            $(`#woocommerce_sqrip_email_attached_invoice_${index}`).closest('tr').hide();
+            $(`#woocommerce_sqrip_partial_invoice_${index}_status`).closest('tr').hide();
+            $(`#woocommerce_sqrip_new_partial_invoice_${index}_status`).closest('tr').hide();
+
+        }
+    }
+
+    if (ip_sqrip_number_of_invoices) {
+        toggleMultipleInvoiceFields();
+
+        ip_sqrip_number_of_invoices.on('change', function() {
+            const numOfInvoices = +(ip_sqrip_number_of_invoices.val());
+
+            for (let index = 1; index <= 3; index++) {
+                if (index <= numOfInvoices){
+                    $(`#woocommerce_sqrip_invoice_fraction_${index}`).closest('tr').show();
+                    $(`#woocommerce_sqrip_email_attached_invoice_${index}`).closest('tr').show();
+                    $(`#woocommerce_sqrip_partial_invoice_${index}_status`).closest('tr').show();
+                    $(`#woocommerce_sqrip_new_partial_invoice_${index}_status`).closest('tr').show();   
+                } else {
+                    $(`#woocommerce_sqrip_invoice_fraction_${index}`).val("0");
+                    $(`#woocommerce_sqrip_invoice_fraction_${index}`).closest('tr').hide();
+                    $(`#woocommerce_sqrip_email_attached_invoice_${index}`).closest('tr').hide();
+                    $(`#woocommerce_sqrip_partial_invoice_${index}_status`).closest('tr').hide();
+                    $(`#woocommerce_sqrip_new_partial_invoice_${index}_status`).closest('tr').hide();
+                }
+            }
+
+        });
+
+        $('input[id*=woocommerce_sqrip_invoice_fraction]').each(function (i, e) {
+            $(this).on("input", function() {
+                let totalSum = 0;
+                $('input[id*=woocommerce_sqrip_invoice_fraction]').each(function (ind, fractionInput) {
+                    $(fractionInput).closest('td.forminp').find('.sqrip-description').remove();
+                    const fractionVal = +fractionInput.value;
+                    totalSum += fractionVal;
+                });
+
+                if (totalSum > 100 || totalSum < 100) {
+                    let output_html = '<p class="sqrip-description" style="color:red;">Total percentage must be 100!</p>';
+                    $(this).closest('td.forminp').append(output_html);
+                    $(this).addClass('sqrip-rounded-red');
+                } else {
+                    $('input[id*=woocommerce_sqrip_invoice_fraction]').each(function (ind, fractionInput) {
+                        $(fractionInput).removeClass('sqrip-rounded-red');
+                    });
+                }
+
+                validate_form();
+            });
+        });
+
+        for (let index = 1; index <= 3; index++) {
+            let ip_sqrip_invoice_status = $(`#woocommerce_sqrip_partial_invoice_${index}_status`);
+            let ip_sqrip_new_invoice_status = $(`#woocommerce_sqrip_new_partial_invoice_${index}_status`);
+            let ip_sqrip_enb_new_invoice_status = $(`#woocommerce_sqrip_enabled_new_partial_invoice_${index}_status`);
+            let ip_sqrip_ft_new_invoice_status = $(`#woocommerce_sqrip_first_time_new_partial_invoice_${index}_status`);
+            
+            
+            ip_sqrip_new_invoice_status.closest('tr').addClass('sqrip-order-status');
+            ip_sqrip_invoice_status.closest('tr').addClass('sqrip-qr-order-status');
+            ip_sqrip_ft_new_invoice_status.prop('checked', false);
+
+            let btn_create_partial_invoice_stt_html = `<button id="btn_create_partial_invoice_${index}_stt" class="button-secondary sqrip-btn">` + sqrip[`txt_partial_invoice_${index}_create`] + '</button>';
+            ip_sqrip_new_invoice_status.after(btn_create_partial_invoice_stt_html);
+
+            $(`.sqrip-toggle-partial-invoice-${index}-status`).on('click', function (e) {
+                e.preventDefault();
+
+                $(this).closest('tr').toggleClass('sqrip-show');
+            })
+
+            let btn_create_qrorder = $(`#btn_create_partial_invoice_${index}_stt`);
+
+            btn_create_qrorder.on('click', function (e) {
+                e.preventDefault();
+
+                if (!ip_sqrip_new_invoice_status.val()) {
+                    ip_sqrip_new_invoice_status.focus();
+                } else {
+                    ip_sqrip_enb_new_invoice_status.prop('checked', true);
+                    ip_sqrip_ft_new_invoice_status.prop('checked', true);
+                    setTimeout(function () {
+                        btn_save.trigger('click');
+                    }, 200);
+                }
+            });
+        }
+    }
+
+    //Hide QR-invoice download option if integrated with PDF invoice plugin
+    if (ip_sqrip_pdf_invoice_integration.is(':checked')) {
+        ip_integration_order.prop('checked', false);
+        ip_integration_order.closest('tr').hide();
+    }
+    $(ip_sqrip_pdf_invoice_integration).on('input', function () {
+        if (ip_sqrip_pdf_invoice_integration.is(':checked')) {
+            ip_integration_order.prop('checked', false);
+            ip_integration_order.closest('tr').hide();
+        } else {
+            ip_integration_order.closest('tr').show();
+        }
+    });
+
+    //Add alignment radio input for download invoice button
+    if (ip_integration_order.length && ip_sqrip_download_button_align.length) {
+        ip_sqrip_download_button_align.closest('tr').addClass('hide-row');
+
+        const downloadAlignment = ip_sqrip_download_button_align.val() || 'left';
+        const downloadAlignmentHtml = `
+            <fieldset>
+                <span style="margin-right:1rem !important;">Position: </span>
+                <label style="margin-right:1rem !important;"><input type="radio" name="sqrip_download_btn_align" class="sqrip_download_btn_align" value="left" ${downloadAlignment === 'left' ? 'checked' : ''}> Links</label>
+                <label style="margin-right:1rem !important;"><input type="radio" name="sqrip_download_btn_align" class="sqrip_download_btn_align" value="center" ${downloadAlignment === 'center' ? 'checked' : ''}> Mitte</label>
+                <label style="margin-right:1rem !important;"><input type="radio" name="sqrip_download_btn_align" class="sqrip_download_btn_align" value="right" ${downloadAlignment === 'right' ? 'checked' : ''}> Rechts</label>
+            </fieldset>
+        `;
+        ip_integration_order.closest('td').append(downloadAlignmentHtml);
+        
+        $('.sqrip_download_btn_align').each(function (i, e) {
+            $(this).on("click", function() {
+                const alignValue = $(this).val();
+                ip_sqrip_download_button_align.val(alignValue);
+            })
+        })
+    }
+
+    document.querySelectorAll('button[type="submit"]').forEach(button => {
+        button.addEventListener('click', () => {
+            validate_form();
+        });
+    });
 });

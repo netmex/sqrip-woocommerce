@@ -222,5 +222,26 @@ jQuery(document).ready(function ($) {
         return response;
     }
 
+    $('.partial-payment-confirm-btn').each(function () {
+        $(this).on('click', function (e) {
+            e.preventDefault();
+            let confirm_url = $(this).data('confirm-url');
+
+            $('body').addClass('sqrip-loading');
+
+            $.ajax({
+                type: "get",
+                url: confirm_url,
+                success: function (response) {
+                    $('body').removeClass('sqrip-loading');
+                    window?.location?.reload();
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.log('The following error occured: ' + textStatus, errorThrown);
+                }
+            })
+        });
+    });
+
 });
 
