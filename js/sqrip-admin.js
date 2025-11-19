@@ -45,7 +45,9 @@ jQuery(document).ready(function ($) {
         ip_sqrip_current_status = $('#woocommerce_sqrip_current_status'),
         ip_sqrip_pdf_invoice_integration = $('#woocommerce_sqrip_pdf_invoice_integration'),
         ip_multiple_qr_slips_enabled = $('#woocommerce_sqrip_multiple_qr_slips_enabled'),
-        ip_sqrip_number_of_invoices = $('#woocommerce_sqrip_number_of_invoices');
+        ip_sqrip_number_of_invoices = $('#woocommerce_sqrip_number_of_invoices'),
+        ip_sqrip_form_head_notice = $('#woocommerce_sqrip_form_head_notice'),
+        ip_sqrip_download_button_align = $('#woocommerce_sqrip_invoice_download_button_align');
         ip_sqrip_remaining_credits.prop("readonly", true);
         ip_sqrip_current_status.prop("readonly", true);
         ip_sqrip_current_status.addClass('sqrip-no-border');
@@ -68,6 +70,10 @@ jQuery(document).ready(function ($) {
     $('select[id*="email_attached"]').select2({
         allowClear: true
     });
+
+    if (ip_sqrip_form_head_notice.val()) {
+        $('.sqrip-tabs').siblings('table.form-table').find('th').first().prepend('<div class="sqrip-notice error mt-10 sqrip-form-head-notice"><p>'+ip_sqrip_form_head_notice.val()+'</p></div>');
+    }
 
     $.ajax({
         type: "post",
@@ -487,26 +493,37 @@ jQuery(document).ready(function ($) {
                 $('.sqrip-tab[data-tab="' + feature.text + '"]').hide();
             }
 
-            toggleComparisonAndMultipleSlips();
+            toggleComparisonAndMultipleSlips(feature.text);
         })
     });
 
     toggleComparisonAndMultipleSlips();
     //Toggle "comparison" and "multiple-qr-slips"
-    function toggleComparisonAndMultipleSlips() {
-        if (ip_payment_comparison_enabled.is(':checked')) {
-            ip_multiple_qr_slips_enabled.attr("checked", false);
-            ip_multiple_qr_slips_enabled.attr("disabled", true);
+    function toggleComparisonAndMultipleSlips(feature) {
+        if (feature === 'comparison') {
+            if (ip_payment_comparison_enabled.is(':checked')) {
+                ip_multiple_qr_slips_enabled.prop("checked", false);
+                // ip_multiple_qr_slips_enabled.attr("disabled", true);
+                $('.sqrip-tab[data-tab="multiple-qr-slips"]').hide();
+            } else {
+                // ip_multiple_qr_slips_enabled.attr("disabled", false);
+                ip_multiple_qr_slips_enabled.prop("checked", true);
+                $('.sqrip-tab[data-tab="multiple-qr-slips"]').show();
+            }
+
         } else {
-            ip_multiple_qr_slips_enabled.attr("disabled", false);
+
+            if (ip_multiple_qr_slips_enabled.is(':checked')) {
+                ip_payment_comparison_enabled.prop("checked", false);
+                // ip_payment_comparison_enabled.attr("disabled", true);
+                $('.sqrip-tab[data-tab="comparison"]').hide();
+            } else {
+                // ip_payment_comparison_enabled.attr("disabled", false);
+                ip_payment_comparison_enabled.prop("checked", true);
+                $('.sqrip-tab[data-tab="comparison"]').show();
+            }
         }
 
-        if (ip_multiple_qr_slips_enabled.is(':checked')) {
-            ip_payment_comparison_enabled.attr("checked", false);
-            ip_payment_comparison_enabled.attr("disabled", true);
-        } else {
-            ip_payment_comparison_enabled.attr("disabled", false);
-        }
     }
 
     tab_active = window.location.hash.slice(1);
@@ -622,6 +639,19 @@ jQuery(document).ready(function ($) {
             btn_save.attr('disabled', true);
         } else {
             btn_save.attr('disabled', false);
+        }
+
+        let missingFields = "";
+
+        document.querySelectorAll('[required]').forEach(field => {
+            if (!field.value) {
+                missingFields += (field.name).replace("woocommerce_sqrip", "").split("_").join(" ") + ", ";
+            }
+        });
+
+        if (missingFields.length > 0) {
+            $(".sqrip-missing-fields-notice").remove();
+            btn_save.after('<div class="sqrip-notice error mt-10 sqrip-missing-fields-notice"><p>Please fill in: ' + missingFields.slice(0, -2) + '</p></div>');
         }
     }
 
@@ -1086,5 +1116,34 @@ jQuery(document).ready(function ($) {
         } else {
             ip_integration_order.closest('tr').show();
         }
+    });
+
+    //Add alignment radio input for download invoice button
+    if (ip_integration_order.length && ip_sqrip_download_button_align.length) {
+        ip_sqrip_download_button_align.closest('tr').addClass('hide-row');
+
+        const downloadAlignment = ip_sqrip_download_button_align.val() || 'left';
+        const downloadAlignmentHtml = `
+            <fieldset>
+                <span style="margin-right:1rem !important;">Position: </span>
+                <label style="margin-right:1rem !important;"><input type="radio" name="sqrip_download_btn_align" class="sqrip_download_btn_align" value="left" ${downloadAlignment === 'left' ? 'checked' : ''}> Links</label>
+                <label style="margin-right:1rem !important;"><input type="radio" name="sqrip_download_btn_align" class="sqrip_download_btn_align" value="center" ${downloadAlignment === 'center' ? 'checked' : ''}> Mitte</label>
+                <label style="margin-right:1rem !important;"><input type="radio" name="sqrip_download_btn_align" class="sqrip_download_btn_align" value="right" ${downloadAlignment === 'right' ? 'checked' : ''}> Rechts</label>
+            </fieldset>
+        `;
+        ip_integration_order.closest('td').append(downloadAlignmentHtml);
+        
+        $('.sqrip_download_btn_align').each(function (i, e) {
+            $(this).on("click", function() {
+                const alignValue = $(this).val();
+                ip_sqrip_download_button_align.val(alignValue);
+            })
+        })
+    }
+
+    document.querySelectorAll('button[type="submit"]').forEach(button => {
+        button.addEventListener('click', () => {
+            validate_form();
+        });
     });
 });

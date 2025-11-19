@@ -49,6 +49,7 @@ jQuery( document ).ready(function($){
                 iban: customerIBAN,
                 token: ip_token.val(),
                 store_iban: true,
+                security: sqrip.ajax_refund_nonce,
                 order_id: order_id.val(),
             },
             beforeSend: function () {

@@ -86,6 +86,10 @@ table.form-table td .sqrip-notice p {
     display: none;
 }
 
+.hide-row {
+    display: none !important;
+}
+
 .sqrip-tab {
     display: block;
     float: left;

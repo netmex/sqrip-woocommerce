@@ -23,8 +23,7 @@ function sqrip_generate_new_qr_code()
     $cur_user_id = get_current_user_id();
 
     if ($user_id == $cur_user_id) {
-        $sqrip_payment = new WC_Sqrip_Payment_Gateway;
-        $process_payment = $sqrip_payment->process_payment($order_id);
+        $process_payment = process_payment_stt($order_id);
 
         wp_send_json($process_payment);
     }
@@ -75,7 +74,7 @@ function sqrip_validation_iban_ajax()
 {
     if (!$_POST['iban'] || !$_POST['token']) return;
 
-    $iban = $_POST['iban'];
+    $iban = htmlentities($_POST['iban'] || '');
     $token = $_POST['token'];
 
     $store_iban = isset($_POST['store_iban']) ? $_POST['store_iban'] : null;
@@ -84,9 +83,13 @@ function sqrip_validation_iban_ajax()
     $response = sqrip_validation_iban($iban, $token);
     $result = [];
     $bank = isset($response->bank_data->bank) ? $response->bank_data->bank : '';
+    $order = wc_get_order($order_id);
 
-    if ($store_iban == "true") {
-        update_post_meta($order_id, 'sqrip_refund_iban_num', $iban);
+    if ($store_iban == "true" && $order && current_user_can('manage_woocommerce')) {
+        check_ajax_referer('sqrip-process-refund', 'security');
+
+        $order->update_meta_data('sqrip_refund_iban_num', $iban);
+        $order->save();
     }
 
     switch ($response->message) {
