@@ -853,7 +853,7 @@ function sqrip_make_address_line_2_required( $fields ) {
         $fields['billing']['billing_address_2']['required'] = true;
         $fields['billing']['billing_address_2']['placeholder'] = 'Building Number (required)';
     } else {
-        $fields['billing']['sqrip_building_num'] = array(
+        $fields['billing']['billing_sqrip_building_num'] = array(
             'type'        => 'text',
             'label'       => __('Building Number', 'sqrip-swiss-qr-invoice'),
             'placeholder' => __('Building Number', 'sqrip-swiss-qr-invoice'),
