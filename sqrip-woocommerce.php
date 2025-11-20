@@ -667,12 +667,14 @@ add_action('woocommerce_process_shop_order_meta', function($post_id) {
     ) {
         $order = wc_get_order($post_id);
         $order_data = $order->get_data(); // order data
+        $building_number_meta = $order->get_meta('_billing_sqrip_building_num', true);
 
         ## BILLING INFORMATION:
         $order_billing_first_name = $_POST['_billing_first_name'];
         $order_billing_last_name = $_POST['_billing_last_name'];
         $order_billing_address = $_POST['_billing_address_1'];
-        $order_billing_building_number = $_POST['_billing_address_2'] ? $_POST['_billing_address_2'] : "";
+        $order_billing_building_number = $_POST['_billing_address_2'] ? $_POST['_billing_address_2'] :
+            ( !empty($building_number_meta) ? $building_number_meta : "");
         $order_billing_city = $_POST['_billing_city'];
         $order_billing_postcode = $_POST['_billing_postcode'];
         $order_billing_country = $_POST['_billing_country'];
@@ -851,9 +853,9 @@ function sqrip_make_address_line_2_required( $fields ) {
         $fields['billing']['billing_address_2']['required'] = true;
         $fields['billing']['billing_address_2']['placeholder'] = 'Building Number (required)';
     } else {
-        $fields['billing']['billing_address_2'] = array(
+        $fields['billing']['sqrip_building_num'] = array(
             'type'        => 'text',
-            'label'       => __('Building Number (required)', 'sqrip-swiss-qr-invoice'),
+            'label'       => __('Building Number', 'sqrip-swiss-qr-invoice'),
             'placeholder' => __('Building Number', 'sqrip-swiss-qr-invoice'),
             'class'       => array('form-row-wide', 'sqrip-building-number'),
             'clear'       => true,
