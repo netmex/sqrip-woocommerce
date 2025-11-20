@@ -142,12 +142,12 @@ Yes. We are already working on comparing the reconciliation of orders/purchases 
 7. Refund functionality
 
 == Changelog ==
-= 1.9 : July 2025 – Features =
+= 1.9 : November 2025 – Features =
+* sqrip is ready for 'structured addresses';
 * Adding the ability to use sqrip in multiple stores installed on the same server instance;
 * If you use the Plugin 'PDF Invoices & Packing Slips for WooCommerce' you can now combine the invoice and the QR slip into one single PDF file;
-* sqrip is ready for 'structured addresses';
-* You can now split your invoices into multiple installments;
 * The QR bill can now be added to multiple e-mail templates;
+* You can now split your invoices into multiple installments (BETA);
 * Adding remarks on the checkout page;
 * The Refund IBAN of the client is now checked before a refund is initiated;
 * Refinements (Reference number layout, adding the sqrip logo to the payment options, WPML can now handle the description field too);
