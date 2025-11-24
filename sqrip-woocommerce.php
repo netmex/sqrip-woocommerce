@@ -849,17 +849,14 @@ add_action('woocommerce_after_order_refund_item_name', "sqrip_display_refund_qr_
  */
 function sqrip_make_address_line_2_required( $fields ) {
 
-    if (isset($fields['billing']['billing_address_2'])) {
-        $fields['billing']['billing_address_2']['required'] = true;
-        $fields['billing']['billing_address_2']['placeholder'] = 'Building Number (required)';
-    } else {
+    if (!isset($fields['billing']['billing_address_2'])) {
         $fields['billing']['billing_sqrip_building_num'] = array(
             'type'        => 'text',
             'label'       => __('Building Number', 'sqrip-swiss-qr-invoice'),
             'placeholder' => __('Building Number', 'sqrip-swiss-qr-invoice'),
             'class'       => array('form-row-wide', 'sqrip-building-number'),
             'clear'       => true,
-            'required'    => true,
+            'required'    => false,
             'priority'    => 50,
         );
     }
