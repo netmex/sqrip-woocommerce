@@ -209,7 +209,15 @@ add_action('admin_enqueue_scripts', function ($hook_suffix) {
                 'txt_send_test_email_warning' => __('You have no free credits anymore, a paid credit will be charged', 'sqrip-swiss-qr-invoice'),
                 'txt_send_test_email_no_credit' => __('You have no credits left', 'sqrip-swiss-qr-invoice'),
                 'details' => $sqrip_details,
-                'field_required_txt' => __('This field is required', 'sqrip-swiss-qr-invoice')
+                'field_required_txt' => __('This field is required', 'sqrip-swiss-qr-invoice'),
+                'txt_address_update_warning' => sprintf(
+                    "<p>%s</p><p>%s<ul><li>%s</li><li>%s</li><li>%s</li></ul><p>",
+                    __('As from November 2025 on, the QR invoice is only accepted when addresses consist of separate fields for street and building number.', 'sqrip-swiss-qr-invoice'),
+                    __('Please make sure you have this defined correctly:', 'sqrip-swiss-qr-invoice'),
+                    __('in your sqrip account;', 'sqrip-swiss-qr-invoice'),
+                    __('as your third address;', 'sqrip-swiss-qr-invoice'),
+                    __('in your checkout process when clients enter their billing address.', 'sqrip-swiss-qr-invoice')
+                ),
             )
         );
 
