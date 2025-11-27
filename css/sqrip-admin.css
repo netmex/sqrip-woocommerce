@@ -498,3 +498,22 @@ tr.sqrip-no-height {
     width: 50%;
     text-align: center;
   }
+
+  .sqrip-form-head-notice {
+    background-color: #ffffff;
+    border-left: 4px solid #371f84;
+    padding: 10px 15px;
+    margin-bottom: 20px;
+  }
+
+  .sqrip-form-head-notice ul {
+    list-style-type: disc !important;
+    margin-left: 1.5rem;
+    font-size: 13px;
+  }
+
+  .sqrip-close-form-notice {
+    float: right;
+    cursor: pointer;
+    font-weight: bold;
+  }

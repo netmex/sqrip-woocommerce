@@ -46,7 +46,6 @@ jQuery(document).ready(function ($) {
         ip_sqrip_pdf_invoice_integration = $('#woocommerce_sqrip_pdf_invoice_integration'),
         ip_multiple_qr_slips_enabled = $('#woocommerce_sqrip_multiple_qr_slips_enabled'),
         ip_sqrip_number_of_invoices = $('#woocommerce_sqrip_number_of_invoices'),
-        ip_sqrip_form_head_notice = $('#woocommerce_sqrip_form_head_notice'),
         ip_sqrip_download_button_align = $('#woocommerce_sqrip_invoice_download_button_align');
         ip_sqrip_remaining_credits.prop("readonly", true);
         ip_sqrip_current_status.prop("readonly", true);
@@ -71,8 +70,25 @@ jQuery(document).ready(function ($) {
         allowClear: true
     });
 
-    if (ip_sqrip_form_head_notice.val()) {
-        $('.sqrip-tabs').siblings('table.form-table').find('th').first().prepend('<div class="sqrip-notice error mt-10 sqrip-form-head-notice"><p>'+ip_sqrip_form_head_notice.val()+'</p></div>');
+    if (
+        (new Date('2025-12-31').getTime() > Date.now())
+        && (!localStorage.getItem('sqrip_hide_form_head_notice'))
+    ) {
+        $('.sqrip-tabs').siblings('table.form-table').find('th')
+        .first()
+        .prepend('<div class="sqrip-notice mt-10 sqrip-form-head-notice">'+
+            `<div class="sqrip-close-form-notice">x</div>`+
+            sqrip.txt_address_update_warning
+            +'</div>'
+        );
+
+        $('.sqrip-close-form-notice').on('click', function () {
+            $(this).closest('.sqrip-form-head-notice').remove();
+
+            if (window?.localStorage) {
+                localStorage.setItem('sqrip_hide_form_head_notice', '1');
+            }
+        });
     }
 
     $.ajax({
