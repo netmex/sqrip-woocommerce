@@ -152,6 +152,12 @@ Yes. We are already working on comparing the reconciliation of orders/purchases 
 * The Refund IBAN of the client is now checked before a refund is initiated;
 * Refinements (Reference number layout, adding the sqrip logo to the payment options, WPML can now handle the description field too);
 * See the activated services by API-keys in the webadmin panel;
+* Performance: the plugin no longer performs a blocking API call on every page load – front-end pages load noticeably faster;
+* Multilingual: complete German, French and Italian translations (incl. Swiss de_CH / fr_CH / it_CH variants) are now bundled with the plugin;
+* Full compatibility with WooCommerce High-Performance Order Storage (HPOS): refunds, order-screen actions and bulk status changes now work with the new order storage;
+* Security: hardened the admin AJAX actions and the payment-confirmation flow;
+* All scripts and styles are now served locally (no external CDN);
+* The minimum required PHP version is now 7.4;
 * Minor bug fixing;
 * Making sure the plugin works with the latest versions of WP and WooCommerce.
 
@@ -310,5 +316,8 @@ We made users (even more) happy with these changes:
 * Here we go!
 
 == Upgrade Notice ==
+= 1.9 =
+Recommended update: faster front-end (no more blocking API call on every page load), built-in German / French / Italian translations, full WooCommerce HPOS compatibility, and security hardening. Requires PHP 7.4 or higher.
+
 = 1.0 =
 =======
