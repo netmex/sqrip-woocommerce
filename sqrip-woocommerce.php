@@ -1696,7 +1696,12 @@ $current_directory = plugin_dir_path( __FILE__ ) . '/inc';
 $file_to_rename = 'onetime.php';
 $new_file_name = 'onetime-backup.php';
 
-if (file_exists($current_directory . '/' . $file_to_rename)) {
+// Run the one-time 1.9 settings migration only in wp-admin. Previously this
+// file-scope block executed on every request (including front-end page loads)
+// until the rename succeeded — on read-only filesystems it never did, re-running
+// a remote API POST on every request. wp-admin is where an updating merchant
+// lands, so gating here keeps the migration one-time without any front-end cost.
+if (is_admin() && file_exists($current_directory . '/' . $file_to_rename)) {
     $current_settings = get_option('woocommerce_sqrip_settings', array());
 
     if (!$current_settings['status_suppressed']) {
