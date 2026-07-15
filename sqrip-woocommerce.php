@@ -7,6 +7,8 @@
  * Version:                 1.9
  * Author:                  netmex digital gmbh
  * Author URI:              https://sqrip.ch/
+ * Text Domain:             sqrip-swiss-qr-invoice
+ * Domain Path:             /languages
  */
 
 defined('ABSPATH') || exit;
@@ -33,6 +35,19 @@ define('SQRIP_PLUGIN_BASENAME', plugin_basename(__FILE__));
 
 require_once __DIR__ . '/inc/functions.php';
 require_once __DIR__ . '/inc/sqrip-ajax.php';
+
+/**
+ * Load the plugin's bundled translations from /languages.
+ *
+ * Hooked on init because WP 6.7+ warns when a textdomain is loaded too early.
+ * Bundled .mo files act as a fallback; if a wordpress.org language pack exists
+ * for a locale it takes precedence automatically.
+ *
+ * @since 1.9
+ */
+add_action('init', function () {
+    load_plugin_textdomain('sqrip-swiss-qr-invoice', false, dirname(plugin_basename(__FILE__)) . '/languages');
+});
 
 /**
  * Add plugin Settings link
@@ -974,7 +989,7 @@ function sqrip_extra_user_profile_fields($user)
 
     if ($sqrip_return_enabled) {
         ?>
-        <h3><?php _e("Refunds with sqrip", "sqrip"); ?></h3>
+        <h3><?php _e("Refunds with sqrip", "sqrip-swiss-qr-invoice"); ?></h3>
         <table class="form-table">
             <tr>
                 <th><label for="iban"><?php _e("IBAN"); ?></label></th>
@@ -1550,16 +1565,16 @@ function bulk_change_order_sqrip_statuses( $actions ) {
     $sqrip_qr_order_status = sqrip_get_plugin_option('qr_order_status');
 
     if ($sqrip_new_status) {
-        $actions['sqrip_new_status'] = __( 'Change status to '. $sqrip_new_status, 'woocommerce' );
+        $actions['sqrip_new_status'] = sprintf( __( 'Change status to %s', 'sqrip-swiss-qr-invoice' ), $sqrip_new_status );
     }
     if ($sqrip_new_qr_status) {
-        $actions['sqrip_new_qr_order_status'] = __( 'Change status to '. $sqrip_new_qr_status, 'woocommerce' );
+        $actions['sqrip_new_qr_order_status'] = sprintf( __( 'Change status to %s', 'sqrip-swiss-qr-invoice' ), $sqrip_new_qr_status );
     }
     if ($sqrip_new_aw_status) {
-        $actions['sqrip_new_awaiting_status'] = __( 'Change status to '. $sqrip_new_aw_status, 'woocommerce' );
+        $actions['sqrip_new_awaiting_status'] = sprintf( __( 'Change status to %s', 'sqrip-swiss-qr-invoice' ), $sqrip_new_aw_status );
     }
     if ($sqrip_new_su_status) {
-        $actions['sqrip_new_suppressed_status'] = __( 'Change status to '. $sqrip_new_su_status, 'woocommerce' );
+        $actions['sqrip_new_suppressed_status'] = sprintf( __( 'Change status to %s', 'sqrip-swiss-qr-invoice' ), $sqrip_new_su_status );
     }
 
     return $actions;

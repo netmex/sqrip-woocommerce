@@ -107,7 +107,7 @@ function sqrip_validation_iban_ajax()
         case 'Valid simple IBAN':
             $result['result'] = true;
             $result['qriban'] = false;
-            $result['message'] = __("validated", "sqrip");
+            $result['message'] = __("validated", "sqrip-swiss-qr-invoice");
             $result['description'] = __('This is a normal IBAN. The customer can make deposits without noting the reference number (RF...). Therefore, automatic matching with orders is not guaranteed throughout. Manual processing may be necessary. A QR-IBAN is required for automatic matching. This is available for the same bank account. Information about this is available from your bank.', 'sqrip-swiss-qr-invoice');
             $result['bank'] = $bank ? sprintf('Bank: <b>%s</b>', $bank) : '';
             break;
@@ -115,7 +115,7 @@ function sqrip_validation_iban_ajax()
         case 'Valid qr IBAN':
             $result['result'] = true;
             $result['qriban'] = true;
-            $result['message'] = __("validated", "sqrip");
+            $result['message'] = __("validated", "sqrip-swiss-qr-invoice");
             $result['description'] = __('This is a QR IBAN. The customer can make payments only by specifying a QR reference (number). You can uniquely assign the deposit to a customer / order. This enables automatic matching of payments received with orders. Want to automate this step? Contact us <a href="mailto:info@sqrip.ch">info@sqrip.ch</a>.', 'sqrip-swiss-qr-invoice');
             $result['bank'] = $bank ? sprintf('Bank: <b>%s</b>', $bank) : '';
             break;
@@ -123,14 +123,14 @@ function sqrip_validation_iban_ajax()
         default:
             $result['result'] = false;
             $result['qriban'] = false;
-            $result['message'] = __("incorrect", "sqrip");
+            $result['message'] = __("incorrect", "sqrip-swiss-qr-invoice");
             $result['description'] = __('It seems that an invalid (QR-)IBAN has been submitted. Please check the designated transfers-receiving IBAN you submitted.', 'sqrip-swiss-qr-invoice');
             break;
     }
     if ($response->will_need_confirmation) {
         $result['result'] = false;
         $result['qriban'] = false;
-        $result['message'] = __("incorrect", "sqrip");
+        $result['message'] = __("incorrect", "sqrip-swiss-qr-invoice");
         $result['description'] = __("Action required:\nPlease confirm change of IBAN on <a href='https://api.sqrip.ch/login' target='_blank'>sqrip.ch</a> in order to continue the service.", 'sqrip-swiss-qr-invoice');
         $result['bank'] = $bank ? sprintf('Bank: <b>%s</b>', $bank) : '';
     }
