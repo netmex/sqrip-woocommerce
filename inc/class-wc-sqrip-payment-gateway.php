@@ -760,6 +760,14 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 
     public function show_qr_reference_format()
     {
+        // This only decides a CSS class on the admin settings form. init_form_fields()
+        // runs in the gateway constructor on every request (incl. frontend), so calling
+        // the blocking validate-iban API here would slow down every page load. The class
+        // is never rendered outside wp-admin, so skip the remote call there entirely.
+        if (!is_admin()) {
+            return 'hide';
+        }
+
         $iban = sqrip_get_plugin_option('iban');
         $token = sqrip_get_plugin_option('token');
 

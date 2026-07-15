@@ -90,7 +90,8 @@ function sqrip_validation_iban_ajax()
     $store_iban = isset($_POST['store_iban']) ? $_POST['store_iban'] : null;
     $order_id = isset($_POST['order_id']) ? $_POST['order_id'] : null;
 
-    $response = sqrip_validation_iban($iban, $token);
+    // Explicit admin "Check" action: always re-query the API and refresh the cache.
+    $response = sqrip_validation_iban($iban, $token, true);
     $result = [];
     $bank = isset($response->bank_data->bank) ? $response->bank_data->bank : '';
     $order = wc_get_order($order_id);
