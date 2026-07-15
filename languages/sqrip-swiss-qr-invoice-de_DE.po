@@ -1,0 +1,610 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: sqrip.ch 1.9\n"
+"Report-Msgid-Bugs-To: https://sqrip.ch/\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: de_DE\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "% of total amount in 1st qr-invoice"
+msgstr "% des Gesamtbetrags in der 1. QR-Rechnung"
+
+msgid "% of total amount in 2nd qr-invoice"
+msgstr "% des Gesamtbetrags in der 2. QR-Rechnung"
+
+msgid "% of total amount in 3rd qr-invoice"
+msgstr "% des Gesamtbetrags in der 3. QR-Rechnung"
+
+msgid "%s %s <p>%s</p>"
+msgstr "%s %s <p>%s</p>"
+
+msgid "(QR-)IBAN of Payee"
+msgstr "(QR-)IBAN des Empfängers"
+
+msgid "(QR-)IBAN of the account to which the transfer is to be made"
+msgstr "(QR-)IBAN des Kontos, auf das die Überweisung erfolgen soll"
+
+msgid "<b>%s</b> %s</br>%s"
+msgstr "<b>%s</b> %s</br>%s"
+
+msgid "[order_date]_[shop_name]_invoice-order_[order_number]"
+msgstr "[order_date]_[shop_name]_rechnung-bestellung_[order_number]"
+
+msgid "Action required:\\nPlease confirm change of IBAN on <a href='https://api.sqrip.ch/login' target='_blank'>sqrip.ch</a> in order to continue the service."
+msgstr "Aktion erforderlich:\\nBitte bestätigen Sie die Änderung der IBAN auf <a href='https://api.sqrip.ch/login' target='_blank'>sqrip.ch</a>, um den Dienst weiterhin nutzen zu können."
+
+msgid "Activate Multiple QR-slips per order"
+msgstr "Mehrere QR-Zahlteile pro Bestellung aktivieren"
+
+msgid "Activate sqrip"
+msgstr "sqrip aktivieren"
+
+msgid "Activate sqrip for Payment Comparison"
+msgstr "sqrip für den Zahlungsabgleich aktivieren"
+
+msgid "Activate sqrip for Refunds"
+msgstr "sqrip für Rückerstattungen aktivieren"
+
+msgid "Activate/Deactivate Multiple QR-slips"
+msgstr "Mehrere QR-Zahlteile aktivieren/deaktivieren"
+
+msgid "Activate/Deactivate Payment Comparison"
+msgstr "Zahlungsabgleich aktivieren/deaktivieren"
+
+msgid "Activate/Deactivate Refunds"
+msgstr "Rückerstattungen aktivieren/deaktivieren"
+
+msgid "Activation & Status"
+msgstr "Aktivierung & Status"
+
+msgid "Additional Information"
+msgstr "Zusätzliche Informationen"
+
+msgid "Address"
+msgstr "Adresse"
+
+msgid "API key"
+msgstr "API-Schlüssel"
+
+msgid "API key for Refunds"
+msgstr "API-Schlüssel für Rückerstattungen"
+
+msgid "As from November 2025 on, the QR invoice is only accepted when addresses consist of separate fields for street and building number."
+msgstr "Ab November 2025 wird die QR-Rechnung nur noch akzeptiert, wenn Adressen aus separaten Feldern für Strasse und Hausnummer bestehen."
+
+msgid "as your third address;"
+msgstr "als Ihre dritte Adresse;"
+
+msgid "Attach 2nd QR-Invoice to E-Mail template"
+msgstr "2. QR-Rechnung an E-Mail-Vorlage anhängen"
+
+msgid "Attach 3rd QR-Invoice to E-Mail template"
+msgstr "3. QR-Rechnung an E-Mail-Vorlage anhängen"
+
+msgid "Attach QR-Invoice to E-Mail template"
+msgstr "QR-Rechnung an E-Mail-Vorlage anhängen"
+
+msgid "Auto turn off"
+msgstr "Automatisch ausschalten"
+
+msgid "Auto turn off sqrip services if error occurs"
+msgstr "sqrip-Dienste bei einem Fehler automatisch ausschalten"
+
+msgid "Automatic QR-invoice generation by sqrip is disabled."
+msgstr "Die automatische Erstellung von QR-Rechnungen durch sqrip ist deaktiviert."
+
+msgid "Awaiting payment"
+msgstr "Warten auf Zahlung"
+
+msgid "Basis of the (QR-)Ref#"
+msgstr "Grundlage der (QR-)Referenznummer"
+
+msgid "Both Company Name and First/Last name "
+msgstr "Sowohl Firmenname als auch Vor-/Nachname "
+
+msgid "Building Number"
+msgstr "Hausnummer"
+
+msgid "Building Number*"
+msgstr "Hausnummer*"
+
+msgid "Change status to %s"
+msgstr "Status ändern zu %s"
+
+msgid "Check"
+msgstr "Prüfen"
+
+msgid "Checkout Page Remarks"
+msgstr "Anmerkungen auf der Kassenseite"
+
+msgid "City*"
+msgstr "Ort*"
+
+msgid "Combine QR-Slip with Invoice into one document"
+msgstr "QR-Zahlteil und Rechnung in einem Dokument zusammenfassen"
+
+msgid "Completed Orders Status"
+msgstr "Status abgeschlossener Bestellungen"
+
+msgid "Completed, Paid"
+msgstr "Abgeschlossen, bezahlt"
+
+msgid "Confirm payment"
+msgstr "Zahlung bestätigen"
+
+msgid "Confirm Payment"
+msgstr "Zahlung bestätigen"
+
+msgid "Confirm receipt of payment"
+msgstr "Zahlungseingang bestätigen"
+
+msgid "Connection"
+msgstr "Verbindung"
+
+msgid "Connection test"
+msgstr "Verbindungstest"
+
+msgid "Country*"
+msgstr "Land*"
+
+msgid "Create"
+msgstr "Erstellen"
+
+msgid "Current sqrip status"
+msgstr "Aktueller sqrip-Status"
+
+msgid "days."
+msgstr "Tagen."
+
+msgid "Define Status when QR-Invoice is suppressed"
+msgstr "Status festlegen, wenn die QR-Rechnung unterdrückt wird"
+
+msgid "Delete any generated QR-invoice after "
+msgstr "Jede erstellte QR-Rechnung löschen nach "
+
+msgid "Delete QR-invoice once status has been changed to"
+msgstr "QR-Rechnung löschen, sobald der Status geändert wurde zu"
+
+msgid "Deleted"
+msgstr "Gelöscht"
+
+msgid "Description"
+msgstr "Beschreibung"
+
+msgid "Description of what the customer can expect from this payment option."
+msgstr "Beschreibung dessen, was der Kunde von dieser Zahlungsoption erwarten kann."
+
+msgid "Display"
+msgstr "Anzeige"
+
+msgid "Do not attach to any e-mail"
+msgstr "An keine E-Mail anhängen"
+
+msgid "Do not set this too low! Remove input to disable the setting."
+msgstr "Setzen Sie diesen Wert nicht zu niedrig! Entfernen Sie die Eingabe, um die Einstellung zu deaktivieren."
+
+msgid "Don\\'t generate QR-invoice at checkout but manually"
+msgstr "QR-Rechnung nicht beim Checkout, sondern manuell erstellen"
+
+msgid "Download Invoice"
+msgstr "Rechnung herunterladen"
+
+msgid "Due date: [due_date format=\\\"y-MM-dd\\\"]\\nOrder: [order_number]\\nThank you for your purchase!"
+msgstr "Fälligkeitsdatum: [due_date format=\\\"y-MM-dd\\\"]\\nBestellung: [order_number]\\nVielen Dank für Ihren Einkauf!"
+
+msgid "E-Mail can not be sent, please check WP MAIL SMTP"
+msgstr "E-Mail kann nicht gesendet werden, bitte überprüfen Sie WP MAIL SMTP"
+
+msgid "Either Company Name(priority) or First/Last name"
+msgstr "Entweder Firmenname (Priorität) oder Vor-/Nachname"
+
+msgid "Enable QR invoices with sqrip API"
+msgstr "QR-Rechnungen mit der sqrip API aktivieren"
+
+msgid "English"
+msgstr "Englisch"
+
+msgid "Error: %s"
+msgstr "Fehler: %s"
+
+msgid "Error: Es wurde kein API Schlüssel für die Rückerstattungen angegeben. Bitte ergänze dies in den sqrip Plugin Einstellungen."
+msgstr "Error: Es wurde kein API Schlüssel für die Rückerstattungen angegeben. Bitte ergänze dies in den sqrip Plugin Einstellungen."
+
+msgid "Features"
+msgstr "Funktionen"
+
+msgid "File Name"
+msgstr "Dateiname"
+
+msgid "For security reasons, a separate API key with <strong>deactived</strong> confirmation is needed for the Refund function."
+msgstr "Aus Sicherheitsgründen wird für die Rückerstattungsfunktion ein separater API-Schlüssel mit <strong>deaktivierter</strong> Bestätigung benötigt."
+
+msgid "Format"
+msgstr "Format"
+
+msgid "French"
+msgstr "Französisch"
+
+msgid "General Settings"
+msgstr "Allgemeine Einstellungen"
+
+msgid "Generate new QR code"
+msgstr "Neuen QR-Code erstellen"
+
+msgid "Generate QR Invoice"
+msgstr "QR-Rechnung erstellen"
+
+msgid "German"
+msgstr "Deutsch"
+
+msgid "Handling"
+msgstr "Handhabung"
+
+msgid "here"
+msgstr "hier"
+
+msgid "Hide QR Code"
+msgstr "QR-Code ausblenden"
+
+msgid "IBAN changes: Active confirmation (see API key in sqrip.ch account)."
+msgstr "IBAN-Änderungen: Aktive Bestätigung (siehe API-Schlüssel im sqrip.ch-Konto)."
+
+msgid "IBAN changes: Passive confirmation (see API key in sqrip.ch account)"
+msgstr "IBAN-Änderungen: Passive Bestätigung (siehe API-Schlüssel im sqrip.ch-Konto)"
+
+msgid "IBAN des Kunden wurde nicht gefunden. Stelle sicher, dass sie im Meta-Feld 'iban_num' hinterlegt ist."
+msgstr "IBAN des Kunden wurde nicht gefunden. Stelle sicher, dass sie im Meta-Feld 'iban_num' hinterlegt ist."
+
+msgid "If activated, sqrip generates multiple QR-slips per order based on specified percentages of total amount."
+msgstr "Wenn aktiviert, erstellt sqrip mehrere QR-Zahlteile pro Bestellung basierend auf festgelegten Prozentsätzen des Gesamtbetrags."
+
+msgid "If activated, sqrip makes refunding easier by creating a QR-code that can be scanned with the banking app to initiate a bank transfer to the client."
+msgstr "Wenn aktiviert, erleichtert sqrip Rückerstattungen, indem ein QR-Code erstellt wird, der mit der Banking-App gescannt werden kann, um eine Banküberweisung an den Kunden auszulösen."
+
+msgid "If activated, sqrip will add an action for orders with the status specified in setting 1 (Awaiting payment), to change the status to the one specified in setting 2 (Confirmed)."
+msgstr "Wenn aktiviert, fügt sqrip für Bestellungen mit dem in Einstellung 1 (Warten auf Zahlung) festgelegten Status eine Aktion hinzu, um den Status in den in Einstellung 2 (Bestätigt) festgelegten zu ändern."
+
+msgid "If there is no suitable status available, you can create one right %s"
+msgstr "Falls kein passender Status verfügbar ist, können Sie gleich %s einen erstellen"
+
+msgid "If you enable this, the order status for orders with sqrip will change to \\'Payment pending\\', a confirmation e-mail will be sent and the order will wait for you to generate qr-invoices manually. This is helpful if you may need to adjust pricing or quantity after an order has been placed"
+msgstr "Wenn Sie dies aktivieren, wird der Bestellstatus für Bestellungen mit sqrip auf \\'Zahlung ausstehend\\' geändert, eine Bestätigungs-E-Mail wird gesendet und die Bestellung wartet darauf, dass Sie die QR-Rechnungen manuell erstellen. Dies ist hilfreich, wenn Sie Preise oder Mengen nach der Bestellung anpassen müssen"
+
+msgid "in your checkout process when clients enter their billing address."
+msgstr "in Ihrem Checkout-Prozess, wenn Kunden ihre Rechnungsadresse eingeben."
+
+msgid "in your sqrip account;"
+msgstr "in Ihrem sqrip-Konto;"
+
+msgid "incorrect"
+msgstr "falsch"
+
+msgid "Initiate QR-Ref# with these 6 digits"
+msgstr "QR-Referenznummer mit diesen 6 Ziffern beginnen"
+
+msgid "Initiate sqrip payment error:"
+msgstr "Fehler beim Auslösen der sqrip-Zahlung:"
+
+msgid "Invoice Details"
+msgstr "Rechnungsdetails"
+
+msgid "It seems that an invalid (QR-)IBAN has been submitted. Please check the designated transfers-receiving IBAN you submitted."
+msgstr "Es scheint, dass eine ungültige (QR-)IBAN übermittelt wurde. Bitte überprüfen Sie die von Ihnen angegebene, für den Zahlungseingang bestimmte IBAN."
+
+msgid "Italian"
+msgstr "Italienisch"
+
+msgid "Keep the size of your media library small. sqrip deletes all qr-invoice files that are not needed anymore"
+msgstr "Halten Sie Ihre Medienbibliothek klein. sqrip löscht alle QR-Rechnungsdateien, die nicht mehr benötigt werden"
+
+msgid "Language"
+msgstr "Sprache"
+
+msgid "Mark as paid"
+msgstr "Als bezahlt markieren"
+
+msgid "Mark as unpaid"
+msgstr "Als unbezahlt markieren"
+
+msgid "Maturity (Today in x days)"
+msgstr "Fälligkeit (heute in x Tagen)"
+
+msgid "Multiple QR-Slips"
+msgstr "Mehrere QR-Zahlteile"
+
+msgid "Name*"
+msgstr "Name*"
+
+msgid "Number of qr-invoices to deliver"
+msgstr "Anzahl der zu übermittelnden QR-Rechnungen"
+
+msgid "Offer QR invoice for download"
+msgstr "QR-Rechnung zum Download anbieten"
+
+msgid "on a blank A4 PDF"
+msgstr "auf einem leeren A4-PDF"
+
+msgid "only the A6 payment part as PDF"
+msgstr "nur der A6-Zahlteil als PDF"
+
+msgid "Open an account at <a href=\"https://sqrip.ch\" target=\"_blank\">https://sqrip.ch</a>, create an API key, copy and paste it here. Done!"
+msgstr "Eröffnen Sie ein Konto unter <a href=\"https://sqrip.ch\" target=\"_blank\">https://sqrip.ch</a>, erstellen Sie einen API-Schlüssel, kopieren Sie ihn und fügen Sie ihn hier ein. Fertig!"
+
+msgid "Order number"
+msgstr "Bestellnummer"
+
+msgid "Paid"
+msgstr "Bezahlt"
+
+msgid "paid on"
+msgstr "bezahlt am"
+
+msgid "Partial Invoice Information"
+msgstr "Informationen zur Teilrechnung"
+
+msgid "Partial Payment"
+msgstr "Teilzahlung"
+
+msgid "Partial payment [invoice] of [max_invoice]"
+msgstr "Teilzahlung [invoice] von [max_invoice]"
+
+msgid "Partially paid"
+msgstr "Teilweise bezahlt"
+
+msgid "Payee"
+msgstr "Empfänger"
+
+msgid "Payer"
+msgstr "Zahlungspflichtiger"
+
+msgid "Payment Comparison"
+msgstr "Zahlungsabgleich"
+
+msgid "Payment method name"
+msgstr "Name der Zahlungsmethode"
+
+msgid "Please add IBAN in the settings of your webshop or on the sqrip dashboard."
+msgstr "Bitte fügen Sie die IBAN in den Einstellungen Ihres Webshops oder im sqrip-Dashboard hinzu."
+
+msgid "Please make sure you have this defined correctly:"
+msgstr "Bitte stellen Sie sicher, dass Sie dies korrekt definiert haben:"
+
+msgid "Please note that the sqrip payment method is disabled in the sqrip plugin settings."
+msgstr "Bitte beachten Sie, dass die Zahlungsmethode sqrip in den sqrip-Plugin-Einstellungen deaktiviert ist."
+
+msgid "Please select a product in the settings."
+msgstr "Bitte wählen Sie in den Einstellungen ein Produkt aus."
+
+msgid "Please submit at least either Name / Last name or Company name to generate the qr-invoice"
+msgstr "Bitte geben Sie mindestens entweder Name / Nachname oder Firmenname an, um die QR-Rechnung zu erstellen"
+
+msgid "Plugin <a href='https://wordpress.org/plugins/woocommerce-pdf-invoices-packing-slips'> 'PDF Invoices & Packing Slips for WooCommerce' </a> "
+msgstr "Plugin <a href='https://wordpress.org/plugins/woocommerce-pdf-invoices-packing-slips'> 'PDF Invoices & Packing Slips for WooCommerce' </a> "
+
+msgid "Position:"
+msgstr "Position:"
+
+msgid "QR order status"
+msgstr "QR-Bestellstatus"
+
+msgid "QR-Code PDF"
+msgstr "QR-Code-PDF"
+
+msgid "QR-Invoice"
+msgstr "QR-Rechnung"
+
+msgid "Random number"
+msgstr "Zufallszahl"
+
+msgid "Reference number"
+msgstr "Referenznummer"
+
+msgid "Refunds"
+msgstr "Rückerstattungen"
+
+msgid "Refunds with sqrip"
+msgstr "Rückerstattungen mit sqrip"
+
+msgid "Remaining Credits"
+msgstr "Verbleibende Credits"
+
+msgid "Renew QR Invoice"
+msgstr "QR-Rechnung erneuern"
+
+msgid "Renew QR Invoice error:"
+msgstr "Fehler beim Erneuern der QR-Rechnung:"
+
+msgid "Select email templates to which the QR-invoice are attached"
+msgstr "Wählen Sie die E-Mail-Vorlagen aus, an die die QR-Rechnung angehängt wird"
+
+msgid "Select number of qr-invoices to send to customer"
+msgstr "Wählen Sie die Anzahl der QR-Rechnungen aus, die an den Kunden gesendet werden sollen"
+
+msgid "Send a copy of the Email with PDF invoice to Admin"
+msgstr "Eine Kopie der E-Mail mit der PDF-Rechnung an den Administrator senden"
+
+msgid "Send a copy to the shop admin"
+msgstr "Eine Kopie an den Shop-Administrator senden"
+
+msgid "Send test to %s"
+msgstr "Test senden an %s"
+
+msgid "Services"
+msgstr "Dienste"
+
+msgid "Set the status of a newly placed order with payment method \\'sqrip\\' so it matches your shop process. Should no status be suitable, please create one for your own %s."
+msgstr "Legen Sie den Status einer neu aufgegebenen Bestellung mit der Zahlungsmethode \\'sqrip\\' so fest, dass er zu Ihrem Shop-Prozess passt. Sollte kein Status geeignet sein, erstellen Sie bitte selbst %s einen."
+
+msgid "Set the status of the 1st partial invoice so it matches your shop process. Should no status be suitable, please create one for your own %s."
+msgstr "Legen Sie den Status der 1. Teilrechnung so fest, dass er zu Ihrem Shop-Prozess passt. Sollte kein Status geeignet sein, erstellen Sie bitte selbst %s einen."
+
+msgid "Set the status of the 2nd partial invoice so it matches your shop process. Should no status be suitable, please create one for your own %s."
+msgstr "Legen Sie den Status der 2. Teilrechnung so fest, dass er zu Ihrem Shop-Prozess passt. Sollte kein Status geeignet sein, erstellen Sie bitte selbst %s einen."
+
+msgid "Set the status of the 3rd partial invoice so it matches your shop process. Should no status be suitable, please create one for your own %s."
+msgstr "Legen Sie den Status der 3. Teilrechnung so fest, dass er zu Ihrem Shop-Prozess passt. Sollte kein Status geeignet sein, erstellen Sie bitte selbst %s einen."
+
+msgid "Settings"
+msgstr "Einstellungen"
+
+msgid "Show QR Code"
+msgstr "QR-Code anzeigen"
+
+msgid "Show QR-invoice on confirmation page"
+msgstr "QR-Rechnung auf der Bestätigungsseite anzeigen"
+
+msgid "sqrip Error: %s"
+msgstr "sqrip-Fehler: %s"
+
+msgid "sqrip Payment"
+msgstr "sqrip-Zahlung"
+
+msgid "sqrip Payment Error: %s"
+msgstr "sqrip-Zahlungsfehler: %s"
+
+msgid "sqrip payment initiation was successful"
+msgstr "Die sqrip-Zahlung wurde erfolgreich ausgelöst"
+
+msgid "sqrip payment QR code was successfully regenerated"
+msgstr "Der QR-Code der sqrip-Zahlung wurde erfolgreich neu erstellt"
+
+msgid "sqrip QR Invoice created."
+msgstr "sqrip QR-Rechnung erstellt."
+
+msgid "sqrip QR Invoices created."
+msgstr "sqrip QR-Rechnungen erstellt."
+
+msgid "sqrip QR-Code für Rückerstattung erstellt."
+msgstr "sqrip QR-Code für Rückerstattung erstellt."
+
+msgid "sqrip refund was marked as \\'paid\\'"
+msgstr "Die sqrip-Rückerstattung wurde als \\'bezahlt\\' markiert"
+
+msgid "sqrip refund was marked as \\'unbezahlt\\'"
+msgstr "Die sqrip-Rückerstattung wurde als \\'unbezahlt\\' markiert"
+
+msgid "sqrip settings"
+msgstr "sqrip-Einstellungen"
+
+msgid "sqrip – Modern and clever WooCommerce tools for the most widely used payment method in Switzerland: the bank transfer."
+msgstr "sqrip – Moderne und clevere WooCommerce-Tools für die am weitesten verbreitete Zahlungsmethode in der Schweiz: die Banküberweisung."
+
+msgid "sqrip – Swiss QR-Invoice API"
+msgstr "sqrip – Swiss QR-Invoice API"
+
+msgid "Status changing to"
+msgstr "Status wird geändert zu"
+
+msgid "Status of awaiting payment orders"
+msgstr "Status der auf Zahlung wartenden Bestellungen"
+
+msgid "Status of Orders after 1st partial payment"
+msgstr "Status der Bestellungen nach der 1. Teilzahlung"
+
+msgid "Status of Orders after 2nd partial payment"
+msgstr "Status der Bestellungen nach der 2. Teilzahlung"
+
+msgid "Status of Orders after 3rd partial payment"
+msgstr "Status der Bestellungen nach der 3. Teilzahlung"
+
+msgid "Status of Orders made with payment method \\'sqrip\\':"
+msgstr "Status der Bestellungen mit der Zahlungsmethode \\'sqrip\\':"
+
+msgid "Street*"
+msgstr "Strasse*"
+
+msgid "Suppress QR-Invoice generation at checkout"
+msgstr "QR-Rechnungserstellung beim Checkout unterdrücken"
+
+msgid "Suppressed status"
+msgstr "Unterdrückter Status"
+
+msgid "Swiss QR invoices with sqrip"
+msgstr "Schweizer QR-Rechnungen mit sqrip"
+
+msgid "The (QR-)IBAN has been changed. Please confirm the new (QR-)IBAN in your sqrip.ch account."
+msgstr "Die (QR-)IBAN wurde geändert. Bitte bestätigen Sie die neue (QR-)IBAN in Ihrem sqrip.ch-Konto."
+
+msgid "The address to appear on the QR invoice"
+msgstr "Die Adresse, die auf der QR-Rechnung erscheinen soll"
+
+msgid "The only characters allowed are A-Z, dashes (-) and underscores (_). Any spaces will be replaced with underscores (_). You can also use the following variables:<br>[order_number] — your full order number;<br>[order_date] — in yymmdd format, e.g. 230210 for Feb. 10 2023;<br>[shop_name] — can only be used if the shop name conforms with the \"characters allowed\" rule, otherwise the setting will be highlighted in red."
+msgstr "Die einzigen erlaubten Zeichen sind A-Z, Bindestriche (-) und Unterstriche (_). Alle Leerzeichen werden durch Unterstriche (_) ersetzt. Sie können auch die folgenden Variablen verwenden:<br>[order_number] — Ihre vollständige Bestellnummer;<br>[order_date] — im Format jjmmtt, z. B. 230210 für den 10. Februar 2023;<br>[shop_name] — kann nur verwendet werden, wenn der Shop-Name der Regel \"erlaubte Zeichen\" entspricht, andernfalls wird die Einstellung rot hervorgehoben."
+
+msgid "The PDF file for order #$order_id has been deleted from the media library"
+msgstr "Die PDF-Datei für Bestellung #$order_id wurde aus der Medienbibliothek gelöscht"
+
+msgid "The sqrip plugin only supports EUR and CHF currencies!"
+msgstr "Das sqrip-Plugin unterstützt nur die Währungen EUR und CHF!"
+
+msgid "Third address"
+msgstr "Dritte Adresse"
+
+msgid "This field is required"
+msgstr "Dieses Feld ist erforderlich"
+
+msgid "This is a normal IBAN. The customer can make deposits without noting the reference number (RF...). Therefore, automatic matching with orders is not guaranteed throughout. Manual processing may be necessary. A QR-IBAN is required for automatic matching. This is available for the same bank account. Information about this is available from your bank."
+msgstr "Dies ist eine normale IBAN. Der Kunde kann Einzahlungen tätigen, ohne die Referenznummer (RF...) anzugeben. Daher ist ein automatischer Abgleich mit Bestellungen nicht durchgängig gewährleistet. Eine manuelle Bearbeitung kann erforderlich sein. Für den automatischen Abgleich wird eine QR-IBAN benötigt. Diese ist für dasselbe Bankkonto verfügbar. Informationen dazu erhalten Sie bei Ihrer Bank."
+
+msgid "This is a QR IBAN. The customer can make payments only by specifying a QR reference (number). You can uniquely assign the deposit to a customer / order. This enables automatic matching of payments received with orders. Want to automate this step? Contact us <a href=\"mailto:info@sqrip.ch\">info@sqrip.ch</a>."
+msgstr "Dies ist eine QR-IBAN. Der Kunde kann Zahlungen nur unter Angabe einer QR-Referenz (Nummer) tätigen. Sie können die Einzahlung eindeutig einem Kunden / einer Bestellung zuordnen. Dies ermöglicht den automatischen Abgleich der eingegangenen Zahlungen mit den Bestellungen. Möchten Sie diesen Schritt automatisieren? Kontaktieren Sie uns unter <a href=\"mailto:info@sqrip.ch\">info@sqrip.ch</a>."
+
+msgid "This selects the status with which new orders are created if the QR-Invoice generation suppression is active. If there is no suitable status available, you can create one right %s"
+msgstr "Dies wählt den Status aus, mit dem neue Bestellungen erstellt werden, wenn die Unterdrückung der QR-Rechnungserstellung aktiv ist. Falls kein passender Status verfügbar ist, können Sie gleich %s einen erstellen"
+
+msgid "To what order status should we change your order, once the payment has been confirmed?"
+msgstr "In welchen Bestellstatus sollen wir Ihre Bestellung ändern, sobald die Zahlung bestätigt wurde?"
+
+msgid "unpaid"
+msgstr "unbezahlt"
+
+msgid "Update"
+msgstr "Aktualisieren"
+
+msgid "Use the QR invoice below to pay the outstanding balance."
+msgstr "Verwenden Sie die untenstehende QR-Rechnung, um den ausstehenden Betrag zu bezahlen."
+
+msgid "Valid, active API Key"
+msgstr "Gültiger, aktiver API-Schlüssel"
+
+msgid "validated"
+msgstr "validiert"
+
+msgid "View sqrip settings"
+msgstr "sqrip-Einstellungen anzeigen"
+
+msgid "We can't seem to find the API key you're using in our database. Please check your API key, your sqrip settings, then contact our support."
+msgstr "Wir können den von Ihnen verwendeten API-Schlüssel offenbar nicht in unserer Datenbank finden. Bitte überprüfen Sie Ihren API-Schlüssel und Ihre sqrip-Einstellungen und kontaktieren Sie anschliessend unseren Support."
+
+msgid "What information about the client should sqrip use in QR-invoices"
+msgstr "Welche Informationen über den Kunden soll sqrip in QR-Rechnungen verwenden"
+
+msgid "What is the order status that waits for confirmation of made payment to your bank account?"
+msgstr "Welcher Bestellstatus wartet auf die Bestätigung der auf Ihr Bankkonto geleisteten Zahlung?"
+
+msgid "Will be displayed in the Checkout page above the Payment Methods section."
+msgstr "Wird auf der Kassenseite oberhalb des Abschnitts Zahlungsmethoden angezeigt."
+
+msgid "Will be displayed on the QR invoice in the section “Additional information”. The result shown in invoices cannot exceed 140 symbols and 5 rows.<br>The following short codes are available:<br>[order_number] the order number.<br>[due_date format=\"y-MM-dd\"] to insert the due date of the invoice.<br><a href=\"https://www.php.net/strftime\" target=\"_blank\">Supported formats</a> are:<br>y-MM-dd -> 2022-04-06<br>dd.MM.yy -> 04.06.22<br>dd. MMMM y -> 06. April 2022<br>d. MMM y -> 6. Apr 2022"
+msgstr "Wird auf der QR-Rechnung im Abschnitt „Zusätzliche Informationen“ angezeigt. Das in Rechnungen angezeigte Ergebnis darf 140 Zeichen und 5 Zeilen nicht überschreiten.<br>Die folgenden Shortcodes sind verfügbar:<br>[order_number] die Bestellnummer.<br>[due_date format=\"y-MM-dd\"] zum Einfügen des Fälligkeitsdatums der Rechnung.<br><a href=\"https://www.php.net/strftime\" target=\"_blank\">Unterstützte Formate</a> sind:<br>y-MM-dd -> 2022-04-06<br>dd.MM.yy -> 04.06.22<br>dd. MMMM y -> 06. April 2022<br>d. MMM y -> 6. Apr 2022"
+
+msgid "Will be displayed on the QR invoice under the section “Additional information”."
+msgstr "Wird auf der QR-Rechnung im Abschnitt „Zusätzliche Informationen“ angezeigt."
+
+msgid "You have no credits left"
+msgstr "Sie haben keine Credits mehr übrig"
+
+msgid "You have no free credits anymore, a paid credit will be charged"
+msgstr "Sie haben keine kostenlosen Credits mehr, es wird ein kostenpflichtiges Credit berechnet"
+
+msgid "Your API key appears to be inactive. Please check that your API key is set to active in the sqrip settings."
+msgstr "Ihr API-Schlüssel scheint inaktiv zu sein. Bitte überprüfen Sie, ob Ihr API-Schlüssel in den sqrip-Einstellungen auf aktiv gesetzt ist."
+
+msgid "Your website is currently unable to upload a PDF."
+msgstr "Ihre Website kann derzeit kein PDF hochladen."
+
+msgid "ZIP*"
+msgstr "PLZ*"
+
