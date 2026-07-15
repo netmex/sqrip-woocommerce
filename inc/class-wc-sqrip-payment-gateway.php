@@ -1345,8 +1345,13 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         $body['product'] = 'Credit';
 
         // replace sqrip IBAN with IBAN of customer
+        // prefer the per-order refund IBAN if one was entered on the order,
+        // otherwise fall back to the customer's stored IBAN (HPOS-safe read)
         $user = $order->get_user();
-        $iban = $user ? sqrip_get_customer_iban($user) : get_post_meta($order_id, 'sqrip_refund_iban_num', true);
+        $iban = sqrip_get_order_meta_value($order, 'sqrip_refund_iban_num');
+        if (!$iban && $user) {
+            $iban = sqrip_get_customer_iban($user);
+        }
 
         $order->update_meta_data('sqrip_refund_iban_num', $iban);
         $order->save();
@@ -1393,9 +1398,17 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         $args = sqrip_prepare_remote_args($body, 'POST', $token);
         $response = wp_remote_post(SQRIP_ENDPOINT . $endpoint, $args);
 
-        //error_log("REFUND".json_encode($response));
+        if (is_wp_error($response)) {
+            $order->add_order_note(
+                sprintf(
+                    __('Error: %s', 'sqrip-swiss-qr-invoice'),
+                    esc_html($response->get_error_message())
+                )
+            );
+            return false;
+        }
 
-        $status_code = $response['response']['code'];
+        $status_code = wp_remote_retrieve_response_code($response);
 
         if ($status_code !== 200) {
             // Transaction was not successful

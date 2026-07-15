@@ -175,10 +175,10 @@ function sqrip_add_admin_notice()
 
 add_action('admin_enqueue_scripts', function ($hook_suffix) {
 
-    wp_enqueue_style('sqrip-admin', plugins_url('css/sqrip-admin.css', __FILE__), '', '1.1.1');
+    wp_enqueue_style('sqrip-admin', plugins_url('css/sqrip-admin.css', __FILE__), '', '1.9');
 
     if (isset($_GET['section']) && $_GET['section'] == "sqrip") {
-        wp_enqueue_script('sqrip-admin', plugins_url('js/sqrip-admin.js', __FILE__), array('jquery'), '1.5.5', true);
+        wp_enqueue_script('sqrip-admin', plugins_url('js/sqrip-admin.js', __FILE__), array('jquery'), '1.9', true);
 
         $sqrip_new_status = sqrip_get_plugin_option('enabled_new_status');
         $sqrip_new_awaiting_status = sqrip_get_plugin_option('enabled_new_awstatus');
@@ -221,17 +221,24 @@ add_action('admin_enqueue_scripts', function ($hook_suffix) {
             )
         );
 
-        wp_enqueue_style('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/css/select2.min.css', array(), '4.1.0');
-        wp_enqueue_script('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/js/select2.min.js', array('jquery'), '4.1.0', true);
+        wp_enqueue_style('select2', plugins_url('css/select2.min.css', __FILE__), array(), '4.1.0');
+        wp_enqueue_script('select2', plugins_url('js/select2.min.js', __FILE__), array('jquery'), '4.1.0', true);
     }
 
     global $post_type;
     $screen = get_current_screen();
 
-    if (is_object($screen) && in_array($screen->post_type, ['shop_order', 'shop_order_placehold'])) {
+    // The order edit screen id differs between classic storage ('shop_order')
+    // and HPOS ('woocommerce_page_wc-orders'); match both.
+    $sqrip_hpos_order_screen = function_exists('wc_get_page_screen_id') ? wc_get_page_screen_id('shop-order') : 'shop_order';
 
-        wp_enqueue_script('sqrip-order', plugins_url('js/sqrip-order.js', __FILE__), array('jquery'), '1.1.1', true);
-        wp_enqueue_script('sqrip-refund', plugins_url('js/sqrip-refund.js', __FILE__), array('jquery'), '1.1.1', true);
+    if (is_object($screen) && (
+        in_array($screen->post_type, ['shop_order', 'shop_order_placehold'], true) ||
+        $screen->id === $sqrip_hpos_order_screen
+    )) {
+
+        wp_enqueue_script('sqrip-order', plugins_url('js/sqrip-order.js', __FILE__), array('jquery'), '1.9', true);
+        wp_enqueue_script('sqrip-refund', plugins_url('js/sqrip-refund.js', __FILE__), array('jquery'), '1.9', true);
 
         wp_localize_script('sqrip-order', 'sqrip',
             array(
@@ -246,7 +253,7 @@ add_action('admin_enqueue_scripts', function ($hook_suffix) {
     }
 
     if (in_array($hook_suffix, ['user-edit.php', 'profile.php'])) {
-        wp_enqueue_script('sqrip-customer-profile', plugins_url('js/sqrip-customer-profile.js', __FILE__), array('jquery'), '1.1.1', true);
+        wp_enqueue_script('sqrip-customer-profile', plugins_url('js/sqrip-customer-profile.js', __FILE__), array('jquery'), '1.9', true);
         wp_localize_script('sqrip-customer-profile', 'sqrip', array('ajax_url' => admin_url('admin-ajax.php')));
     }
 
@@ -265,7 +272,7 @@ function sqrip_enqueue_scripts()
 {
     wp_enqueue_style('sqrip', plugins_url('css/sqrip-order.css', __FILE__), false);
 
-    wp_enqueue_script('sqrip', plugins_url('js/sqrip-fe.js', __FILE__), array('jquery'), '1.0.3', true);
+    wp_enqueue_script('sqrip', plugins_url('js/sqrip-fe.js', __FILE__), array('jquery'), '1.9', true);
 
     wp_localize_script('sqrip', 'sqrip',
         array(
@@ -1411,7 +1418,8 @@ function sqrip_add_custom_order_status_actions_button($actions, $order)
                 $payment_confirm_title = __('Confirm Payment', 'sqrip-swiss-qr-invoice') . " ($sqrip_next_paid_invoice_number/$invoice_count): " . $partial_amount;
                 $qr_order_status_options = wc_get_order_statuses();
                 $payment_status = sqrip_get_plugin_option("partial_invoice_".$sqrip_next_paid_invoice_number."_status");
-                $status_fullname = __('Status changing to', 'sqrip-swiss-qr-invoice') . ": " . $qr_order_status_options[$payment_status] ?? $payment_status;
+                $status_fullname = __('Status changing to', 'sqrip-swiss-qr-invoice') . ": " . ($payment_status && isset($qr_order_status_options[$payment_status]) ?
+                    $qr_order_status_options[$payment_status] : $payment_status);
                 
                 $payment_confirm_footer = $status_fullname;
             }
@@ -1531,7 +1539,9 @@ add_action('woocommerce_admin_order_data_after_order_details', function ($order)
 });
 
 // Adding to admin order list bulk dropdown custom change order statuses
+// Register on both the classic ('edit-shop_order') and HPOS ('woocommerce_page_wc-orders') list screens.
 add_filter( 'bulk_actions-edit-shop_order', 'bulk_change_order_sqrip_statuses', 20, 1 );
+add_filter( 'bulk_actions-woocommerce_page_wc-orders', 'bulk_change_order_sqrip_statuses', 20, 1 );
 function bulk_change_order_sqrip_statuses( $actions ) {
     $sqrip_new_status = sqrip_get_plugin_option('new_status');
     $sqrip_new_qr_status = sqrip_get_plugin_option('new_qr_order_status');
@@ -1558,6 +1568,7 @@ function bulk_change_order_sqrip_statuses( $actions ) {
 // Make the action for bulk sqrip status change
 // since 1.8
 add_filter( 'handle_bulk_actions-edit-shop_order', 'sqrip_handle_bulk_action_edit_shop_order', 10, 3 );
+add_filter( 'handle_bulk_actions-woocommerce_page_wc-orders', 'sqrip_handle_bulk_action_edit_shop_order', 10, 3 );
 function sqrip_handle_bulk_action_edit_shop_order( $redirect_to, $action, $post_ids ) {
     
     if ( !in_array($action, ['sqrip_new_status', 'sqrip_new_qr_order_status', 'sqrip_new_awaiting_status', 'sqrip_new_suppressed_status']) )
@@ -1617,16 +1628,14 @@ function sqrip_show_remark_before_payment() {
     $checkout_remarks = sqrip_get_plugin_option('checkout_remarks') ?? "";
 
     if (strlen(trim($checkout_remarks)) > 0) {
-        echo $checkout_remarks;
+        echo wp_kses_post($checkout_remarks);
     }
 }
 
 function output_sqrip_remarks() {
     $checkout_remarks = sqrip_get_plugin_option('checkout_remarks') ?? "";
 
-    ?>
-        <?php echo($checkout_remarks); ?>
-    <?php
+    echo wp_kses_post($checkout_remarks);
 }
 
 add_filter('render_block_woocommerce/checkout-payment-block', function($block_content) {
@@ -1653,7 +1662,6 @@ function sqrip_add_admin_to_recipients($recipient, $order) {
         $recipient .= (', ' . $admin_email);
     }
 
-    error_log("RECIP::".$recipient);
     return $recipient;
 }
 

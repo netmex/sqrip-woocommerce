@@ -50,9 +50,15 @@ add_action('wp_ajax_sqrip_preview_address', 'sqrip_preview_address_ajax');
 
 function sqrip_preview_address_ajax()
 {
-    if (!$_POST['address']) return;
+    if (!current_user_can('manage_woocommerce')) {
+        wp_die(-1, 403);
+    }
 
-    $address = $_POST['address'];
+    if (empty($_POST['address'])) return;
+
+    $address = is_array($_POST['address'])
+        ? array_map('sanitize_text_field', wp_unslash($_POST['address']))
+        : sanitize_text_field(wp_unslash($_POST['address']));
 
     $response = sqrip_get_payable_to_address($address);
 
@@ -72,10 +78,14 @@ add_action('wp_ajax_sqrip_validation_iban', 'sqrip_validation_iban_ajax');
 
 function sqrip_validation_iban_ajax()
 {
-    if (!$_POST['iban'] || !$_POST['token']) return;
+    if (!current_user_can('manage_woocommerce')) {
+        wp_die(-1, 403);
+    }
 
-    $iban = htmlentities($_POST['iban'] || '');
-    $token = $_POST['token'];
+    if (empty($_POST['iban']) || empty($_POST['token'])) return;
+
+    $iban = sanitize_text_field(wp_unslash($_POST['iban']));
+    $token = sanitize_text_field(wp_unslash($_POST['token']));
 
     $store_iban = isset($_POST['store_iban']) ? $_POST['store_iban'] : null;
     $order_id = isset($_POST['order_id']) ? $_POST['order_id'] : null;
@@ -139,9 +149,15 @@ add_action('wp_ajax_sqrip_validation_token', 'sqrip_validation_token_ajax');
 
 function sqrip_validation_token_ajax()
 {
-    if (!$_POST['token']) return;
+    if (!current_user_can('manage_woocommerce')) {
+        wp_die(-1, 403);
+    }
 
-    $endpoint = 'details';    
+    if (empty($_POST['token'])) return;
+
+    $token = sanitize_text_field(wp_unslash($_POST['token']));
+
+    $endpoint = 'details';
     $plugin_version = '';
     $plugins = get_plugins();
     $sqrip_info = array_filter($plugins, fn($item) => $item["Name"] == "sqrip.ch");
@@ -149,7 +165,7 @@ function sqrip_validation_token_ajax()
     if ($sqrip_info) {
         $plugin_version = array_values($sqrip_info)[0]['Version'];
     }
-    $args = sqrip_prepare_remote_args('', 'GET', $_POST['token']);
+    $args = sqrip_prepare_remote_args('', 'GET', $token);
     $params = $plugin_version ? "?version=".$plugin_version : "";
     $response = wp_remote_request(SQRIP_ENDPOINT . $endpoint . $params, $args);
     $response_code = wp_remote_retrieve_response_code($response);
@@ -214,10 +230,14 @@ function sqrip_mark_refund_paid()
 {
     check_ajax_referer('sqrip-mark-refund-paid', 'security');
 
+    if (!current_user_can('manage_woocommerce')) {
+        wp_die(-1, 403);
+    }
+
     $refund_id = isset($_POST['refund_id']) ? absint($_POST['refund_id']) : 0;
     $refund = wc_get_order($refund_id);
 
-    if (!$refund) {
+    if (!$refund || !($refund instanceof WC_Order_Refund)) {
         return;
     }
 
@@ -228,7 +248,9 @@ function sqrip_mark_refund_paid()
 
     // add woocommerce message to original order
     $order = wc_get_order($refund->get_parent_id());
-    $order->add_order_note(__('sqrip refund was marked as \'paid\'', 'sqrip-swiss-qr-invoice'));
+    if ($order) {
+        $order->add_order_note(__('sqrip refund was marked as \'paid\'', 'sqrip-swiss-qr-invoice'));
+    }
 
     wp_send_json(['date' => $date, 'result' => 'success']);
 
@@ -244,10 +266,14 @@ function sqrip_mark_refund_unpaid()
 {
     check_ajax_referer('sqrip-mark-refund-unpaid', 'security');
 
+    if (!current_user_can('manage_woocommerce')) {
+        wp_die(-1, 403);
+    }
+
     $refund_id = isset($_POST['refund_id']) ? absint($_POST['refund_id']) : 0;
     $refund = wc_get_order($refund_id);
 
-    if (!$refund) {
+    if (!$refund || !($refund instanceof WC_Order_Refund)) {
         return;
     }
 
@@ -256,7 +282,9 @@ function sqrip_mark_refund_unpaid()
 
     // add woocommerce message to original order
     $order = wc_get_order($refund->get_parent_id());
-    $order->add_order_note(__('sqrip refund was marked as \'unbezahlt\'', 'sqrip-swiss-qr-invoice'));
+    if ($order) {
+        $order->add_order_note(__('sqrip refund was marked as \'unbezahlt\'', 'sqrip-swiss-qr-invoice'));
+    }
 
     wp_send_json(['result' => 'success']);
 
@@ -273,11 +301,17 @@ add_action('wp_ajax_sqrip_validation_refund_token', 'sqrip_validate_refund_token
 
 function sqrip_validate_refund_token()
 {
-    if (!$_POST['token']) return;
+    if (!current_user_can('manage_woocommerce')) {
+        wp_die(-1, 403);
+    }
+
+    if (empty($_POST['token'])) return;
+
+    $token = sanitize_text_field(wp_unslash($_POST['token']));
 
     $endpoint = 'verify-token';
 
-    $response = sqrip_remote_request($endpoint, '', 'GET', $_POST['token']);
+    $response = sqrip_remote_request($endpoint, '', 'GET', $token);
 
     wp_send_json($response);
 
@@ -286,17 +320,21 @@ function sqrip_validate_refund_token()
 
 
 add_action('wp_ajax_sqrip_payment_confirmed', 'sqrip_payment_confirmed');
-add_action('wp_ajax_nopriv_sqrip_payment_confirmed', 'sqrip_payment_confirmed');
 
 function sqrip_payment_confirmed()
 {
     check_ajax_referer('sqrip_payment_confirmed', '_wpnonce');
 
-    if (!isset($_GET['order_id']) || empty($_GET['order_id'])) {
+    if (!current_user_can('manage_woocommerce')) {
+        wp_die(-1, 403);
+    }
+
+    $order_id = isset($_GET['order_id']) ? absint($_GET['order_id']) : 0;
+
+    if (!$order_id) {
         return;
     }
 
-    $order_id = $_GET['order_id'];
     $status_completed = sqrip_get_plugin_option('status_completed');
 
     $order = wc_get_order($order_id);
@@ -305,7 +343,7 @@ function sqrip_payment_confirmed()
         return;
     }
 
-    $paged = isset($_GET['paged']) ? '&paged=' . $_GET['paged'] : '';
+    $paged = isset($_GET['paged']) ? '&paged=' . absint($_GET['paged']) : '';
 
     $sqrip_paid_invoice = sqrip_get_order_meta_value($order, 'sqrip_paid_invoice_number');
     $sqrip_invoice_count = sqrip_get_order_meta_value($order, 'sqrip_multiple_invoice_count');

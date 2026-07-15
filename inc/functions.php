@@ -603,7 +603,6 @@ function sqrip_format_reference_id($reference_id, $order_id)
 
     switch ($qr_basis) {
         case 'order_number':
-            error_log("Order Number Ref::");
             if (strpos(strtolower($reference_id_formatted), 'rf') !== false) {
                 if (endsWith($reference_id_formatted, $order_id)) {
                     $reference_id_formatted = sqrip_reference_id_format_with_order_id ($reference_id_formatted, $order_id, 4);
@@ -614,8 +613,7 @@ function sqrip_format_reference_id($reference_id, $order_id)
                 $control_digit = substr($reference_id_formatted, -1);
                 $reference_without_control_digit = substr($reference_id_formatted, 0, -1);
                 $ref_ends_with_order_id = endsWith($reference_without_control_digit, $order_id);
-                error_log("Order Ref w/o control:-".json_encode($ref_ends_with_order_id)." ".$order_id);
-                
+
                 if ($ref_ends_with_order_id) {
                     $reference_id_formatted = sqrip_reference_id_format_with_order_id ($reference_id_formatted, $order_id, 2)." ".$control_digit;
                 } else {

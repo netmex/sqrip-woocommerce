@@ -52,8 +52,7 @@ class Sqrip_Media_Clearner
             $current_time = strtotime(date('Y-m-d H:00:00'));
             $targeted_time = $current_time - $time_delay;
             $targeted_date = date('Y-m-d', $targeted_time);
-            error_log('Target Date::: '.$targeted_date);
-    
+
             $completed_orders = (array)wc_get_orders(array(
                 'limit' => -1,
                 'date_created' => '<' . $targeted_time,
@@ -142,8 +141,6 @@ class Sqrip_Media_Clearner
         } else {
             $logs = "Sqrip_Media_Cleaner Delete after field not enabled.";
         }
-        
-        error_log($logs);
     }
 }
 
