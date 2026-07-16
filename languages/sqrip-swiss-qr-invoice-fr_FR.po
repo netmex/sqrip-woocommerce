@@ -493,9 +493,6 @@ msgstr "Le remboursement sqrip a été marqué comme \\'non payé\\'"
 msgid "sqrip settings"
 msgstr "réglages sqrip"
 
-msgid "sqrip warning: new orders paid with sqrip are set to the status \"Pending payment\". WooCommerce automatically cancels unpaid orders with this status after the stock-hold time (currently %d minutes), so QR-invoice orders can be cancelled before the bank transfer arrives. We recommend the status \"On hold\" or your own custom status instead."
-msgstr "Avertissement sqrip : les nouvelles commandes payées avec sqrip reçoivent le statut « En attente de paiement ». WooCommerce annule automatiquement les commandes impayées ayant ce statut après le délai de réservation du stock (actuellement %d minutes), de sorte que les commandes de facture QR peuvent être annulées avant l'arrivée du virement bancaire. Nous recommandons plutôt le statut « En attente » ou votre propre statut personnalisé."
-
 msgid "sqrip – Modern and clever WooCommerce tools for the most widely used payment method in Switzerland: the bank transfer."
 msgstr "sqrip – Des outils WooCommerce modernes et astucieux pour le mode de paiement le plus répandu en Suisse : le virement bancaire."
 

@@ -1665,19 +1665,6 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 // turn off sqrip if auto turn-off enabled
                 sqrip_auto_turn_off();
             }
-
-            // Move the order into its sqrip status here, server-side, instead of
-            // relying only on the woocommerce_thankyou hook. That hook does not
-            // fire when the order-received page is served from a full-page cache
-            // (e.g. NitroPack) or through the block checkout, which left orders
-            // stuck in 'pending'. update_status is idempotent with the thankyou
-            // hook, so setting it in both places is safe.
-            $sqrip_qr_order_status = sqrip_get_plugin_option('qr_order_status');
-            if (!$sqrip_qr_order_status) {
-                $sqrip_qr_order_status = 'wc-on-hold';
-            }
-            $order->update_status($sqrip_qr_order_status);
-
             // Redirect to thank you page
             return array(
                 'result' => 'success',

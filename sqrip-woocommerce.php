@@ -4,7 +4,7 @@
  * Plugin Name:             sqrip.ch
  * Plugin URI:              https://sqrip.ch/
  * Description:             sqrip – A comprehensive, flexible and clever WooCommerce finance tool for the most widely used payment method in Switzerland: the bank transfers.
- * Version:                 1.9.4
+ * Version:                 1.9.5
  * Author:                  netmex digital gmbh
  * Author URI:              https://sqrip.ch/
  * Text Domain:             sqrip-swiss-qr-invoice
@@ -73,45 +73,6 @@ add_filter('load_textdomain_mofile', function ($mofile, $domain) {
     }
     return $mofile;
 }, 10, 2);
-
-/**
- * Warn (display only) when the sqrip new-order status is set to "Pending payment".
- *
- * WooCommerce automatically cancels unpaid orders in the 'pending' status once
- * the stock-hold time elapses. For a QR invoice the bank transfer arrives days
- * later, so such orders can be cancelled before payment — silently "losing" them.
- * This notice only informs the shop owner; it never reads-to-write or changes any
- * setting. It appears solely on the sqrip settings screen and only when the risk
- * is real (status is 'wc-pending' AND stock-hold is active).
- *
- * @since 1.9.4
- */
-add_action('admin_notices', 'sqrip_warn_pending_order_status');
-
-function sqrip_warn_pending_order_status()
-{
-    if (!current_user_can('manage_woocommerce')) {
-        return;
-    }
-    if (!isset($_GET['tab'], $_GET['section']) || $_GET['tab'] !== 'checkout' || $_GET['section'] !== 'sqrip') {
-        return;
-    }
-    if (sqrip_get_plugin_option('qr_order_status') !== 'wc-pending') {
-        return;
-    }
-    $hold_minutes = (int) get_option('woocommerce_hold_stock_minutes');
-    if ($hold_minutes <= 0) {
-        return; // Without an active stock-hold, WooCommerce does not auto-cancel.
-    }
-
-    $message = sprintf(
-        /* translators: %d: WooCommerce stock-hold time in minutes */
-        __('sqrip warning: new orders paid with sqrip are set to the status "Pending payment". WooCommerce automatically cancels unpaid orders with this status after the stock-hold time (currently %d minutes), so QR-invoice orders can be cancelled before the bank transfer arrives. We recommend the status "On hold" or your own custom status instead.', 'sqrip-swiss-qr-invoice'),
-        $hold_minutes
-    );
-
-    echo '<div class="notice notice-warning"><p><strong>sqrip</strong> — ' . esc_html($message) . '</p></div>';
-}
 
 /**
  * Add plugin Settings link
@@ -254,10 +215,10 @@ function sqrip_add_admin_notice()
 
 add_action('admin_enqueue_scripts', function ($hook_suffix) {
 
-    wp_enqueue_style('sqrip-admin', plugins_url('css/sqrip-admin.css', __FILE__), '', '1.9.4');
+    wp_enqueue_style('sqrip-admin', plugins_url('css/sqrip-admin.css', __FILE__), '', '1.9.5');
 
     if (isset($_GET['section']) && $_GET['section'] == "sqrip") {
-        wp_enqueue_script('sqrip-admin', plugins_url('js/sqrip-admin.js', __FILE__), array('jquery'), '1.9.4', true);
+        wp_enqueue_script('sqrip-admin', plugins_url('js/sqrip-admin.js', __FILE__), array('jquery'), '1.9.5', true);
 
         $sqrip_new_status = sqrip_get_plugin_option('enabled_new_status');
         $sqrip_new_awaiting_status = sqrip_get_plugin_option('enabled_new_awstatus');
@@ -316,8 +277,8 @@ add_action('admin_enqueue_scripts', function ($hook_suffix) {
         $screen->id === $sqrip_hpos_order_screen
     )) {
 
-        wp_enqueue_script('sqrip-order', plugins_url('js/sqrip-order.js', __FILE__), array('jquery'), '1.9.4', true);
-        wp_enqueue_script('sqrip-refund', plugins_url('js/sqrip-refund.js', __FILE__), array('jquery'), '1.9.4', true);
+        wp_enqueue_script('sqrip-order', plugins_url('js/sqrip-order.js', __FILE__), array('jquery'), '1.9.5', true);
+        wp_enqueue_script('sqrip-refund', plugins_url('js/sqrip-refund.js', __FILE__), array('jquery'), '1.9.5', true);
 
         wp_localize_script('sqrip-order', 'sqrip',
             array(
@@ -332,7 +293,7 @@ add_action('admin_enqueue_scripts', function ($hook_suffix) {
     }
 
     if (in_array($hook_suffix, ['user-edit.php', 'profile.php'])) {
-        wp_enqueue_script('sqrip-customer-profile', plugins_url('js/sqrip-customer-profile.js', __FILE__), array('jquery'), '1.9.4', true);
+        wp_enqueue_script('sqrip-customer-profile', plugins_url('js/sqrip-customer-profile.js', __FILE__), array('jquery'), '1.9.5', true);
         wp_localize_script('sqrip-customer-profile', 'sqrip', array('ajax_url' => admin_url('admin-ajax.php')));
     }
 
@@ -351,7 +312,7 @@ function sqrip_enqueue_scripts()
 {
     wp_enqueue_style('sqrip', plugins_url('css/sqrip-order.css', __FILE__), false);
 
-    wp_enqueue_script('sqrip', plugins_url('js/sqrip-fe.js', __FILE__), array('jquery'), '1.9.4', true);
+    wp_enqueue_script('sqrip', plugins_url('js/sqrip-fe.js', __FILE__), array('jquery'), '1.9.5', true);
 
     wp_localize_script('sqrip', 'sqrip',
         array(
