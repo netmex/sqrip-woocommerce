@@ -142,7 +142,7 @@ Yes. We are already working on comparing the reconciliation of orders/purchases 
 7. Refund functionality
 
 == Changelog ==
-= 1.9 : November 2025 – Features =
+= 1.9 : Juli 2026 – Features =
 * sqrip is ready for 'structured addresses';
 * Adding the ability to use sqrip in multiple stores installed on the same server instance;
 * If you use the Plugin 'PDF Invoices & Packing Slips for WooCommerce' you can now combine the invoice and the QR slip into one single PDF file;
