@@ -605,6 +605,17 @@ function sqrip_qr_action_order_details_after_order_table($order)
     $payment_method = $order->get_payment_method();
 
     if ($payment_method === 'sqrip') {
+
+        // Guard against duplicate output: on modern WooCommerce the order-received
+        // page can fire woocommerce_order_details_after_order_table more than once
+        // (classic template + block "Order confirmation"), which would print the
+        // download button twice. Render the sqrip block only once per request.
+        static $sqrip_details_rendered = false;
+        if ($sqrip_details_rendered) {
+            return;
+        }
+        $sqrip_details_rendered = true;
+
         $order_id = $order->get_id();
 
         $plugin_options = get_option('woocommerce_sqrip_settings', array());
@@ -644,7 +655,7 @@ function sqrip_qr_action_order_details_after_order_table($order)
         $checkout_remarks = sqrip_get_plugin_option('checkout_remarks') ?? "";
 
         if (strlen(trim($checkout_remarks)) > 0) {
-            echo $checkout_remarks;
+            echo wp_kses_post($checkout_remarks);
         }
 
         if ($integration_order == "yes" && $pdf_file) {
