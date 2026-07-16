@@ -37,8 +37,12 @@ msgstr "<b>%s</b> %s</br>%s"
 msgid "[order_date]_[shop_name]_invoice-order_[order_number]"
 msgstr "[order_date]_[shop_name]_invoice-order_[order_number]"
 
-msgid "Action required:\\nPlease confirm change of IBAN on <a href='https://api.sqrip.ch/login' target='_blank'>sqrip.ch</a> in order to continue the service."
-msgstr "Action requise :\\nVeuillez confirmer le changement d'IBAN sur <a href='https://api.sqrip.ch/login' target='_blank'>sqrip.ch</a> afin de poursuivre le service."
+msgid ""
+"Action required:\\n"
+"Please confirm change of IBAN on <a href='https://api.sqrip.ch/login' target='_blank'>sqrip.ch</a> in order to continue the service."
+msgstr ""
+"Action requise :\\n"
+"Veuillez confirmer le changement d'IBAN sur <a href='https://api.sqrip.ch/login' target='_blank'>sqrip.ch</a> afin de poursuivre le service."
 
 msgid "Activate Multiple QR-slips per order"
 msgstr "Activer plusieurs bulletins QR par commande"
@@ -69,6 +73,9 @@ msgstr "Informations complémentaires"
 
 msgid "Address"
 msgstr "Adresse"
+
+msgid "Also send the order-confirmation e-mails (to the customer and to the shop admin) when a new sqrip order is placed"
+msgstr "Envoyer également les e-mails de confirmation de commande (au client et à l'administrateur de la boutique) lorsqu'une nouvelle commande sqrip est passée"
 
 msgid "API key"
 msgstr "Clé API"
@@ -190,14 +197,20 @@ msgstr "Ne joindre à aucun e-mail"
 msgid "Do not set this too low! Remove input to disable the setting."
 msgstr "Ne réglez pas cette valeur trop bas ! Supprimez la saisie pour désactiver le réglage."
 
-msgid "Don\\'t generate QR-invoice at checkout but manually"
+msgid "Don't generate QR-invoice at checkout but manually"
 msgstr "Ne pas générer la facture QR à la commande mais manuellement"
 
 msgid "Download Invoice"
 msgstr "Télécharger la facture"
 
-msgid "Due date: [due_date format=\\\"y-MM-dd\\\"]\\nOrder: [order_number]\\nThank you for your purchase!"
-msgstr "Date d'échéance : [due_date format=\\\"y-MM-dd\\\"]\\nCommande : [order_number]\\nMerci pour votre achat !"
+msgid ""
+"Due date: [due_date format=\"y-MM-dd\"]\\n"
+"Order: [order_number]\\n"
+"Thank you for your purchase!"
+msgstr ""
+"Date d'échéance : [due_date format=\"y-MM-dd\"]\\n"
+"Commande : [order_number]\\n"
+"Merci pour votre achat !"
 
 msgid "E-Mail can not be sent, please check WP MAIL SMTP"
 msgstr "L'e-mail ne peut pas être envoyé, veuillez vérifier WP MAIL SMTP"
@@ -207,6 +220,9 @@ msgstr "Soit le nom de l'entreprise (priorité), soit le prénom/nom"
 
 msgid "Enable QR invoices with sqrip API"
 msgstr "Activer les factures QR avec l'API sqrip"
+
+msgid "Enable this if you keep orders in a status (such as 'Pending payment') that does not itself trigger WooCommerce e-mails. sqrip then sends the 'New order' (admin) and 'Order on-hold' (customer) e-mails directly at checkout, so confirmations go out without changing your chosen status. Leave off to keep the standard WooCommerce behaviour."
+msgstr "Activez cette option si vous laissez les commandes dans un statut (par exemple « En attente de paiement ») qui ne déclenche pas lui-même les e-mails WooCommerce. sqrip envoie alors les e-mails « Nouvelle commande » (administrateur) et « Commande en attente » (client) directement à la validation, de sorte que les confirmations partent sans modifier le statut choisi. Laissez désactivé pour conserver le comportement standard de WooCommerce."
 
 msgid "English"
 msgstr "Anglais"
@@ -274,8 +290,8 @@ msgstr "Si activé, sqrip ajoutera une action pour les commandes ayant le statut
 msgid "If there is no suitable status available, you can create one right %s"
 msgstr "S'il n'existe aucun statut approprié, vous pouvez en créer un %s"
 
-msgid "If you enable this, the order status for orders with sqrip will change to \\'Payment pending\\', a confirmation e-mail will be sent and the order will wait for you to generate qr-invoices manually. This is helpful if you may need to adjust pricing or quantity after an order has been placed"
-msgstr "Si vous activez ceci, le statut des commandes avec sqrip passera à \\'Paiement en attente\\', un e-mail de confirmation sera envoyé et la commande attendra que vous génériez les factures QR manuellement. Ceci est utile si vous devez ajuster le prix ou la quantité après qu'une commande a été passée"
+msgid "If you enable this, the order status for orders with sqrip will change to 'Payment pending', a confirmation e-mail will be sent and the order will wait for you to generate qr-invoices manually. This is helpful if you may need to adjust pricing or quantity after an order has been placed"
+msgstr "Si vous activez ceci, le statut des commandes avec sqrip passera à 'Paiement en attente', un e-mail de confirmation sera envoyé et la commande attendra que vous génériez les factures QR manuellement. Ceci est utile si vous devez ajuster le prix ou la quantité après qu'une commande a été passée"
 
 msgid "in your checkout process when clients enter their billing address."
 msgstr "dans votre processus de commande lorsque les clients saisissent leur adresse de facturation."
@@ -433,14 +449,17 @@ msgstr "Envoyer une copie de l'e-mail avec la facture PDF à l'administrateur"
 msgid "Send a copy to the shop admin"
 msgstr "Envoyer une copie à l'administrateur de la boutique"
 
+msgid "Send order-confirmation e-mails for this status"
+msgstr "Envoyer les e-mails de confirmation de commande pour ce statut"
+
 msgid "Send test to %s"
 msgstr "Envoyer un test à %s"
 
 msgid "Services"
 msgstr "Services"
 
-msgid "Set the status of a newly placed order with payment method \\'sqrip\\' so it matches your shop process. Should no status be suitable, please create one for your own %s."
-msgstr "Définissez le statut d'une commande nouvellement passée avec le mode de paiement \\'sqrip\\' afin qu'il corresponde au processus de votre boutique. Si aucun statut ne convient, veuillez en créer un pour votre propre usage %s."
+msgid "Set the status of a newly placed order with payment method 'sqrip' so it matches your shop process. Should no status be suitable, please create one for your own %s."
+msgstr "Définissez le statut d'une commande nouvellement passée avec le mode de paiement 'sqrip' afin qu'il corresponde au processus de votre boutique. Si aucun statut ne convient, veuillez en créer un pour votre propre usage %s."
 
 msgid "Set the status of the 1st partial invoice so it matches your shop process. Should no status be suitable, please create one for your own %s."
 msgstr "Définissez le statut de la 1re facture partielle afin qu'il corresponde au processus de votre boutique. Si aucun statut ne convient, veuillez en créer un pour votre propre usage %s."
@@ -484,11 +503,11 @@ msgstr "Factures QR sqrip créées."
 msgid "sqrip QR-Code für Rückerstattung erstellt."
 msgstr "Code QR sqrip pour le remboursement créé."
 
-msgid "sqrip refund was marked as \\'paid\\'"
-msgstr "Le remboursement sqrip a été marqué comme \\'payé\\'"
+msgid "sqrip refund was marked as 'paid'"
+msgstr "Le remboursement sqrip a été marqué comme 'payé'"
 
-msgid "sqrip refund was marked as \\'unbezahlt\\'"
-msgstr "Le remboursement sqrip a été marqué comme \\'non payé\\'"
+msgid "sqrip refund was marked as 'unbezahlt'"
+msgstr "Le remboursement sqrip a été marqué comme 'non payé'"
 
 msgid "sqrip settings"
 msgstr "réglages sqrip"
@@ -514,8 +533,8 @@ msgstr "Statut des commandes après le 2e paiement partiel"
 msgid "Status of Orders after 3rd partial payment"
 msgstr "Statut des commandes après le 3e paiement partiel"
 
-msgid "Status of Orders made with payment method \\'sqrip\\':"
-msgstr "Statut des commandes effectuées avec le mode de paiement \\'sqrip\\' :"
+msgid "Status of Orders made with payment method 'sqrip':"
+msgstr "Statut des commandes effectuées avec le mode de paiement 'sqrip' :"
 
 msgid "Street*"
 msgstr "Rue*"

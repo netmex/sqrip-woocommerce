@@ -457,6 +457,14 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'default' => __('QR order status', 'sqrip-swiss-qr-invoice'),
                 'description' => sprintf(__('Set the status of a newly placed order with payment method \'sqrip\' so it matches your shop process. Should no status be suitable, please create one for your own %s.', 'sqrip-swiss-qr-invoice'), '<a href="#" class="sqrip-toggle-qr-order-status">' . __('here', 'sqrip-swiss-qr-invoice') . '</a>'),
             ),
+            'qr_order_status_send_emails' => array(
+                'title' => __('Send order-confirmation e-mails for this status', 'sqrip-swiss-qr-invoice'),
+                'label' => __('Also send the order-confirmation e-mails (to the customer and to the shop admin) when a new sqrip order is placed', 'sqrip-swiss-qr-invoice'),
+                'type' => 'checkbox',
+                'default' => 'no',
+                'class' => 'qrinvoice-tab',
+                'description' => __('Enable this if you keep orders in a status (such as \'Pending payment\') that does not itself trigger WooCommerce e-mails. sqrip then sends the \'New order\' (admin) and \'Order on-hold\' (customer) e-mails directly at checkout, so confirmations go out without changing your chosen status. Leave off to keep the standard WooCommerce behaviour.', 'sqrip-swiss-qr-invoice'),
+            ),
             'enabled_new_qrstatus' => array(
                 'title' => '',
                 'type' => 'checkbox',
@@ -1665,6 +1673,26 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 // turn off sqrip if auto turn-off enabled
                 sqrip_auto_turn_off();
             }
+
+            // Optional (opt-in) order-confirmation e-mails.
+            // WooCommerce fires the "New order" (admin) and customer e-mails only on
+            // a status TRANSITION (pending -> on-hold/processing/completed). A shop
+            // that deliberately keeps the order in a non-transition status (e.g.
+            // 'Pending payment', for manual payment reconciliation) therefore never
+            // gets these e-mails. When the merchant opts in, trigger them directly
+            // here — server-side, so it also works with cached confirmation pages —
+            // without touching the configured order status. Each e-mail still
+            // respects its own enabled/disabled state in WooCommerce.
+            if (sqrip_get_plugin_option('qr_order_status_send_emails') === 'yes') {
+                $mailer = WC()->mailer();
+                $wc_emails = $mailer ? $mailer->get_emails() : array();
+                foreach (array('WC_Email_New_Order', 'WC_Email_Customer_On_Hold_Order') as $sqrip_email_class) {
+                    if (isset($wc_emails[$sqrip_email_class]) && is_callable(array($wc_emails[$sqrip_email_class], 'trigger'))) {
+                        $wc_emails[$sqrip_email_class]->trigger($order_id, $order);
+                    }
+                }
+            }
+
             // Redirect to thank you page
             return array(
                 'result' => 'success',

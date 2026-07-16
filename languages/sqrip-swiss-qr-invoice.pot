@@ -7,15 +7,15 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Domain: sqrip-swiss-qr-invoice\n"
 
-#: inc/class-wc-sqrip-payment-gateway.php:524
+#: inc/class-wc-sqrip-payment-gateway.php:532
 msgid "% of total amount in 1st qr-invoice"
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:561
+#: inc/class-wc-sqrip-payment-gateway.php:569
 msgid "% of total amount in 2nd qr-invoice"
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:605
+#: inc/class-wc-sqrip-payment-gateway.php:613
 msgid "% of total amount in 3rd qr-invoice"
 msgstr ""
 
@@ -40,7 +40,9 @@ msgid "[order_date]_[shop_name]_invoice-order_[order_number]"
 msgstr ""
 
 #: inc/sqrip-ajax.php:134
-msgid "Action required:\\nPlease confirm change of IBAN on <a href='https://api.sqrip.ch/login' target='_blank'>sqrip.ch</a> in order to continue the service."
+msgid ""
+"Action required:\\n"
+"Please confirm change of IBAN on <a href='https://api.sqrip.ch/login' target='_blank'>sqrip.ch</a> in order to continue the service."
 msgstr ""
 
 #: inc/class-wc-sqrip-payment-gateway.php:235
@@ -83,11 +85,15 @@ msgstr ""
 msgid "Address"
 msgstr ""
 
+#: inc/class-wc-sqrip-payment-gateway.php:462
+msgid "Also send the order-confirmation e-mails (to the customer and to the shop admin) when a new sqrip order is placed"
+msgstr ""
+
 #: inc/class-wc-sqrip-payment-gateway.php:181
 msgid "API key"
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:746
+#: inc/class-wc-sqrip-payment-gateway.php:754
 msgid "API key for Refunds"
 msgstr ""
 
@@ -99,15 +105,15 @@ msgstr ""
 msgid "as your third address;"
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:598
+#: inc/class-wc-sqrip-payment-gateway.php:606
 msgid "Attach 2nd QR-Invoice to E-Mail template"
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:642
+#: inc/class-wc-sqrip-payment-gateway.php:650
 msgid "Attach 3rd QR-Invoice to E-Mail template"
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:501
+#: inc/class-wc-sqrip-payment-gateway.php:509
 msgid "Attach QR-Invoice to E-Mail template"
 msgstr ""
 
@@ -123,7 +129,7 @@ msgstr ""
 msgid "Automatic QR-invoice generation by sqrip is disabled."
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:694
+#: inc/class-wc-sqrip-payment-gateway.php:702
 msgid "Awaiting payment"
 msgstr ""
 
@@ -163,15 +169,15 @@ msgstr ""
 msgid "City*"
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:477
+#: inc/class-wc-sqrip-payment-gateway.php:485
 msgid "Combine QR-Slip with Invoice into one document"
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:714
+#: inc/class-wc-sqrip-payment-gateway.php:722
 msgid "Completed Orders Status"
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:726
+#: inc/class-wc-sqrip-payment-gateway.php:734
 msgid "Completed, Paid"
 msgstr ""
 
@@ -214,7 +220,7 @@ msgstr ""
 msgid "Current sqrip status"
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:665
+#: inc/class-wc-sqrip-payment-gateway.php:673
 msgid "days."
 msgstr ""
 
@@ -222,11 +228,11 @@ msgstr ""
 msgid "Define Status when QR-Invoice is suppressed"
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:664
+#: inc/class-wc-sqrip-payment-gateway.php:672
 msgid "Delete any generated QR-invoice after "
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:657
+#: inc/class-wc-sqrip-payment-gateway.php:665
 msgid "Delete QR-invoice once status has been changed to"
 msgstr ""
 
@@ -259,7 +265,7 @@ msgid "Do not set this too low! Remove input to disable the setting."
 msgstr ""
 
 #: inc/class-wc-sqrip-payment-gateway.php:410
-msgid "Don\\'t generate QR-invoice at checkout but manually"
+msgid "Don't generate QR-invoice at checkout but manually"
 msgstr ""
 
 #: sqrip-woocommerce.php:666
@@ -268,10 +274,13 @@ msgid "Download Invoice"
 msgstr ""
 
 #: inc/class-wc-sqrip-payment-gateway.php:362
-msgid "Due date: [due_date format=\\\"y-MM-dd\\\"]\\nOrder: [order_number]\\nThank you for your purchase!"
+msgid ""
+"Due date: [due_date format=\"y-MM-dd\"]\\n"
+"Order: [order_number]\\n"
+"Thank you for your purchase!"
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:1284
+#: inc/class-wc-sqrip-payment-gateway.php:1292
 msgid "E-Mail can not be sent, please check WP MAIL SMTP"
 msgstr ""
 
@@ -283,6 +292,10 @@ msgstr ""
 msgid "Enable QR invoices with sqrip API"
 msgstr ""
 
+#: inc/class-wc-sqrip-payment-gateway.php:466
+msgid "Enable this if you keep orders in a status (such as 'Pending payment') that does not itself trigger WooCommerce e-mails. sqrip then sends the 'New order' (admin) and 'Order on-hold' (customer) e-mails directly at checkout, so confirmations go out without changing your chosen status. Leave off to keep the standard WooCommerce behaviour."
+msgstr ""
+
 #: inc/class-wc-sqrip-payment-gateway.php:398
 msgid "English"
 msgstr ""
@@ -290,15 +303,15 @@ msgstr ""
 #: sqrip-woocommerce.php:800
 #: inc/functions.php:984
 #: inc/functions.php:993
-#: inc/class-wc-sqrip-payment-gateway.php:1412
-#: inc/class-wc-sqrip-payment-gateway.php:1429
-#: inc/class-wc-sqrip-payment-gateway.php:1465
-#: inc/class-wc-sqrip-payment-gateway.php:1678
-#: inc/class-wc-sqrip-payment-gateway.php:1687
+#: inc/class-wc-sqrip-payment-gateway.php:1420
+#: inc/class-wc-sqrip-payment-gateway.php:1437
+#: inc/class-wc-sqrip-payment-gateway.php:1473
+#: inc/class-wc-sqrip-payment-gateway.php:1706
+#: inc/class-wc-sqrip-payment-gateway.php:1715
 msgid "Error: %s"
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:1399
+#: inc/class-wc-sqrip-payment-gateway.php:1407
 msgid "Error: Es wurde kein API Schlüssel für die Rückerstattungen angegeben. Bitte ergänze dies in den sqrip Plugin Einstellungen."
 msgstr ""
 
@@ -310,7 +323,7 @@ msgstr ""
 msgid "File Name"
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:748
+#: inc/class-wc-sqrip-payment-gateway.php:756
 msgid "For security reasons, a separate API key with <strong>deactived</strong> confirmation is needed for the Refund function."
 msgstr ""
 
@@ -322,7 +335,7 @@ msgstr ""
 msgid "French"
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:679
+#: inc/class-wc-sqrip-payment-gateway.php:687
 msgid "General Settings"
 msgstr ""
 
@@ -345,11 +358,11 @@ msgstr ""
 
 #: inc/class-wc-sqrip-payment-gateway.php:428
 #: inc/class-wc-sqrip-payment-gateway.php:458
-#: inc/class-wc-sqrip-payment-gateway.php:542
-#: inc/class-wc-sqrip-payment-gateway.php:579
-#: inc/class-wc-sqrip-payment-gateway.php:623
-#: inc/class-wc-sqrip-payment-gateway.php:695
-#: inc/class-wc-sqrip-payment-gateway.php:727
+#: inc/class-wc-sqrip-payment-gateway.php:550
+#: inc/class-wc-sqrip-payment-gateway.php:587
+#: inc/class-wc-sqrip-payment-gateway.php:631
+#: inc/class-wc-sqrip-payment-gateway.php:703
+#: inc/class-wc-sqrip-payment-gateway.php:735
 msgid "here"
 msgstr ""
 
@@ -357,15 +370,15 @@ msgstr ""
 msgid "Hide QR Code"
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:1029
+#: inc/class-wc-sqrip-payment-gateway.php:1037
 msgid "IBAN changes: Active confirmation (see API key in sqrip.ch account)."
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:1033
+#: inc/class-wc-sqrip-payment-gateway.php:1041
 msgid "IBAN changes: Passive confirmation (see API key in sqrip.ch account)"
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:1370
+#: inc/class-wc-sqrip-payment-gateway.php:1378
 msgid "IBAN des Kunden wurde nicht gefunden. Stelle sicher, dass sie im Meta-Feld 'iban_num' hinterlegt ist."
 msgstr ""
 
@@ -381,13 +394,13 @@ msgstr ""
 msgid "If activated, sqrip will add an action for orders with the status specified in setting 1 (Awaiting payment), to change the status to the one specified in setting 2 (Confirmed)."
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:695
-#: inc/class-wc-sqrip-payment-gateway.php:727
+#: inc/class-wc-sqrip-payment-gateway.php:703
+#: inc/class-wc-sqrip-payment-gateway.php:735
 msgid "If there is no suitable status available, you can create one right %s"
 msgstr ""
 
 #: inc/class-wc-sqrip-payment-gateway.php:412
-msgid "If you enable this, the order status for orders with sqrip will change to \\'Payment pending\\', a confirmation e-mail will be sent and the order will wait for you to generate qr-invoices manually. This is helpful if you may need to adjust pricing or quantity after an order has been placed"
+msgid "If you enable this, the order status for orders with sqrip will change to 'Payment pending', a confirmation e-mail will be sent and the order will wait for you to generate qr-invoices manually. This is helpful if you may need to adjust pricing or quantity after an order has been placed"
 msgstr ""
 
 #: sqrip-woocommerce.php:259
@@ -423,7 +436,7 @@ msgstr ""
 msgid "Italian"
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:666
+#: inc/class-wc-sqrip-payment-gateway.php:674
 msgid "Keep the size of your media library small. sqrip deletes all qr-invoice files that are not needed anymore"
 msgstr ""
 
@@ -451,11 +464,11 @@ msgstr ""
 msgid "Name*"
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:508
+#: inc/class-wc-sqrip-payment-gateway.php:516
 msgid "Number of qr-invoices to deliver"
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:486
+#: inc/class-wc-sqrip-payment-gateway.php:494
 msgid "Offer QR invoice for download"
 msgstr ""
 
@@ -483,7 +496,7 @@ msgstr ""
 msgid "paid on"
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:516
+#: inc/class-wc-sqrip-payment-gateway.php:524
 msgid "Partial Invoice Information"
 msgstr ""
 
@@ -491,13 +504,13 @@ msgstr ""
 msgid "Partial Payment"
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:519
+#: inc/class-wc-sqrip-payment-gateway.php:527
 msgid "Partial payment [invoice] of [max_invoice]"
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:541
-#: inc/class-wc-sqrip-payment-gateway.php:578
-#: inc/class-wc-sqrip-payment-gateway.php:622
+#: inc/class-wc-sqrip-payment-gateway.php:549
+#: inc/class-wc-sqrip-payment-gateway.php:586
+#: inc/class-wc-sqrip-payment-gateway.php:630
 msgid "Partially paid"
 msgstr ""
 
@@ -537,11 +550,11 @@ msgstr ""
 msgid "Please submit at least either Name / Last name or Company name to generate the qr-invoice"
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:478
+#: inc/class-wc-sqrip-payment-gateway.php:486
 msgid "Plugin <a href='https://wordpress.org/plugins/woocommerce-pdf-invoices-packing-slips'> 'PDF Invoices & Packing Slips for WooCommerce' </a> "
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:494
+#: inc/class-wc-sqrip-payment-gateway.php:502
 msgid "Position:"
 msgstr ""
 
@@ -585,22 +598,26 @@ msgstr ""
 msgid "Renew QR Invoice error:"
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:502
-#: inc/class-wc-sqrip-payment-gateway.php:599
-#: inc/class-wc-sqrip-payment-gateway.php:643
+#: inc/class-wc-sqrip-payment-gateway.php:510
+#: inc/class-wc-sqrip-payment-gateway.php:607
+#: inc/class-wc-sqrip-payment-gateway.php:651
 msgid "Select email templates to which the QR-invoice are attached"
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:509
+#: inc/class-wc-sqrip-payment-gateway.php:517
 msgid "Select number of qr-invoices to send to customer"
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:650
+#: inc/class-wc-sqrip-payment-gateway.php:658
 msgid "Send a copy of the Email with PDF invoice to Admin"
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:649
+#: inc/class-wc-sqrip-payment-gateway.php:657
 msgid "Send a copy to the shop admin"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:461
+msgid "Send order-confirmation e-mails for this status"
 msgstr ""
 
 #: sqrip-woocommerce.php:246
@@ -612,18 +629,18 @@ msgid "Services"
 msgstr ""
 
 #: inc/class-wc-sqrip-payment-gateway.php:458
-msgid "Set the status of a newly placed order with payment method \\'sqrip\\' so it matches your shop process. Should no status be suitable, please create one for your own %s."
+msgid "Set the status of a newly placed order with payment method 'sqrip' so it matches your shop process. Should no status be suitable, please create one for your own %s."
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:542
+#: inc/class-wc-sqrip-payment-gateway.php:550
 msgid "Set the status of the 1st partial invoice so it matches your shop process. Should no status be suitable, please create one for your own %s."
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:579
+#: inc/class-wc-sqrip-payment-gateway.php:587
 msgid "Set the status of the 2nd partial invoice so it matches your shop process. Should no status be suitable, please create one for your own %s."
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:623
+#: inc/class-wc-sqrip-payment-gateway.php:631
 msgid "Set the status of the 3rd partial invoice so it matches your shop process. Should no status be suitable, please create one for your own %s."
 msgstr ""
 
@@ -635,11 +652,11 @@ msgstr ""
 msgid "Show QR Code"
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:485
+#: inc/class-wc-sqrip-payment-gateway.php:493
 msgid "Show QR-invoice on confirmation page"
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:1294
+#: inc/class-wc-sqrip-payment-gateway.php:1302
 msgid "sqrip Error: %s"
 msgstr ""
 
@@ -651,9 +668,9 @@ msgstr ""
 #: inc/functions.php:839
 #: inc/functions.php:863
 #: inc/functions.php:871
-#: inc/class-wc-sqrip-payment-gateway.php:1532
-#: inc/class-wc-sqrip-payment-gateway.php:1557
+#: inc/class-wc-sqrip-payment-gateway.php:1540
 #: inc/class-wc-sqrip-payment-gateway.php:1565
+#: inc/class-wc-sqrip-payment-gateway.php:1573
 msgid "sqrip Payment Error: %s"
 msgstr ""
 
@@ -666,25 +683,25 @@ msgid "sqrip payment QR code was successfully regenerated"
 msgstr ""
 
 #: inc/functions.php:947
-#: inc/class-wc-sqrip-payment-gateway.php:1641
+#: inc/class-wc-sqrip-payment-gateway.php:1649
 msgid "sqrip QR Invoice created."
 msgstr ""
 
 #: inc/functions.php:912
-#: inc/class-wc-sqrip-payment-gateway.php:1606
+#: inc/class-wc-sqrip-payment-gateway.php:1614
 msgid "sqrip QR Invoices created."
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:1450
+#: inc/class-wc-sqrip-payment-gateway.php:1458
 msgid "sqrip QR-Code für Rückerstattung erstellt."
 msgstr ""
 
 #: inc/sqrip-ajax.php:253
-msgid "sqrip refund was marked as \\'paid\\'"
+msgid "sqrip refund was marked as 'paid'"
 msgstr ""
 
 #: inc/sqrip-ajax.php:287
-msgid "sqrip refund was marked as \\'unbezahlt\\'"
+msgid "sqrip refund was marked as 'unbezahlt'"
 msgstr ""
 
 #: sqrip-woocommerce.php:878
@@ -705,24 +722,24 @@ msgstr ""
 msgid "Status changing to"
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:684
+#: inc/class-wc-sqrip-payment-gateway.php:692
 msgid "Status of awaiting payment orders"
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:531
+#: inc/class-wc-sqrip-payment-gateway.php:539
 msgid "Status of Orders after 1st partial payment"
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:568
+#: inc/class-wc-sqrip-payment-gateway.php:576
 msgid "Status of Orders after 2nd partial payment"
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:612
+#: inc/class-wc-sqrip-payment-gateway.php:620
 msgid "Status of Orders after 3rd partial payment"
 msgstr ""
 
 #: inc/class-wc-sqrip-payment-gateway.php:447
-msgid "Status of Orders made with payment method \\'sqrip\\':"
+msgid "Status of Orders made with payment method 'sqrip':"
 msgstr ""
 
 #: inc/class-wc-sqrip-payment-gateway.php:292
@@ -741,7 +758,7 @@ msgstr ""
 msgid "Swiss QR invoices with sqrip"
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:995
+#: inc/class-wc-sqrip-payment-gateway.php:1003
 msgid "The (QR-)IBAN has been changed. Please confirm the new (QR-)IBAN in your sqrip.ch account."
 msgstr ""
 
@@ -783,7 +800,7 @@ msgstr ""
 msgid "This selects the status with which new orders are created if the QR-Invoice generation suppression is active. If there is no suitable status available, you can create one right %s"
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:727
+#: inc/class-wc-sqrip-payment-gateway.php:735
 msgid "To what order status should we change your order, once the payment has been confirmed?"
 msgstr ""
 
@@ -841,7 +858,7 @@ msgstr ""
 msgid "Will be displayed on the QR invoice in the section “Additional information”. The result shown in invoices cannot exceed 140 symbols and 5 rows.<br>The following short codes are available:<br>[order_number] the order number.<br>[due_date format=\"y-MM-dd\"] to insert the due date of the invoice.<br><a href=\"https://www.php.net/strftime\" target=\"_blank\">Supported formats</a> are:<br>y-MM-dd -> 2022-04-06<br>dd.MM.yy -> 04.06.22<br>dd. MMMM y -> 06. April 2022<br>d. MMM y -> 6. Apr 2022"
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:520
+#: inc/class-wc-sqrip-payment-gateway.php:528
 msgid "Will be displayed on the QR invoice under the section “Additional information”."
 msgstr ""
 
