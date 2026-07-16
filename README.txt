@@ -4,7 +4,7 @@ Donate link: https://sqrip.ch/
 Tags: woocommerce, payment, sqrip, qrcode, qr, scan, Kontoabgleich, WPML, swiss qr invoice, QR-Rechnung, EBICS, QR-facture, bulletins de versement, Einzahlungsschein, QR-Einzahlungsschein, bulletins de versement, Swiss QR Code, code QR, QR-fattura, polizze di versamento, multi-store, multi-site, PDF Invoices, multiple invoice installments, 
 Requires at least: 6.0
 Tested up to: 7.0
-Stable tag: 1.9.2
+Stable tag: 1.9.3
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -142,6 +142,9 @@ Yes. We are already working on comparing the reconciliation of orders/purchases 
 7. Refund functionality
 
 == Changelog ==
+= 1.9.3 : Juli 2026 – Fix =
+* Orders no longer get stuck in 'pending': the sqrip order status is now set server-side during checkout instead of relying on the confirmation page, which a full-page cache (e.g. NitroPack) or the block checkout can bypass.
+
 = 1.9.2 : Juli 2026 – Fixes =
 * Translations: the plugin's own bundled German/French/Italian files are now always used, even if an outdated language pack exists on the server;
 * Confirmation page: the QR-invoice download button is no longer printed twice on modern (block) order-received pages;
