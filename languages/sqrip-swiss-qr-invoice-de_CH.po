@@ -493,6 +493,9 @@ msgstr "Die sqrip-Rückerstattung wurde als \\'unbezahlt\\' markiert"
 msgid "sqrip settings"
 msgstr "sqrip-Einstellungen"
 
+msgid "sqrip warning: new orders paid with sqrip are set to the status \"Pending payment\". WooCommerce automatically cancels unpaid orders with this status after the stock-hold time (currently %d minutes), so QR-invoice orders can be cancelled before the bank transfer arrives. We recommend the status \"On hold\" or your own custom status instead."
+msgstr "sqrip Warnung: Neue mit sqrip bezahlte Bestellungen erhalten den Status \"Bezahlung ausstehend\". WooCommerce storniert unbezahlte Bestellungen mit diesem Status automatisch nach Ablauf der Bestandssperre (aktuell %d Minuten), sodass QR-Rechnungs-Bestellungen storniert werden können, bevor die Banküberweisung eintrifft. Wir empfehlen stattdessen den Status \"In Wartestellung\" oder Ihren eigenen Status."
+
 msgid "sqrip – Modern and clever WooCommerce tools for the most widely used payment method in Switzerland: the bank transfer."
 msgstr "sqrip – Moderne und clevere WooCommerce-Tools für die am weitesten verbreitete Zahlungsmethode in der Schweiz: die Banküberweisung."
 
