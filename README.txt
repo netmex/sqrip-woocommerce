@@ -4,7 +4,7 @@ Donate link: https://sqrip.ch/
 Tags: woocommerce, payment, sqrip, qrcode, qr, scan, Kontoabgleich, WPML, swiss qr invoice, QR-Rechnung, EBICS, QR-facture, bulletins de versement, Einzahlungsschein, QR-Einzahlungsschein, bulletins de versement, Swiss QR Code, code QR, QR-fattura, polizze di versamento, multi-store, multi-site, PDF Invoices, multiple invoice installments, 
 Requires at least: 6.0
 Tested up to: 7.0
-Stable tag: 1.9
+Stable tag: 1.9.1
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -142,6 +142,11 @@ Yes. We are already working on comparing the reconciliation of orders/purchases 
 7. Refund functionality
 
 == Changelog ==
+= 1.9.1 : Juli 2026 – Fixes =
+* Confirmation page: the QR-invoice download button is no longer printed twice on modern (block) order-received pages;
+* Escaping and minor hardening;
+* Tested with WordPress 7.0.
+
 = 1.9 : Juli 2026 – Features =
 * sqrip is ready for 'structured addresses';
 * Adding the ability to use sqrip in multiple stores installed on the same server instance;
