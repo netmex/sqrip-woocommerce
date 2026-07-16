@@ -102,7 +102,7 @@ class Sqrip_Media_Clearner
                     if ($deleted_att) {
                         $logs .= ' Deleted sqrip_reference_id, sqrip_qr_pdf_attachment_id, sqrip_pdf_file_path & sqrip_pdf_file_url for order #' . $order_id . '.';
         
-                        $order_notes = __("The PDF file for order #$order_id has been deleted from the media library", 'sqrip-swiss-qr-invoice');
+                        $order_notes = sprintf(__('The PDF file for order #%s has been deleted from the media library', 'sqrip-swiss-qr-invoice'), $order_id);
                         $order->add_order_note($order_notes);
                     }
     

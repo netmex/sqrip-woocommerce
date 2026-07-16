@@ -34,6 +34,9 @@ msgstr "(QR-)IBAN del conto sul quale deve essere effettuato il bonifico"
 msgid "<b>%s</b> %s</br>%s"
 msgstr "<b>%s</b> %s</br>%s"
 
+msgid "<span id=\"test-email-status\">Test email has been sent! <a href=\"%s\" target=\"_blank\">Click here</a> to view the invoice.</span>"
+msgstr "<span id=\"test-email-status\">L'e-mail di prova è stata inviata! <a href=\"%s\" target=\"_blank\">Clicca qui</a> per vedere la fattura.</span>"
+
 msgid "[order_date]_[shop_name]_invoice-order_[order_number]"
 msgstr "[order_date]_[shop_name]_invoice-order_[order_number]"
 
@@ -247,6 +250,12 @@ msgstr "Formato"
 
 msgid "French"
 msgstr "Francese"
+
+msgid "from sqrip account: %s"
+msgstr "dall'account sqrip: %s"
+
+msgid "from WooCommerce: %s"
+msgstr "da WooCommerce: %s"
 
 msgid "General Settings"
 msgstr "Impostazioni generali"
@@ -509,6 +518,9 @@ msgstr "Il rimborso sqrip è stato contrassegnato come 'pagato'"
 msgid "sqrip refund was marked as 'unbezahlt'"
 msgstr "Il rimborso sqrip è stato contrassegnato come 'non pagato'"
 
+msgid "sqrip sent the order-confirmation e-mail(s): %s."
+msgstr "sqrip ha inviato l'e-mail/le e-mail di conferma dell'ordine: %s."
+
 msgid "sqrip settings"
 msgstr "Impostazioni sqrip"
 
@@ -557,8 +569,8 @@ msgstr "L'indirizzo da visualizzare sulla fattura QR"
 msgid "The only characters allowed are A-Z, dashes (-) and underscores (_). Any spaces will be replaced with underscores (_). You can also use the following variables:<br>[order_number] — your full order number;<br>[order_date] — in yymmdd format, e.g. 230210 for Feb. 10 2023;<br>[shop_name] — can only be used if the shop name conforms with the \"characters allowed\" rule, otherwise the setting will be highlighted in red."
 msgstr "Gli unici caratteri consentiti sono A-Z, trattini (-) e trattini bassi (_). Eventuali spazi verranno sostituiti con trattini bassi (_). Può anche utilizzare le seguenti variabili:<br>[order_number] — il Suo numero d'ordine completo;<br>[order_date] — nel formato yymmdd, ad es. 230210 per il 10 feb. 2023;<br>[shop_name] — può essere utilizzato solo se il nome del negozio rispetta la regola dei \"caratteri consentiti\", altrimenti l'impostazione verrà evidenziata in rosso."
 
-msgid "The PDF file for order #$order_id has been deleted from the media library"
-msgstr "Il file PDF per l'ordine #$order_id è stato eliminato dalla libreria multimediale"
+msgid "The PDF file for order #%s has been deleted from the media library"
+msgstr "Il file PDF dell'ordine #%s è stato eliminato dalla libreria multimediale"
 
 msgid "The sqrip plugin only supports EUR and CHF currencies!"
 msgstr "Il plugin sqrip supporta solo le valute EUR e CHF!"

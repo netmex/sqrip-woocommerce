@@ -112,11 +112,11 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         $address_options = [];
 
         if ($address_sqrip) {
-            $address_options['sqrip'] = __('from sqrip account: ' . esc_attr($address_sqrip), 'sqrip-swiss-qr-invoice');
+            $address_options['sqrip'] = sprintf(__('from sqrip account: %s', 'sqrip-swiss-qr-invoice'), esc_attr($address_sqrip));
         }
 
         if ($address_woocommerce) {
-            $address_options['woocommerce'] = __('from WooCommerce: ' . esc_attr($address_woocommerce), 'sqrip-swiss-qr-invoice');
+            $address_options['woocommerce'] = sprintf(__('from WooCommerce: %s', 'sqrip-swiss-qr-invoice'), esc_attr($address_woocommerce));
         }
 
         $address_options['individual'] = __('Third address', 'sqrip-swiss-qr-invoice');
@@ -1287,7 +1287,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             $wp_mail = wp_mail($to, $subject, $body, $headers, $attachments);
 
             if ($wp_mail) {
-                $settings->add_message(__('<span id="test-email-status">Test email has been sent! <a href="' . $sqrip_qr_pdf_url . '" target="_blank">Click here</a> to view the invoice.</span>', 'sqrip-swiss-qr-invoice'));
+                $settings->add_message(sprintf(__('<span id="test-email-status">Test email has been sent! <a href="%s" target="_blank">Click here</a> to view the invoice.</span>', 'sqrip-swiss-qr-invoice'), esc_url($sqrip_qr_pdf_url)));
             } else {
                 $settings->add_error(__('E-Mail can not be sent, please check WP MAIL SMTP', 'sqrip-swiss-qr-invoice'));
             }
@@ -1686,10 +1686,26 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             if (sqrip_get_plugin_option('qr_order_status_send_emails') === 'yes') {
                 $mailer = WC()->mailer();
                 $wc_emails = $mailer ? $mailer->get_emails() : array();
+                $sqrip_sent_emails = array();
                 foreach (array('WC_Email_New_Order', 'WC_Email_Customer_On_Hold_Order') as $sqrip_email_class) {
-                    if (isset($wc_emails[$sqrip_email_class]) && is_callable(array($wc_emails[$sqrip_email_class], 'trigger'))) {
-                        $wc_emails[$sqrip_email_class]->trigger($order_id, $order);
+                    if (!isset($wc_emails[$sqrip_email_class]) || !is_callable(array($wc_emails[$sqrip_email_class], 'trigger'))) {
+                        continue;
                     }
+                    $sqrip_email = $wc_emails[$sqrip_email_class];
+                    // Respect each e-mail's own enabled/disabled state in WooCommerce.
+                    if (method_exists($sqrip_email, 'is_enabled') && !$sqrip_email->is_enabled()) {
+                        continue;
+                    }
+                    $sqrip_email->trigger($order_id, $order);
+                    $sqrip_sent_emails[] = method_exists($sqrip_email, 'get_title') ? $sqrip_email->get_title() : $sqrip_email_class;
+                }
+                // Record the step in the order notes for traceability.
+                if ($sqrip_sent_emails) {
+                    $order->add_order_note(sprintf(
+                        /* translators: %s: comma-separated list of e-mail titles */
+                        __('sqrip sent the order-confirmation e-mail(s): %s.', 'sqrip-swiss-qr-invoice'),
+                        implode(', ', $sqrip_sent_emails)
+                    ));
                 }
             }
 

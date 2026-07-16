@@ -35,6 +35,10 @@ msgstr ""
 msgid "<b>%s</b> %s</br>%s"
 msgstr ""
 
+#: inc/class-wc-sqrip-payment-gateway.php:1290
+msgid "<span id=\"test-email-status\">Test email has been sent! <a href=\"%s\" target=\"_blank\">Click here</a> to view the invoice.</span>"
+msgstr ""
+
 #: inc/class-wc-sqrip-payment-gateway.php:371
 msgid "[order_date]_[shop_name]_invoice-order_[order_number]"
 msgstr ""
@@ -306,8 +310,8 @@ msgstr ""
 #: inc/class-wc-sqrip-payment-gateway.php:1420
 #: inc/class-wc-sqrip-payment-gateway.php:1437
 #: inc/class-wc-sqrip-payment-gateway.php:1473
-#: inc/class-wc-sqrip-payment-gateway.php:1706
-#: inc/class-wc-sqrip-payment-gateway.php:1715
+#: inc/class-wc-sqrip-payment-gateway.php:1722
+#: inc/class-wc-sqrip-payment-gateway.php:1731
 msgid "Error: %s"
 msgstr ""
 
@@ -333,6 +337,14 @@ msgstr ""
 
 #: inc/class-wc-sqrip-payment-gateway.php:396
 msgid "French"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:115
+msgid "from sqrip account: %s"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:119
+msgid "from WooCommerce: %s"
 msgstr ""
 
 #: inc/class-wc-sqrip-payment-gateway.php:687
@@ -704,6 +716,10 @@ msgstr ""
 msgid "sqrip refund was marked as 'unbezahlt'"
 msgstr ""
 
+#: inc/class-wc-sqrip-payment-gateway.php:1706
+msgid "sqrip sent the order-confirmation e-mail(s): %s."
+msgstr ""
+
 #: sqrip-woocommerce.php:878
 #: sqrip-woocommerce.php:878
 msgid "sqrip settings"
@@ -772,7 +788,7 @@ msgstr ""
 
 #: sqrip-woocommerce.php:1536
 #: inc/class-sqrip-media-cleaner.php:105
-msgid "The PDF file for order #$order_id has been deleted from the media library"
+msgid "The PDF file for order #%s has been deleted from the media library"
 msgstr ""
 
 #: sqrip-woocommerce.php:175

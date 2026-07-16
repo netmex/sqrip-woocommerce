@@ -4,7 +4,7 @@ Donate link: https://sqrip.ch/
 Tags: woocommerce, payment, sqrip, qrcode, qr, scan, Kontoabgleich, WPML, swiss qr invoice, QR-Rechnung, EBICS, QR-facture, bulletins de versement, Einzahlungsschein, QR-Einzahlungsschein, bulletins de versement, Swiss QR Code, code QR, QR-fattura, polizze di versamento, multi-store, multi-site, PDF Invoices, multiple invoice installments, 
 Requires at least: 6.0
 Tested up to: 7.0
-Stable tag: 1.9.6
+Stable tag: 1.9.7
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -142,6 +142,10 @@ Yes. We are already working on comparing the reconciliation of orders/purchases 
 7. Refund functionality
 
 == Changelog ==
+= 1.9.7 : Juli 2026 – i18n & order notes =
+* Fixed further strings that could never be translated because they embedded a variable or HTML directly in the translation call (the media-library deletion order note, the payee-address dropdown options, and the test-e-mail confirmation);
+* Order notes: when the optional order-confirmation e-mails are sent, the step is now recorded as an order note for full traceability.
+
 = 1.9.6 : Juli 2026 – Feature & i18n fix =
 * New optional setting under the sqrip order status: 'Send order-confirmation e-mails for this status'. When enabled, sqrip sends the New order (admin) and Order on-hold (customer) e-mails directly at checkout, so shops that keep orders in a non-transition status (e.g. 'Pending payment') still get confirmations — without changing the chosen status. Opt-in, off by default;
 * Fixed bundled translations for strings containing apostrophes/quotes (e.g. "Status of Orders made with payment method 'sqrip'") that previously stayed untranslated.
