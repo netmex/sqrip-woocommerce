@@ -1,17 +1,11 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: sqrip.ch 1.9\n"
-"Report-Msgid-Bugs-To: https://sqrip.ch/\n"
-"POT-Creation-Date: 2026-07-15 00:00+0000\n"
-"PO-Revision-Date: 2026-07-15 00:00+0000\n"
-"Last-Translator: netmex digital gmbh <info@sqrip.ch>\n"
-"Language-Team: German <info@sqrip.ch>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Language: de_DE\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: sqrip i18n build\n"
 
 msgid "% of total amount in 1st qr-invoice"
 msgstr "% des Gesamtbetrags in der 1. QR-Rechnung"
@@ -45,7 +39,7 @@ msgid ""
 "Please confirm change of IBAN on <a href='https://api.sqrip.ch/login' target='_blank'>sqrip.ch</a> in order to continue the service."
 msgstr ""
 "Aktion erforderlich:\\n"
-"Bitte bestätigen Sie die Änderung der IBAN auf <a href='https://api.sqrip.ch/login' target='_blank'>sqrip.ch</a>, um den Dienst weiterhin nutzen zu können."
+"Bitte bestätigen Sie die IBAN-Änderung auf <a href='https://api.sqrip.ch/login' target='_blank'>sqrip.ch</a>, um den Dienst fortzusetzen."
 
 msgid "Activate Multiple QR-slips per order"
 msgstr "Mehrere QR-Zahlteile pro Bestellung aktivieren"
@@ -100,6 +94,9 @@ msgstr "3. QR-Rechnung an E-Mail-Vorlage anhängen"
 
 msgid "Attach QR-Invoice to E-Mail template"
 msgstr "QR-Rechnung an E-Mail-Vorlage anhängen"
+
+msgid "Austria"
+msgstr "Österreich"
 
 msgid "Auto turn off"
 msgstr "Automatisch ausschalten"
@@ -248,6 +245,9 @@ msgstr "Aus Sicherheitsgründen wird für die Rückerstattungsfunktion ein separ
 msgid "Format"
 msgstr "Format"
 
+msgid "France"
+msgstr "Frankreich"
+
 msgid "French"
 msgstr "Französisch"
 
@@ -268,6 +268,9 @@ msgstr "QR-Rechnung erstellen"
 
 msgid "German"
 msgstr "Deutsch"
+
+msgid "Germany"
+msgstr "Deutschland"
 
 msgid "Handling"
 msgstr "Handhabung"
@@ -326,11 +329,20 @@ msgstr "Es scheint, dass eine ungültige (QR-)IBAN übermittelt wurde. Bitte üb
 msgid "Italian"
 msgstr "Italienisch"
 
+msgid "Italy"
+msgstr "Italien"
+
 msgid "Keep the size of your media library small. sqrip deletes all qr-invoice files that are not needed anymore"
 msgstr "Halten Sie Ihre Medienbibliothek klein. sqrip löscht alle QR-Rechnungsdateien, die nicht mehr benötigt werden"
 
 msgid "Language"
 msgstr "Sprache"
+
+msgid "Liechtenstein"
+msgstr "Liechtenstein"
+
+msgid "Loading..."
+msgstr "Wird geladen..."
 
 msgid "Mark as paid"
 msgstr "Als bezahlt markieren"
@@ -407,6 +419,9 @@ msgstr "Bitte beachten Sie, dass die Zahlungsmethode sqrip in den sqrip-Plugin-E
 msgid "Please select a product in the settings."
 msgstr "Bitte wählen Sie in den Einstellungen ein Produkt aus."
 
+msgid "Please select an option"
+msgstr "Bitte eine Option wählen"
+
 msgid "Please submit at least either Name / Last name or Company name to generate the qr-invoice"
 msgstr "Bitte geben Sie mindestens entweder Name / Nachname oder Firmenname an, um die QR-Rechnung zu erstellen"
 
@@ -451,6 +466,9 @@ msgstr "Wählen Sie die E-Mail-Vorlagen aus, an die die QR-Rechnung angehängt w
 
 msgid "Select number of qr-invoices to send to customer"
 msgstr "Wählen Sie die Anzahl der QR-Rechnungen aus, die an den Kunden gesendet werden sollen"
+
+msgid "Select Status"
+msgstr "Status wählen"
 
 msgid "Send a copy of the Email with PDF invoice to Admin"
 msgstr "Eine Kopie der E-Mail mit der PDF-Rechnung an den Administrator senden"
@@ -559,6 +577,9 @@ msgstr "Unterdrückter Status"
 
 msgid "Swiss QR invoices with sqrip"
 msgstr "Schweizer QR-Rechnungen mit sqrip"
+
+msgid "Switzerland"
+msgstr "Schweiz"
 
 msgid "The (QR-)IBAN has been changed. Please confirm the new (QR-)IBAN in your sqrip.ch account."
 msgstr "Die (QR-)IBAN wurde geändert. Bitte bestätigen Sie die neue (QR-)IBAN in Ihrem sqrip.ch-Konto."

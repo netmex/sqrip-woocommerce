@@ -1,17 +1,11 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: sqrip.ch 1.9\n"
-"Report-Msgid-Bugs-To: https://sqrip.ch/\n"
-"POT-Creation-Date: 2026-07-15 00:00+0000\n"
-"PO-Revision-Date: 2026-07-15 00:00+0000\n"
-"Last-Translator: netmex digital gmbh <info@sqrip.ch>\n"
-"Language-Team: Italian <info@sqrip.ch>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Language: it_IT\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: sqrip i18n build\n"
 
 msgid "% of total amount in 1st qr-invoice"
 msgstr "% dell'importo totale nella 1ª fattura QR"
@@ -45,7 +39,7 @@ msgid ""
 "Please confirm change of IBAN on <a href='https://api.sqrip.ch/login' target='_blank'>sqrip.ch</a> in order to continue the service."
 msgstr ""
 "Azione richiesta:\\n"
-"Confermi la modifica dell'IBAN su <a href='https://api.sqrip.ch/login' target='_blank'>sqrip.ch</a> per continuare a utilizzare il servizio."
+"Conferma la modifica dell'IBAN su <a href='https://api.sqrip.ch/login' target='_blank'>sqrip.ch</a> per continuare il servizio."
 
 msgid "Activate Multiple QR-slips per order"
 msgstr "Attiva più cedole QR per ordine"
@@ -100,6 +94,9 @@ msgstr "Allega la 3ª fattura QR al modello di e-mail"
 
 msgid "Attach QR-Invoice to E-Mail template"
 msgstr "Allega la fattura QR al modello di e-mail"
+
+msgid "Austria"
+msgstr "Austria"
 
 msgid "Auto turn off"
 msgstr "Disattivazione automatica"
@@ -213,7 +210,7 @@ msgid ""
 msgstr ""
 "Data di scadenza: [due_date format=\"y-MM-dd\"]\\n"
 "Ordine: [order_number]\\n"
-"Grazie per il Suo acquisto!"
+"Grazie per il tuo acquisto!"
 
 msgid "E-Mail can not be sent, please check WP MAIL SMTP"
 msgstr "Impossibile inviare l'e-mail, verifichi WP MAIL SMTP"
@@ -248,6 +245,9 @@ msgstr "Per motivi di sicurezza, per la funzione di rimborso è necessaria una c
 msgid "Format"
 msgstr "Formato"
 
+msgid "France"
+msgstr "Francia"
+
 msgid "French"
 msgstr "Francese"
 
@@ -268,6 +268,9 @@ msgstr "Genera fattura QR"
 
 msgid "German"
 msgstr "Tedesco"
+
+msgid "Germany"
+msgstr "Germania"
 
 msgid "Handling"
 msgstr "Gestione"
@@ -326,11 +329,20 @@ msgstr "Sembra che sia stato inviato un (QR-)IBAN non valido. Verifichi l'IBAN d
 msgid "Italian"
 msgstr "Italiano"
 
+msgid "Italy"
+msgstr "Italia"
+
 msgid "Keep the size of your media library small. sqrip deletes all qr-invoice files that are not needed anymore"
 msgstr "Mantenga ridotte le dimensioni della Sua libreria multimediale. sqrip elimina tutti i file delle fatture QR che non sono più necessari"
 
 msgid "Language"
 msgstr "Lingua"
+
+msgid "Liechtenstein"
+msgstr "Liechtenstein"
+
+msgid "Loading..."
+msgstr "Caricamento..."
 
 msgid "Mark as paid"
 msgstr "Contrassegna come pagato"
@@ -407,6 +419,9 @@ msgstr "Tenga presente che il metodo di pagamento sqrip è disattivato nelle imp
 msgid "Please select a product in the settings."
 msgstr "Selezioni un prodotto nelle impostazioni."
 
+msgid "Please select an option"
+msgstr "Seleziona un'opzione"
+
 msgid "Please submit at least either Name / Last name or Company name to generate the qr-invoice"
 msgstr "Indichi almeno il nome/cognome oppure la ragione sociale per generare la fattura QR"
 
@@ -451,6 +466,9 @@ msgstr "Selezioni i modelli di e-mail a cui allegare la fattura QR"
 
 msgid "Select number of qr-invoices to send to customer"
 msgstr "Selezioni il numero di fatture QR da inviare al cliente"
+
+msgid "Select Status"
+msgstr "Seleziona uno stato"
 
 msgid "Send a copy of the Email with PDF invoice to Admin"
 msgstr "Invia una copia dell'e-mail con la fattura PDF all'amministratore"
@@ -559,6 +577,9 @@ msgstr "Stato soppresso"
 
 msgid "Swiss QR invoices with sqrip"
 msgstr "Fatture QR svizzere con sqrip"
+
+msgid "Switzerland"
+msgstr "Svizzera"
 
 msgid "The (QR-)IBAN has been changed. Please confirm the new (QR-)IBAN in your sqrip.ch account."
 msgstr "Il (QR-)IBAN è stato modificato. Confermi il nuovo (QR-)IBAN nel Suo account sqrip.ch."

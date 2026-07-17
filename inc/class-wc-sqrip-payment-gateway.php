@@ -107,7 +107,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 
         $address_woocommerce = sqrip_get_payable_to_address_txt('woocommerce');
         // Replace Loading... in sqrip-admin.js with address response from "/details" AJAX call
-        $address_sqrip = "Loading...";
+        $address_sqrip = __('Loading...', 'sqrip-swiss-qr-invoice');
         
         $address_options = [];
 
@@ -126,7 +126,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         $tooltip = sprintf('<span class="sqrip-tooltip"><span>%s</span></span>', __('Do not set this too low! Remove input to disable the setting.', 'sqrip-swiss-qr-invoice'));
 
         $suppressed_qr_invoice_orders = wc_get_order_statuses();
-        $suppressed_qr_invoice_orders = ['wc-sqrip-default-status' => 'Please select an option'] + $suppressed_qr_invoice_orders;
+        $suppressed_qr_invoice_orders = ['wc-sqrip-default-status' => __('Please select an option', 'sqrip-swiss-qr-invoice')] + $suppressed_qr_invoice_orders;
         
         $qr_order_status_options = wc_get_order_statuses();
         if (isset($qr_order_status_options['wc-on-hold'])) {
@@ -722,7 +722,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'title' => __('Completed Orders Status', 'sqrip-swiss-qr-invoice'),
                 'type' => 'select',
                 'options' => wc_get_order_statuses(),
-                'placeholder' => 'Select Status',
+                'placeholder' => __('Select Status', 'sqrip-swiss-qr-invoice'),
                 'default' => 'wc-completed',
 
                 'class' => 'comparison-tab'
