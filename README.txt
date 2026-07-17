@@ -4,7 +4,7 @@ Donate link: https://sqrip.ch/
 Tags: woocommerce, payment, sqrip, qrcode, qr, scan, Kontoabgleich, WPML, swiss qr invoice, QR-Rechnung, EBICS, QR-facture, bulletins de versement, Einzahlungsschein, QR-Einzahlungsschein, bulletins de versement, Swiss QR Code, code QR, QR-fattura, polizze di versamento, multi-store, multi-site, PDF Invoices, multiple invoice installments, 
 Requires at least: 6.0
 Tested up to: 7.0
-Stable tag: 1.9.10
+Stable tag: 1.10
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -142,47 +142,28 @@ Yes. We are already working on comparing the reconciliation of orders/purchases 
 7. Refund functionality
 
 == Changelog ==
-= 1.9.10 : Juli 2026 – display fix =
-* Fixed the multiselect fields on the settings screen (the remove 'x' overlapped the option label). The plugin no longer loads its own second copy of select2; it uses the one WooCommerce already provides on its admin screens, which also makes the plugin lighter.
-
-= 1.9.9 : Juli 2026 – admin language fix =
-* Fixed the language mix on the settings screen. Admin screens render in the logged-in user's profile language, which is often a locale variant the plugin doesn't ship a file for (e.g. de_CH_informal, de_AT, fr_BE). The plugin now falls back to its bundled base-language translation (Swiss variants to the -CH file) for any such variant, so a stale or partial wordpress.org language pack can no longer take over the admin UI.
-
-= 1.9.8 : Juli 2026 – i18n completeness =
-* Settings are now fully localised: the payee-address country names (which were never extracted for translation) and the hardcoded 'Please select an option', 'Select Status' and 'Loading...' labels are now translated (DE/FR/IT).
-
-= 1.9.7 : Juli 2026 – i18n & order notes =
-* Fixed further strings that could never be translated because they embedded a variable or HTML directly in the translation call (the media-library deletion order note, the payee-address dropdown options, and the test-e-mail confirmation);
-* Order notes: when the optional order-confirmation e-mails are sent, the step is now recorded as an order note for full traceability.
-
-= 1.9.6 : Juli 2026 – Feature & i18n fix =
-* New optional setting under the sqrip order status: 'Send order-confirmation e-mails for this status'. When enabled, sqrip sends the New order (admin) and Order on-hold (customer) e-mails directly at checkout, so shops that keep orders in a non-transition status (e.g. 'Pending payment') still get confirmations — without changing the chosen status. Opt-in, off by default;
-* Fixed bundled translations for strings containing apostrophes/quotes (e.g. "Status of Orders made with payment method 'sqrip'") that previously stayed untranslated.
-
-= 1.9.2 : Juli 2026 – Fixes =
-* Translations: the plugin's own bundled German/French/Italian files are now always used, even if an outdated language pack exists on the server;
-* Confirmation page: the QR-invoice download button is no longer printed twice on modern (block) order-received pages;
-* Escaping and minor hardening;
-* Tested with WordPress 7.0.
-
-= 1.9 : Juli 2026 – Features =
+= 1.10 : Juli 2026 =
+**Features**
 * sqrip is ready for 'structured addresses';
-* Adding the ability to use sqrip in multiple stores installed on the same server instance;
-* If you use the Plugin 'PDF Invoices & Packing Slips for WooCommerce' you can now combine the invoice and the QR slip into one single PDF file;
-* The QR bill can now be added to multiple e-mail templates;
-* You can now split your invoices into multiple installments (BETA);
-* Adding remarks on the checkout page;
-* The Refund IBAN of the client is now checked before a refund is initiated;
-* Refinements (Reference number layout, adding the sqrip logo to the payment options, WPML can now handle the description field too);
-* See the activated services by API-keys in the webadmin panel;
-* Performance: the plugin no longer performs a blocking API call on every page load – front-end pages load noticeably faster;
-* Multilingual: complete German, French and Italian translations (incl. Swiss de_CH / fr_CH / it_CH variants) are now bundled with the plugin;
-* Full compatibility with WooCommerce High-Performance Order Storage (HPOS): refunds, order-screen actions and bulk status changes now work with the new order storage;
+* Use sqrip in multiple stores installed on the same server instance;
+* Combine the invoice and the QR slip into one single PDF (with the 'PDF Invoices & Packing Slips for WooCommerce' plugin);
+* The QR bill can be added to multiple e-mail templates;
+* Split your invoices into multiple installments (BETA);
+* Add remarks on the checkout page;
+* The refund IBAN of the client is checked before a refund is initiated;
+* Optionally send the order-confirmation e-mails (to the customer and the shop admin) even when your chosen sqrip order status does not itself trigger WooCommerce e-mails (opt-in, off by default);
+* See the services activated per API key in the web admin panel;
+* Refinements: reference number layout, sqrip logo on the payment options, WPML handles the description field.
+
+**Improvements & fixes**
+* Performance: the plugin no longer makes a blocking API call on every page load – front-end pages load noticeably faster;
+* Full German, French and Italian translations are bundled and load reliably, regardless of the shop's admin profile language variant or an outdated wordpress.org language pack;
+* Full compatibility with WooCommerce High-Performance Order Storage (HPOS): refunds, order-screen actions and bulk status changes;
 * Security: hardened the admin AJAX actions and the payment-confirmation flow;
-* All scripts and styles are now served locally (no external CDN);
-* The minimum required PHP version is now 7.4;
-* Minor bug fixing;
-* Making sure the plugin works with the latest versions of WP and WooCommerce.
+* Every processing step (QR creation, e-mails, deletion, refunds) is recorded in the order notes;
+* Confirmation page: the QR-invoice download button is no longer shown twice;
+* Fixed the multiselect fields on the settings screen and removed the last bundled third-party asset (now uses WooCommerce's own select2);
+* Requires PHP 7.4; tested with WordPress 7.0.
 
 = 1.8.4 : May 2024 – Compatibility =
 * Solved an issue that prevented the sqrip box to be shown on the order details page;
@@ -339,7 +320,7 @@ We made users (even more) happy with these changes:
 * Here we go!
 
 == Upgrade Notice ==
-= 1.9 =
+= 1.10 =
 Recommended update: faster front-end (no more blocking API call on every page load), built-in German / French / Italian translations, full WooCommerce HPOS compatibility, and security hardening. Requires PHP 7.4 or higher.
 
 = 1.0 =
