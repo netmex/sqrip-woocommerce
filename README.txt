@@ -4,7 +4,7 @@ Donate link: https://sqrip.ch/
 Tags: woocommerce, payment, sqrip, qrcode, qr, scan, Kontoabgleich, WPML, swiss qr invoice, QR-Rechnung, EBICS, QR-facture, bulletins de versement, Einzahlungsschein, QR-Einzahlungsschein, bulletins de versement, Swiss QR Code, code QR, QR-fattura, polizze di versamento, multi-store, multi-site, PDF Invoices, multiple invoice installments, 
 Requires at least: 6.0
 Tested up to: 7.0
-Stable tag: 1.9.8
+Stable tag: 1.9.9
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -142,6 +142,9 @@ Yes. We are already working on comparing the reconciliation of orders/purchases 
 7. Refund functionality
 
 == Changelog ==
+= 1.9.9 : Juli 2026 – admin language fix =
+* Fixed the language mix on the settings screen. Admin screens render in the logged-in user's profile language, which is often a locale variant the plugin doesn't ship a file for (e.g. de_CH_informal, de_AT, fr_BE). The plugin now falls back to its bundled base-language translation (Swiss variants to the -CH file) for any such variant, so a stale or partial wordpress.org language pack can no longer take over the admin UI.
+
 = 1.9.8 : Juli 2026 – i18n completeness =
 * Settings are now fully localised: the payee-address country names (which were never extracted for translation) and the hardcoded 'Please select an option', 'Select Status' and 'Loading...' labels are now translated (DE/FR/IT).
 

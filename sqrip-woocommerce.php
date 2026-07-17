@@ -4,7 +4,7 @@
  * Plugin Name:             sqrip.ch
  * Plugin URI:              https://sqrip.ch/
  * Description:             sqrip – A comprehensive, flexible and clever WooCommerce finance tool for the most widely used payment method in Switzerland: the bank transfers.
- * Version:                 1.9.8
+ * Version:                 1.9.9
  * Author:                  netmex digital gmbh
  * Author URI:              https://sqrip.ch/
  * Text Domain:             sqrip-swiss-qr-invoice
@@ -52,14 +52,19 @@ add_action('init', function () {
 /**
  * Force WordPress to use the translations bundled with this plugin.
  *
- * WordPress loads a language pack from wp-content/languages/plugins/ in
- * preference to a plugin's own /languages folder. A stale or partial pack left
- * there (e.g. auto-downloaded for an older release) overrides our complete
- * bundled DE/FR/IT translations and produces a mix of old and untranslated
- * strings. Deleting that file is outside the plugin folder and cannot be asked
- * of every customer, so instead we redirect the load to our bundled file
- * whenever we ship one for the requested locale — our translations always win,
- * with no server-side cleanup required.
+ * Two problems this solves:
+ * 1. WordPress loads a language pack from wp-content/languages/plugins/ in
+ *    preference to a plugin's own /languages folder. A stale or partial pack
+ *    left there overrides our complete bundled translations.
+ * 2. Admin screens render in the *user profile* language, which is often a
+ *    locale variant we don't ship a file for (e.g. de_CH_informal, de_AT,
+ *    fr_BE, it_CH). Without a bundled file for that exact variant, WordPress
+ *    falls back to a stale/partial pack and shows a mix of old and English text.
+ *
+ * So: use our bundled file for the exact locale when we ship one, otherwise
+ * fall back to our base-language file (de/fr/it) for any variant of that
+ * language. Deleting the server pack is outside the plugin folder and can't be
+ * asked of every customer, so this keeps our translations winning everywhere.
  *
  * @since 1.9.2
  */
@@ -67,10 +72,35 @@ add_filter('load_textdomain_mofile', function ($mofile, $domain) {
     if ($domain !== 'sqrip-swiss-qr-invoice') {
         return $mofile;
     }
-    $bundled = plugin_dir_path(__FILE__) . 'languages/' . basename($mofile);
-    if ($mofile !== $bundled && is_readable($bundled)) {
-        return $bundled;
+    $dir = plugin_dir_path(__FILE__) . 'languages/';
+
+    // 1) Exact locale we ship (de_DE, de_CH, fr_FR, fr_CH, it_IT, it_CH).
+    $exact = $dir . basename($mofile);
+    if (is_readable($exact)) {
+        return $exact;
     }
+
+    // 2) Any other variant of a language we ship -> our base file for that
+    //    language (Swiss variants get the -CH file so orthography stays right).
+    $name = basename($mofile);
+    $prefix = $domain . '-';
+    if (strpos($name, $prefix) === 0 && substr($name, -3) === '.mo') {
+        $locale = substr($name, strlen($prefix), -3); // e.g. de_CH_informal
+        $lang = strtolower(substr($locale, 0, 2));    // de / fr / it
+        $swiss = (strpos($locale, 'CH') !== false);
+        $base = array(
+            'de' => $swiss ? 'de_CH' : 'de_DE',
+            'fr' => $swiss ? 'fr_CH' : 'fr_FR',
+            'it' => $swiss ? 'it_CH' : 'it_IT',
+        );
+        if (isset($base[$lang])) {
+            $fallback = $dir . $prefix . $base[$lang] . '.mo';
+            if (is_readable($fallback)) {
+                return $fallback;
+            }
+        }
+    }
+
     return $mofile;
 }, 10, 2);
 
@@ -215,10 +245,10 @@ function sqrip_add_admin_notice()
 
 add_action('admin_enqueue_scripts', function ($hook_suffix) {
 
-    wp_enqueue_style('sqrip-admin', plugins_url('css/sqrip-admin.css', __FILE__), '', '1.9.8');
+    wp_enqueue_style('sqrip-admin', plugins_url('css/sqrip-admin.css', __FILE__), '', '1.9.9');
 
     if (isset($_GET['section']) && $_GET['section'] == "sqrip") {
-        wp_enqueue_script('sqrip-admin', plugins_url('js/sqrip-admin.js', __FILE__), array('jquery'), '1.9.8', true);
+        wp_enqueue_script('sqrip-admin', plugins_url('js/sqrip-admin.js', __FILE__), array('jquery'), '1.9.9', true);
 
         $sqrip_new_status = sqrip_get_plugin_option('enabled_new_status');
         $sqrip_new_awaiting_status = sqrip_get_plugin_option('enabled_new_awstatus');
@@ -277,8 +307,8 @@ add_action('admin_enqueue_scripts', function ($hook_suffix) {
         $screen->id === $sqrip_hpos_order_screen
     )) {
 
-        wp_enqueue_script('sqrip-order', plugins_url('js/sqrip-order.js', __FILE__), array('jquery'), '1.9.8', true);
-        wp_enqueue_script('sqrip-refund', plugins_url('js/sqrip-refund.js', __FILE__), array('jquery'), '1.9.8', true);
+        wp_enqueue_script('sqrip-order', plugins_url('js/sqrip-order.js', __FILE__), array('jquery'), '1.9.9', true);
+        wp_enqueue_script('sqrip-refund', plugins_url('js/sqrip-refund.js', __FILE__), array('jquery'), '1.9.9', true);
 
         wp_localize_script('sqrip-order', 'sqrip',
             array(
@@ -293,7 +323,7 @@ add_action('admin_enqueue_scripts', function ($hook_suffix) {
     }
 
     if (in_array($hook_suffix, ['user-edit.php', 'profile.php'])) {
-        wp_enqueue_script('sqrip-customer-profile', plugins_url('js/sqrip-customer-profile.js', __FILE__), array('jquery'), '1.9.8', true);
+        wp_enqueue_script('sqrip-customer-profile', plugins_url('js/sqrip-customer-profile.js', __FILE__), array('jquery'), '1.9.9', true);
         wp_localize_script('sqrip-customer-profile', 'sqrip', array('ajax_url' => admin_url('admin-ajax.php')));
     }
 
@@ -312,7 +342,7 @@ function sqrip_enqueue_scripts()
 {
     wp_enqueue_style('sqrip', plugins_url('css/sqrip-order.css', __FILE__), false);
 
-    wp_enqueue_script('sqrip', plugins_url('js/sqrip-fe.js', __FILE__), array('jquery'), '1.9.8', true);
+    wp_enqueue_script('sqrip', plugins_url('js/sqrip-fe.js', __FILE__), array('jquery'), '1.9.9', true);
 
     wp_localize_script('sqrip', 'sqrip',
         array(
