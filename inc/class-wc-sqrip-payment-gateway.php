@@ -507,7 +507,8 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             ),
             'email_attached' => array(
                 'title' => __('Attach QR-Invoice to E-Mail template', 'sqrip-swiss-qr-invoice'),
-                'description' => __('Select email templates to which the QR-invoice are attached', 'sqrip-swiss-qr-invoice'),
+                'description' => __('Select email templates to which the QR-invoice are attached', 'sqrip-swiss-qr-invoice')
+                    . '<br>' . __('Note: this attaches the QR invoice as a separate PDF. If you also combine the QR slip with the invoice of the \'PDF Invoices & Packing Slips\' plugin, the e-mail will contain both documents — leave this selection empty if you only want the combined invoice.', 'sqrip-swiss-qr-invoice'),
                 'type' => 'multiselect',
                 'options' => sqrip_get_wc_emails(),
                 'class' => 'qrinvoice-tab'

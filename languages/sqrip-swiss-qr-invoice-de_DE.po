@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: sqrip.ch 1.9\n"
+"Project-Id-Version: sqrip.ch 1.10\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -143,10 +143,10 @@ msgstr "Status abgeschlossener Bestellungen"
 msgid "Completed, Paid"
 msgstr "Abgeschlossen, bezahlt"
 
-msgid "Confirm payment"
+msgid "Confirm Payment"
 msgstr "Zahlung bestätigen"
 
-msgid "Confirm Payment"
+msgid "Confirm payment"
 msgstr "Zahlung bestätigen"
 
 msgid "Confirm receipt of payment"
@@ -358,6 +358,9 @@ msgstr "Mehrere QR-Zahlteile"
 
 msgid "Name*"
 msgstr "Name*"
+
+msgid "Note: this attaches the QR invoice as a separate PDF. If you also combine the QR slip with the invoice of the 'PDF Invoices & Packing Slips' plugin, the e-mail will contain both documents — leave this selection empty if you only want the combined invoice."
+msgstr "Hinweis: Hiermit wird die QR-Rechnung als separates PDF angehängt. Wenn Sie zusätzlich den QR-Zahlteil mit der Rechnung des Plugins 'PDF Invoices & Packing Slips' kombinieren, enthält die E-Mail beide Dokumente — lassen Sie diese Auswahl leer, wenn Sie nur die kombinierte Rechnung wünschen."
 
 msgid "Number of qr-invoices to deliver"
 msgstr "Anzahl der zu übermittelnden QR-Rechnungen"

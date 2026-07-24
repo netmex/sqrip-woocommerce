@@ -62,6 +62,22 @@ jQuery(document).ready(function ($) {
         return displayMessage;
     }
 
+    // Submit the WooCommerce settings form programmatically.
+    // Since WooCommerce 9.9 the save button is disabled until the form is
+    // "dirty"; programmatic prop() changes fire no events, so WooCommerce never
+    // enables it and a jQuery .trigger('click') hits a disabled button — nothing
+    // happens (test e-mail button, "create status" links). Re-enable the button
+    // and use a native click so the browser performs a real form submission.
+    function sqrip_submit_settings() {
+        var save = btn_save.get(0);
+        if (!save) {
+            return;
+        }
+        save.disabled = false;
+        save.classList.remove('disabled');
+        save.click();
+    }
+
     $('select[id*="delete_invoice_status"]').select2({
         allowClear: true
     });
@@ -207,7 +223,7 @@ jQuery(document).ready(function ($) {
                     if (hasError && ip_sqrip_enabled.is(':checked')) {
                         ip_sqrip_enabled.prop('checked', false);
                         setTimeout(function () {
-                            btn_save.trigger('click');
+                            sqrip_submit_settings();
                         }, 200);
                     }
                 }
@@ -451,7 +467,7 @@ jQuery(document).ready(function ($) {
             e.preventDefault();
             $('#woocommerce_sqrip_test_email').prop('checked', true);
 
-            btn_save.trigger('click');
+            sqrip_submit_settings();
         });
     }
 
@@ -843,7 +859,7 @@ jQuery(document).ready(function ($) {
                 ip_enb_new_status.prop('checked', true);
                 ip_ft_new_status.prop('checked', true);
                 setTimeout(function () {
-                    btn_save.trigger('click');
+                    sqrip_submit_settings();
                 }, 200);
             }
         })
@@ -873,7 +889,7 @@ jQuery(document).ready(function ($) {
                 ip_enb_new_awstatus.prop('checked', true);
                 ip_ft_new_awstatus.prop('checked', true);
                 setTimeout(function () {
-                    btn_save.trigger('click');
+                    sqrip_submit_settings();
                 }, 200);
             }
         })
@@ -904,7 +920,7 @@ jQuery(document).ready(function ($) {
                 ip_enb_new_sustatus.prop('checked', true);
                 ip_ft_new_sustatus.prop('checked', true);
                 setTimeout(function () {
-                    btn_save.trigger('click');
+                    sqrip_submit_settings();
                 }, 200);
             }
         });
@@ -943,7 +959,7 @@ jQuery(document).ready(function ($) {
                 ip_enb_new_qrstatus.prop('checked', true);
                 ip_ft_new_qrstatus.prop('checked', true);
                 setTimeout(function () {
-                    btn_save.trigger('click');
+                    sqrip_submit_settings();
                 }, 200);
             }
         });
@@ -1113,7 +1129,7 @@ jQuery(document).ready(function ($) {
                     ip_sqrip_enb_new_invoice_status.prop('checked', true);
                     ip_sqrip_ft_new_invoice_status.prop('checked', true);
                     setTimeout(function () {
-                        btn_save.trigger('click');
+                        sqrip_submit_settings();
                     }, 200);
                 }
             });
