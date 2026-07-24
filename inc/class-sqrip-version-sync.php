@@ -51,8 +51,6 @@ class Sqrip_Version_Sync
         $params = $plugin_version ? "?version=".$plugin_version : "";
         $response = wp_remote_request(SQRIP_ENDPOINT . $endpoint . $params, $args);
         $response_code = wp_remote_retrieve_response_code($response);
-
-        error_log("SYNC REQ::".$params);
     }
 }
 

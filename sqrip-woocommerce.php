@@ -4,9 +4,11 @@
  * Plugin Name:             sqrip.ch
  * Plugin URI:              https://sqrip.ch/
  * Description:             sqrip – A comprehensive, flexible and clever WooCommerce finance tool for the most widely used payment method in Switzerland: the bank transfers.
- * Version:                 1.9
+ * Version:                 1.10
  * Author:                  netmex digital gmbh
  * Author URI:              https://sqrip.ch/
+ * Text Domain:             sqrip-swiss-qr-invoice
+ * Domain Path:             /languages
  */
 
 defined('ABSPATH') || exit;
@@ -33,6 +35,74 @@ define('SQRIP_PLUGIN_BASENAME', plugin_basename(__FILE__));
 
 require_once __DIR__ . '/inc/functions.php';
 require_once __DIR__ . '/inc/sqrip-ajax.php';
+
+/**
+ * Load the plugin's bundled translations from /languages.
+ *
+ * Hooked on init because WP 6.7+ warns when a textdomain is loaded too early.
+ * Bundled .mo files act as a fallback; if a wordpress.org language pack exists
+ * for a locale it takes precedence automatically.
+ *
+ * @since 1.9
+ */
+add_action('init', function () {
+    load_plugin_textdomain('sqrip-swiss-qr-invoice', false, dirname(plugin_basename(__FILE__)) . '/languages');
+});
+
+/**
+ * Force WordPress to use the translations bundled with this plugin.
+ *
+ * Two problems this solves:
+ * 1. WordPress loads a language pack from wp-content/languages/plugins/ in
+ *    preference to a plugin's own /languages folder. A stale or partial pack
+ *    left there overrides our complete bundled translations.
+ * 2. Admin screens render in the *user profile* language, which is often a
+ *    locale variant we don't ship a file for (e.g. de_CH_informal, de_AT,
+ *    fr_BE, it_CH). Without a bundled file for that exact variant, WordPress
+ *    falls back to a stale/partial pack and shows a mix of old and English text.
+ *
+ * So: use our bundled file for the exact locale when we ship one, otherwise
+ * fall back to our base-language file (de/fr/it) for any variant of that
+ * language. Deleting the server pack is outside the plugin folder and can't be
+ * asked of every customer, so this keeps our translations winning everywhere.
+ *
+ * @since 1.9.2
+ */
+add_filter('load_textdomain_mofile', function ($mofile, $domain) {
+    if ($domain !== 'sqrip-swiss-qr-invoice') {
+        return $mofile;
+    }
+    $dir = plugin_dir_path(__FILE__) . 'languages/';
+
+    // 1) Exact locale we ship (de_DE, de_CH, fr_FR, fr_CH, it_IT, it_CH).
+    $exact = $dir . basename($mofile);
+    if (is_readable($exact)) {
+        return $exact;
+    }
+
+    // 2) Any other variant of a language we ship -> our base file for that
+    //    language (Swiss variants get the -CH file so orthography stays right).
+    $name = basename($mofile);
+    $prefix = $domain . '-';
+    if (strpos($name, $prefix) === 0 && substr($name, -3) === '.mo') {
+        $locale = substr($name, strlen($prefix), -3); // e.g. de_CH_informal
+        $lang = strtolower(substr($locale, 0, 2));    // de / fr / it
+        $swiss = (strpos($locale, 'CH') !== false);
+        $base = array(
+            'de' => $swiss ? 'de_CH' : 'de_DE',
+            'fr' => $swiss ? 'fr_CH' : 'fr_FR',
+            'it' => $swiss ? 'it_CH' : 'it_IT',
+        );
+        if (isset($base[$lang])) {
+            $fallback = $dir . $prefix . $base[$lang] . '.mo';
+            if (is_readable($fallback)) {
+                return $fallback;
+            }
+        }
+    }
+
+    return $mofile;
+}, 10, 2);
 
 /**
  * Add plugin Settings link
@@ -175,10 +245,10 @@ function sqrip_add_admin_notice()
 
 add_action('admin_enqueue_scripts', function ($hook_suffix) {
 
-    wp_enqueue_style('sqrip-admin', plugins_url('css/sqrip-admin.css', __FILE__), '', '1.1.1');
+    wp_enqueue_style('sqrip-admin', plugins_url('css/sqrip-admin.css', __FILE__), '', '1.10');
 
     if (isset($_GET['section']) && $_GET['section'] == "sqrip") {
-        wp_enqueue_script('sqrip-admin', plugins_url('js/sqrip-admin.js', __FILE__), array('jquery'), '1.5.5', true);
+        wp_enqueue_script('sqrip-admin', plugins_url('js/sqrip-admin.js', __FILE__), array('jquery', 'selectWoo'), '1.10', true);
 
         $sqrip_new_status = sqrip_get_plugin_option('enabled_new_status');
         $sqrip_new_awaiting_status = sqrip_get_plugin_option('enabled_new_awstatus');
@@ -221,17 +291,28 @@ add_action('admin_enqueue_scripts', function ($hook_suffix) {
             )
         );
 
-        wp_enqueue_style('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/css/select2.min.css', array(), '4.1.0');
-        wp_enqueue_script('select2', 'https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/js/select2.min.js', array('jquery'), '4.1.0', true);
+        // No own select2 is loaded here on purpose. This is a WooCommerce
+        // settings screen, which already ships select2 (handle "selectWoo") and
+        // its styles. sqrip-admin.js depends on "selectWoo", so .select2() uses
+        // WooCommerce's copy. Loading a second select2 (our old 4.1.0 bundle)
+        // caused the multiselect chips to render with the remove "x" overlapping
+        // the label.
     }
 
     global $post_type;
     $screen = get_current_screen();
 
-    if (is_object($screen) && in_array($screen->post_type, ['shop_order', 'shop_order_placehold'])) {
+    // The order edit screen id differs between classic storage ('shop_order')
+    // and HPOS ('woocommerce_page_wc-orders'); match both.
+    $sqrip_hpos_order_screen = function_exists('wc_get_page_screen_id') ? wc_get_page_screen_id('shop-order') : 'shop_order';
 
-        wp_enqueue_script('sqrip-order', plugins_url('js/sqrip-order.js', __FILE__), array('jquery'), '1.1.1', true);
-        wp_enqueue_script('sqrip-refund', plugins_url('js/sqrip-refund.js', __FILE__), array('jquery'), '1.1.1', true);
+    if (is_object($screen) && (
+        in_array($screen->post_type, ['shop_order', 'shop_order_placehold'], true) ||
+        $screen->id === $sqrip_hpos_order_screen
+    )) {
+
+        wp_enqueue_script('sqrip-order', plugins_url('js/sqrip-order.js', __FILE__), array('jquery'), '1.10', true);
+        wp_enqueue_script('sqrip-refund', plugins_url('js/sqrip-refund.js', __FILE__), array('jquery'), '1.10', true);
 
         wp_localize_script('sqrip-order', 'sqrip',
             array(
@@ -246,7 +327,7 @@ add_action('admin_enqueue_scripts', function ($hook_suffix) {
     }
 
     if (in_array($hook_suffix, ['user-edit.php', 'profile.php'])) {
-        wp_enqueue_script('sqrip-customer-profile', plugins_url('js/sqrip-customer-profile.js', __FILE__), array('jquery'), '1.1.1', true);
+        wp_enqueue_script('sqrip-customer-profile', plugins_url('js/sqrip-customer-profile.js', __FILE__), array('jquery'), '1.10', true);
         wp_localize_script('sqrip-customer-profile', 'sqrip', array('ajax_url' => admin_url('admin-ajax.php')));
     }
 
@@ -265,7 +346,7 @@ function sqrip_enqueue_scripts()
 {
     wp_enqueue_style('sqrip', plugins_url('css/sqrip-order.css', __FILE__), false);
 
-    wp_enqueue_script('sqrip', plugins_url('js/sqrip-fe.js', __FILE__), array('jquery'), '1.0.3', true);
+    wp_enqueue_script('sqrip', plugins_url('js/sqrip-fe.js', __FILE__), array('jquery'), '1.10', true);
 
     wp_localize_script('sqrip', 'sqrip',
         array(
@@ -583,6 +664,17 @@ function sqrip_qr_action_order_details_after_order_table($order)
     $payment_method = $order->get_payment_method();
 
     if ($payment_method === 'sqrip') {
+
+        // Guard against duplicate output: on modern WooCommerce the order-received
+        // page can fire woocommerce_order_details_after_order_table more than once
+        // (classic template + block "Order confirmation"), which would print the
+        // download button twice. Render the sqrip block only once per request.
+        static $sqrip_details_rendered = false;
+        if ($sqrip_details_rendered) {
+            return;
+        }
+        $sqrip_details_rendered = true;
+
         $order_id = $order->get_id();
 
         $plugin_options = get_option('woocommerce_sqrip_settings', array());
@@ -622,7 +714,7 @@ function sqrip_qr_action_order_details_after_order_table($order)
         $checkout_remarks = sqrip_get_plugin_option('checkout_remarks') ?? "";
 
         if (strlen(trim($checkout_remarks)) > 0) {
-            echo $checkout_remarks;
+            echo wp_kses_post($checkout_remarks);
         }
 
         if ($integration_order == "yes" && $pdf_file) {
@@ -967,7 +1059,7 @@ function sqrip_extra_user_profile_fields($user)
 
     if ($sqrip_return_enabled) {
         ?>
-        <h3><?php _e("Refunds with sqrip", "sqrip"); ?></h3>
+        <h3><?php _e("Refunds with sqrip", "sqrip-swiss-qr-invoice"); ?></h3>
         <table class="form-table">
             <tr>
                 <th><label for="iban"><?php _e("IBAN"); ?></label></th>
@@ -1411,7 +1503,8 @@ function sqrip_add_custom_order_status_actions_button($actions, $order)
                 $payment_confirm_title = __('Confirm Payment', 'sqrip-swiss-qr-invoice') . " ($sqrip_next_paid_invoice_number/$invoice_count): " . $partial_amount;
                 $qr_order_status_options = wc_get_order_statuses();
                 $payment_status = sqrip_get_plugin_option("partial_invoice_".$sqrip_next_paid_invoice_number."_status");
-                $status_fullname = __('Status changing to', 'sqrip-swiss-qr-invoice') . ": " . $qr_order_status_options[$payment_status] ?? $payment_status;
+                $status_fullname = __('Status changing to', 'sqrip-swiss-qr-invoice') . ": " . ($payment_status && isset($qr_order_status_options[$payment_status]) ?
+                    $qr_order_status_options[$payment_status] : $payment_status);
                 
                 $payment_confirm_footer = $status_fullname;
             }
@@ -1474,7 +1567,7 @@ add_action('woocommerce_order_status_changed', function ($post_id, $old_status, 
         }
 
         $order = wc_get_order($order_id);
-        $order_notes = __("The PDF file for order #$order_id has been deleted from the media library", 'sqrip-swiss-qr-invoice');
+        $order_notes = sprintf(__('The PDF file for order #%s has been deleted from the media library', 'sqrip-swiss-qr-invoice'), $order_id);
         $order->add_order_note($order_notes);
     }
 
@@ -1531,7 +1624,9 @@ add_action('woocommerce_admin_order_data_after_order_details', function ($order)
 });
 
 // Adding to admin order list bulk dropdown custom change order statuses
+// Register on both the classic ('edit-shop_order') and HPOS ('woocommerce_page_wc-orders') list screens.
 add_filter( 'bulk_actions-edit-shop_order', 'bulk_change_order_sqrip_statuses', 20, 1 );
+add_filter( 'bulk_actions-woocommerce_page_wc-orders', 'bulk_change_order_sqrip_statuses', 20, 1 );
 function bulk_change_order_sqrip_statuses( $actions ) {
     $sqrip_new_status = sqrip_get_plugin_option('new_status');
     $sqrip_new_qr_status = sqrip_get_plugin_option('new_qr_order_status');
@@ -1540,16 +1635,16 @@ function bulk_change_order_sqrip_statuses( $actions ) {
     $sqrip_qr_order_status = sqrip_get_plugin_option('qr_order_status');
 
     if ($sqrip_new_status) {
-        $actions['sqrip_new_status'] = __( 'Change status to '. $sqrip_new_status, 'woocommerce' );
+        $actions['sqrip_new_status'] = sprintf( __( 'Change status to %s', 'sqrip-swiss-qr-invoice' ), $sqrip_new_status );
     }
     if ($sqrip_new_qr_status) {
-        $actions['sqrip_new_qr_order_status'] = __( 'Change status to '. $sqrip_new_qr_status, 'woocommerce' );
+        $actions['sqrip_new_qr_order_status'] = sprintf( __( 'Change status to %s', 'sqrip-swiss-qr-invoice' ), $sqrip_new_qr_status );
     }
     if ($sqrip_new_aw_status) {
-        $actions['sqrip_new_awaiting_status'] = __( 'Change status to '. $sqrip_new_aw_status, 'woocommerce' );
+        $actions['sqrip_new_awaiting_status'] = sprintf( __( 'Change status to %s', 'sqrip-swiss-qr-invoice' ), $sqrip_new_aw_status );
     }
     if ($sqrip_new_su_status) {
-        $actions['sqrip_new_suppressed_status'] = __( 'Change status to '. $sqrip_new_su_status, 'woocommerce' );
+        $actions['sqrip_new_suppressed_status'] = sprintf( __( 'Change status to %s', 'sqrip-swiss-qr-invoice' ), $sqrip_new_su_status );
     }
 
     return $actions;
@@ -1558,6 +1653,7 @@ function bulk_change_order_sqrip_statuses( $actions ) {
 // Make the action for bulk sqrip status change
 // since 1.8
 add_filter( 'handle_bulk_actions-edit-shop_order', 'sqrip_handle_bulk_action_edit_shop_order', 10, 3 );
+add_filter( 'handle_bulk_actions-woocommerce_page_wc-orders', 'sqrip_handle_bulk_action_edit_shop_order', 10, 3 );
 function sqrip_handle_bulk_action_edit_shop_order( $redirect_to, $action, $post_ids ) {
     
     if ( !in_array($action, ['sqrip_new_status', 'sqrip_new_qr_order_status', 'sqrip_new_awaiting_status', 'sqrip_new_suppressed_status']) )
@@ -1617,16 +1713,14 @@ function sqrip_show_remark_before_payment() {
     $checkout_remarks = sqrip_get_plugin_option('checkout_remarks') ?? "";
 
     if (strlen(trim($checkout_remarks)) > 0) {
-        echo $checkout_remarks;
+        echo wp_kses_post($checkout_remarks);
     }
 }
 
 function output_sqrip_remarks() {
     $checkout_remarks = sqrip_get_plugin_option('checkout_remarks') ?? "";
 
-    ?>
-        <?php echo($checkout_remarks); ?>
-    <?php
+    echo wp_kses_post($checkout_remarks);
 }
 
 add_filter('render_block_woocommerce/checkout-payment-block', function($block_content) {
@@ -1653,7 +1747,6 @@ function sqrip_add_admin_to_recipients($recipient, $order) {
         $recipient .= (', ' . $admin_email);
     }
 
-    error_log("RECIP::".$recipient);
     return $recipient;
 }
 
@@ -1688,7 +1781,12 @@ $current_directory = plugin_dir_path( __FILE__ ) . '/inc';
 $file_to_rename = 'onetime.php';
 $new_file_name = 'onetime-backup.php';
 
-if (file_exists($current_directory . '/' . $file_to_rename)) {
+// Run the one-time 1.9 settings migration only in wp-admin. Previously this
+// file-scope block executed on every request (including front-end page loads)
+// until the rename succeeded — on read-only filesystems it never did, re-running
+// a remote API POST on every request. wp-admin is where an updating merchant
+// lands, so gating here keeps the migration one-time without any front-end cost.
+if (is_admin() && file_exists($current_directory . '/' . $file_to_rename)) {
     $current_settings = get_option('woocommerce_sqrip_settings', array());
 
     if (!$current_settings['status_suppressed']) {

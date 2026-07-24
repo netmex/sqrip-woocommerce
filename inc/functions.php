@@ -337,10 +337,31 @@ function sqrip_get_user_details($token = "", $return = "address")
 
 /*
  *  sqrip validation IBAN
+ *
+ *  The validation result for a given IBAN + token is deterministic and rarely
+ *  changes, but this function is reached on the checkout / QR-generation path.
+ *  Without caching, every such request makes a blocking ~0.25s call to
+ *  api.sqrip.ch (validate-iban). We cache the result in a transient so only the
+ *  first request per (iban, token) pair hits the API. The admin "Check" button
+ *  passes $force_refresh = true to always re-query and refresh the cache.
+ *
+ *  @param string $iban
+ *  @param string $tokens
+ *  @param bool   $force_refresh  Bypass the cache and re-query the API.
  */
-function sqrip_validation_iban($iban, $tokens)
+function sqrip_validation_iban($iban, $tokens, $force_refresh = false)
 {
     $endpoint = 'validate-iban';
+
+    $cache_key = 'sqrip_ibanval_' . md5($iban . '|' . $tokens);
+
+    if (!$force_refresh) {
+        $cached = get_transient($cache_key);
+        // Stored values are always objects, so a strict !== false means "cached".
+        if ($cached !== false) {
+            return $cached;
+        }
+    }
 
     $body = '{
         "iban": {
@@ -350,6 +371,11 @@ function sqrip_validation_iban($iban, $tokens)
     }';
 
     $res_decode = sqrip_remote_request($endpoint, $body, $method = 'POST', $tokens);
+
+    // Only cache a well-formed API response; never persist transient/network errors.
+    if (is_object($res_decode) && isset($res_decode->message)) {
+        set_transient($cache_key, $res_decode, 12 * HOUR_IN_SECONDS);
+    }
 
     return $res_decode;
 }
@@ -603,7 +629,6 @@ function sqrip_format_reference_id($reference_id, $order_id)
 
     switch ($qr_basis) {
         case 'order_number':
-            error_log("Order Number Ref::");
             if (strpos(strtolower($reference_id_formatted), 'rf') !== false) {
                 if (endsWith($reference_id_formatted, $order_id)) {
                     $reference_id_formatted = sqrip_reference_id_format_with_order_id ($reference_id_formatted, $order_id, 4);
@@ -614,8 +639,7 @@ function sqrip_format_reference_id($reference_id, $order_id)
                 $control_digit = substr($reference_id_formatted, -1);
                 $reference_without_control_digit = substr($reference_id_formatted, 0, -1);
                 $ref_ends_with_order_id = endsWith($reference_without_control_digit, $order_id);
-                error_log("Order Ref w/o control:-".json_encode($ref_ends_with_order_id)." ".$order_id);
-                
+
                 if ($ref_ends_with_order_id) {
                     $reference_id_formatted = sqrip_reference_id_format_with_order_id ($reference_id_formatted, $order_id, 2)." ".$control_digit;
                 } else {

@@ -107,16 +107,16 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 
         $address_woocommerce = sqrip_get_payable_to_address_txt('woocommerce');
         // Replace Loading... in sqrip-admin.js with address response from "/details" AJAX call
-        $address_sqrip = "Loading...";
+        $address_sqrip = __('Loading...', 'sqrip-swiss-qr-invoice');
         
         $address_options = [];
 
         if ($address_sqrip) {
-            $address_options['sqrip'] = __('from sqrip account: ' . esc_attr($address_sqrip), 'sqrip-swiss-qr-invoice');
+            $address_options['sqrip'] = sprintf(__('from sqrip account: %s', 'sqrip-swiss-qr-invoice'), esc_attr($address_sqrip));
         }
 
         if ($address_woocommerce) {
-            $address_options['woocommerce'] = __('from WooCommerce: ' . esc_attr($address_woocommerce), 'sqrip-swiss-qr-invoice');
+            $address_options['woocommerce'] = sprintf(__('from WooCommerce: %s', 'sqrip-swiss-qr-invoice'), esc_attr($address_woocommerce));
         }
 
         $address_options['individual'] = __('Third address', 'sqrip-swiss-qr-invoice');
@@ -126,7 +126,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         $tooltip = sprintf('<span class="sqrip-tooltip"><span>%s</span></span>', __('Do not set this too low! Remove input to disable the setting.', 'sqrip-swiss-qr-invoice'));
 
         $suppressed_qr_invoice_orders = wc_get_order_statuses();
-        $suppressed_qr_invoice_orders = ['wc-sqrip-default-status' => 'Please select an option'] + $suppressed_qr_invoice_orders;
+        $suppressed_qr_invoice_orders = ['wc-sqrip-default-status' => __('Please select an option', 'sqrip-swiss-qr-invoice')] + $suppressed_qr_invoice_orders;
         
         $qr_order_status_options = wc_get_order_statuses();
         if (isset($qr_order_status_options['wc-on-hold'])) {
@@ -457,6 +457,14 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'default' => __('QR order status', 'sqrip-swiss-qr-invoice'),
                 'description' => sprintf(__('Set the status of a newly placed order with payment method \'sqrip\' so it matches your shop process. Should no status be suitable, please create one for your own %s.', 'sqrip-swiss-qr-invoice'), '<a href="#" class="sqrip-toggle-qr-order-status">' . __('here', 'sqrip-swiss-qr-invoice') . '</a>'),
             ),
+            'qr_order_status_send_emails' => array(
+                'title' => __('Send order-confirmation e-mails for this status', 'sqrip-swiss-qr-invoice'),
+                'label' => __('Also send the order-confirmation e-mails (to the customer and to the shop admin) when a new sqrip order is placed', 'sqrip-swiss-qr-invoice'),
+                'type' => 'checkbox',
+                'default' => 'no',
+                'class' => 'qrinvoice-tab',
+                'description' => __('Enable this if you keep orders in a status (such as \'Pending payment\') that does not itself trigger WooCommerce e-mails. sqrip then sends the \'New order\' (admin) and \'Order on-hold\' (customer) e-mails directly at checkout, so confirmations go out without changing your chosen status. Leave off to keep the standard WooCommerce behaviour.', 'sqrip-swiss-qr-invoice'),
+            ),
             'enabled_new_qrstatus' => array(
                 'title' => '',
                 'type' => 'checkbox',
@@ -499,7 +507,8 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             ),
             'email_attached' => array(
                 'title' => __('Attach QR-Invoice to E-Mail template', 'sqrip-swiss-qr-invoice'),
-                'description' => __('Select email templates to which the QR-invoice are attached', 'sqrip-swiss-qr-invoice'),
+                'description' => __('Select email templates to which the QR-invoice are attached', 'sqrip-swiss-qr-invoice')
+                    . '<br>' . __('Note: this attaches the QR invoice as a separate PDF. If you also combine the QR slip with the invoice of the \'PDF Invoices & Packing Slips\' plugin, the e-mail will contain both documents — leave this selection empty if you only want the combined invoice.', 'sqrip-swiss-qr-invoice'),
                 'type' => 'multiselect',
                 'options' => sqrip_get_wc_emails(),
                 'class' => 'qrinvoice-tab'
@@ -714,7 +723,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'title' => __('Completed Orders Status', 'sqrip-swiss-qr-invoice'),
                 'type' => 'select',
                 'options' => wc_get_order_statuses(),
-                'placeholder' => 'Select Status',
+                'placeholder' => __('Select Status', 'sqrip-swiss-qr-invoice'),
                 'default' => 'wc-completed',
 
                 'class' => 'comparison-tab'
@@ -760,6 +769,14 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 
     public function show_qr_reference_format()
     {
+        // This only decides a CSS class on the admin settings form. init_form_fields()
+        // runs in the gateway constructor on every request (incl. frontend), so calling
+        // the blocking validate-iban API here would slow down every page load. The class
+        // is never rendered outside wp-admin, so skip the remote call there entirely.
+        if (!is_admin()) {
+            return 'hide';
+        }
+
         $iban = sqrip_get_plugin_option('iban');
         $token = sqrip_get_plugin_option('token');
 
@@ -1271,7 +1288,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             $wp_mail = wp_mail($to, $subject, $body, $headers, $attachments);
 
             if ($wp_mail) {
-                $settings->add_message(__('<span id="test-email-status">Test email has been sent! <a href="' . $sqrip_qr_pdf_url . '" target="_blank">Click here</a> to view the invoice.</span>', 'sqrip-swiss-qr-invoice'));
+                $settings->add_message(sprintf(__('<span id="test-email-status">Test email has been sent! <a href="%s" target="_blank">Click here</a> to view the invoice.</span>', 'sqrip-swiss-qr-invoice'), esc_url($sqrip_qr_pdf_url)));
             } else {
                 $settings->add_error(__('E-Mail can not be sent, please check WP MAIL SMTP', 'sqrip-swiss-qr-invoice'));
             }
@@ -1345,8 +1362,13 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         $body['product'] = 'Credit';
 
         // replace sqrip IBAN with IBAN of customer
+        // prefer the per-order refund IBAN if one was entered on the order,
+        // otherwise fall back to the customer's stored IBAN (HPOS-safe read)
         $user = $order->get_user();
-        $iban = $user ? sqrip_get_customer_iban($user) : get_post_meta($order_id, 'sqrip_refund_iban_num', true);
+        $iban = sqrip_get_order_meta_value($order, 'sqrip_refund_iban_num');
+        if (!$iban && $user) {
+            $iban = sqrip_get_customer_iban($user);
+        }
 
         $order->update_meta_data('sqrip_refund_iban_num', $iban);
         $order->save();
@@ -1393,9 +1415,17 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         $args = sqrip_prepare_remote_args($body, 'POST', $token);
         $response = wp_remote_post(SQRIP_ENDPOINT . $endpoint, $args);
 
-        //error_log("REFUND".json_encode($response));
+        if (is_wp_error($response)) {
+            $order->add_order_note(
+                sprintf(
+                    __('Error: %s', 'sqrip-swiss-qr-invoice'),
+                    esc_html($response->get_error_message())
+                )
+            );
+            return false;
+        }
 
-        $status_code = $response['response']['code'];
+        $status_code = wp_remote_retrieve_response_code($response);
 
         if ($status_code !== 200) {
             // Transaction was not successful
@@ -1644,6 +1674,42 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 // turn off sqrip if auto turn-off enabled
                 sqrip_auto_turn_off();
             }
+
+            // Optional (opt-in) order-confirmation e-mails.
+            // WooCommerce fires the "New order" (admin) and customer e-mails only on
+            // a status TRANSITION (pending -> on-hold/processing/completed). A shop
+            // that deliberately keeps the order in a non-transition status (e.g.
+            // 'Pending payment', for manual payment reconciliation) therefore never
+            // gets these e-mails. When the merchant opts in, trigger them directly
+            // here — server-side, so it also works with cached confirmation pages —
+            // without touching the configured order status. Each e-mail still
+            // respects its own enabled/disabled state in WooCommerce.
+            if (sqrip_get_plugin_option('qr_order_status_send_emails') === 'yes') {
+                $mailer = WC()->mailer();
+                $wc_emails = $mailer ? $mailer->get_emails() : array();
+                $sqrip_sent_emails = array();
+                foreach (array('WC_Email_New_Order', 'WC_Email_Customer_On_Hold_Order') as $sqrip_email_class) {
+                    if (!isset($wc_emails[$sqrip_email_class]) || !is_callable(array($wc_emails[$sqrip_email_class], 'trigger'))) {
+                        continue;
+                    }
+                    $sqrip_email = $wc_emails[$sqrip_email_class];
+                    // Respect each e-mail's own enabled/disabled state in WooCommerce.
+                    if (method_exists($sqrip_email, 'is_enabled') && !$sqrip_email->is_enabled()) {
+                        continue;
+                    }
+                    $sqrip_email->trigger($order_id, $order);
+                    $sqrip_sent_emails[] = method_exists($sqrip_email, 'get_title') ? $sqrip_email->get_title() : $sqrip_email_class;
+                }
+                // Record the step in the order notes for traceability.
+                if ($sqrip_sent_emails) {
+                    $order->add_order_note(sprintf(
+                        /* translators: %s: comma-separated list of e-mail titles */
+                        __('sqrip sent the order-confirmation e-mail(s): %s.', 'sqrip-swiss-qr-invoice'),
+                        implode(', ', $sqrip_sent_emails)
+                    ));
+                }
+            }
+
             // Redirect to thank you page
             return array(
                 'result' => 'success',

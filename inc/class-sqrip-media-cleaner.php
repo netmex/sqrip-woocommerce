@@ -52,8 +52,7 @@ class Sqrip_Media_Clearner
             $current_time = strtotime(date('Y-m-d H:00:00'));
             $targeted_time = $current_time - $time_delay;
             $targeted_date = date('Y-m-d', $targeted_time);
-            error_log('Target Date::: '.$targeted_date);
-    
+
             $completed_orders = (array)wc_get_orders(array(
                 'limit' => -1,
                 'date_created' => '<' . $targeted_time,
@@ -103,7 +102,7 @@ class Sqrip_Media_Clearner
                     if ($deleted_att) {
                         $logs .= ' Deleted sqrip_reference_id, sqrip_qr_pdf_attachment_id, sqrip_pdf_file_path & sqrip_pdf_file_url for order #' . $order_id . '.';
         
-                        $order_notes = __("The PDF file for order #$order_id has been deleted from the media library", 'sqrip-swiss-qr-invoice');
+                        $order_notes = sprintf(__('The PDF file for order #%s has been deleted from the media library', 'sqrip-swiss-qr-invoice'), $order_id);
                         $order->add_order_note($order_notes);
                     }
     
@@ -142,8 +141,6 @@ class Sqrip_Media_Clearner
         } else {
             $logs = "Sqrip_Media_Cleaner Delete after field not enabled.";
         }
-        
-        error_log($logs);
     }
 }
 

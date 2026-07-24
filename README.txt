@@ -2,10 +2,10 @@
 Contributors: sqrip
 Donate link: https://sqrip.ch/
 Tags: woocommerce, payment, sqrip, qrcode, qr, scan, Kontoabgleich, WPML, swiss qr invoice, QR-Rechnung, EBICS, QR-facture, bulletins de versement, Einzahlungsschein, QR-Einzahlungsschein, bulletins de versement, Swiss QR Code, code QR, QR-fattura, polizze di versamento, multi-store, multi-site, PDF Invoices, multiple invoice installments, 
-Requires at least: 4.7
-Tested up to: 6.8
-Stable tag: 1.9
-Requires PHP: 7.0
+Requires at least: 6.0
+Tested up to: 7.0
+Stable tag: 1.10
+Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -142,18 +142,28 @@ Yes. We are already working on comparing the reconciliation of orders/purchases 
 7. Refund functionality
 
 == Changelog ==
-= 1.9 : November 2025 – Features =
+= 1.10 : Juli 2026 =
+**Features**
 * sqrip is ready for 'structured addresses';
-* Adding the ability to use sqrip in multiple stores installed on the same server instance;
-* If you use the Plugin 'PDF Invoices & Packing Slips for WooCommerce' you can now combine the invoice and the QR slip into one single PDF file;
-* The QR bill can now be added to multiple e-mail templates;
-* You can now split your invoices into multiple installments (BETA);
-* Adding remarks on the checkout page;
-* The Refund IBAN of the client is now checked before a refund is initiated;
-* Refinements (Reference number layout, adding the sqrip logo to the payment options, WPML can now handle the description field too);
-* See the activated services by API-keys in the webadmin panel;
-* Minor bug fixing;
-* Making sure the plugin works with the latest versions of WP and WooCommerce.
+* Use sqrip in multiple stores installed on the same server instance;
+* Combine the invoice and the QR slip into one single PDF (with the 'PDF Invoices & Packing Slips for WooCommerce' plugin);
+* The QR bill can be added to multiple e-mail templates;
+* Split your invoices into multiple installments (BETA);
+* Add remarks on the checkout page;
+* The refund IBAN of the client is checked before a refund is initiated;
+* Optionally send the order-confirmation e-mails (to the customer and the shop admin) even when your chosen sqrip order status does not itself trigger WooCommerce e-mails (opt-in, off by default);
+* See the services activated per API key in the web admin panel;
+* Refinements: reference number layout, sqrip logo on the payment options, WPML handles the description field.
+
+**Improvements & fixes**
+* Performance: the plugin no longer makes a blocking API call on every page load – front-end pages load noticeably faster;
+* Full German, French and Italian translations are bundled and load reliably, regardless of the shop's admin profile language variant or an outdated wordpress.org language pack;
+* Full compatibility with WooCommerce High-Performance Order Storage (HPOS): refunds, order-screen actions and bulk status changes;
+* Security: hardened the admin AJAX actions and the payment-confirmation flow;
+* Every processing step (QR creation, e-mails, deletion, refunds) is recorded in the order notes;
+* Confirmation page: the QR-invoice download button is no longer shown twice;
+* Fixed the multiselect fields on the settings screen and removed the last bundled third-party asset (now uses WooCommerce's own select2);
+* Requires PHP 7.4; tested with WordPress 7.0.
 
 = 1.8.4 : May 2024 – Compatibility =
 * Solved an issue that prevented the sqrip box to be shown on the order details page;
@@ -310,5 +320,8 @@ We made users (even more) happy with these changes:
 * Here we go!
 
 == Upgrade Notice ==
+= 1.10 =
+Recommended update: faster front-end (no more blocking API call on every page load), built-in German / French / Italian translations, full WooCommerce HPOS compatibility, and security hardening. Requires PHP 7.4 or higher.
+
 = 1.0 =
 =======
