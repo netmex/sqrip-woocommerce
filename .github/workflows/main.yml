@@ -3,12 +3,14 @@ on:
   push:
     tags:
     - "*"
+permissions:
+  contents: write
 jobs:
   tag:
     name: New tag
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@master
+    - uses: actions/checkout@v4
     - name: WordPress Plugin Deploy
       uses: 10up/action-wordpress-plugin-deploy@stable
       env:
@@ -16,3 +18,39 @@ jobs:
         SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
         SLUG: sqrip-swiss-qr-invoice
         ASSETS_DIR: assets
+    # Keep the GitHub "Releases" list in sync with what is actually published.
+    # A git tag alone does not create a release entry, which is why the list used
+    # to lag behind wordpress.org. Runs only after a successful deploy, so a
+    # release always reflects a version that really went live.
+    - name: Create GitHub release
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        TAG: ${{ github.ref_name }}
+      run: |
+        set -euo pipefail
+
+        # Idempotent: on a re-run the release already exists, nothing to do.
+        if gh release view "$TAG" >/dev/null 2>&1; then
+          echo "Release $TAG already exists — skipping."
+          exit 0
+        fi
+
+        # Use the changelog section of this version from README.txt as notes.
+        # Matches the "= <tag> : <date> =" heading and stops at the next "= " one.
+        SECTION="$(awk -v tag="= $TAG " '
+          index($0, tag) == 1 { found = 1; next }
+          found && /^= / { exit }
+          found { print }
+        ' README.txt)"
+
+        if [ -n "$SECTION" ]; then
+          {
+            printf '%s\n' "$SECTION"
+            printf -- '---\n'
+            printf 'Published on wordpress.org: https://wordpress.org/plugins/%s/\n' "sqrip-swiss-qr-invoice"
+          } > release-notes.md
+          gh release create "$TAG" --title "Version $TAG" --latest --notes-file release-notes.md
+        else
+          echo "No changelog section found for $TAG — falling back to generated notes."
+          gh release create "$TAG" --title "Version $TAG" --latest --generate-notes
+        fi
