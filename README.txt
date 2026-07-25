@@ -1,7 +1,7 @@
 === sqrip.ch ===
 Contributors: sqrip
 Donate link: https://sqrip.ch/
-Tags: woocommerce, payment, sqrip, qrcode, qr, scan, Kontoabgleich, WPML, swiss qr invoice, QR-Rechnung, EBICS, QR-facture, bulletins de versement, Einzahlungsschein, QR-Einzahlungsschein, bulletins de versement, Swiss QR Code, code QR, QR-fattura, polizze di versamento, multi-store, multi-site, PDF Invoices, multiple invoice installments, 
+Tags: woocommerce, payment, swiss qr invoice, qr-rechnung, einzahlungsschein
 Requires at least: 6.0
 Tested up to: 7.0
 Stable tag: 1.10
@@ -15,6 +15,9 @@ sqrip – A comprehensive, flexible and clever WooCommerce finance tool for the
 At the end of September 2022, the traditional inpayment slips (ISR) for bank transfers in Switzerland have disappeared. The replacement is the "QR bill" (https://www.einfach-zahlen.ch/), which was introduced in July 2020.
 
 In order to offer this cost-effective payment option with all its advantages in the future, we have developed sqrip. sqrip for WooCommerce consists of a universal API (http://api.sqrip.ch/) and a WordPress plugin, which connects seamlessly with WooCommerce and comes up with various options. The plugin is "open source" (https://github.com/netmex/sqrip-woocommerce) and can thus be adapted for other store systems.
+
+= Names and terms you may be looking for =
+The Swiss QR bill goes by many names: in German QR-Rechnung, QR-Einzahlungsschein or simply Einzahlungsschein; in French QR-facture, bulletin de versement or code QR; in Italian QR-fattura or polizza di versamento. sqrip produces this Swiss QR Code payment part for all of them from the same WooCommerce order. It also covers payment reconciliation (Kontoabgleich) — manually or automatically via EBICS and camt.053 — as well as WPML, multi-store and multi-site setups, an integration with PDF Invoices & Packing Slips, and multiple invoice installments.
 
 = Functionality =
 sqrip is listed as an additional payment method in WooCommerce and can be configured there. For identification and billing purposes, but also for security aspects, the plugin is connected to the sqrip account via an API key/token. The QR invoice is created by the API, delivered and saved in the desired format in the media library. From there, the file can be integrated in various places (e.g. as an insert in the confirmation email) and reopened at any time. If the invoice has been changed, the QR payment part can be updated with one click. The reference number is prominently displayed with the order so that reconciliation is quickly possible.
