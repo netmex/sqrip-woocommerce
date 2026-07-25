@@ -144,7 +144,7 @@ Yes. We are already working on comparing the reconciliation of orders/purchases 
 == Changelog ==
 = 1.10 : Juli 2026 =
 **Features**
-* sqrip is ready for 'structured addresses';
+* 'structured addresses' are confirmed;
 * Use sqrip in multiple stores installed on the same server instance;
 * Combine the invoice and the QR slip into one single PDF (with the 'PDF Invoices & Packing Slips for WooCommerce' plugin);
 * The QR bill can be added to multiple e-mail templates;
