@@ -863,19 +863,27 @@ add_action('woocommerce_process_shop_order_meta', function($post_id) {
                 if ($is_multiple_invoices) {
                     $num = 1;
                     foreach ($response_body as $key => $invoice) {
-        
+
                         $sqrip_pdf = $invoice->pdf_file;
                         $sqrip_reference = $invoice->reference;
-            
-                        $sqrip_qr_pdf_attachment_id = file_upload_stt($sqrip_pdf, '.pdf', '', $order->ID."-".$num);
-            
+                        $sqrip_partial_amount = $invoice->amount;
+                        $partial_invoice_fraction = sqrip_get_plugin_option('invoice_fraction_'.$num);
+
+                        $sqrip_qr_pdf_attachment_id = file_upload_stt($sqrip_pdf, '.pdf', '', $post_id."-".$num);
+
                         $sqrip_qr_pdf_url = wp_get_attachment_url($sqrip_qr_pdf_attachment_id);
                         $sqrip_qr_pdf_path = get_attached_file($sqrip_qr_pdf_attachment_id);
-    
+
                         $order->update_meta_data('sqrip_reference_id_'.$num, $sqrip_reference);
                         $order->update_meta_data('sqrip_qr_pdf_attachment_id_'.$num, $sqrip_qr_pdf_attachment_id);
                         $order->update_meta_data('sqrip_pdf_file_url_'.$num, $sqrip_qr_pdf_url);
                         $order->update_meta_data('sqrip_pdf_file_path_'.$num, $sqrip_qr_pdf_path);
+                        // Amount and percentage per slip, same as the checkout path in
+                        // inc/functions.php and inc/class-wc-sqrip-payment-gateway.php.
+                        // Without these the admin order screen shows 0.00 per slip and a
+                        // payment reconciliation cannot verify the amount. (E2)
+                        $order->update_meta_data('sqrip_partial_invoice_amount_'.$num, $sqrip_partial_amount);
+                        $order->update_meta_data('sqrip_partial_invoice_fraction_'.$num, $partial_invoice_fraction);
                         $num++;
                     }
     
@@ -889,7 +897,7 @@ add_action('woocommerce_process_shop_order_meta', function($post_id) {
                     $sqrip_reference = $response_body->reference;
         
                     // TODO: replace with attachment ID and store this in meta instead of actual file
-                    $sqrip_qr_pdf_attachment_id = file_upload_stt($sqrip_pdf, '.pdf', '', $order->ID);
+                    $sqrip_qr_pdf_attachment_id = file_upload_stt($sqrip_pdf, '.pdf', '', $post_id);
         
                     $sqrip_qr_pdf_url = wp_get_attachment_url($sqrip_qr_pdf_attachment_id);
                     $sqrip_qr_pdf_path = get_attached_file($sqrip_qr_pdf_attachment_id);
