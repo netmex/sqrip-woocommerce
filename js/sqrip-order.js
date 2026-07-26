@@ -5,11 +5,26 @@ jQuery(document).ready(function ($) {
         btn_initiate_payment = $('button.sqrip-initiate-payment'),
         sqrip_error = '<p class="sqrip-error">' + sqrip.field_required_txt + '</p>';
 
+    // Find the order edit form. Its id differs by order storage: HPOS renders
+    // <form id="order">, the classic post-based editor <form id="post">. Hard-coding
+    // one of them silently broke the QR buttons on the other (no form found → no
+    // submit → no QR invoice, no PDF, no error). Prefer walking up from the button,
+    // which works regardless of the id, and fall back to both known ids.
+    function sqrip_order_form($btn) {
+        var $form = $btn && $btn.length ? $btn.closest('form') : $();
+
+        if (!$form.length) {
+            $form = $('form#order, form#post').first();
+        }
+
+        return $form;
+    }
+
     btn_regenerate_qrcode.on('click', function (e) {
 
         e.preventDefault();
 
-        _form = $('form#order');
+        _form = sqrip_order_form($(this));
 
         if (_form.length) {
             _form.find('.sqrip-error').remove();
@@ -44,7 +59,7 @@ jQuery(document).ready(function ($) {
 
         e.preventDefault();
 
-        _form = $('form#order');
+        _form = sqrip_order_form($(this));
 
         if (_form.length) {
 
@@ -143,7 +158,7 @@ jQuery(document).ready(function ($) {
 
         e.preventDefault();
 
-        _form = $('form#order');
+        _form = sqrip_order_form($(this));
 
         $('body').addClass('sqrip-loading');
 
