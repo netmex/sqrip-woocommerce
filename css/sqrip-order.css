@@ -15,3 +15,12 @@
     justify-content: center;
     align-items: center;
 }
+
+/* "Pay" button while QR-invoice generation at checkout is suppressed: visible,
+   but not clickable — there is no QR invoice to pay yet. */
+.woocommerce-button.sqrip-pay-disabled,
+a.sqrip-pay-disabled {
+	pointer-events: none;
+	opacity: 0.5;
+	cursor: not-allowed;
+}

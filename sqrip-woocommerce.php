@@ -749,6 +749,52 @@ function sqrip_qr_action_order_details_after_order_table($order)
 }
 
 /**
+ * Neutralise the "Pay" button for sqrip orders while QR-invoice generation at
+ * checkout is suppressed.
+ *
+ * With "Don't generate QR-invoice at checkout but manually" enabled the order is
+ * parked in a pending status, so WooCommerce offers the customer a "Pay" button in
+ * My account -> Orders. There is nothing to pay yet — the shop still has to create
+ * the QR invoice — and following the button ends in an error message. The button
+ * stays visible on purpose (requested behaviour) but is no longer clickable.
+ *
+ * @since 1.11
+ */
+add_filter('woocommerce_my_account_my_orders_actions', 'sqrip_disable_pay_action_when_suppressed', 10, 2);
+
+function sqrip_disable_pay_action_when_suppressed($actions, $order)
+{
+    if (!isset($actions['pay']) || !is_a($order, 'WC_Order')) {
+        return $actions;
+    }
+
+    if ($order->get_payment_method() !== 'sqrip') {
+        return $actions;
+    }
+
+    if (sqrip_get_plugin_option('suppress_generation') !== 'yes') {
+        return $actions;
+    }
+
+    // Rebuild the list to keep the original order of the buttons. The action key
+    // becomes the CSS class in WooCommerce's my-orders template, which is how
+    // css/sqrip-order.css greys the button out.
+    $disabled = array();
+
+    foreach ($actions as $key => $action) {
+        if ($key === 'pay') {
+            $action['url'] = '#';
+            $disabled['sqrip-pay-disabled'] = $action;
+            continue;
+        }
+
+        $disabled[$key] = $action;
+    }
+
+    return $disabled;
+}
+
+/**
  *  Re-Generate QR-Code in Admin Order page
  *
  * @since 1.0.3

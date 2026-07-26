@@ -33,9 +33,21 @@ jQuery( document ).ready(function($){
         })
     })
 
+    // While QR-invoice generation at checkout is suppressed there is nothing for the
+    // customer to pay yet, and following the "Pay" button ends in an error. Show the
+    // button but make it inert. The orders list is handled server side (see
+    // sqrip_disable_pay_action_when_suppressed); this covers the single order view,
+    // where WooCommerce renders the button from its own template.
     let invoice_info = $('#sqrip-invoice-info');
     if (invoice_info.length && $(invoice_info).data('suppressed') == 'yes') {
-        $(".woocommerce-button.pay").hide();
+        $(".woocommerce-button.pay")
+            .addClass('sqrip-pay-disabled')
+            .attr('aria-disabled', 'true');
     }
+
+    // Keyboard activation still fires on a focused link, so block it explicitly.
+    $(document).on('click', '.sqrip-pay-disabled', function (e) {
+        e.preventDefault();
+    });
 
 });
