@@ -41,6 +41,8 @@ nachdem WooCommerce die geänderten Positionen und das neue Total gespeichert ha
 
 **Reihenfolge laut Plan**
 
+0. Die drei geernteten Teile aus `origin/feature/ebics-camt53-live` lesen (Abschnitt
+   „Vorhandener Code, der geerntet werden muss" im Plan) — **nicht mergen**
 1. E2 (fehlender `sqrip_partial_invoice_amount_{n}` im Regenerationspfad), dann A2–A4
 2. B1 — CH-Gatekeeper (NET2-2329)
 3. C1–C4 — camt-Upload und Abgleich
@@ -50,8 +52,8 @@ nachdem WooCommerce die geänderten Positionen und das neue Total gespeichert ha
 
 **Womit du anfängst**
 
-Beginne mit Schritt 1 (E2 und A2–A4) und setze diese Fixes um. Lege dafür einen Branch
-`release/1.11` an — der aktuelle Stand liegt auf `main`.
+Du arbeitest auf dem Branch `release/1.11` (existiert lokal und auf GitHub, ist
+ausgecheckt). Mach Schritt 0, dann Schritt 1 (E2 und A2–A4) und setze diese Fixes um.
 
 **Was du von Markus brauchst, sobald C ansteht**
 
