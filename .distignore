@@ -1,6 +1,7 @@
 /assets
 /.git
 /.github
+/docs
 
 .DS_Store
 .distignore

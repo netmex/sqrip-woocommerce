@@ -765,7 +765,16 @@ add_action('woocommerce_process_shop_order_meta', function($post_id) {
             isset($_POST['_sqrip_initiate_payment'])
         )
     ) {
+        // Read the order only now, at priority 99: WooCommerce saves the edited line
+        // items and the recalculated grand total on this very hook. Running earlier
+        // meant we picked up the total from *before* the price/VAT change, so the
+        // regenerated QR bill showed a different amount than the order. (NET2-2322)
         $order = wc_get_order($post_id);
+
+        if (!$order) {
+            return;
+        }
+
         $order_data = $order->get_data(); // order data
         $building_number_meta = $order->get_meta('_billing_sqrip_building_num', true);
 
@@ -939,7 +948,7 @@ add_action('woocommerce_process_shop_order_meta', function($post_id) {
             }
         }
     }
-});
+}, 99);
 
 add_action('woocommerce_after_order_refund_item_name', "sqrip_display_refund_qr_code", 10, 1);
 

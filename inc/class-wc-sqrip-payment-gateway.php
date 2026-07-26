@@ -1259,11 +1259,23 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             $subject = 'Test E-Mail von sqrip.ch';
             $body = 'Hier das eingestellte Resultat:';
             $attachments = [];
+            $headers = [];
+            $pdf_error = '';
 
             $headers[] = 'From: sqrip Test-Mail <' . $to . '>';
             $headers[] = 'Content-Type: text/html; charset=UTF-8';
 
-            $attachments[] = $sqrip_qr_pdf_path;
+            // Only attach the PDF if it was really written and is readable.
+            // An unreadable attachment makes PHPMailer abort the whole mail, which
+            // used to surface as a generic "check WP MAIL SMTP" error even though
+            // the actual problem was the file (e.g. allow_url_fopen disabled or an
+            // unwritable uploads directory). Reporting both separately makes the
+            // difference between a mail problem and a PDF problem visible.
+            if ($sqrip_qr_pdf_path && is_readable($sqrip_qr_pdf_path) && filesize($sqrip_qr_pdf_path) > 0) {
+                $attachments[] = $sqrip_qr_pdf_path;
+            } else {
+                $pdf_error = __('The QR invoice PDF could not be saved, so the test e-mail is sent without an attachment. Please check that the PHP setting allow_url_fopen is enabled and that the WordPress uploads folder is writable.', 'sqrip-swiss-qr-invoice');
+            }
 
             // switch ($integration) {
             //     case 'body':
@@ -1285,12 +1297,47 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 sqrip_auto_turn_off();
             }
 
+            // Capture the real reason if sending fails. wp_mail() only returns a
+            // boolean; the underlying PHPMailer/SMTP error is passed to the
+            // 'wp_mail_failed' action. Without this the admin only ever saw a
+            // generic hint, which made the actual cause impossible to find.
+            $mail_error = '';
+            $capture_mail_error = function ($wp_error) use (&$mail_error) {
+                if (is_wp_error($wp_error)) {
+                    $mail_error = $wp_error->get_error_message();
+                }
+            };
+            add_action('wp_mail_failed', $capture_mail_error);
+
             $wp_mail = wp_mail($to, $subject, $body, $headers, $attachments);
 
+            remove_action('wp_mail_failed', $capture_mail_error);
+
             if ($wp_mail) {
-                $settings->add_message(sprintf(__('<span id="test-email-status">Test email has been sent! <a href="%s" target="_blank">Click here</a> to view the invoice.</span>', 'sqrip-swiss-qr-invoice'), esc_url($sqrip_qr_pdf_url)));
+                $settings->add_message(sprintf(
+                    /* translators: 1: recipient e-mail address, 2: URL of the generated invoice */
+                    __('<span id="test-email-status">Test email has been sent to %1$s! <a href="%2$s" target="_blank">Click here</a> to view the invoice.</span>', 'sqrip-swiss-qr-invoice'),
+                    esc_html($to),
+                    esc_url($sqrip_qr_pdf_url)
+                ));
+
+                if ($pdf_error) {
+                    $settings->add_error(esc_html($pdf_error));
+                }
             } else {
-                $settings->add_error(__('E-Mail can not be sent, please check WP MAIL SMTP', 'sqrip-swiss-qr-invoice'));
+                if ($mail_error) {
+                    $settings->add_error(sprintf(
+                        /* translators: %s: error message reported by WordPress / the SMTP plugin */
+                        __('The test e-mail could not be sent. Your e-mail service reported: %s', 'sqrip-swiss-qr-invoice'),
+                        esc_html($mail_error)
+                    ));
+                } else {
+                    $settings->add_error(__('The test e-mail could not be sent by WordPress. Please check your e-mail configuration (for example the WP Mail SMTP plugin) and its e-mail log.', 'sqrip-swiss-qr-invoice'));
+                }
+
+                if ($pdf_error) {
+                    $settings->add_error(esc_html($pdf_error));
+                }
             }
         } else {
             // turn off sqrip if auto turn-off enabled

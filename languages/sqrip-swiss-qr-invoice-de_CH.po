@@ -28,8 +28,8 @@ msgstr "(QR-)IBAN des Kontos, auf das die Überweisung erfolgen soll"
 msgid "<b>%s</b> %s</br>%s"
 msgstr "<b>%s</b> %s</br>%s"
 
-msgid "<span id=\"test-email-status\">Test email has been sent! <a href=\"%s\" target=\"_blank\">Click here</a> to view the invoice.</span>"
-msgstr "<span id=\"test-email-status\">Test-E-Mail wurde gesendet! <a href=\"%s\" target=\"_blank\">Hier klicken</a>, um die Rechnung anzusehen.</span>"
+msgid "<span id=\"test-email-status\">Test email has been sent to %1$s! <a href=\"%2$s\" target=\"_blank\">Click here</a> to view the invoice.</span>"
+msgstr "<span id=\"test-email-status\">Test-E-Mail wurde an %1$s gesendet! <a href=\"%2$s\" target=\"_blank\">Hier klicken</a>, um die Rechnung anzusehen.</span>"
 
 msgid "[order_date]_[shop_name]_invoice-order_[order_number]"
 msgstr "[order_date]_[shop_name]_rechnung-bestellung_[order_number]"
@@ -143,10 +143,10 @@ msgstr "Status abgeschlossener Bestellungen"
 msgid "Completed, Paid"
 msgstr "Abgeschlossen, bezahlt"
 
-msgid "Confirm Payment"
+msgid "Confirm payment"
 msgstr "Zahlung bestätigen"
 
-msgid "Confirm payment"
+msgid "Confirm Payment"
 msgstr "Zahlung bestätigen"
 
 msgid "Confirm receipt of payment"
@@ -211,9 +211,6 @@ msgstr ""
 "Fälligkeitsdatum: [due_date format=\"y-MM-dd\"]\\n"
 "Bestellung: [order_number]\\n"
 "Vielen Dank für Ihren Einkauf!"
-
-msgid "E-Mail can not be sent, please check WP MAIL SMTP"
-msgstr "E-Mail kann nicht gesendet werden, bitte überprüfen Sie WP MAIL SMTP"
 
 msgid "Either Company Name(priority) or First/Last name"
 msgstr "Entweder Firmenname (Priorität) oder Vor-/Nachname"
@@ -596,8 +593,17 @@ msgstr "Die einzigen erlaubten Zeichen sind A-Z, Bindestriche (-) und Unterstric
 msgid "The PDF file for order #%s has been deleted from the media library"
 msgstr "Die PDF-Datei für Bestellung #%s wurde aus der Mediathek gelöscht"
 
+msgid "The QR invoice PDF could not be saved, so the test e-mail is sent without an attachment. Please check that the PHP setting allow_url_fopen is enabled and that the WordPress uploads folder is writable."
+msgstr "Die QR-Rechnung als PDF konnte nicht gespeichert werden, daher wird die Test-E-Mail ohne Anhang gesendet. Bitte prüfen Sie, ob die PHP-Einstellung allow_url_fopen aktiviert ist und der WordPress-Upload-Ordner beschreibbar ist."
+
 msgid "The sqrip plugin only supports EUR and CHF currencies!"
 msgstr "Das sqrip-Plugin unterstützt nur die Währungen EUR und CHF!"
+
+msgid "The test e-mail could not be sent by WordPress. Please check your e-mail configuration (for example the WP Mail SMTP plugin) and its e-mail log."
+msgstr "Die Test-E-Mail konnte von WordPress nicht gesendet werden. Bitte prüfen Sie Ihre E-Mail-Konfiguration (zum Beispiel das Plugin WP Mail SMTP) und dessen E-Mail-Protokoll."
+
+msgid "The test e-mail could not be sent. Your e-mail service reported: %s"
+msgstr "Die Test-E-Mail konnte nicht gesendet werden. Ihr E-Mail-Dienst meldet: %s"
 
 msgid "Third address"
 msgstr "Dritte Adresse"
