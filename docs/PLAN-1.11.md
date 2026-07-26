@@ -99,12 +99,36 @@ auf fremden Systemen.
 
 ---
 
+## Vorhandener Code, der geerntet werden muss (vor C und B3 lesen!)
+
+Im Repo liegen zwei alte Remote-Branches mit einem **Prototyp des Zahlungsabgleichs**:
+`origin/feature/ebics-camt53` und `origin/feature/ebics-camt53-live`.
+
+**Achtung: nicht mergen.** Beide weichen um ~3000 Zeilen von `main` ab und haben
+`inc/sqrip-ajax.php` in eine Klasse `inc/class-sqrip-ajax.php` umgebaut. Ein Merge wäre
+ein Rückschritt. Gezielt einzelne Teile übernehmen.
+
+**Wichtig für die Architektur:** Der Prototyp gleicht **nicht** im Plugin ab. Er schickt
+die offenen Bestellungen an den sqrip-Server (`confirm-order`) und verarbeitet dessen
+Antwort (`orders_matched` / `orders_unmatched`). Genau das wollen wir in 1.11 **nicht** —
+der Abgleich soll im Plugin passieren. Der Vergleich selbst (C1/C2) ist also echte
+Neuarbeit.
+
+Brauchbar sind aber drei Teile:
+
+| Quelle (auf `origin/feature/ebics-camt53-live`) | Was | Für |
+|---|---|---|
+| `inc/functions.php` → `sqrip_get_awaiting_orders()` | Holt Bestellungen im konfigurierten „wartet auf Zahlung"-Status mit gesetzter `sqrip_reference_id` und liefert `order_id`, `amount`, `reference`, `date`. | **C2** — fertige Kandidatenauswahl. Zwei Anpassungen nötig: sie liest nur `sqrip_reference_id`, nicht die Mehrfach-Varianten `sqrip_reference_id_{n}`; und sie filtert per `meta_key`/`meta_compare`, was unter HPOS anders greift als klassisch — hier lieber nach Status holen und in PHP filtern. |
+| `inc/class-sqrip-payment-verification.php` → `update_order_status()` | Schreibt Trefferergebnisse zurück auf die Bestellungen. | **C3** — Übernahme-Schritt. |
+| `inc/class-sqrip-orders-reminder.php` | Vollständige Klasse: täglicher WP-Cron, arbeitet mit den Optionen `due_date`, `status_reminders`, `due_reminder`. | **B3 (Mahngebühr)** — das Cron- und Fälligkeitsgerüst existiert bereits. Macht B3 deutlich billiger als geschätzt. |
+
 ## Reihenfolge
 
+0. **Die drei geernteten Teile aus `origin/feature/ebics-camt53-live` lesen** (siehe Abschnitt oben), bevor C oder B3 begonnen wird.
 1. **E2, dann A2–A4** — kleine, klar umrissene Fixes. Bringt das Repo auf einen sauberen Stand.
 2. **B1 (CH-Gatekeeper)** — bestes Nutzen/Aufwand-Verhältnis, unabhängig von allem anderen.
 3. **C1–C4 (camt)** — das grosse Paket. Zuerst Parser mit echten Beispieldateien, dann Abgleich, dann Oberfläche.
-4. **B2, B3 (Skonto, Mahngebühr)** — nach C, weil C ihnen die automatische Entwertung liefert.
+4. **B2, B3 (Skonto, Mahngebühr)** — nach C, weil C ihnen die automatische Entwertung liefert. B3 setzt auf `Sqrip_Orders_Reminder` auf.
 5. **E1 (HPOS)** — vor dem Release.
 6. **D1, D2, D4** — Auffüllmasse. **D3** erst nach Klärung mit Markus.
 
