@@ -1549,8 +1549,11 @@ function sqrip_add_custom_order_status_actions_button($actions, $order)
 
             $paged = isset($_GET['paged']) ? '&paged=' . $_GET['paged'] : '';
 
-            // Set the action button
-            $payment_confirm_title = __('Confirm receipt of payment', 'sqrip-swiss-qr-invoice');
+            // Set the action button.
+            // The label is always the first line of the tooltip, also for multiple QR
+            // slips where the partial-payment details follow underneath it. (NET2-2310)
+            $payment_confirm_label = __('Confirm receipt of payment', 'sqrip-swiss-qr-invoice') . ':';
+            $payment_confirm_title = '';
             $invoice_count = sqrip_get_order_meta_value($order, 'sqrip_multiple_invoice_count');
             $invoice_count = $invoice_count ? (int) $invoice_count : null;
             $payment_confirm_footer = wc_price($invoice_total);
@@ -1563,7 +1566,7 @@ function sqrip_add_custom_order_status_actions_button($actions, $order)
                 $currency_symbol = $order_data['currency'];
                 $partial_amount = $currency_symbol . (sqrip_get_order_meta_value($order, 'sqrip_partial_invoice_amount_'.$sqrip_next_paid_invoice_number) ?: '0.00');
 
-                $payment_confirm_title = __('Confirm Payment', 'sqrip-swiss-qr-invoice') . " ($sqrip_next_paid_invoice_number/$invoice_count): " . $partial_amount;
+                $payment_confirm_title = __('Partial Payment', 'sqrip-swiss-qr-invoice') . " [$sqrip_next_paid_invoice_number/$invoice_count]: " . $partial_amount;
                 $qr_order_status_options = wc_get_order_statuses();
                 $payment_status = sqrip_get_plugin_option("partial_invoice_".$sqrip_next_paid_invoice_number."_status");
                 $status_fullname = __('Status changing to', 'sqrip-swiss-qr-invoice') . ": " . ($payment_status && isset($qr_order_status_options[$payment_status]) ?
@@ -1575,7 +1578,12 @@ function sqrip_add_custom_order_status_actions_button($actions, $order)
 
             $actions[$action_slug] = array(
                 'url' => wp_nonce_url(admin_url('admin-ajax.php?action=sqrip_payment_confirmed&order_id=' . $order_id . $paged), 'sqrip_payment_confirmed'),
-                'name' => $payment_confirm_title . '<br />' . $reference_id_formatted . '</br>' . $payment_confirm_footer,
+                'name' => implode('<br />', array_filter(array(
+                    $payment_confirm_label,
+                    $payment_confirm_title,
+                    $reference_id_formatted,
+                    $payment_confirm_footer,
+                ))),
                 'action' => $action_slug,
             );
         }
