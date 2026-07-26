@@ -41,6 +41,112 @@ function sqrip_get_plugin_options()
     return $plugin_options;
 }
 
+/**
+ * Countries a QR invoice may be created for.
+ *
+ * @since 1.11
+ * @return string[] Upper case ISO 3166-1 alpha-2 codes, empty if nothing is configured.
+ */
+function sqrip_get_allowed_invoice_countries()
+{
+    $countries = sqrip_get_plugin_option('allowed_invoice_countries');
+
+    if (!is_array($countries)) {
+        return array();
+    }
+
+    $countries = array_map(function ($country) {
+        return strtoupper(trim((string) $country));
+    }, $countries);
+
+    return array_values(array_filter($countries));
+}
+
+/**
+ * Is the country gatekeeper switched on and usable?
+ *
+ * A switched-on but empty country list would block every single order, which is
+ * never what the shop meant. That counts as switched off.
+ *
+ * @since 1.11
+ * @return bool
+ */
+function sqrip_country_gatekeeper_active()
+{
+    if (sqrip_get_plugin_option('country_restriction_enabled') !== 'yes') {
+        return false;
+    }
+
+    return !empty(sqrip_get_allowed_invoice_countries());
+}
+
+/**
+ * May a QR invoice be created for this invoice country?
+ *
+ * A QR invoice is always in CHF. Sending one to a customer abroad causes confusion
+ * and bank charges, so the shop can limit it to the countries it wants. (NET2-2329)
+ *
+ * @since 1.11
+ * @param string $country Two letter country code of the billing address.
+ * @return bool
+ */
+function sqrip_is_invoice_country_allowed($country)
+{
+    if (!sqrip_country_gatekeeper_active()) {
+        return true;
+    }
+
+    $country = strtoupper(trim((string) $country));
+
+    // Nothing to judge by. Let it pass rather than block an order over missing data.
+    if ($country === '') {
+        return true;
+    }
+
+    return in_array($country, sqrip_get_allowed_invoice_countries(), true);
+}
+
+/**
+ * May a QR invoice be created for this order?
+ *
+ * Judged by the invoice (billing) address, because that is the address printed on
+ * the QR bill as the debtor and the one the customer pays from.
+ *
+ * @since 1.11
+ * @param WC_Order $order
+ * @return bool
+ */
+function sqrip_order_allows_qr_invoice($order)
+{
+    if (!is_a($order, 'WC_Order')) {
+        return true;
+    }
+
+    return sqrip_is_invoice_country_allowed($order->get_billing_country());
+}
+
+/**
+ * Record on the order why no QR invoice was created, so the shop is not left guessing.
+ *
+ * @since 1.11
+ * @param WC_Order $order
+ * @return void
+ */
+function sqrip_add_country_blocked_order_note($order)
+{
+    if (!is_a($order, 'WC_Order')) {
+        return;
+    }
+
+    $order->add_order_note(
+        sprintf(
+            /* translators: %s: two letter country code of the invoice address */
+            __('No sqrip QR invoice was created: the invoice address is in %s, which is not among the countries selected in the sqrip settings.', 'sqrip-swiss-qr-invoice'),
+            $order->get_billing_country()
+        )
+    );
+}
+
 function sqrip_prepare_remote_args($body, $method, $token = null)
 {
     $plugin_token = sqrip_get_plugin_option('token');
@@ -805,6 +911,17 @@ function process_payment_stt($order_id)
 
     if ($suppress_generation == "yes") {
         $order->update_status('pending');
+
+        return array(
+            'result' => 'success',
+            'redirect' => get_return_url_stt($order),
+        );
+    }
+
+    // Customers can trigger this from the order page, so the gatekeeper has to hold
+    // here as well. (NET2-2329)
+    if (!sqrip_order_allows_qr_invoice($order)) {
+        sqrip_add_country_blocked_order_note($order);
 
         return array(
             'result' => 'success',

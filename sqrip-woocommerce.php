@@ -821,6 +821,16 @@ add_action('woocommerce_process_shop_order_meta', function($post_id) {
             return;
         }
 
+        // The shop can limit QR invoices to certain invoice countries. Manual creation
+        // has to respect that too, otherwise the gatekeeper is only half a gate.
+        // The order was saved just above, so its address is the edited one. (NET2-2329)
+        if (!sqrip_order_allows_qr_invoice($order)) {
+            sqrip_add_country_blocked_order_note($order);
+            $order->save();
+
+            return;
+        }
+
         $order_data = $order->get_data(); // order data
         $building_number_meta = $order->get_meta('_billing_sqrip_building_num', true);
 
