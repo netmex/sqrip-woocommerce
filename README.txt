@@ -4,7 +4,7 @@ Donate link: https://sqrip.ch/
 Tags: woocommerce, payment, swiss qr invoice, qr-rechnung, einzahlungsschein
 Requires at least: 6.0
 Tested up to: 7.0
-Stable tag: 1.10
+Stable tag: 1.10.1
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -145,6 +145,12 @@ Yes. We are already working on comparing the reconciliation of orders/purchases 
 7. Refund functionality
 
 == Changelog ==
+= 1.10.1 : Juli 2026 – Fixes =
+* Manually created orders: the 'Generate QR Invoice' button works again on shops that still use the classic order storage. The button was bound to the order form of the new High-Performance Order Storage only, so on those shops nothing happened at all — no QR invoice, no PDF and no error message;
+* The document icon in the sqrip order box is no longer shown before a QR invoice exists (it used to link back to the order instead of a PDF);
+* Test e-mail: if sending fails, the actual error reported by your e-mail service is now shown instead of a generic hint, the recipient address is named on success, and a failed PDF is reported separately;
+* Fewer plugin tags on wordpress.org, with the search terms moved into the plugin description.
+
 = 1.10 : Juli 2026 =
 **Features**
 * 'structured addresses' are confirmed;
