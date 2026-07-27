@@ -289,6 +289,24 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'class' => 'qrinvoice-tab'
             ),
 
+            'country_restriction_enabled' => array(
+                'title' => __('Restrict QR-invoice by country', 'sqrip-swiss-qr-invoice'),
+                'label' => __('Offer sqrip only for the invoice countries selected below', 'sqrip-swiss-qr-invoice'),
+                'type' => 'checkbox',
+                'description' => __('A QR-invoice is always in Swiss francs. For customers abroad this causes confusion, bank charges for paying in the wrong currency, and manual work. With this enabled, sqrip is hidden at the checkout for every other invoice country and no QR-invoice is created for such orders.', 'sqrip-swiss-qr-invoice'),
+                'default' => 'no',
+                'class' => 'qrinvoice-tab'
+            ),
+            'allowed_invoice_countries' => array(
+                'title' => __('Countries that get a QR-invoice', 'sqrip-swiss-qr-invoice'),
+                'type' => 'multiselect',
+                'options' => $invoice_countries,
+                'default' => array('CH', 'LI'),
+                'description' => __('Judged by the invoice address, which is the address printed on the QR-invoice.', 'sqrip-swiss-qr-invoice'),
+                'css' => 'width: 400px;',
+                // sqrip-country-field: only shown while the restriction is switched on.
+                'class' => 'qrinvoice-tab wc-enhanced-select sqrip-country-field'
+            ),
             'section_payment_recevier' => array(
                 'title' => __('Payee', 'sqrip-swiss-qr-invoice'),
                 'type' => 'section',
@@ -387,6 +405,43 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'description' => __('Will be displayed on the QR invoice in the section “Additional information”. The result shown in invoices cannot exceed 140 symbols and 5 rows.<br>The following short codes are available:<br>[order_number] the order number.<br>[due_date format="y-MM-dd"] to insert the due date of the invoice.<br><a href="https://www.php.net/strftime" target="_blank">Supported formats</a> are:<br>y-MM-dd -> 2022-04-06<br>dd.MM.yy -> 04.06.22<br>dd. MMMM y -> 06. April 2022<br>d. MMM y -> 6. Apr 2022', 'sqrip-swiss-qr-invoice'),
                 'class' => 'qrinvoice-tab'
             ),
+            'file_name' => array(
+                'title' => __('File Name', 'sqrip-swiss-qr-invoice'),
+                'type' => 'textarea',
+                'class' => 'qrinvoice-tab',
+                'maxlength' => 140,
+                'default' => __("[order_date]_[shop_name]_invoice-order_[order_number]", "sqrip-swiss-qr-invoice"),
+                'description' => __('The only characters allowed are A-Z, dashes (-) and underscores (_). Any spaces will be replaced with underscores (_). You can also use the following variables:<br>[order_number] — your full order number;<br>[order_date] — in yymmdd format, e.g. 230210 for Feb. 10 2023;<br>[shop_name] — can only be used if the shop name conforms with the "characters allowed" rule, otherwise the setting will be highlighted in red.', 'sqrip-swiss-qr-invoice'),
+            ),
+            'checkout_remarks' => array(
+                'title' => __('Checkout Page Remarks', 'sqrip-swiss-qr-invoice'),
+                'type' => 'textarea',
+                'class' => 'sqrip-checkout-remarks',
+                'description' => __('Will be displayed in the Checkout page above the Payment Methods section.', 'sqrip-swiss-qr-invoice'),
+                'class' => 'qrinvoice-tab'
+            ),
+            'product' => array(
+                'title' => __('Format', 'sqrip-swiss-qr-invoice'),
+                'type' => 'select',
+                'description' => '',
+                'options' => array(
+                    'Full A4' => __('on a blank A4 PDF', 'sqrip-swiss-qr-invoice'),
+                    'Invoice Slip' => __('only the A6 payment part as PDF', 'sqrip-swiss-qr-invoice'),
+                ),
+                'class' => 'qrinvoice-tab'
+            ),
+            'lang' => array(
+                'title' => __('Language', 'sqrip-swiss-qr-invoice'),
+                'type' => 'select',
+                'options' => array(
+                    'de' => __('German', 'sqrip-swiss-qr-invoice'),
+                    'fr' => __('French', 'sqrip-swiss-qr-invoice'),
+                    'it' => __('Italian', 'sqrip-swiss-qr-invoice'),
+                    'en' => __('English', 'sqrip-swiss-qr-invoice')
+                ),
+                'default' => 'de',
+                'class' => 'qrinvoice-tab'
+            ),
             'section_skonto' => array(
                 'title' => __('Discount for early payment (Skonto)', 'sqrip-swiss-qr-invoice'),
                 'type' => 'section',
@@ -431,64 +486,10 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'description' => __('Printed on the discounted invoice. Same short codes as above, plus [skonto] for the percentage. Here [due_date] is the Skonto deadline, not the ordinary maturity.', 'sqrip-swiss-qr-invoice'),
                 'class' => 'qrinvoice-tab sqrip-skonto-field'
             ),
-            'file_name' => array(
-                'title' => __('File Name', 'sqrip-swiss-qr-invoice'),
-                'type' => 'textarea',
-                'class' => 'qrinvoice-tab',
-                'maxlength' => 140,
-                'default' => __("[order_date]_[shop_name]_invoice-order_[order_number]", "sqrip-swiss-qr-invoice"),
-                'description' => __('The only characters allowed are A-Z, dashes (-) and underscores (_). Any spaces will be replaced with underscores (_). You can also use the following variables:<br>[order_number] — your full order number;<br>[order_date] — in yymmdd format, e.g. 230210 for Feb. 10 2023;<br>[shop_name] — can only be used if the shop name conforms with the "characters allowed" rule, otherwise the setting will be highlighted in red.', 'sqrip-swiss-qr-invoice'),
-            ),
-            'checkout_remarks' => array(
-                'title' => __('Checkout Page Remarks', 'sqrip-swiss-qr-invoice'),
-                'type' => 'textarea',
-                'class' => 'sqrip-checkout-remarks',
-                'description' => __('Will be displayed in the Checkout page above the Payment Methods section.', 'sqrip-swiss-qr-invoice'),
-                'class' => 'qrinvoice-tab'
-            ),
-            'product' => array(
-                'title' => __('Format', 'sqrip-swiss-qr-invoice'),
-                'type' => 'select',
-                'description' => '',
-                'options' => array(
-                    'Full A4' => __('on a blank A4 PDF', 'sqrip-swiss-qr-invoice'),
-                    'Invoice Slip' => __('only the A6 payment part as PDF', 'sqrip-swiss-qr-invoice'),
-                ),
-                'class' => 'qrinvoice-tab'
-            ),
-            'lang' => array(
-                'title' => __('Language', 'sqrip-swiss-qr-invoice'),
-                'type' => 'select',
-                'options' => array(
-                    'de' => __('German', 'sqrip-swiss-qr-invoice'),
-                    'fr' => __('French', 'sqrip-swiss-qr-invoice'),
-                    'it' => __('Italian', 'sqrip-swiss-qr-invoice'),
-                    'en' => __('English', 'sqrip-swiss-qr-invoice')
-                ),
-                'default' => 'de',
-                'class' => 'qrinvoice-tab'
-            ),
             'section_handling' => array(
                 'title' => __('Handling', 'sqrip-swiss-qr-invoice'),
                 'type' => 'section',
                 'class' => 'qrinvoice-tab'
-            ),
-            'country_restriction_enabled' => array(
-                'title' => __('Restrict QR-invoice by country', 'sqrip-swiss-qr-invoice'),
-                'label' => __('Offer sqrip only for the invoice countries selected below', 'sqrip-swiss-qr-invoice'),
-                'type' => 'checkbox',
-                'description' => __('A QR-invoice is always in Swiss francs. For customers abroad this causes confusion, bank charges for paying in the wrong currency, and manual work. With this enabled, sqrip is hidden at the checkout for every other invoice country and no QR-invoice is created for such orders.', 'sqrip-swiss-qr-invoice'),
-                'default' => 'no',
-                'class' => 'qrinvoice-tab'
-            ),
-            'allowed_invoice_countries' => array(
-                'title' => __('Countries that get a QR-invoice', 'sqrip-swiss-qr-invoice'),
-                'type' => 'multiselect',
-                'options' => $invoice_countries,
-                'default' => array('CH', 'LI'),
-                'description' => __('Judged by the invoice address, which is the address printed on the QR-invoice.', 'sqrip-swiss-qr-invoice'),
-                'css' => 'width: 400px;',
-                'class' => 'qrinvoice-tab wc-enhanced-select'
             ),
             'suppress_generation' => array(
                 'title' => __('Suppress QR-Invoice generation at checkout', 'sqrip-swiss-qr-invoice'),

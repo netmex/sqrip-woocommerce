@@ -1233,10 +1233,38 @@ jQuery(document).ready(function ($) {
         }
     }
 
-    sqrip_toggle_camt();
+    /**
+     * Settings that only make sense once their feature is switched on. Hidden rather
+     * than disabled: an empty country list or a Skonto percentage under a switch that
+     * is off is just noise on an already long settings screen.
+     *
+     * Has to run after sqrip_tab_init() as well, because that shows every row of the
+     * active tab before we get a say.
+     */
+    var ip_skonto_enabled = $('#woocommerce_sqrip_skonto_enabled');
+    var ip_country_restriction = $('#woocommerce_sqrip_country_restriction_enabled');
+
+    function sqrip_toggle_dependent_settings() {
+        if (ip_skonto_enabled.length) {
+            $('.sqrip-skonto-field').closest('tr').toggle(ip_skonto_enabled.is(':checked'));
+        }
+
+        if (ip_country_restriction.length) {
+            $('.sqrip-country-field').closest('tr').toggle(ip_country_restriction.is(':checked'));
+        }
+    }
+
+    function sqrip_toggle_optional_rows() {
+        sqrip_toggle_camt();
+        sqrip_toggle_dependent_settings();
+    }
+
+    sqrip_toggle_optional_rows();
     ip_camt_enabled.on('change', sqrip_toggle_camt);
     ip_payment_comparison_enabled.on('change', sqrip_toggle_camt);
-    tab.on('click', sqrip_toggle_camt);
+    ip_skonto_enabled.on('change', sqrip_toggle_dependent_settings);
+    ip_country_restriction.on('change', sqrip_toggle_dependent_settings);
+    tab.on('click', sqrip_toggle_optional_rows);
 
     var camt_panel = $('.sqrip-camt-panel');
 
