@@ -134,6 +134,9 @@ msgstr "Note nella pagina di checkout"
 msgid "City*"
 msgstr "Città*"
 
+msgid "Clean-up finished. All QR invoices that are no longer needed have been deleted."
+msgstr "Pulizia completata. Tutte le fatture QR non più necessarie sono state eliminate."
+
 msgid "Combine QR-Slip with Invoice into one document"
 msgstr "Combina la cedola QR e la fattura in un unico documento"
 
@@ -143,10 +146,10 @@ msgstr "Stato degli ordini completati"
 msgid "Completed, Paid"
 msgstr "Completato, pagato"
 
-msgid "Confirm payment"
+msgid "Confirm Payment"
 msgstr "Conferma pagamento"
 
-msgid "Confirm Payment"
+msgid "Confirm payment"
 msgstr "Conferma pagamento"
 
 msgid "Confirm receipt of payment"
@@ -154,6 +157,9 @@ msgstr "Conferma la ricezione del pagamento"
 
 msgid "Connection"
 msgstr "Connessione"
+
+msgid "Connection error!"
+msgstr "Errore di connessione!"
 
 msgid "Connection test"
 msgstr "Test di connessione"
@@ -173,6 +179,9 @@ msgstr "giorni."
 msgid "Define Status when QR-Invoice is suppressed"
 msgstr "Definisci lo stato quando la fattura QR è soppressa"
 
+msgid "Delete all unneeded QR-invoice PDFs now"
+msgstr "Elimina ora tutti i PDF delle fatture QR non più necessari"
+
 msgid "Delete any generated QR-invoice after "
 msgstr "Elimina qualsiasi fattura QR generata dopo "
 
@@ -181,6 +190,9 @@ msgstr "Elimina la fattura QR quando lo stato è stato cambiato in"
 
 msgid "Deleted"
 msgstr "Eliminato"
+
+msgid "Deleting…"
+msgstr "Eliminazione…"
 
 msgid "Description"
 msgstr "Descrizione"
@@ -229,6 +241,15 @@ msgstr "Errore: %s"
 
 msgid "Error: Es wurde kein API Schlüssel für die Rückerstattungen angegeben. Bitte ergänze dies in den sqrip Plugin Einstellungen."
 msgstr "Errore: non è stata indicata alcuna chiave API per i rimborsi. La aggiunga nelle impostazioni del plugin sqrip."
+
+msgid "Error: sqrip did not return a QR code for this refund. No refund QR code was created."
+msgstr "Errore: sqrip non ha restituito alcun codice QR per questo rimborso. Non è stato creato alcun codice QR di rimborso."
+
+msgid "Error: the sqrip refund QR code could not be saved to the media library. No refund QR code was created."
+msgstr "Errore: non è stato possibile salvare il codice QR di rimborso sqrip nella libreria multimediale. Non è stato creato alcun codice QR di rimborso."
+
+msgid "Error: the sqrip settings are incomplete (IBAN or format missing), so no refund QR code could be created."
+msgstr "Errore: le impostazioni sqrip sono incomplete (IBAN o formato mancante), quindi non è stato possibile creare alcun codice QR di rimborso."
 
 msgid "Features"
 msgstr "Funzionalità"
@@ -410,6 +431,9 @@ msgstr "Nome del metodo di pagamento"
 msgid "Please add IBAN in the settings of your webshop or on the sqrip dashboard."
 msgstr "Aggiunga l'IBAN nelle impostazioni del Suo negozio online o nella dashboard di sqrip."
 
+msgid "Please first set after how many days QR invoices should be deleted, then save the settings."
+msgstr "Imposta prima dopo quanti giorni eliminare le fatture QR, poi salva le impostazioni."
+
 msgid "Please make sure you have this defined correctly:"
 msgstr "Si assicuri di aver definito correttamente quanto segue:"
 
@@ -586,6 +610,12 @@ msgstr "Il (QR-)IBAN è stato modificato. Confermi il nuovo (QR-)IBAN nel Suo ac
 
 msgid "The address to appear on the QR invoice"
 msgstr "L'indirizzo da visualizzare sulla fattura QR"
+
+msgid "The clean-up could not be completed."
+msgstr "Non è stato possibile completare la pulizia."
+
+msgid "The clean-up could not be started."
+msgstr "Non è stato possibile avviare la pulizia."
 
 msgid "The only characters allowed are A-Z, dashes (-) and underscores (_). Any spaces will be replaced with underscores (_). You can also use the following variables:<br>[order_number] — your full order number;<br>[order_date] — in yymmdd format, e.g. 230210 for Feb. 10 2023;<br>[shop_name] — can only be used if the shop name conforms with the \"characters allowed\" rule, otherwise the setting will be highlighted in red."
 msgstr "Gli unici caratteri consentiti sono A-Z, trattini (-) e trattini bassi (_). Eventuali spazi verranno sostituiti con trattini bassi (_). Può anche utilizzare le seguenti variabili:<br>[order_number] — il Suo numero d'ordine completo;<br>[order_date] — nel formato yymmdd, ad es. 230210 per il 10 feb. 2023;<br>[shop_name] — può essere utilizzato solo se il nome del negozio rispetta la regola dei \"caratteri consentiti\", altrimenti l'impostazione verrà evidenziata in rosso."

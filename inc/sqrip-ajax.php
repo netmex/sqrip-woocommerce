@@ -431,3 +431,45 @@ function sqrip_payment_confirmed()
     wp_safe_redirect($orders_url . $paged);
     die();
 }
+
+/**
+ * Run the QR-invoice clean-up immediately from the settings screen.
+ *
+ * The clean-up otherwise only runs on a daily cron, which makes the "delete after x days"
+ * setting impossible to verify. This lets the shop owner trigger exactly the same routine
+ * on demand — it deletes only PDFs that sqrip created itself.
+ *
+ * @since 1.10.1
+ */
+add_action('wp_ajax_sqrip_cleanup_invoices_now', 'sqrip_cleanup_invoices_now');
+
+function sqrip_cleanup_invoices_now()
+{
+    check_ajax_referer('sqrip-cleanup-invoices', 'security');
+
+    if (!current_user_can('manage_woocommerce')) {
+        wp_die(-1, 403);
+    }
+
+    if (!sqrip_get_plugin_option('expired_date')) {
+        wp_send_json(array(
+            'result' => false,
+            'message' => __('Please first set after how many days QR invoices should be deleted, then save the settings.', 'sqrip-swiss-qr-invoice'),
+        ));
+    }
+
+    if (!class_exists('Sqrip_Media_Clearner')) {
+        wp_send_json(array(
+            'result' => false,
+            'message' => __('The clean-up could not be started.', 'sqrip-swiss-qr-invoice'),
+        ));
+    }
+
+    $cleaner = new Sqrip_Media_Clearner();
+    $cleaner->clean();
+
+    wp_send_json(array(
+        'result' => true,
+        'message' => __('Clean-up finished. All QR invoices that are no longer needed have been deleted.', 'sqrip-swiss-qr-invoice'),
+    ));
+}
