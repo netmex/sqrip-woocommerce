@@ -1189,7 +1189,8 @@ jQuery(document).ready(function ($) {
             '<div class="sqrip-cleanup-box" style="margin-top:10px;">' +
             '<button type="button" id="btn_sqrip_cleanup_now" class="button-secondary">' +
             sqrip.txt_cleanup_now + '</button>' +
-            '<span class="sqrip-cleanup-result" style="margin-left:10px;"></span>' +
+            // Result goes on its own line BELOW the button, not trailing after it.
+            '<div class="sqrip-cleanup-result" style="margin-top:8px;"></div>' +
             '</div>'
         );
 

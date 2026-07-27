@@ -466,10 +466,25 @@ function sqrip_cleanup_invoices_now()
     }
 
     $cleaner = new Sqrip_Media_Clearner();
-    $cleaner->clean();
+    $deleted = (int) $cleaner->clean();
+
+    if ($deleted > 0) {
+        $message = sprintf(
+            /* translators: %d: number of deleted files */
+            _n(
+                'Clean-up finished. %d file that was no longer needed has been deleted.',
+                'Clean-up finished. %d files that were no longer needed have been deleted.',
+                $deleted,
+                'sqrip-swiss-qr-invoice'
+            ),
+            $deleted
+        );
+    } else {
+        $message = __('Clean-up finished. There was nothing to delete.', 'sqrip-swiss-qr-invoice');
+    }
 
     wp_send_json(array(
         'result' => true,
-        'message' => __('Clean-up finished. All QR invoices that are no longer needed have been deleted.', 'sqrip-swiss-qr-invoice'),
+        'message' => $message,
     ));
 }

@@ -41,8 +41,15 @@ class Sqrip_Media_Clearner
         wp_schedule_event(time(), 'daily', $this->cron_hook);
     }
 
+    /**
+     * Deletes QR invoices that are no longer needed.
+     *
+     * @return int Number of files actually deleted.
+     */
     public function clean()
     {
+        $deleted_files = 0;
+
         // How many days old.
         $days = $this->expired_date;
 
@@ -94,6 +101,8 @@ class Sqrip_Media_Clearner
                     $logs .= $deleted_att ? ' Deleted attachement ' . $att_id . ' in order #' . $order_id . '.' : ' No attachement deleted for order #' . $order_id;
 
                     if ($deleted_att) {
+                        $deleted_files++;
+
                         $order->update_meta_data('sqrip_pdf_file_path', 'deleted');
                         $order->update_meta_data('sqrip_pdf_file_url', 'deleted');
                         $order->save();
@@ -109,18 +118,26 @@ class Sqrip_Media_Clearner
                 $logs .= 'Sqrip_Media_Cleaner ran and deleted 0 invoices!';
             }
     
-            // Clean up leftover test-e-mail invoices (the test mail uses order id 11111).
-            // This MUST stay restricted to attachments sqrip created itself: every upload
-            // from this plugin carries the 'sqrip_invoice' meta. Without that filter the
-            // query matched ANY PDF in the media library whose title, content or excerpt
-            // contained "11111" and force-deleted it — including files that had nothing
-            // to do with sqrip.
-            $args = array(
+            // Sweep every file sqrip itself created that is past the retention period.
+            //
+            // The order loop above only ever finds the ONE invoice a given order currently
+            // points at, which left a lot behind:
+            //   - PNG files (the refund QR code and the PNG for the PDF-invoice
+            //     integration) — never referenced by 'sqrip_qr_pdf_attachment_id';
+            //   - files from earlier regenerations ("…-1.pdf", "…_001.pdf") that no order
+            //     references any more, so nothing could ever find them again;
+            //   - the individual slips of a multi-slip order (…_url_1, …_url_2);
+            //   - the test-e-mail invoices.
+            //
+            // Selecting by the 'sqrip_invoice' meta that every sqrip upload carries covers
+            // all of them at once and, by construction, cannot touch a file that sqrip did
+            // not create. The attachment's own date is the right clock here: the setting
+            // says "delete x days after creation".
+            $sweep = get_posts(array(
                 'post_type' => 'attachment',
-                'post_mime_type' => 'application/pdf',
                 'posts_per_page' => -1,
                 'post_status' => 'any',
-                's' => '11111',
+                'fields' => 'ids',
                 'meta_query' => array(
                     array(
                         'key' => 'sqrip_invoice',
@@ -129,25 +146,24 @@ class Sqrip_Media_Clearner
                 ),
                 'date_query' => array(
                     array(
-                        'before' => date('Y-m-d H:00:00', $targeted_time),
-                        'inclusive' => false
-                    )
-                )
-            );
-    
-            $attachments = get_posts($args);
-    
-            if ($attachments) {
-                foreach ($attachments as $attachment) {
-                    $deleted_attachment = wp_delete_attachment($attachment->ID, true);
-    
-                    $logs .= $deleted_attachment ? ' Deleted test email attachement ' . $attachment->ID . '.' : ' No attachement deleted for id ' . $attachment->ID;
+                        'before' => date('Y-m-d H:i:s', $targeted_time),
+                        'inclusive' => false,
+                    ),
+                ),
+            ));
+
+            foreach ($sweep as $attachment_id) {
+                if (wp_delete_attachment($attachment_id, true)) {
+                    $deleted_files++;
+                    $logs .= ' Deleted sqrip attachment ' . $attachment_id . '.';
                 }
             }
-    
+
         } else {
             $logs = "Sqrip_Media_Cleaner Delete after field not enabled.";
         }
+
+        return $deleted_files;
     }
 }
 

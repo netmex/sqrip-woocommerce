@@ -134,8 +134,14 @@ msgstr "Anmerkungen auf der Kassenseite"
 msgid "City*"
 msgstr "Ort*"
 
-msgid "Clean-up finished. All QR invoices that are no longer needed have been deleted."
-msgstr "Aufräumen abgeschlossen. Alle nicht mehr benötigten QR-Rechnungen wurden gelöscht."
+msgid "Clean-up finished. %d file that was no longer needed has been deleted."
+msgstr "Aufräumen abgeschlossen. %d nicht mehr benötigte Datei wurde gelöscht."
+
+msgid "Clean-up finished. %d files that were no longer needed have been deleted."
+msgstr "Aufräumen abgeschlossen. %d nicht mehr benötigte Dateien wurden gelöscht."
+
+msgid "Clean-up finished. There was nothing to delete."
+msgstr "Aufräumen abgeschlossen. Es war nichts zu löschen."
 
 msgid "Combine QR-Slip with Invoice into one document"
 msgstr "QR-Zahlteil und Rechnung in einem Dokument zusammenfassen"
@@ -146,10 +152,10 @@ msgstr "Status abgeschlossener Bestellungen"
 msgid "Completed, Paid"
 msgstr "Abgeschlossen, bezahlt"
 
-msgid "Confirm Payment"
+msgid "Confirm payment"
 msgstr "Zahlung bestätigen"
 
-msgid "Confirm payment"
+msgid "Confirm Payment"
 msgstr "Zahlung bestätigen"
 
 msgid "Confirm receipt of payment"

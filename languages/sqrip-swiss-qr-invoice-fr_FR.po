@@ -134,8 +134,14 @@ msgstr "Remarques de la page de commande"
 msgid "City*"
 msgstr "Ville*"
 
-msgid "Clean-up finished. All QR invoices that are no longer needed have been deleted."
-msgstr "Nettoyage terminé. Toutes les factures QR qui ne sont plus nécessaires ont été supprimées."
+msgid "Clean-up finished. %d file that was no longer needed has been deleted."
+msgstr "Nettoyage terminé. %d fichier qui n'était plus nécessaire a été supprimé."
+
+msgid "Clean-up finished. %d files that were no longer needed have been deleted."
+msgstr "Nettoyage terminé. %d fichiers qui n'étaient plus nécessaires ont été supprimés."
+
+msgid "Clean-up finished. There was nothing to delete."
+msgstr "Nettoyage terminé. Il n'y avait rien à supprimer."
 
 msgid "Combine QR-Slip with Invoice into one document"
 msgstr "Combiner le bulletin QR et la facture en un seul document"
@@ -146,10 +152,10 @@ msgstr "Statut des commandes terminées"
 msgid "Completed, Paid"
 msgstr "Terminée, payée"
 
-msgid "Confirm Payment"
+msgid "Confirm payment"
 msgstr "Confirmer le paiement"
 
-msgid "Confirm payment"
+msgid "Confirm Payment"
 msgstr "Confirmer le paiement"
 
 msgid "Confirm receipt of payment"
