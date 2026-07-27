@@ -529,7 +529,12 @@ jQuery(document).ready(function ($) {
         })
     });
 
-    toggleComparisonAndMultipleSlips();
+    // Deliberately NOT called on page load any more. It rewrites the two checkboxes,
+    // so merely opening the settings screen used to switch a feature the shop had not
+    // touched: with multiple QR slips on, the payment comparison was silently
+    // unticked, and with multiple QR slips off it was silently ticked — which also
+    // made it impossible to have both switched off. The tabs are already hidden for
+    // unchecked features by the loop above.
     //Toggle "comparison" and "multiple-qr-slips"
     function toggleComparisonAndMultipleSlips(feature) {
         if (feature === 'comparison') {
