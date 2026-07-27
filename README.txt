@@ -344,6 +344,9 @@ We made users (even more) happy with these changes:
 * Here we go!
 
 == Upgrade Notice ==
+= 1.10.1 =
+Recommended update for everyone on 1.10: fixes the clean-up so it can only ever delete sqrip's own files, prevents refunds from being recorded without a refund QR code, stops the order status being reset when the confirmation page is reopened, and restores the 'Generate QR Invoice' button for manually created orders. Also adds a clean-up button, a settable logo height and an informal form of address.
+
 = 1.10 =
 Recommended update: faster front-end (no more blocking API call on every page load), built-in German / French / Italian translations, full WooCommerce HPOS compatibility, and security hardening. Requires PHP 7.4 or higher.
 

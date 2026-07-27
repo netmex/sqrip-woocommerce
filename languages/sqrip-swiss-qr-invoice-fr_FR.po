@@ -155,10 +155,10 @@ msgstr "Statut des commandes terminées"
 msgid "Completed, Paid"
 msgstr "Terminée, payée"
 
-msgid "Confirm Payment"
+msgid "Confirm payment"
 msgstr "Confirmer le paiement"
 
-msgid "Confirm payment"
+msgid "Confirm Payment"
 msgstr "Confirmer le paiement"
 
 msgid "Confirm receipt of payment"
@@ -172,9 +172,6 @@ msgstr "Erreur de connexion !"
 
 msgid "Connection test"
 msgstr "Test de connexion"
-
-msgid "Controls how large the sqrip logo appears next to the payment method. Enter 0 to hide the logo. Without this setting the size depended entirely on your theme, which made the logo huge in some shops and barely visible in others."
-msgstr "Détermine la taille du logo sqrip affiché à côté du moyen de paiement. Saisissez 0 pour masquer le logo. Sans ce réglage, la taille dépendait uniquement de votre thème, ce qui rendait le logo énorme dans certaines boutiques et à peine visible dans d'autres."
 
 msgid "Country*"
 msgstr "Pays*"
@@ -313,6 +310,9 @@ msgstr "Allemagne"
 
 msgid "Handling"
 msgstr "Traitement"
+
+msgid "Height of the sqrip logo next to the payment method at the checkout. Enter 0 to hide the logo."
+msgstr "Hauteur du logo sqrip à côté du moyen de paiement à la caisse. Saisissez 0 pour masquer le logo."
 
 msgid "here"
 msgstr "ici"

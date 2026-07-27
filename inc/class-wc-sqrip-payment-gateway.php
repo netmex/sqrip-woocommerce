@@ -501,7 +501,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'title' => __('Logo height at the checkout (pixels)', 'sqrip-swiss-qr-invoice'),
                 'type' => 'number',
                 'default' => '24',
-                'description' => __('Controls how large the sqrip logo appears next to the payment method. Enter 0 to hide the logo. Without this setting the size depended entirely on your theme, which made the logo huge in some shops and barely visible in others.', 'sqrip-swiss-qr-invoice'),
+                'description' => __('Height of the sqrip logo next to the payment method at the checkout. Enter 0 to hide the logo.', 'sqrip-swiss-qr-invoice'),
                 'custom_attributes' => array('min' => '0', 'max' => '128', 'step' => '1'),
                 'class' => 'qrinvoice-tab'
             ),
