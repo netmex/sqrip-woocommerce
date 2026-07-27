@@ -80,6 +80,9 @@ msgstr "API-Schlüssel"
 msgid "API key for Refunds"
 msgstr "API-Schlüssel für Rückerstattungen"
 
+msgid "Applies to the texts your customers see on the order confirmation page. The informal wording is currently available for German shops; other languages keep the regular wording."
+msgstr "Gilt für die Texte, die Ihre Kundschaft auf der Bestellbestätigungsseite sieht. Die Du-Form ist derzeit für deutschsprachige Shops verfügbar; andere Sprachen behalten die übliche Anrede."
+
 msgid "As from November 2025 on, the QR invoice is only accepted when addresses consist of separate fields for street and building number."
 msgstr "Ab November 2025 wird die QR-Rechnung nur noch akzeptiert, wenn Adressen aus separaten Feldern für Strasse und Hausnummer bestehen."
 
@@ -152,10 +155,10 @@ msgstr "Status abgeschlossener Bestellungen"
 msgid "Completed, Paid"
 msgstr "Abgeschlossen, bezahlt"
 
-msgid "Confirm Payment"
+msgid "Confirm payment"
 msgstr "Zahlung bestätigen"
 
-msgid "Confirm payment"
+msgid "Confirm Payment"
 msgstr "Zahlung bestätigen"
 
 msgid "Confirm receipt of payment"
@@ -269,6 +272,12 @@ msgstr "Dateiname"
 msgid "For security reasons, a separate API key with <strong>deactived</strong> confirmation is needed for the Refund function."
 msgstr "Aus Sicherheitsgründen wird für die Rückerstattungsfunktion ein separater API-Schlüssel mit <strong>deaktivierter</strong> Bestätigung benötigt."
 
+msgid "Form of address in the shop front end"
+msgstr "Anrede im Shop-Frontend"
+
+msgid "Formal (default)"
+msgstr "Sie (Standard)"
+
 msgid "Format"
 msgstr "Format"
 
@@ -340,6 +349,9 @@ msgstr "in Ihrem sqrip-Konto;"
 
 msgid "incorrect"
 msgstr "falsch"
+
+msgid "Informal"
+msgstr "Du"
 
 msgid "Initiate QR-Ref# with these 6 digits"
 msgstr "QR-Referenznummer mit diesen 6 Ziffern beginnen"

@@ -44,33 +44,14 @@ class Sqrip_Media_Clearner
     /**
      * Order statuses in which a customer may still pay, so the QR invoice has to stay.
      *
-     * Covers WooCommerce's own pre-payment statuses plus whatever the shop configured,
-     * including the partial-payment statuses — a partially paid order is not settled yet.
+     * Delegates to the shared helper so the front end (which hides the download button)
+     * and the clean-up (which protects the file) can never disagree.
      *
      * @return array Status slugs without the 'wc-' prefix.
      */
     protected function awaiting_payment_statuses()
     {
-        $statuses = array('pending', 'on-hold', 'failed', 'checkout-draft');
-
-        $option_keys = array(
-            'status_awaiting',
-            'qr_order_status',
-            'status_suppressed',
-            'partial_invoice_1_status',
-            'partial_invoice_2_status',
-            'partial_invoice_3_status',
-        );
-
-        foreach ($option_keys as $key) {
-            $status = sqrip_get_plugin_option($key);
-
-            if ($status) {
-                $statuses[] = str_replace('wc-', '', (string) $status);
-            }
-        }
-
-        return array_values(array_unique(array_filter($statuses)));
+        return sqrip_awaiting_payment_statuses();
     }
 
     /**

@@ -497,6 +497,17 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'default' => 'yes',
                 'class' => 'qrinvoice-tab ' . $this->show_integration_order()
             ),
+            'frontend_anrede' => array(
+                'title' => __('Form of address in the shop front end', 'sqrip-swiss-qr-invoice'),
+                'type' => 'select',
+                'options' => array(
+                    'sie' => __('Formal (default)', 'sqrip-swiss-qr-invoice'),
+                    'du' => __('Informal', 'sqrip-swiss-qr-invoice'),
+                ),
+                'default' => 'sie',
+                'description' => __('Applies to the texts your customers see on the order confirmation page. The informal wording is currently available for German shops; other languages keep the regular wording.', 'sqrip-swiss-qr-invoice'),
+                'class' => 'qrinvoice-tab'
+            ),
             'invoice_download_button_align' => array(
                 'title' => '',
                 'label' => __('Position:', 'sqrip-swiss-qr-invoice'),
