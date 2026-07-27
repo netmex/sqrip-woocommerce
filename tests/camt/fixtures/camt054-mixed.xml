@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:camt.054.001.08">
+  <BkToCstmrDbtCdtNtfctn>
+    <GrpHdr>
+      <MsgId>MSG-2026-07-24</MsgId>
+      <CreDtTm>2026-07-24T14:40:34</CreDtTm>
+    </GrpHdr>
+    <Ntfctn>
+      <Id>NTF-0001</Id>
+      <Acct>
+        <Id><IBAN>CH0000000000000000000</IBAN></Id>
+        <Ccy>CHF</Ccy>
+      </Acct>
+
+      <!-- 1. Plain QR reference credit, reference written with spaces -->
+      <Ntry>
+        <Amt Ccy="CHF">149.50</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <Sts><Cd>BOOK</Cd></Sts>
+        <BookgDt><Dt>2026-07-23</Dt></BookgDt>
+        <ValDt><Dt>2026-07-24</Dt></ValDt>
+        <NtryDtls>
+          <TxDtls>
+            <Amt Ccy="CHF">149.50</Amt>
+            <CdtDbtInd>CRDT</CdtDbtInd>
+            <RmtInf>
+              <Strd>
+                <CdtrRefInf>
+                  <Tp><CdOrPrtry><Cd>SCOR</Cd></CdOrPrtry></Tp>
+                  <Ref>21 00000 00003 13947 14300 09017</Ref>
+                </CdtrRefInf>
+              </Strd>
+            </RmtInf>
+          </TxDtls>
+        </NtryDtls>
+      </Ntry>
+
+      <!-- 2. Creditor Reference (RF) credit -->
+      <Ntry>
+        <Amt Ccy="CHF">80.00</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <Sts><Cd>BOOK</Cd></Sts>
+        <BookgDt><Dt>2026-07-23</Dt></BookgDt>
+        <ValDt><Dt>2026-07-23</Dt></ValDt>
+        <NtryDtls>
+          <TxDtls>
+            <Amt Ccy="CHF">80.00</Amt>
+            <RmtInf>
+              <Strd>
+                <CdtrRefInf>
+                  <Ref>RF18 5390 0754 7034</Ref>
+                </CdtrRefInf>
+              </Strd>
+            </RmtInf>
+          </TxDtls>
+        </NtryDtls>
+      </Ntry>
+
+      <!-- 3. Batch booking: one entry, three payments, one of them a debit -->
+      <Ntry>
+        <Amt Ccy="CHF">310.25</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <Sts><Cd>BOOK</Cd></Sts>
+        <BookgDt><Dt>2026-07-24</Dt></BookgDt>
+        <ValDt><Dt>2026-07-24</Dt></ValDt>
+        <AddtlNtryInf>Zahlungsauftrag e-banking</AddtlNtryInf>
+        <NtryDtls>
+          <Btch><NbOfTxs>3</NbOfTxs></Btch>
+          <TxDtls>
+            <Amt Ccy="CHF">200.00</Amt>
+            <CdtDbtInd>CRDT</CdtDbtInd>
+            <RmtInf>
+              <Strd><CdtrRefInf><Ref>210000000003139471430009024</Ref></CdtrRefInf></Strd>
+            </RmtInf>
+          </TxDtls>
+          <TxDtls>
+            <Amt Ccy="CHF">100.25</Amt>
+            <CdtDbtInd>CRDT</CdtDbtInd>
+            <Refs><EndToEndId>210000000003139471430009031</EndToEndId></Refs>
+          </TxDtls>
+          <TxDtls>
+            <Amt Ccy="CHF">10.00</Amt>
+            <CdtDbtInd>DBIT</CdtDbtInd>
+            <RmtInf>
+              <Strd><CdtrRefInf><Ref>210000000003139471430009048</Ref></CdtrRefInf></Strd>
+            </RmtInf>
+          </TxDtls>
+        </NtryDtls>
+      </Ntry>
+
+      <!-- 4. Credit that belongs to no order of ours -->
+      <Ntry>
+        <Amt Ccy="CHF">5000.00</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <Sts><Cd>BOOK</Cd></Sts>
+        <ValDt><Dt>2026-07-24</Dt></ValDt>
+        <NtryDtls>
+          <TxDtls>
+            <Amt Ccy="CHF">5000.00</Amt>
+            <RmtInf>
+              <Strd><CdtrRefInf><Ref>999999999999999999999999999</Ref></CdtrRefInf></Strd>
+            </RmtInf>
+          </TxDtls>
+        </NtryDtls>
+      </Ntry>
+
+      <!-- 5. Outgoing payment, must be ignored -->
+      <Ntry>
+        <Amt Ccy="CHF">42.00</Amt>
+        <CdtDbtInd>DBIT</CdtDbtInd>
+        <Sts><Cd>BOOK</Cd></Sts>
+        <ValDt><Dt>2026-07-24</Dt></ValDt>
+        <NtryDtls>
+          <TxDtls>
+            <RmtInf>
+              <Strd><CdtrRefInf><Ref>210000000003139471430009017</Ref></CdtrRefInf></Strd>
+            </RmtInf>
+          </TxDtls>
+        </NtryDtls>
+      </Ntry>
+
+      <!-- 6. Reversed credit, must not confirm anything -->
+      <Ntry>
+        <Amt Ccy="CHF">64.00</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <RvslInd>true</RvslInd>
+        <Sts><Cd>BOOK</Cd></Sts>
+        <ValDt><Dt>2026-07-24</Dt></ValDt>
+        <NtryDtls>
+          <TxDtls>
+            <Amt Ccy="CHF">64.00</Amt>
+            <RmtInf>
+              <Strd><CdtrRefInf><Ref>210000000003139471430009055</Ref></CdtrRefInf></Strd>
+            </RmtInf>
+          </TxDtls>
+        </NtryDtls>
+      </Ntry>
+
+      <!-- 7. Same reference as entry 1: duplicate payment -->
+      <Ntry>
+        <Amt Ccy="CHF">149.50</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <Sts><Cd>BOOK</Cd></Sts>
+        <ValDt><Dt>2026-07-25</Dt></ValDt>
+        <NtryDtls>
+          <TxDtls>
+            <Amt Ccy="CHF">149.50</Amt>
+            <RmtInf>
+              <Strd><CdtrRefInf><Ref>210000000003139471430009017</Ref></CdtrRefInf></Strd>
+            </RmtInf>
+          </TxDtls>
+        </NtryDtls>
+      </Ntry>
+
+    </Ntfctn>
+  </BkToCstmrDbtCdtNtfctn>
+</Document>

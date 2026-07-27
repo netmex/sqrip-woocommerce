@@ -2,6 +2,7 @@
 /.git
 /.github
 /docs
+/tests
 
 .DS_Store
 .distignore

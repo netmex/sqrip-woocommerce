@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:camt.053.001.08">
+  <BkToCstmrStmt>
+    <GrpHdr>
+      <MsgId>STM-2026-07</MsgId>
+      <CreDtTm>2026-07-31T23:59:00</CreDtTm>
+    </GrpHdr>
+    <Stmt>
+      <Id>STM-0001</Id>
+      <Acct><Id><IBAN>CH0000000000000000000</IBAN></Id><Ccy>CHF</Ccy></Acct>
+      <Bal>
+        <Tp><CdOrPrtry><Cd>OPBD</Cd></CdOrPrtry></Tp>
+        <Amt Ccy="CHF">1000.00</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <Dt><Dt>2026-07-01</Dt></Dt>
+      </Bal>
+
+      <!-- Entry without any TxDtls breakdown: reference sits on the entry itself -->
+      <Ntry>
+        <Amt Ccy="CHF">149.50</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <Sts><Cd>BOOK</Cd></Sts>
+        <BookgDt><Dt>2026-07-23</Dt></BookgDt>
+        <ValDt><DtTm>2026-07-24T00:00:00</DtTm></ValDt>
+        <RmtInf>
+          <Strd><CdtrRefInf><Ref>21 00000 00003 13947 14300 09017</Ref></CdtrRefInf></Strd>
+        </RmtInf>
+      </Ntry>
+
+      <!-- Underpaid: right reference, wrong amount -->
+      <Ntry>
+        <Amt Ccy="CHF">70.00</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <Sts><Cd>BOOK</Cd></Sts>
+        <ValDt><Dt>2026-07-25</Dt></ValDt>
+        <NtryDtls>
+          <TxDtls>
+            <Amt Ccy="CHF">70.00</Amt>
+            <RmtInf><Strd><CdtrRefInf><Ref>RF18539007547034</Ref></CdtrRefInf></Strd></RmtInf>
+          </TxDtls>
+        </NtryDtls>
+      </Ntry>
+
+      <!-- Payer supplied nothing usable -->
+      <Ntry>
+        <Amt Ccy="CHF">33.00</Amt>
+        <CdtDbtInd>CRDT</CdtDbtInd>
+        <Sts><Cd>BOOK</Cd></Sts>
+        <ValDt><Dt>2026-07-26</Dt></ValDt>
+        <NtryDtls>
+          <TxDtls>
+            <Amt Ccy="CHF">33.00</Amt>
+            <Refs><EndToEndId>NOTPROVIDED</EndToEndId></Refs>
+          </TxDtls>
+        </NtryDtls>
+      </Ntry>
+
+    </Stmt>
+  </BkToCstmrStmt>
+</Document>
