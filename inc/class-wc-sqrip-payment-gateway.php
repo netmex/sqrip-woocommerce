@@ -486,6 +486,82 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'description' => __('Printed on the discounted invoice. Same short codes as above, plus [skonto] for the percentage. Here [due_date] is the Skonto deadline, not the ordinary maturity.', 'sqrip-swiss-qr-invoice'),
                 'class' => 'qrinvoice-tab sqrip-skonto-field'
             ),
+            'section_reminder' => array(
+                'title' => __('Payment reminder with a late fee', 'sqrip-swiss-qr-invoice'),
+                'type' => 'section',
+                'class' => 'qrinvoice-tab'
+            ),
+            'reminder_enabled' => array(
+                'title' => __('Activate/Deactivate reminder', 'sqrip-swiss-qr-invoice'),
+                'label' => __('Send a new QR invoice with a late fee when payment is overdue', 'sqrip-swiss-qr-invoice'),
+                'type' => 'checkbox',
+                'description' => __('Once a day sqrip looks for orders that are still waiting for payment past their due date, adds the fee to the order as a WooCommerce fee, creates a new QR invoice over the new total and e-mails it to the customer. The original invoice stays valid until one of the two is paid; the other is then voided. One reminder per order. Uses a further credit per reminder.', 'sqrip-swiss-qr-invoice'),
+                'default' => 'no',
+                'class' => 'qrinvoice-tab sqrip-reminder-toggle'
+            ),
+            'reminder_days_after_due' => array(
+                'title' => __('Send reminder x days after the due date', 'sqrip-swiss-qr-invoice'),
+                'type' => 'number',
+                'default' => 10,
+                'css' => 'width:70px',
+                'class' => 'qrinvoice-tab sqrip-reminder-field'
+            ),
+            'reminder_due_days' => array(
+                'title' => __('Maturity of the reminder (today in x days)', 'sqrip-swiss-qr-invoice'),
+                'type' => 'number',
+                'default' => 10,
+                'css' => 'width:70px',
+                'class' => 'qrinvoice-tab sqrip-reminder-field'
+            ),
+            'reminder_fee_type' => array(
+                'title' => __('Late fee', 'sqrip-swiss-qr-invoice'),
+                'type' => 'radio',
+                'options' => array(
+                    'fixed' => __('Fixed amount', 'sqrip-swiss-qr-invoice'),
+                    'percent' => __('Percentage of the order total', 'sqrip-swiss-qr-invoice'),
+                ),
+                'default' => 'fixed',
+                'class' => 'qrinvoice-tab sqrip-reminder-field'
+            ),
+            'reminder_fee_amount' => array(
+                'title' => __('Fixed amount', 'sqrip-swiss-qr-invoice'),
+                'type' => 'number',
+                'default' => '20',
+                'css' => 'width:70px',
+                'custom_attributes' => array('step' => '0.05', 'min' => '0'),
+                'class' => 'qrinvoice-tab sqrip-reminder-field'
+            ),
+            'reminder_fee_percent' => array(
+                'title' => __('Percentage', 'sqrip-swiss-qr-invoice'),
+                'label' => __('% of the order total', 'sqrip-swiss-qr-invoice'),
+                'type' => 'number',
+                'default' => '5',
+                'css' => 'width:70px',
+                'custom_attributes' => array('step' => '0.1', 'min' => '0'),
+                'class' => 'qrinvoice-tab sqrip-reminder-field'
+            ),
+            'reminder_fee_taxable' => array(
+                'title' => __('VAT on the late fee', 'sqrip-swiss-qr-invoice'),
+                'label' => __('The late fee is subject to VAT', 'sqrip-swiss-qr-invoice'),
+                'type' => 'checkbox',
+                'description' => __('Switzerland often treats a dunning fee as damages and therefore outside the scope of VAT, while other shops bill it as a taxable service. Ask your accountant — both answers are wrong on somebody else\'s invoice.', 'sqrip-swiss-qr-invoice'),
+                'default' => 'no',
+                'class' => 'qrinvoice-tab sqrip-reminder-field'
+            ),
+            'reminder_fee_label' => array(
+                'title' => __('Name of the fee', 'sqrip-swiss-qr-invoice'),
+                'type' => 'text',
+                'default' => __('Reminder fee', 'sqrip-swiss-qr-invoice'),
+                'description' => __('Appears on the order and on every document WooCommerce creates from it.', 'sqrip-swiss-qr-invoice'),
+                'class' => 'qrinvoice-tab sqrip-reminder-field'
+            ),
+            'reminder_additional_information' => array(
+                'title' => __('Additional Information (reminder)', 'sqrip-swiss-qr-invoice'),
+                'type' => 'textarea',
+                'default' => __("Payment reminder. Please pay by [due_date format=\"dd.MM.y\"].\nIncludes a late fee of [currency] [reminder_fee].\nOrder: [order_number]", 'sqrip-swiss-qr-invoice'),
+                'description' => __('Printed on the reminder invoice. Same short codes as above, plus [reminder_fee] and [currency]. Here [due_date] is the maturity of the reminder.', 'sqrip-swiss-qr-invoice'),
+                'class' => 'qrinvoice-tab sqrip-reminder-field'
+            ),
             'section_handling' => array(
                 'title' => __('Handling', 'sqrip-swiss-qr-invoice'),
                 'type' => 'section',
