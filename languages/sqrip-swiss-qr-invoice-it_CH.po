@@ -365,6 +365,9 @@ msgstr "Dettagli della fattura"
 msgid "It seems that an invalid (QR-)IBAN has been submitted. Please check the designated transfers-receiving IBAN you submitted."
 msgstr "Sembra che sia stato inviato un (QR-)IBAN non valido. Verifichi l'IBAN destinatario dei bonifici che ha inviato."
 
+msgid "It seems we couldn't provide you with a QR-invoice at this time. Please try later, contact the shop or use a different payment method."
+msgstr "Al momento non è stato possibile creare la fattura QR. Riprova più tardi, contatta il negozio oppure scegli un altro metodo di pagamento."
+
 msgid "Italian"
 msgstr "Italiano"
 

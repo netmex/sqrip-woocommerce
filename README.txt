@@ -149,6 +149,9 @@ Yes. We are already working on comparing the reconciliation of orders/purchases 
 * New button in the settings: delete all QR-invoice PDFs created up to today right away, instead of waiting for the daily clean-up. Invoices of orders that are still waiting for payment are always kept;
 * The clean-up now also removes files that were previously left behind: refund QR codes, the PNG for the PDF-invoice integration, the individual slips of a multi-invoice order, and leftovers from earlier regenerations;
 * The refund QR code is shown immediately instead of being hidden behind a link;
+* Order confirmation page: the QR-invoice download is no longer offered when the invoice has already been deleted (the button used to lead nowhere) or when the order is cancelled, refunded or already paid;
+* New setting 'Form of address in the shop front end': the texts your customers see on the order confirmation page can now use the informal form (currently for German shops);
+* The error your customers see when a QR invoice cannot be created is now translated instead of appearing in English;
 * Manual invoices in the media library are no longer at risk: the clean-up job only ever deletes PDFs that sqrip created itself (it could previously delete unrelated PDFs whose name contained a certain number);
 * Refunds no longer report success when no refund QR code could be created;
 * Failed QR-invoice downloads are reported instead of producing an empty PDF, and can no longer interrupt the checkout;

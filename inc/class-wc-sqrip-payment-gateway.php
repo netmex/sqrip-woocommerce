@@ -1662,7 +1662,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             $sqrip_link = $has_purchase ? 
                 " here <a href='https://www.sqrip.ch/#pricing' target='_blank'>https://www.sqrip.ch/#pricing</a>" 
                 : ($has_request ? " And we don't yet know why. Please contact our <a href='mailto:support@sqrip.ch'>support</a>" : "");
-            $customer_msg = "It seems we couldn't provide you with a QR-invoice at this time. Please try later, contact the shop or use a different payment method.";
+            $customer_msg = __("It seems we couldn't provide you with a QR-invoice at this time. Please try later, contact the shop or use a different payment method.", 'sqrip-swiss-qr-invoice');
             // <a href="mailto:someone@example.com">Send email</a>
 
             wc_add_notice(
@@ -1828,7 +1828,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             );
         } else {
 
-            $customer_msg = "It seems we couldn't provide you with a QR-invoice at this time. Please try later, contact the shop or use a different payment method.";
+            $customer_msg = __("It seems we couldn't provide you with a QR-invoice at this time. Please try later, contact the shop or use a different payment method.", 'sqrip-swiss-qr-invoice');
             wc_add_notice(
                 sprintf(
                     __('Error: %s', 'sqrip-swiss-qr-invoice'),
