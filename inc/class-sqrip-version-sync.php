@@ -37,8 +37,16 @@ class Sqrip_Version_Sync
 
     public function sync_request()
     {
-        $endpoint = 'details';    
+        $endpoint = 'details';
         $plugin_version = '';
+
+        // get_plugins() lives in wp-admin/includes/plugin.php, which wp-cron.php does not
+        // load. Without this require the weekly sync died with "call to undefined
+        // function" and took every cron event queued after it down with it.
+        if (!function_exists('get_plugins')) {
+            require_once ABSPATH . 'wp-admin/includes/plugin.php';
+        }
+
         $plugins = get_plugins();
         $sqrip_info = array_filter($plugins, fn($item) => $item["Name"] == "sqrip.ch");
 

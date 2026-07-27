@@ -1112,13 +1112,16 @@ function sqrip_display_refund_qr_code($refund)
     $hide_paid_action_css = !$paid ?: 'display: none';
     $hide_unpaid_action_css = $paid ?: 'display: none';
 
-    echo "<span class='woocommerce_sqrip_refund_status' data-paid='$paid_status' data-unpaid='$unpaid_status'>[$status]</span>";
+    // Escape everything: $status embeds refund meta and $refund_qr_pdf_url comes from an
+    // attachment id stored in order meta. Unescaped, any path that writes those values
+    // yields stored XSS on the order screen, running with shop-manager privileges.
+    echo "<span class='woocommerce_sqrip_refund_status' data-paid='" . esc_attr($paid_status) . "' data-unpaid='" . esc_attr($unpaid_status) . "'>[" . esc_html($status) . "]</span>";
     echo "<br/>";
-    echo "<a class='woocommerce_sqrip_toggle_qr' href='$refund_qr_pdf_url' title='$title' target='_blank' data-title-hide='$hidden_title' data-title='$title' style='margin-right: 10px; $hide_paid_action_css'>$title</a>";
-    echo "<a class='woocommerce_sqrip_refund_paid' href='#' title='$paid_title' style='margin-right: 10px; color: green; $hide_paid_action_css' data-refund='$refund_id'>$paid_title</a>";
-    echo "<a class='woocommerce_sqrip_refund_unpaid' href='#' title='$unpaid_title' style='color: darkred; $hide_unpaid_action_css' data-refund='$refund_id'>$unpaid_title</a>";
+    echo "<a class='woocommerce_sqrip_toggle_qr' href='" . esc_url($refund_qr_pdf_url) . "' title='" . esc_attr($title) . "' target='_blank' data-title-hide='" . esc_attr($hidden_title) . "' data-title='" . esc_attr($title) . "' style='margin-right: 10px; " . esc_attr($hide_paid_action_css) . "'>" . esc_html($title) . "</a>";
+    echo "<a class='woocommerce_sqrip_refund_paid' href='#' title='" . esc_attr($paid_title) . "' style='margin-right: 10px; color: green; " . esc_attr($hide_paid_action_css) . "' data-refund='" . esc_attr($refund_id) . "'>" . esc_html($paid_title) . "</a>";
+    echo "<a class='woocommerce_sqrip_refund_unpaid' href='#' title='" . esc_attr($unpaid_title) . "' style='color: darkred; " . esc_attr($hide_unpaid_action_css) . "' data-refund='" . esc_attr($refund_id) . "'>" . esc_html($unpaid_title) . "</a>";
     echo "<div class='woocommerce_sqrip_qr_wrapper' style='display:none; margin: 5px;'>";
-    echo "<img src='$refund_qr_pdf_url' width='300' height='300'/>";
+    echo "<img src='" . esc_url($refund_qr_pdf_url) . "' width='300' height='300'/>";
     echo "</div>";
 
 }
@@ -1582,7 +1585,10 @@ function sqrip_add_custom_order_status_actions_button($actions, $order)
     // Display the button for all orders that have a 'processing' status
 
     $status_awaiting = sqrip_get_plugin_option('status_awaiting');
-    $status_awaiting = str_replace('wc-', '', $status_awaiting);
+    // Cast first: the option is null until the settings have been saved once, and passing
+    // null to str_replace() is deprecated on PHP 8.1 — this runs once per order row, so it
+    // filled the log (and, with display_errors on, the orders table) on every page.
+    $status_awaiting = str_replace('wc-', '', (string) $status_awaiting);
     // Compare against 'yes': a WooCommerce checkbox stores the string 'no', which is
     // truthy in PHP. Testing it for truthiness made the whole condition always true, so
     // the confirm-payment action appeared on every sqrip order in every status —

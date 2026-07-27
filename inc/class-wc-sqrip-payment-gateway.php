@@ -1480,6 +1480,18 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 
         $body = sqrip_prepare_qr_code_request_body($currency_symbol, $amount, strval($order_id));
 
+        // prepare_body() returns false when the IBAN or product setting is missing.
+        // Writing into that false silently produced a two-key array that the API rejects
+        // (and is a deprecation on PHP 8.1+, a fatal on PHP 9), which buried the specific
+        // configuration error the shop needed to see.
+        if (!is_array($body)) {
+            $order->add_order_note(
+                __('Error: the sqrip settings are incomplete (IBAN or format missing), so no refund QR code could be created.', 'sqrip-swiss-qr-invoice')
+            );
+
+            return false;
+        }
+
         // change product to Credit to just get QR Code
         $body['product'] = 'Credit';
 
@@ -1673,6 +1685,16 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         }
 
         $body = sqrip_prepare_qr_code_request_body($currency_symbol, $amount, strval($order_id));
+
+        // Missing IBAN / format setting: prepare_body() already queued the precise notice
+        // for the shop, so stop here instead of writing into a false and letting the API
+        // reject a malformed request with a generic message.
+        if (!is_array($body)) {
+            return array(
+                'result' => 'failure',
+            );
+        }
+
         $body["payable_by"] = sqrip_get_billing_address_from_order($order);
         $body['payable_to'] = sqrip_get_payable_to_address($address);
 
@@ -1743,7 +1765,12 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         $response_body = wp_remote_retrieve_body($response);
         // error_log($response_body);
         $response_body = json_decode($response_body);
-        $response_reference = $is_multiple_invoices && count($response_body) ? $response_body[0]->reference : $response_body->reference;
+        // count() on a non-array is a fatal TypeError on PHP 8: an HTTP 200 whose body is
+        // not valid JSON makes json_decode() return null, which used to take down the
+        // checkout request *after* the sqrip credit had already been spent.
+        $response_reference = $is_multiple_invoices
+            ? (isset($response_body[0]->reference) ? $response_body[0]->reference : null)
+            : (isset($response_body->reference) ? $response_body->reference : null);
 
         if (isset($response_reference)) {
 
@@ -1827,7 +1854,9 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             $woocommerce->cart->empty_cart();
             $order->save();
 
-            $invoice_info = $is_multiple_invoices ? $response_body[0] : $response_body;
+            // Array access on an object is a fatal Error, so only index when it really is
+            // an array (the API returns an object for a single invoice).
+            $invoice_info = ($is_multiple_invoices && isset($response_body[0])) ? $response_body[0] : $response_body;
             if (isset($invoice_info->total_codes_left) && $invoice_info->total_codes_left <= 0) {
                 // turn off sqrip if auto turn-off enabled
                 sqrip_auto_turn_off();
@@ -1911,6 +1940,14 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
     */
     public function file_upload($fileurl, $type, $token = "", $order_id = "", $is_refund = false)
     {
+        // Validate the URL BEFORE touching file_get_contents(): on PHP 8 an empty or null
+        // path is not a warning but a ValueError ("Path must not be empty"), i.e. a fatal
+        // on the checkout request. Callers pass $response_body->pdf_file straight through,
+        // and a 200 response can carry a reference without a pdf_file.
+        if (!is_string($fileurl) || $fileurl === '') {
+            return 0;
+        }
+
         include_once(ABSPATH . 'wp-admin/includes/image.php');
 
         $sqrip_name = sqrip_file_name($order_id, $is_refund);
