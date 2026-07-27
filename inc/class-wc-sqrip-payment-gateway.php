@@ -387,6 +387,50 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'description' => __('Will be displayed on the QR invoice in the section “Additional information”. The result shown in invoices cannot exceed 140 symbols and 5 rows.<br>The following short codes are available:<br>[order_number] the order number.<br>[due_date format="y-MM-dd"] to insert the due date of the invoice.<br><a href="https://www.php.net/strftime" target="_blank">Supported formats</a> are:<br>y-MM-dd -> 2022-04-06<br>dd.MM.yy -> 04.06.22<br>dd. MMMM y -> 06. April 2022<br>d. MMM y -> 6. Apr 2022', 'sqrip-swiss-qr-invoice'),
                 'class' => 'qrinvoice-tab'
             ),
+            'section_skonto' => array(
+                'title' => __('Discount for early payment (Skonto)', 'sqrip-swiss-qr-invoice'),
+                'type' => 'section',
+                'class' => 'qrinvoice-tab'
+            ),
+            'skonto_enabled' => array(
+                'title' => __('Activate/Deactivate Skonto', 'sqrip-swiss-qr-invoice'),
+                'label' => __('Create a second QR invoice with a discount for early payment', 'sqrip-swiss-qr-invoice'),
+                'type' => 'checkbox',
+                'description' => __('The customer receives two QR invoices: the ordinary one, and a second one over the reduced amount that is only valid until the deadline below. Whichever of the two is paid settles the order; the other one is then voided. Uses a second credit per order. Not available together with multiple QR slips.', 'sqrip-swiss-qr-invoice'),
+                'default' => 'no',
+                'class' => 'qrinvoice-tab sqrip-skonto-toggle'
+            ),
+            'skonto_percentage' => array(
+                'title' => __('Skonto', 'sqrip-swiss-qr-invoice'),
+                'label' => __('%', 'sqrip-swiss-qr-invoice'),
+                'type' => 'number',
+                'default' => '2',
+                'css' => 'width:70px',
+                'custom_attributes' => array('step' => '0.1', 'min' => '0.1', 'max' => '99.9'),
+                'class' => 'qrinvoice-tab sqrip-skonto-field'
+            ),
+            'skonto_round_five' => array(
+                'title' => __('Rounding', 'sqrip-swiss-qr-invoice'),
+                'label' => __('Round the discounted amount to 0.05', 'sqrip-swiss-qr-invoice'),
+                'type' => 'checkbox',
+                'default' => 'yes',
+                'class' => 'qrinvoice-tab sqrip-skonto-field'
+            ),
+            'skonto_due_date' => array(
+                'title' => __('Skonto deadline (today in x days)', 'sqrip-swiss-qr-invoice'),
+                'type' => 'number',
+                'default' => 10,
+                'css' => 'width:70px',
+                'description' => __('Must be shorter than the ordinary maturity above, otherwise the discount has no effect.', 'sqrip-swiss-qr-invoice'),
+                'class' => 'qrinvoice-tab sqrip-skonto-field'
+            ),
+            'skonto_additional_information' => array(
+                'title' => __('Additional Information (Skonto)', 'sqrip-swiss-qr-invoice'),
+                'type' => 'textarea',
+                'default' => __("If you pay by [due_date format=\"dd.MM.y\"] we grant you [skonto]% Skonto.\nOrder: [order_number]", 'sqrip-swiss-qr-invoice'),
+                'description' => __('Printed on the discounted invoice. Same short codes as above, plus [skonto] for the percentage. Here [due_date] is the Skonto deadline, not the ordinary maturity.', 'sqrip-swiss-qr-invoice'),
+                'class' => 'qrinvoice-tab sqrip-skonto-field'
+            ),
             'file_name' => array(
                 'title' => __('File Name', 'sqrip-swiss-qr-invoice'),
                 'type' => 'textarea',
@@ -1955,8 +1999,11 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                     $sqrip_png = $response_body->png_file;
                     $order->update_meta_data('sqrip_png_file_url', $sqrip_png);
                 }
+
+                // Second invoice over the discounted amount, if the shop grants Skonto.
+                Sqrip_Skonto::create_for_order($order, $body);
             }
-            
+
             $order->update_meta_data('sqrip_refund_iban_num', get_user_meta($order->get_user_id(), 'iban_num', true));
 
             // $order->update_meta_data('sqrip_png_file_url', $sqrip_qr_png_url);

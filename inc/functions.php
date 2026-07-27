@@ -657,7 +657,13 @@ function sqrip_get_locale_by_lang($lang)
     return $locale;
 }
 
-function sqrip_file_name($order_id, $is_refund=false)
+/**
+ * @param int|string $order_id
+ * @param bool       $is_refund
+ * @param string     $suffix Appended to the finished name, e.g. '_Skonto' so the two
+ *                           invoices of one order are told apart in the media library.
+ */
+function sqrip_file_name($order_id, $is_refund=false, $suffix='')
 {
     $order = wc_get_order($order_id);
     $order_date = '';
@@ -677,10 +683,16 @@ function sqrip_file_name($order_id, $is_refund=false)
     // replace [order_number] with order number
     $sqrip_file_name = str_replace("[shop_name]", get_bloginfo('name'), $sqrip_file_name);
 
+    // Before the duplicate check, so the discounted invoice is deduplicated as its own
+    // name rather than colliding with the ordinary one.
+    if ($suffix !== '') {
+        $sqrip_file_name .= $suffix;
+    }
+
     $sqrip_file_name = sqrip_rename_if_duplicates_present($sqrip_file_name);
 
     if (!preg_match('/^([\w-]+)(?=\.[\w]+$)/', $sqrip_file_name . '.pdf')) {
-        $sqrip_file_name = "$order_date" . '-' . get_bloginfo('name') . '-invoice-order-' . "$order_id";
+        $sqrip_file_name = "$order_date" . '-' . get_bloginfo('name') . '-invoice-order-' . "$order_id" . $suffix;
     }
 
     return $sqrip_file_name;
@@ -844,7 +856,7 @@ function sqrip_reference_id_format_with_order_id ($reference_id_formatted, $orde
 *  sqrip QR Code PDF  Download in medialibrary and set
 *  static function version
 */
-function file_upload_stt($fileurl, $type, $token = "", $order_id = "", $is_refund = false)
+function file_upload_stt($fileurl, $type, $token = "", $order_id = "", $is_refund = false, $suffix = '')
 {
     // Validate the URL BEFORE file_get_contents(): on PHP 8 an empty or null path throws
     // a ValueError, i.e. a fatal on the checkout request, not a warning as on 7.4.
@@ -854,7 +866,7 @@ function file_upload_stt($fileurl, $type, $token = "", $order_id = "", $is_refun
 
     include_once(ABSPATH . 'wp-admin/includes/image.php');
 
-    $sqrip_name = sqrip_file_name($order_id, $is_refund);
+    $sqrip_name = sqrip_file_name($order_id, $is_refund, $suffix);
     $filename = $sqrip_name . $type;
     $file_path = sanitize_title($sqrip_name) . $type;
 
@@ -1138,8 +1150,11 @@ function process_payment_stt($order_id)
                 $sqrip_png = $response_body->png_file;
                 $order->update_meta_data('sqrip_png_file_url', $sqrip_png);
             }
+
+            // Second invoice over the discounted amount, if the shop grants Skonto.
+            Sqrip_Skonto::create_for_order($order, $body);
         }
-        
+
         $order->update_meta_data('sqrip_refund_iban_num', get_user_meta($order->get_user_id(), 'iban_num', true));
 
         // $order->update_meta_data('sqrip_png_file_url', $sqrip_qr_png_url);

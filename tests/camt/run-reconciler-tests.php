@@ -317,6 +317,92 @@ namespace {
     check('order is held back', $order301['category'], Sqrip_Camt_Reconciler::DUPLICATE);
     check('nothing is applied', $order301['applicable_slips'], array());
 
+    echo "\n=== Skonto: two invoices, only one of them gets paid ===\n";
+
+    /**
+     * 501 carries the ordinary invoice over 100.00 and a Skonto invoice over 98.00.
+     */
+    function skonto_order($id = 501)
+    {
+        return new WC_Order($id, '100.00', array(
+            'sqrip_reference_id'        => '210000000003139471430009017',
+            'sqrip_skonto_reference_id' => 'RF18539007547034',
+            'sqrip_skonto_amount'       => '98.00',
+        ));
+    }
+
+    function payment($reference, $amount)
+    {
+        return array($reference => array(array(
+            'reference' => $reference, 'amount' => $amount, 'currency' => 'CHF',
+            'value_date' => '2026-07-24', 'booking_date' => '2026-07-24',
+        )));
+    }
+
+    $skonto = $reconciler->build_expectations(array(skonto_order()));
+
+    check('both invoices are looked for', count($skonto[0]['slips']), 2);
+    check('the Skonto invoice expects the reduced amount',
+        $skonto[0]['slips'][1]['expected'], 98.00);
+
+    // Paid with Skonto.
+    $report = $reconciler->match($skonto, payment('RF18539007547034', 98.00));
+    $order = order_in($report, 501);
+
+    check('paying the Skonto invoice settles the order',
+        $order['category'], Sqrip_Camt_Reconciler::PAID);
+    check('and is recognised as the Skonto one', $order['paid_alternative'], 'skonto');
+    check('the untouched ordinary invoice does not hold it back',
+        $order['slips'][0]['category'], Sqrip_Camt_Reconciler::OPEN);
+
+    // Paid without Skonto, after the deadline.
+    $report = $reconciler->match($skonto, payment('210000000003139471430009017', 100.00));
+    $order = order_in($report, 501);
+
+    check('paying the ordinary invoice settles the order',
+        $order['category'], Sqrip_Camt_Reconciler::PAID);
+    check('and is recognised as the ordinary one', $order['paid_alternative'], 'regular');
+
+    // Neither.
+    $report = $reconciler->match($skonto, array());
+    check('nothing paid leaves the order open',
+        order_in($report, 501)['category'], Sqrip_Camt_Reconciler::OPEN);
+
+    // Both — the customer used each invoice once.
+    $both = array_merge(
+        payment('RF18539007547034', 98.00),
+        payment('210000000003139471430009017', 100.00)
+    );
+    $report = $reconciler->match($skonto, $both);
+    $order = order_in($report, 501);
+
+    check('paying both is never settled automatically',
+        $order['category'], Sqrip_Camt_Reconciler::DUPLICATE);
+    check('and nothing is applied', $order['applicable_slips'], array());
+
+    // The discount was taken but the amount is wrong.
+    $report = $reconciler->match($skonto, payment('RF18539007547034', 90.00));
+    check('a wrong amount on the Skonto invoice is not a payment',
+        order_in($report, 501)['category'], Sqrip_Camt_Reconciler::AMOUNT_MISMATCH);
+
+    // Full amount paid against the Skonto reference: an overpayment, not a settlement.
+    $report = $reconciler->match($skonto, payment('RF18539007547034', 100.00));
+    check('the full amount on the Skonto reference is held back',
+        order_in($report, 501)['category'], Sqrip_Camt_Reconciler::AMOUNT_MISMATCH);
+
+    // A voided Skonto invoice must drop out of the comparison entirely.
+    $voided = $reconciler->build_expectations(array(new WC_Order(502, '100.00', array(
+        'sqrip_reference_id'        => '210000000003139471430009017',
+        'sqrip_skonto_reference_id' => 'deleted',
+    ))));
+
+    check('a voided Skonto invoice is no longer looked for',
+        count($voided[0]['slips']), 1);
+
+    $report = $reconciler->match($voided, payment('210000000003139471430009017', 100.00));
+    check('and the order still settles normally',
+        order_in($report, 502)['category'], Sqrip_Camt_Reconciler::PAID);
+
     echo "\n=== Safety rails ===\n";
 
     $wrong_currency = $reconciler->build_expectations(array(

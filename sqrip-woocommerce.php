@@ -35,6 +35,7 @@ define('SQRIP_PLUGIN_BASENAME', plugin_basename(__FILE__));
 
 require_once __DIR__ . '/inc/functions.php';
 require_once __DIR__ . '/inc/sqrip-ajax.php';
+require_once __DIR__ . '/inc/class-sqrip-skonto.php';
 require_once __DIR__ . '/inc/class-sqrip-camt-parser.php';
 require_once __DIR__ . '/inc/class-sqrip-camt-reconciler.php';
 
@@ -1034,6 +1035,12 @@ add_action('woocommerce_process_shop_order_meta', function($post_id) {
                     $order->update_meta_data('sqrip_qr_pdf_attachment_id', $sqrip_qr_pdf_attachment_id);
                     $order->update_meta_data('sqrip_pdf_file_url', $sqrip_qr_pdf_url);
                     $order->update_meta_data('sqrip_pdf_file_path', $sqrip_qr_pdf_path);
+
+                    // Second invoice over the discounted amount, if the shop grants
+                    // Skonto. A regeneration replaces the previous pair, so an earlier
+                    // discounted invoice is cleared out first.
+                    Sqrip_Skonto::discard_existing($order);
+                    Sqrip_Skonto::create_for_order($order, $body);
                 }
 
                 $order->update_meta_data('sqrip_refund_iban_num', get_user_meta($order->get_user_id(), 'iban_num', true));

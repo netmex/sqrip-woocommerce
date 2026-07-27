@@ -327,7 +327,16 @@ class Sqrip_Camt_Admin
                     ? $status_completed
                     : sqrip_get_plugin_option('partial_invoice_' . $last . '_status');
             } else {
-                $slip = isset($entry['slips'][0]) ? $entry['slips'][0] : null;
+                // With a Skonto invoice the order carries two references and only one
+                // of them was paid, so pick the one that actually matched.
+                $slip = null;
+
+                foreach ($entry['slips'] as $candidate) {
+                    if ($candidate['category'] === Sqrip_Camt_Reconciler::PAID) {
+                        $slip = $candidate;
+                        break;
+                    }
+                }
 
                 if (!$slip) {
                     continue;
@@ -335,6 +344,11 @@ class Sqrip_Camt_Admin
 
                 $order->add_order_note(self::note($slip, $file_name));
                 $booked[] = $slip;
+
+                // Whichever invoice was used, the other must stop being payable.
+                if (!empty($entry['alternatives']) && !empty($entry['paid_alternative'])) {
+                    Sqrip_Skonto::void_alternative($order, $entry['paid_alternative']);
+                }
 
                 $status = $status_completed;
             }
