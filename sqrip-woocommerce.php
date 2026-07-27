@@ -543,6 +543,36 @@ if (!function_exists('sqrip_add_fields_for_order_details')) {
                         </li>
                     <?php } ?>
 
+                    <?php
+                    // The discounted alternative, so the shop sees both references it
+                    // may receive a payment against. (NET2-2326)
+                    $skonto_reference = sqrip_get_order_meta_value($order, 'sqrip_skonto_reference_id');
+
+                    if ($skonto_reference) :
+                        $skonto_file = sqrip_get_order_meta_value($order, 'sqrip_skonto_pdf_file_url');
+                        $skonto_amount = sqrip_get_order_meta_value($order, 'sqrip_skonto_amount');
+                        $skonto_percentage = sqrip_get_order_meta_value($order, 'sqrip_skonto_percentage');
+                        ?>
+                        <li>
+                            <b><?php
+                                printf(
+                                    /* translators: %s: discount percentage */
+                                    esc_html__('With %s%% Skonto', 'sqrip-swiss-qr-invoice'),
+                                    esc_html($skonto_percentage)
+                                );
+                                ?>:</b><br>
+                            <?php if ($skonto_reference === 'deleted') : ?>
+                                <?php echo esc_html__('Voided', 'sqrip-swiss-qr-invoice'); ?>
+                            <?php else : ?>
+                                <?php echo esc_html($currency_symbol . ' ' . $skonto_amount); ?><br>
+                                <?php echo sqrip_format_reference_id($skonto_reference, $order_id); ?>
+                                <?php if ($skonto_file && $skonto_file !== 'deleted') : ?>
+                                    <a target="_blank" href="<?php echo esc_url($skonto_file); ?>"><span class="dashicons dashicons-media-document"></span></a>
+                                <?php endif; ?>
+                            <?php endif; ?>
+                        </li>
+                    <?php endif; ?>
+
                     <li>
                         <button class="button button-secondary sqrip-re-generate-qrcode"><?php echo $btn_txt; ?></button>
                     </li>
@@ -666,8 +696,16 @@ function sqrip_attach_qrcode_pdf_to_email($attachments, $email_id, $order)
         } else {
             $pdf_file_path = sqrip_get_order_meta_value($order, 'sqrip_pdf_file_path');
             // WARNING: attachments must be local file paths and not URLs
-            if ($pdf_file_path && $isEmailAttached) {
+            if ($pdf_file_path && $pdf_file_path !== 'deleted' && $isEmailAttached) {
                 $attachments[] = $pdf_file_path;
+            }
+
+            // The discounted invoice travels with the ordinary one — a Skonto the
+            // customer never receives is no Skonto at all. Dropped once it is voided.
+            $skonto_path = sqrip_get_order_meta_value($order, 'sqrip_skonto_pdf_file_path');
+
+            if ($skonto_path && $skonto_path !== 'deleted' && $isEmailAttached) {
+                $attachments[] = $skonto_path;
             }
         }
         // error_log("SQRIP:: Using HPOS pdf_file:: ".$pdf_file_path);
@@ -732,8 +770,24 @@ function sqrip_qr_action_order_details_after_order_table($order)
 
         } else {
             $pdf_file = sqrip_get_order_meta_value($order, 'sqrip_pdf_file_url');
-            if ($pdf_file) {
+            if ($pdf_file && $pdf_file !== 'deleted') {
                 $pdf_file_html = '<p style="text-align:'.$download_btn_align.';"><a class="button button-sqrip-invoice" href="' . esc_url($pdf_file) . '" >' . __('Download Invoice', 'sqrip-swiss-qr-invoice') . ' <i class="dashicons dashicons-pdf"></i></a></p>';
+            }
+
+            // Second button for the discounted invoice, so the customer can actually
+            // choose between the two. Disappears as soon as one of them is voided.
+            $skonto_file = sqrip_get_order_meta_value($order, 'sqrip_skonto_pdf_file_url');
+
+            if ($skonto_file && $skonto_file !== 'deleted') {
+                $skonto_percentage = sqrip_get_order_meta_value($order, 'sqrip_skonto_percentage');
+
+                $pdf_file_html .= '<p style="text-align:'.$download_btn_align.';"><a class="button button-sqrip-invoice" href="' . esc_url($skonto_file) . '" >'
+                    . sprintf(
+                        /* translators: %s: discount percentage */
+                        esc_html__('Download Invoice with %s%% Skonto', 'sqrip-swiss-qr-invoice'),
+                        esc_html($skonto_percentage)
+                    )
+                    . ' <i class="dashicons dashicons-pdf"></i></a></p>';
             }
         }
 
@@ -746,7 +800,9 @@ function sqrip_qr_action_order_details_after_order_table($order)
             echo wp_kses_post($checkout_remarks);
         }
 
-        if ($integration_order == "yes" && $pdf_file) {
+        // Keyed on the rendered buttons rather than on the ordinary invoice: once that
+        // one is voided the discounted invoice may still be the one to pay.
+        if ($integration_order == "yes" && $pdf_file_html) {
             /**
              *  Insert sqrip QR code PNG after customer details
              *
