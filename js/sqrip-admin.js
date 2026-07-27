@@ -1243,6 +1243,7 @@ jQuery(document).ready(function ($) {
      */
     var ip_skonto_enabled = $('#woocommerce_sqrip_skonto_enabled');
     var ip_country_restriction = $('#woocommerce_sqrip_country_restriction_enabled');
+    var ip_reminder_enabled = $('#woocommerce_sqrip_reminder_enabled');
 
     function sqrip_toggle_dependent_settings() {
         if (ip_skonto_enabled.length) {
@@ -1251,6 +1252,20 @@ jQuery(document).ready(function ($) {
 
         if (ip_country_restriction.length) {
             $('.sqrip-country-field').closest('tr').toggle(ip_country_restriction.is(':checked'));
+        }
+
+        if (ip_reminder_enabled.length) {
+            var reminder_on = ip_reminder_enabled.is(':checked');
+
+            $('.sqrip-reminder-field').closest('tr').toggle(reminder_on);
+
+            // Only one of the two fee inputs applies at a time.
+            if (reminder_on) {
+                var percent = $('input[name="woocommerce_sqrip_reminder_fee_type"]:checked').val() === 'percent';
+
+                $('#woocommerce_sqrip_reminder_fee_amount').closest('tr').toggle(!percent);
+                $('#woocommerce_sqrip_reminder_fee_percent').closest('tr').toggle(percent);
+            }
         }
     }
 
@@ -1264,6 +1279,8 @@ jQuery(document).ready(function ($) {
     ip_payment_comparison_enabled.on('change', sqrip_toggle_camt);
     ip_skonto_enabled.on('change', sqrip_toggle_dependent_settings);
     ip_country_restriction.on('change', sqrip_toggle_dependent_settings);
+    ip_reminder_enabled.on('change', sqrip_toggle_dependent_settings);
+    $(document).on('change', 'input[name="woocommerce_sqrip_reminder_fee_type"]', sqrip_toggle_dependent_settings);
     tab.on('click', sqrip_toggle_optional_rows);
 
     var camt_panel = $('.sqrip-camt-panel');

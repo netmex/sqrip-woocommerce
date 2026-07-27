@@ -147,6 +147,101 @@ function sqrip_add_country_blocked_order_note($order)
     );
 }
 
+/**
+ * Where the three kinds of QR invoice keep their data on an order.
+ *
+ * An order can carry the ordinary invoice, a discounted one (Skonto) and a reminder
+ * with a late fee. They are alternatives: the customer pays one of them.
+ *
+ * @since 1.11
+ * @return array kind => meta keys
+ */
+function sqrip_invoice_kinds()
+{
+    return array(
+        'regular' => array(
+            'reference'  => 'sqrip_reference_id',
+            'attachment' => 'sqrip_qr_pdf_attachment_id',
+            'url'        => 'sqrip_pdf_file_url',
+            'path'       => 'sqrip_pdf_file_path',
+        ),
+        'skonto' => array(
+            'reference'  => 'sqrip_skonto_reference_id',
+            'attachment' => 'sqrip_skonto_qr_pdf_attachment_id',
+            'url'        => 'sqrip_skonto_pdf_file_url',
+            'path'       => 'sqrip_skonto_pdf_file_path',
+        ),
+        'reminder' => array(
+            'reference'  => 'sqrip_reminder_reference_id',
+            'attachment' => 'sqrip_reminder_qr_pdf_attachment_id',
+            'url'        => 'sqrip_reminder_pdf_file_url',
+            'path'       => 'sqrip_reminder_pdf_file_path',
+        ),
+    );
+}
+
+/**
+ * Once one invoice of an order is paid, the others must stop being payable.
+ *
+ * Follows the convention the plugin already uses: the reference and the file are
+ * marked 'deleted' and the PDF leaves the media library.
+ *
+ * @since 1.11
+ * @param WC_Order $order
+ * @param string   $keep_kind The kind that was paid; everything else is voided.
+ * @return string[] The kinds that were voided.
+ */
+function sqrip_void_other_invoices($order, $keep_kind)
+{
+    if (!is_a($order, 'WC_Order')) {
+        return array();
+    }
+
+    $labels = array(
+        'regular'  => __('the ordinary QR invoice', 'sqrip-swiss-qr-invoice'),
+        'skonto'   => __('the QR invoice with Skonto', 'sqrip-swiss-qr-invoice'),
+        'reminder' => __('the payment reminder', 'sqrip-swiss-qr-invoice'),
+    );
+
+    $voided = array();
+
+    foreach (sqrip_invoice_kinds() as $kind => $keys) {
+        if ($kind === $keep_kind) {
+            continue;
+        }
+
+        $reference = sqrip_get_order_meta_value($order, $keys['reference']);
+
+        if (!$reference || $reference === 'deleted') {
+            continue;
+        }
+
+        $attachment_id = (int) sqrip_get_order_meta_value($order, $keys['attachment']);
+
+        if ($attachment_id) {
+            wp_delete_attachment($attachment_id, true);
+        }
+
+        $order->update_meta_data($keys['reference'], 'deleted');
+        $order->update_meta_data($keys['url'], 'deleted');
+        $order->update_meta_data($keys['path'], 'deleted');
+
+        $voided[] = isset($labels[$kind]) ? $labels[$kind] : $kind;
+    }
+
+    if ($voided) {
+        $order->add_order_note(sprintf(
+            /* translators: %s: list of the invoices that are no longer payable */
+            __('Paid. No longer payable: %s.', 'sqrip-swiss-qr-invoice'),
+            implode(', ', $voided)
+        ));
+
+        $order->save();
+    }
+
+    return $voided;
+}
+
 function sqrip_prepare_remote_args($body, $method, $token = null)
 {
     $plugin_token = sqrip_get_plugin_option('token');

@@ -199,6 +199,252 @@ class Sqrip_Reminder
     }
 
     /**
+     * Daily sweep for overdue orders.
+     *
+     * @return void
+     */
+    public static function init()
+    {
+        add_action('sqrip_send_payment_reminders', array(__CLASS__, 'run'));
+
+        if (!wp_next_scheduled('sqrip_send_payment_reminders')) {
+            wp_schedule_event(time() + HOUR_IN_SECONDS, 'daily', 'sqrip_send_payment_reminders');
+        }
+    }
+
+    /**
+     * Find the orders that are overdue and remind about them.
+     *
+     * @param int|null $limit Safety cap per run.
+     * @return int Number of reminders sent.
+     */
+    public static function run($limit = 200)
+    {
+        if (!self::is_enabled()) {
+            return 0;
+        }
+
+        $status = (string) sqrip_get_plugin_option('status_awaiting');
+
+        if ($status === '') {
+            return 0;
+        }
+
+        if (strpos($status, 'wc-') !== 0) {
+            $status = 'wc-' . $status;
+        }
+
+        $orders = wc_get_orders(array(
+            'limit'   => (int) $limit,
+            'status'  => $status,
+            'type'    => 'shop_order',
+            'orderby' => 'date',
+            'order'   => 'ASC',
+        ));
+
+        if (!is_array($orders)) {
+            return 0;
+        }
+
+        $now  = time();
+        $sent = 0;
+
+        foreach ($orders as $order) {
+            if (!is_a($order, 'WC_Order') || $order->get_payment_method() !== 'sqrip') {
+                continue;
+            }
+
+            if (!self::is_due($order, $now)) {
+                continue;
+            }
+
+            if (self::send_for_order($order)) {
+                $sent++;
+            }
+        }
+
+        return $sent;
+    }
+
+    /**
+     * Add the fee, create the new invoice, tell the customer.
+     *
+     * @param WC_Order $order
+     * @return bool
+     */
+    public static function send_for_order($order)
+    {
+        $original_total = round((float) $order->get_total(), 2);
+        $fee            = self::fee_for_total($original_total);
+
+        if ($fee <= 0) {
+            return false;
+        }
+
+        // The amount the ORIGINAL invoice was issued for. The fee is about to change
+        // the order total, and without this the reconciliation would compare a payment
+        // against the original QR slip to a total that has since grown. (B3)
+        if (!sqrip_get_order_meta_value($order, 'sqrip_invoice_amount')) {
+            $order->update_meta_data('sqrip_invoice_amount', $original_total);
+        }
+
+        if (!self::add_fee_item($order, $fee)) {
+            return false;
+        }
+
+        $new_total = round((float) $order->get_total(), 2);
+        $currency  = $order->get_currency();
+
+        $body = sqrip_prepare_qr_code_request_body($currency, $new_total, strval($order->get_id()));
+
+        if (!$body) {
+            $order->add_order_note(__('The payment reminder could not be created: the sqrip settings are incomplete.', 'sqrip-swiss-qr-invoice'));
+
+            return false;
+        }
+
+        $body['payable_by'] = sqrip_get_billing_address_from_order($order);
+        $body['payable_to'] = sqrip_get_payable_to_address(sqrip_get_plugin_option('address'));
+
+        $message = self::message($order->get_order_number(), $fee, $currency);
+
+        if ($message !== '') {
+            $body['payment_information']['message'] = $message;
+        } else {
+            unset($body['payment_information']['message']);
+        }
+
+        // A distinct reference is what lets the reconciliation tell the reminder from
+        // the original invoice — and voiding the loser depends on exactly that. With
+        // the shop deriving references from the order number both would be identical,
+        // so this one is left to sqrip. Same reasoning as Sqrip_Skonto.
+        unset($body['payment_information']['qr_reference']);
+        unset($body['payment_information']['partial_invoice_message']);
+        unset($body['invoice_fractions']);
+
+        $response = wp_remote_post(SQRIP_ENDPOINT . 'code', sqrip_prepare_remote_args($body, 'POST'));
+
+        if (is_wp_error($response)) {
+            $order->add_order_note(sprintf(
+                /* translators: %s: error message */
+                __('The payment reminder could not be created: %s', 'sqrip-swiss-qr-invoice'),
+                esc_html($response->get_error_message())
+            ));
+
+            return false;
+        }
+
+        $decoded = json_decode(wp_remote_retrieve_body($response));
+
+        if (wp_remote_retrieve_response_code($response) !== 200
+            || !isset($decoded->reference) || !isset($decoded->pdf_file)) {
+            $order->add_order_note(sprintf(
+                /* translators: %s: error reported by sqrip */
+                __('The payment reminder could not be created: %s', 'sqrip-swiss-qr-invoice'),
+                isset($decoded->message) ? esc_html($decoded->message) : ''
+            ));
+
+            return false;
+        }
+
+        $attachment_id = file_upload_stt(
+            $decoded->pdf_file,
+            '.pdf',
+            '',
+            $order->get_id(),
+            false,
+            self::file_name_suffix()
+        );
+
+        $order->update_meta_data('sqrip_reminder_reference_id', $decoded->reference);
+        $order->update_meta_data('sqrip_reminder_amount', $new_total);
+        $order->update_meta_data('sqrip_reminder_fee', $fee);
+        $order->update_meta_data('sqrip_reminder_qr_pdf_attachment_id', $attachment_id);
+        $order->update_meta_data('sqrip_reminder_pdf_file_url', wp_get_attachment_url($attachment_id));
+        $order->update_meta_data('sqrip_reminder_pdf_file_path', get_attached_file($attachment_id));
+        $order->update_meta_data('sqrip_reminder_sent_at', time());
+
+        $order->add_order_note(sprintf(
+            /* translators: 1: currency, 2: fee, 3: new order total */
+            __('Payment reminder created: late fee %1$s %2$s added, new QR invoice over %1$s %3$s. The original invoice stays valid until one of the two is paid.', 'sqrip-swiss-qr-invoice'),
+            $currency,
+            number_format($fee, 2, '.', ''),
+            number_format($new_total, 2, '.', '')
+        ));
+
+        $order->save();
+
+        self::send_email($order);
+
+        return true;
+    }
+
+    /**
+     * Put the fee on the order itself, so it shows up in the order, the tax report and
+     * every document WooCommerce builds — not only on the QR slip.
+     *
+     * @param WC_Order $order
+     * @param float    $fee
+     * @return bool
+     */
+    private static function add_fee_item($order, $fee)
+    {
+        if (!class_exists('WC_Order_Item_Fee')) {
+            return false;
+        }
+
+        $item = new WC_Order_Item_Fee();
+        $item->set_name(self::fee_label());
+        $item->set_amount((string) $fee);
+        $item->set_total((string) $fee);
+        $item->set_tax_status(self::fee_is_taxable() ? 'taxable' : 'none');
+
+        $order->add_item($item);
+
+        // Recalculates the tax on the new fee and the order total. Passing true also
+        // refreshes the existing lines, which is what WooCommerce itself does when a
+        // fee is added by hand in the admin.
+        $order->calculate_totals(self::fee_is_taxable());
+        $order->save();
+
+        return true;
+    }
+
+    /**
+     * Send the reminder to the customer.
+     *
+     * Uses WooCommerce's own "Customer invoice" mail — the one built for sending an
+     * order to the customer after the fact — so the shop keeps its template, its
+     * sender and its styling.
+     *
+     * @param WC_Order $order
+     * @return void
+     */
+    private static function send_email($order)
+    {
+        if (!function_exists('WC') || !WC()->mailer()) {
+            return;
+        }
+
+        $emails = WC()->mailer()->get_emails();
+
+        if (!isset($emails['WC_Email_Customer_Invoice'])) {
+            return;
+        }
+
+        // Tells sqrip_attach_qrcode_pdf_to_email() to attach the reminder PDF to this
+        // one mail, whatever the shop configured for ordinary invoices.
+        $GLOBALS['sqrip_sending_reminder'] = $order->get_id();
+
+        $emails['WC_Email_Customer_Invoice']->trigger($order->get_id(), $order);
+
+        unset($GLOBALS['sqrip_sending_reminder']);
+
+        $order->add_order_note(__('Payment reminder e-mailed to the customer.', 'sqrip-swiss-qr-invoice'));
+        $order->save();
+    }
+
+    /**
      * @param mixed $value
      * @return float
      */

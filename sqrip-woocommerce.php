@@ -36,6 +36,7 @@ define('SQRIP_PLUGIN_BASENAME', plugin_basename(__FILE__));
 require_once __DIR__ . '/inc/functions.php';
 require_once __DIR__ . '/inc/sqrip-ajax.php';
 require_once __DIR__ . '/inc/class-sqrip-skonto.php';
+require_once __DIR__ . '/inc/class-sqrip-reminder.php';
 require_once __DIR__ . '/inc/class-sqrip-camt-parser.php';
 require_once __DIR__ . '/inc/class-sqrip-camt-reconciler.php';
 
@@ -169,6 +170,10 @@ function sqrip_version_sync_require()
     require_once __DIR__ . '/inc/class-sqrip-version-sync.php';
 }
 
+// Daily sweep for overdue orders. Registered late so WooCommerce and its order
+// storage are fully up before the schedule is touched.
+add_action('plugins_loaded', array('Sqrip_Reminder', 'init'), 20);
+
 /**
  * Unschedule media clean cron job on sqrip deactivation
  * @since 1.84
@@ -181,6 +186,12 @@ function sqrip_deactivation_action() {
 
     $timestamp2 = wp_next_scheduled( 'sqrip_version_sync' );
     wp_unschedule_event( $timestamp2, 'sqrip_version_sync' );
+
+    $timestamp3 = wp_next_scheduled( 'sqrip_send_payment_reminders' );
+
+    if ( $timestamp3 ) {
+        wp_unschedule_event( $timestamp3, 'sqrip_send_payment_reminders' );
+    }
 }
 
 /**
@@ -670,6 +681,19 @@ function sqrip_attach_qrcode_pdf_to_email($attachments, $email_id, $order)
     if ($payment_method === 'sqrip' && in_array($integration_email, $array_in)) {
         // $order_id = $order->id;
         $order_id = method_exists($order, 'get_id') ? $order->get_id() : $order->id;
+
+        // The reminder mail carries the reminder invoice, whatever the shop configured
+        // for ordinary invoices — a reminder without its QR slip is pointless. Set by
+        // Sqrip_Reminder::send_email() for the duration of that one mail.
+        if (isset($GLOBALS['sqrip_sending_reminder']) && (int) $GLOBALS['sqrip_sending_reminder'] === (int) $order_id) {
+            $reminder_path = sqrip_get_order_meta_value($order, 'sqrip_reminder_pdf_file_path');
+
+            if ($reminder_path && $reminder_path !== 'deleted') {
+                $attachments[] = $reminder_path;
+            }
+
+            return $attachments;
+        }
 
         $pdf_file_path = '';
         

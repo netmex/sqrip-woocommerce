@@ -216,11 +216,19 @@ class Sqrip_Camt_Reconciler
                 );
 
                 if ($reference !== '') {
+                    // A reminder adds its late fee to the order, so the order total is
+                    // no longer what the original invoice asked for. That amount is
+                    // recorded when the fee is added; fall back to the total when there
+                    // never was a reminder.
+                    $issued_for = sqrip_get_order_meta_value($order, 'sqrip_invoice_amount');
+
                     $slips[] = array(
                         'index'        => null,
                         'kind'         => 'regular',
                         'reference'    => $reference,
-                        'expected'     => $total,
+                        'expected'     => ($issued_for === '' || $issued_for === null)
+                            ? $total
+                            : round((float) $issued_for, 2),
                         'already_paid' => false,
                     );
                 }
@@ -241,6 +249,27 @@ class Sqrip_Camt_Reconciler
                         'expected'     => $skonto_amount === '' || $skonto_amount === null
                             ? null
                             : round((float) $skonto_amount, 2),
+                        'already_paid' => false,
+                    );
+                }
+
+                // Reminder: the original amount plus the late fee. Also an alternative
+                // — a customer who pays the original invoice after the reminder went
+                // out has still paid, just not the fee.
+                $reminder_reference = $this->clean_reference(
+                    sqrip_get_order_meta_value($order, 'sqrip_reminder_reference_id')
+                );
+
+                if ($reminder_reference !== '') {
+                    $reminder_amount = sqrip_get_order_meta_value($order, 'sqrip_reminder_amount');
+
+                    $slips[] = array(
+                        'index'        => null,
+                        'kind'         => 'reminder',
+                        'reference'    => $reminder_reference,
+                        'expected'     => $reminder_amount === '' || $reminder_amount === null
+                            ? null
+                            : round((float) $reminder_amount, 2),
                         'already_paid' => false,
                     );
                 }

@@ -403,6 +403,63 @@ namespace {
     check('and the order still settles normally',
         order_in($report, 502)['category'], Sqrip_Camt_Reconciler::PAID);
 
+    echo "\n=== Reminder: the late fee raises the order total ===\n";
+
+    /**
+     * 601 was invoiced over 100.00. A reminder added a 20.00 fee, so the order total
+     * is now 120.00 and the reminder invoice asks for that.
+     */
+    $reminded = $reconciler->build_expectations(array(new WC_Order(601, '120.00', array(
+        'sqrip_reference_id'          => '210000000003139471430009017',
+        'sqrip_invoice_amount'        => '100.00',
+        'sqrip_reminder_reference_id' => 'RF18539007547034',
+        'sqrip_reminder_amount'       => '120.00',
+    ))));
+
+    check('both invoices are looked for', count($reminded[0]['slips']), 2);
+    check('the original still expects what it was issued for',
+        $reminded[0]['slips'][0]['expected'], 100.00);
+    check('the reminder expects the raised total',
+        $reminded[0]['slips'][1]['expected'], 120.00);
+
+    // The customer paid the original invoice — late, without the fee. That is still a
+    // payment of the original invoice and must not be judged against the new total.
+    $report = $reconciler->match($reminded, payment('210000000003139471430009017', 100.00));
+    $order = order_in($report, 601);
+
+    check('paying the original amount after the reminder is recognised',
+        $order['category'], Sqrip_Camt_Reconciler::PAID);
+    check('and is named as the ordinary invoice', $order['paid_alternative'], 'regular');
+
+    // The customer paid the reminder including the fee.
+    $report = $reconciler->match($reminded, payment('RF18539007547034', 120.00));
+    $order = order_in($report, 601);
+
+    check('paying the reminder settles the order',
+        $order['category'], Sqrip_Camt_Reconciler::PAID);
+    check('and is named as the reminder', $order['paid_alternative'], 'reminder');
+
+    // Paying the original amount against the reminder reference is short by the fee.
+    $report = $reconciler->match($reminded, payment('RF18539007547034', 100.00));
+    check('the reminder short by the fee is held back',
+        order_in($report, 601)['category'], Sqrip_Camt_Reconciler::AMOUNT_MISMATCH);
+
+    // Both — original and reminder each paid once.
+    $report = $reconciler->match($reminded, array_merge(
+        payment('210000000003139471430009017', 100.00),
+        payment('RF18539007547034', 120.00)
+    ));
+    check('paying both is never settled automatically',
+        order_in($report, 601)['category'], Sqrip_Camt_Reconciler::DUPLICATE);
+
+    // An order that never had a reminder still measures against its total.
+    $plain = $reconciler->build_expectations(array(new WC_Order(602, '100.00', array(
+        'sqrip_reference_id' => '210000000003139471430009017',
+    ))));
+
+    check('without a reminder the order total is the expectation',
+        $plain[0]['slips'][0]['expected'], 100.00);
+
     echo "\n=== Safety rails ===\n";
 
     $wrong_currency = $reconciler->build_expectations(array(

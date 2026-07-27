@@ -345,9 +345,9 @@ class Sqrip_Camt_Admin
                 $order->add_order_note(self::note($slip, $file_name));
                 $booked[] = $slip;
 
-                // Whichever invoice was used, the other must stop being payable.
+                // Whichever invoice was used, the others must stop being payable.
                 if (!empty($entry['alternatives']) && !empty($entry['paid_alternative'])) {
-                    Sqrip_Skonto::void_alternative($order, $entry['paid_alternative']);
+                    sqrip_void_other_invoices($order, $entry['paid_alternative']);
                 }
 
                 $status = $status_completed;
