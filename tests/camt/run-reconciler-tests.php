@@ -88,6 +88,82 @@ namespace {
     }
 
     /**
+     * Read the credit references out of a file so the test can pretend they are orders.
+     *
+     * Test-only: the plugin itself never walks a statement this way — it always starts
+     * from the open orders. Returns reference => list of amounts.
+     */
+    function sqrip_test_harvest($file)
+    {
+        libxml_use_internal_errors(true);
+
+        $payments = array();
+        $reader   = new XMLReader();
+
+        if (!@$reader->open($file, null, LIBXML_NONET)) {
+            return $payments;
+        }
+
+        $document = new DOMDocument();
+
+        while (@$reader->read()) {
+            if ($reader->nodeType !== XMLReader::ELEMENT || $reader->localName !== 'Ntry') {
+                continue;
+            }
+
+            $entry = @$reader->expand($document);
+
+            if (!$entry) {
+                @$reader->next();
+                continue;
+            }
+
+            $xpath = new DOMXPath($entry->ownerDocument);
+
+            $indicator = $xpath->query('./*[local-name()="CdtDbtInd"]', $entry);
+
+            if (!$indicator->length || trim($indicator->item(0)->textContent) !== 'CRDT') {
+                @$reader->next();
+                continue;
+            }
+
+            $reversal = $xpath->query('./*[local-name()="RvslInd"]', $entry);
+
+            if ($reversal->length && strtolower(trim($reversal->item(0)->textContent)) === 'true') {
+                @$reader->next();
+                continue;
+            }
+
+            $entry_amount = $xpath->query('./*[local-name()="Amt"]', $entry);
+            $entry_amount = $entry_amount->length ? $entry_amount->item(0)->textContent : '0';
+
+            $transactions = $xpath->query('./*[local-name()="NtryDtls"]/*[local-name()="TxDtls"]', $entry);
+            $units = $transactions->length ? iterator_to_array($transactions) : array($entry);
+
+            foreach ($units as $unit) {
+                $found = $xpath->query('.//*[local-name()="CdtrRefInf"]/*[local-name()="Ref"]', $unit);
+
+                if (!$found->length) {
+                    continue;
+                }
+
+                $amount = $xpath->query('./*[local-name()="Amt"]', $unit);
+                $amount = $amount->length ? $amount->item(0)->textContent : $entry_amount;
+
+                $reference = Sqrip_Camt_Parser::normalize_reference($found->item(0)->textContent);
+                $payments[$reference][] = round((float) $amount, 2);
+            }
+
+            @$reader->next();
+        }
+
+        $reader->close();
+        libxml_clear_errors();
+
+        return $payments;
+    }
+
+    /**
      * Find an order in the report by its id.
      */
     function order_in($report, $id)
@@ -302,6 +378,125 @@ namespace {
 
     check('one cent short is not paid',
         order_in($one_cent, 403)['category'], Sqrip_Camt_Reconciler::AMOUNT_MISMATCH);
+
+    /**
+     * Optional: check the whole chain against real bank files.
+     *
+     *     php tests/camt/run-reconciler-tests.php ~/Downloads
+     *
+     * Every payment in a file is turned into an order expecting exactly that amount,
+     * and the reconciliation has to find it again. A reference paid twice has to come
+     * back as a duplicate, and every order is checked a second time with its amount
+     * five centimes off, which has to be refused.
+     *
+     * Prints counts only — no reference, amount, name or account number is ever put on
+     * screen, so a real statement can be checked without its contents leaking into a
+     * terminal or a shell history. Files are only read, never written or copied.
+     */
+    if (isset($argv[1])) {
+        $directory = rtrim($argv[1], '/');
+        $files = glob($directory . '/*.xml');
+
+        echo "\n=== Real bank files in " . basename($directory) . " ===\n";
+
+        if (!$files) {
+            echo "  no XML files found\n";
+        }
+
+        $refs = $single = $paid = $duplicates = $duplicates_ok = $mismatch_ok = $unreadable = 0;
+
+        foreach ($files as $file) {
+            $parser  = new Sqrip_Camt_Parser();
+            $probe   = $parser->collect_matches($file, array());
+
+            if ($probe === false) {
+                $unreadable++;
+                continue;
+            }
+
+            // Read the file once more to learn which references it carries, so the
+            // simulated orders can be built from it.
+            $payments = sqrip_test_harvest($file);
+
+            if (!$payments) {
+                continue;
+            }
+
+            $orders = array();
+            $id     = 1000;
+
+            foreach ($payments as $reference => $amounts) {
+                $orders[] = new WC_Order($id++, number_format($amounts[0], 2, '.', ''), array(
+                    'sqrip_reference_id' => $reference,
+                ));
+            }
+
+            $expectations = $reconciler->build_expectations($orders);
+            $found        = $parser->collect_matches($file, $reconciler->references_of($expectations));
+
+            if ($found === false) {
+                $unreadable++;
+                continue;
+            }
+
+            $report = $reconciler->match($expectations, $found['matches']);
+
+            foreach ($report['orders'] as $entry) {
+                $reference = $entry['slips'][0]['reference'];
+                $refs++;
+
+                if (count($payments[$reference]) === 1) {
+                    $single++;
+
+                    if ($entry['category'] === Sqrip_Camt_Reconciler::PAID) {
+                        $paid++;
+                    }
+                } else {
+                    $duplicates++;
+
+                    if ($entry['category'] === Sqrip_Camt_Reconciler::DUPLICATE) {
+                        $duplicates_ok++;
+                    }
+                }
+            }
+
+            $wrong = array();
+            $id    = 2000;
+
+            foreach ($payments as $reference => $amounts) {
+                if (count($amounts) !== 1) {
+                    continue;
+                }
+
+                $wrong[] = new WC_Order($id++, number_format($amounts[0] + 0.05, 2, '.', ''), array(
+                    'sqrip_reference_id' => $reference,
+                ));
+            }
+
+            if ($wrong) {
+                $control = $reconciler->match($reconciler->build_expectations($wrong), $found['matches']);
+
+                foreach ($control['orders'] as $entry) {
+                    if ($entry['category'] === Sqrip_Camt_Reconciler::AMOUNT_MISMATCH) {
+                        $mismatch_ok++;
+                    }
+                }
+            }
+        }
+
+        echo "  files read:                  " . (count($files) - $unreadable) . " of " . count($files) . "\n";
+        echo "  references on the credit side: $refs\n";
+        echo "  paid once:                   $single\n";
+        echo "  paid more than once:         $duplicates\n";
+
+        if ($refs > 0) {
+            check('every single payment is recognised', $paid, $single);
+            check('every repeated payment is held back', $duplicates_ok, $duplicates);
+            check('five centimes off is refused', $mismatch_ok, $single);
+        }
+
+        check('no file was unreadable', $unreadable, 0);
+    }
 
     echo "\n----------------------------------------\n";
     echo "  $passed passed, $failed failed\n\n";
