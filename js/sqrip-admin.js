@@ -1229,4 +1229,114 @@ jQuery(document).ready(function ($) {
         });
     }
 
+    /**
+     * camt reconciliation.
+     *
+     * The activation checkbox is a sub-feature of the payment comparison, so it only
+     * appears while that one is ticked, and its tab only while both are.
+     *
+     * Deliberately NOT routed through toggleFeatures: that calls
+     * toggleComparisonAndMultipleSlips(), which switches the payment comparison and the
+     * multiple QR slips against each other. A sub-feature must not trigger that.
+     */
+    var ip_camt_enabled = $('#woocommerce_sqrip_camt_reconciliation_enabled');
+
+    function sqrip_toggle_camt() {
+        if (!ip_camt_enabled.length) {
+            return;
+        }
+
+        var comparison_on = ip_payment_comparison_enabled.is(':checked');
+
+        // Only interfere on the tab this row belongs to; elsewhere sqrip_tab_init has
+        // hidden the whole row anyway.
+        if (tab_active === 'services') {
+            ip_camt_enabled.closest('tr').toggle(comparison_on);
+        }
+
+        if (comparison_on && ip_camt_enabled.is(':checked')) {
+            $('.sqrip-tab[data-tab="camt"]').show();
+        } else {
+            $('.sqrip-tab[data-tab="camt"]').hide();
+        }
+    }
+
+    sqrip_toggle_camt();
+    ip_camt_enabled.on('change', sqrip_toggle_camt);
+    ip_payment_comparison_enabled.on('change', sqrip_toggle_camt);
+    tab.on('click', sqrip_toggle_camt);
+
+    var camt_panel = $('.sqrip-camt-panel');
+
+    if (camt_panel.length) {
+        camt_panel.on('click', '.sqrip-camt-preview, .sqrip-camt-apply', function (e) {
+            e.preventDefault();
+
+            var btn = $(this);
+            var is_apply = btn.hasClass('sqrip-camt-apply');
+            var panel = btn.closest('.sqrip-camt-panel');
+            var out = panel.find('.sqrip-camt-result');
+            var input = panel.find('.sqrip-camt-file')[0];
+
+            if (!input || !input.files || !input.files.length) {
+                out.html('').text(sqrip.txt_camt_choose_file).css('color', 'darkred');
+                return;
+            }
+
+            if (is_apply && !window.confirm(sqrip.txt_camt_confirm)) {
+                return;
+            }
+
+            // The file is sent again for the second step on purpose: the server reads
+            // and matches it afresh instead of trusting a result the browser hands back.
+            var form = new FormData();
+            form.append('action', is_apply ? 'sqrip_camt_apply' : 'sqrip_camt_preview');
+            form.append('security', sqrip.camt_nonce);
+            form.append('camt_file', input.files[0]);
+
+            var label = btn.text();
+            var buttons = panel.find('.sqrip-camt-preview, .sqrip-camt-apply');
+
+            buttons.prop('disabled', true);
+            btn.text(is_apply ? sqrip.txt_camt_applying : sqrip.txt_camt_reading);
+            out.css('color', '').html('');
+
+            $.ajax({
+                type: 'post',
+                url: sqrip.ajax_url,
+                data: form,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    if (response && response.success && response.data) {
+                        out.html(response.data.html);
+                        panel.find('.sqrip-camt-apply')
+                            .prop('disabled', !response.data.applicable);
+                        return;
+                    }
+
+                    var message = (response && response.data && response.data.message)
+                        ? response.data.message
+                        : sqrip.txt_camt_failed;
+
+                    out.text(message).css('color', 'darkred');
+                    panel.find('.sqrip-camt-apply').prop('disabled', true);
+                },
+                error: function () {
+                    out.text(sqrip.txt_camt_failed).css('color', 'darkred');
+                    panel.find('.sqrip-camt-apply').prop('disabled', true);
+                },
+                complete: function () {
+                    btn.text(label);
+                    panel.find('.sqrip-camt-preview').prop('disabled', false);
+                }
+            });
+        });
+
+        // A different file invalidates the preview the Apply button was enabled for.
+        camt_panel.on('change', '.sqrip-camt-file', function () {
+            $(this).closest('.sqrip-camt-panel').find('.sqrip-camt-apply').prop('disabled', true);
+        });
+    }
+
 });

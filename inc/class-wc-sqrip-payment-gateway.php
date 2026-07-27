@@ -172,6 +172,12 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                         'class' => '',
                     ],
                     [
+                        'id' => 'camt',
+                        'title' => __('camt Reconciliation', 'sqrip-swiss-qr-invoice'),
+                        'description' => '',
+                        'class' => '',
+                    ],
+                    [
                         'id' => 'refunds',
                         'title' => __('Refunds', 'sqrip-swiss-qr-invoice'),
                         'class' => '',
@@ -237,6 +243,16 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'description' => '',
                 'default' => 'no',
                 'class' => 'services-tab'
+            ),
+            'camt_reconciliation_enabled' => array(
+                'title' => '',
+                'label' => __('Activate camt reconciliation', 'sqrip-swiss-qr-invoice'),
+                'type' => 'checkbox',
+                'description' => __('Upload the camt file from your e-banking and let sqrip mark the paid orders. Runs entirely in your shop: the file is read once, only payments belonging to an open order are used, and the file is discarded straight afterwards.', 'sqrip-swiss-qr-invoice'),
+                'default' => 'no',
+                // Sub-feature of the payment comparison. sqrip-admin.js only shows this
+                // row while that one is switched on.
+                'class' => 'services-tab sqrip-camt-toggle'
             ),
             'multiple_qr_slips_enabled' => array(
                 'title' => __('Activate/Deactivate Multiple QR-slips', 'sqrip-swiss-qr-invoice'),
@@ -776,6 +792,16 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'css' => 'visibility: hidden; position: absolute',
                 'class' => 'comparison-tab sqrip-no-height'
             ),
+            'section_camt' => array(
+                'title' => __('camt Reconciliation', 'sqrip-swiss-qr-invoice'),
+                'type' => 'section',
+                'class' => 'camt-tab'
+            ),
+            'camt_upload' => array(
+                'title' => __('Bank file', 'sqrip-swiss-qr-invoice'),
+                'type' => 'camt_upload',
+                'class' => 'camt-tab'
+            ),
             'return_token' => array(
                 'title' => __('API key for Refunds', 'sqrip-swiss-qr-invoice'),
                 'type' => 'textarea',
@@ -968,6 +994,92 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         <?php
 
         return ob_get_clean();
+    }
+
+    /**
+     * The camt reconciliation panel: pick a file, preview, apply.
+     *
+     * Rendered by hand rather than as a plain file input, because the file is never
+     * part of the settings form. It is sent to its own endpoint, read once and dropped;
+     * nothing about it is saved with the settings. (C3)
+     *
+     * @since 1.11
+     * @param string $key
+     * @param array  $data
+     * @return string
+     */
+    public function generate_camt_upload_html($key, $data)
+    {
+        $field_key = $this->get_field_key($key);
+
+        $data = wp_parse_args($data, array(
+            'title' => '',
+            'class' => '',
+        ));
+
+        $max_size = size_format(Sqrip_Camt_Parser::MAX_FILE_SIZE);
+
+        ob_start();
+        ?>
+        <tr valign="top">
+            <th scope="row" class="titledesc <?php echo esc_attr($data['class']); ?>">
+                <label for="<?php echo esc_attr($field_key); ?>"><?php echo wp_kses_post($data['title']); ?></label>
+            </th>
+            <td class="forminp">
+                <fieldset class="sqrip-camt-panel <?php echo esc_attr($data['class']); ?>">
+                    <p class="description">
+                        <?php
+                        echo esc_html__(
+                            'Download the camt.053 or camt.054 file of the account that receives your customers\' payments from your e-banking, then choose it here. "Preview" only shows what would happen and changes nothing.',
+                            'sqrip-swiss-qr-invoice'
+                        );
+                        ?>
+                    </p>
+
+                    <p>
+                        <input type="file"
+                               id="<?php echo esc_attr($field_key); ?>"
+                               class="sqrip-camt-file"
+                               accept=".xml,text/xml,application/xml" />
+                    </p>
+
+                    <p class="description">
+                        <?php
+                        printf(
+                            /* translators: %s: maximum file size, e.g. 20 MB */
+                            esc_html__('XML file, at most %s.', 'sqrip-swiss-qr-invoice'),
+                            esc_html($max_size)
+                        );
+                        ?>
+                    </p>
+
+                    <p>
+                        <button type="button" class="button-secondary sqrip-camt-preview">
+                            <?php esc_html_e('Preview', 'sqrip-swiss-qr-invoice'); ?>
+                        </button>
+                        <button type="button" class="button-primary sqrip-camt-apply" disabled="disabled">
+                            <?php esc_html_e('Apply', 'sqrip-swiss-qr-invoice'); ?>
+                        </button>
+                    </p>
+
+                    <div class="sqrip-camt-result"></div>
+                </fieldset>
+            </td>
+        </tr>
+        <?php
+
+        return ob_get_clean();
+    }
+
+    /**
+     * The upload is never stored, so there is nothing to validate or save.
+     *
+     * @since 1.11
+     * @return string
+     */
+    public function validate_camt_upload_field($key, $value)
+    {
+        return '';
     }
 
     public function generate_section_html($key, $data)

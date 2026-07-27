@@ -35,6 +35,15 @@ define('SQRIP_PLUGIN_BASENAME', plugin_basename(__FILE__));
 
 require_once __DIR__ . '/inc/functions.php';
 require_once __DIR__ . '/inc/sqrip-ajax.php';
+require_once __DIR__ . '/inc/class-sqrip-camt-parser.php';
+require_once __DIR__ . '/inc/class-sqrip-camt-reconciler.php';
+
+// Reconciling is an admin-only job; the frontend never needs any of it.
+if (is_admin()) {
+    require_once __DIR__ . '/inc/class-sqrip-camt-admin.php';
+
+    Sqrip_Camt_Admin::init();
+}
 
 /**
  * Load the plugin's bundled translations from /languages.
@@ -281,6 +290,12 @@ add_action('admin_enqueue_scripts', function ($hook_suffix) {
                 'details' => $sqrip_details,
                 'field_required_txt' => __('This field is required', 'sqrip-swiss-qr-invoice'),
                 'cleanup_nonce' => wp_create_nonce('sqrip-cleanup-invoices'),
+                'camt_nonce' => wp_create_nonce(Sqrip_Camt_Admin::NONCE),
+                'txt_camt_choose_file' => __('Please choose a file first.', 'sqrip-swiss-qr-invoice'),
+                'txt_camt_reading' => __('Reading…', 'sqrip-swiss-qr-invoice'),
+                'txt_camt_applying' => __('Applying…', 'sqrip-swiss-qr-invoice'),
+                'txt_camt_failed' => __('The file could not be processed.', 'sqrip-swiss-qr-invoice'),
+                'txt_camt_confirm' => __('Mark the listed orders as paid?', 'sqrip-swiss-qr-invoice'),
                 'txt_cleanup_now' => __('Delete all unneeded QR-invoice PDFs now', 'sqrip-swiss-qr-invoice'),
                 'txt_cleanup_running' => __('Deleting…', 'sqrip-swiss-qr-invoice'),
                 'txt_cleanup_failed' => __('The clean-up could not be completed.', 'sqrip-swiss-qr-invoice'),
