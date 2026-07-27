@@ -135,6 +135,13 @@ function sqrip_frontend_text($key)
             }
 
             return __('Use the QR invoice below to pay the outstanding balance.', 'sqrip-swiss-qr-invoice');
+
+        case 'qr_invoice_failed':
+            if ($informal && $is_german) {
+                return 'Die QR-Rechnung konnte im Moment leider nicht erstellt werden. Bitte versuche es später erneut, wende dich an den Shop oder wähle eine andere Zahlungsart.';
+            }
+
+            return __("It seems we couldn't provide you with a QR-invoice at this time. Please try later, contact the shop or use a different payment method.", 'sqrip-swiss-qr-invoice');
     }
 
     return '';
@@ -1015,7 +1022,7 @@ function process_payment_stt($order_id)
         $sqrip_link = $has_purchase ? 
             " here <a href='https://www.sqrip.ch/#pricing' target='_blank'>https://www.sqrip.ch/#pricing</a>" 
             : ($has_request ? " And we don't yet know why. Please contact our <a href='mailto:support@sqrip.ch'>support</a>" : "");
-        $customer_msg = __("It seems we couldn't provide you with a QR-invoice at this time. Please try later, contact the shop or use a different payment method.", 'sqrip-swiss-qr-invoice');
+        $customer_msg = sqrip_frontend_text('qr_invoice_failed');
         // <a href="mailto:someone@example.com">Send email</a>
         wc_add_notice(
             sprintf(
@@ -1145,7 +1152,7 @@ function process_payment_stt($order_id)
         );
     } else {
 
-        $customer_msg = __("It seems we couldn't provide you with a QR-invoice at this time. Please try later, contact the shop or use a different payment method.", 'sqrip-swiss-qr-invoice');
+        $customer_msg = sqrip_frontend_text('qr_invoice_failed');
         wc_add_notice(
             sprintf(
                 __('Error: %s', 'sqrip-swiss-qr-invoice'),

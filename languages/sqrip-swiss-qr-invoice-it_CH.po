@@ -155,10 +155,10 @@ msgstr "Stato degli ordini completati"
 msgid "Completed, Paid"
 msgstr "Completato, pagato"
 
-msgid "Confirm payment"
+msgid "Confirm Payment"
 msgstr "Conferma pagamento"
 
-msgid "Confirm Payment"
+msgid "Confirm payment"
 msgstr "Conferma pagamento"
 
 msgid "Confirm receipt of payment"
