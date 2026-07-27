@@ -524,44 +524,13 @@ jQuery(document).ready(function ($) {
             } else {
                 $('.sqrip-tab[data-tab="' + feature.text + '"]').hide();
             }
-
-            toggleComparisonAndMultipleSlips(feature.text);
         })
     });
 
-    // Deliberately NOT called on page load any more. It rewrites the two checkboxes,
-    // so merely opening the settings screen used to switch a feature the shop had not
-    // touched: with multiple QR slips on, the payment comparison was silently
-    // unticked, and with multiple QR slips off it was silently ticked — which also
-    // made it impossible to have both switched off. The tabs are already hidden for
-    // unchecked features by the loop above.
-    //Toggle "comparison" and "multiple-qr-slips"
-    function toggleComparisonAndMultipleSlips(feature) {
-        if (feature === 'comparison') {
-            if (ip_payment_comparison_enabled.is(':checked')) {
-                ip_multiple_qr_slips_enabled.prop("checked", false);
-                // ip_multiple_qr_slips_enabled.attr("disabled", true);
-                $('.sqrip-tab[data-tab="multiple-qr-slips"]').hide();
-            } else {
-                // ip_multiple_qr_slips_enabled.attr("disabled", false);
-                ip_multiple_qr_slips_enabled.prop("checked", true);
-                $('.sqrip-tab[data-tab="multiple-qr-slips"]').show();
-            }
-
-        } else {
-
-            if (ip_multiple_qr_slips_enabled.is(':checked')) {
-                ip_payment_comparison_enabled.prop("checked", false);
-                // ip_payment_comparison_enabled.attr("disabled", true);
-                $('.sqrip-tab[data-tab="comparison"]').hide();
-            } else {
-                // ip_payment_comparison_enabled.attr("disabled", false);
-                ip_payment_comparison_enabled.prop("checked", true);
-                $('.sqrip-tab[data-tab="comparison"]').show();
-            }
-        }
-
-    }
+    // "Payment Comparison" and "Multiple QR-slips" used to switch each other off. They
+    // are independent features: instalments, discount and reminder invoices all create
+    // several QR slips per order, and reconciling them is exactly what the payment
+    // comparison is for. The two are now free to be on at the same time, or both off.
 
     tab_active = window.location.hash.slice(1);
     if (!tab_active) tab_active = "services";
@@ -1238,11 +1207,9 @@ jQuery(document).ready(function ($) {
      * camt reconciliation.
      *
      * The activation checkbox is a sub-feature of the payment comparison, so it only
-     * appears while that one is ticked, and its tab only while both are.
-     *
-     * Deliberately NOT routed through toggleFeatures: that calls
-     * toggleComparisonAndMultipleSlips(), which switches the payment comparison and the
-     * multiple QR slips against each other. A sub-feature must not trigger that.
+     * appears while that one is ticked, and its tab only while both are. Kept out of
+     * the toggleFeatures list above, which pairs one checkbox with one tab of the same
+     * name — this one depends on two checkboxes.
      */
     var ip_camt_enabled = $('#woocommerce_sqrip_camt_reconciliation_enabled');
 
