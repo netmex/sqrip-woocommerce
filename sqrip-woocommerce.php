@@ -1071,7 +1071,9 @@ function sqrip_extra_user_profile_fields($user)
     $sqrip_return_enabled = sqrip_get_plugin_option('return_enabled');
     $sqrip_refund_token = sqrip_get_plugin_option('return_token');
 
-    if ($sqrip_return_enabled) {
+    // Compare against 'yes': a WooCommerce checkbox stores the string 'no', which is
+    // truthy in PHP, so this section used to render even with refunds switched off.
+    if ($sqrip_return_enabled === 'yes') {
         ?>
         <h3><?php _e("Refunds with sqrip", "sqrip-swiss-qr-invoice"); ?></h3>
         <table class="form-table">
@@ -1082,7 +1084,20 @@ function sqrip_extra_user_profile_fields($user)
                            value="<?php echo esc_attr(sqrip_get_customer_iban($user)); ?>" class="regular-text"/><br/>
                            <button id="btn_sqrip_check_iban" class="button-secondary sqrip-btn-validate" style="margin-top: 10px;">Check</button><br/>
                     <span class="description"><?php _e("This iban will be used to generate a sqrip qr code in case of a refund."); ?></span>
-                    <input type="hidden" id="sqrip-refund-token" value="<?=$sqrip_refund_token; ?>" />
+                    <?php
+                    // Never expose the shop's refund API key to users who may not manage
+                    // the shop. This block also renders on show_user_profile, i.e. on
+                    // wp-admin/profile.php, which every role with edit_posts can open —
+                    // the token was readable there via View Source. Shop managers still
+                    // get it, so the IBAN "Check" button keeps working; everyone else
+                    // cannot use the validation endpoint anyway (it requires
+                    // manage_woocommerce).
+                    if (current_user_can('manage_woocommerce')) {
+                        ?>
+                        <input type="hidden" id="sqrip-refund-token" value="<?php echo esc_attr($sqrip_refund_token); ?>" />
+                        <?php
+                    }
+                    ?>
                 </td>
             </tr>
         </table>
