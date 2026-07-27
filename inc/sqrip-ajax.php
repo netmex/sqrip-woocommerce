@@ -22,11 +22,40 @@ function sqrip_generate_new_qr_code()
     $user_id = $order->get_user_id();
     $cur_user_id = get_current_user_id();
 
-    if ($user_id == $cur_user_id) {
-        $process_payment = process_payment_stt($order_id);
-
-        wp_send_json($process_payment);
+    // Guest orders have user id 0 — never let a logged-out or unrelated visitor match.
+    if (!$cur_user_id || $user_id != $cur_user_id) {
+        die();
     }
+
+    // Each call spends one paid sqrip credit, deletes the existing PDF and mints a NEW
+    // reference number. Without the guards below a customer could loop this endpoint:
+    // draining the shop's credits and changing the reference of a transfer already in
+    // flight, so the incoming payment could no longer be reconciled.
+    if ($order->get_payment_method() !== 'sqrip') {
+        die();
+    }
+
+    // Only for orders that are still waiting to be paid.
+    $status_awaiting = str_replace('wc-', '', (string) sqrip_get_plugin_option('status_awaiting'));
+    $qr_order_status = str_replace('wc-', '', (string) sqrip_get_plugin_option('qr_order_status'));
+    $allowed_statuses = array_filter(array('pending', 'on-hold', $status_awaiting, $qr_order_status));
+
+    if (!$order->has_status($allowed_statuses)) {
+        die();
+    }
+
+    // Simple per-order throttle so the endpoint cannot be hammered.
+    $throttle_key = 'sqrip_regen_' . $order->get_id();
+
+    if (get_transient($throttle_key)) {
+        die();
+    }
+
+    set_transient($throttle_key, 1, MINUTE_IN_SECONDS);
+
+    $process_payment = process_payment_stt($order_id);
+
+    wp_send_json($process_payment);
 
     die();
 }
@@ -344,15 +373,40 @@ function sqrip_payment_confirmed()
         return;
     }
 
+    // Only ever confirm payments on sqrip orders. The nonce is not bound to a specific
+    // order, so without this an edited order_id could confirm payment on any order.
+    if ($order->get_payment_method() !== 'sqrip') {
+        wp_die(-1, 403);
+    }
+
     $paged = isset($_GET['paged']) ? '&paged=' . absint($_GET['paged']) : '';
+
+    // The orders screen differs by order storage: HPOS uses admin.php?page=wc-orders,
+    // classic storage edit.php?post_type=shop_order (which only still works because
+    // WooCommerce 301-redirects it).
+    $orders_url = (class_exists('\Automattic\WooCommerce\Utilities\OrderUtil')
+        && \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled())
+        ? admin_url('admin.php?page=wc-orders')
+        : admin_url('edit.php?post_type=shop_order');
 
     $sqrip_paid_invoice = sqrip_get_order_meta_value($order, 'sqrip_paid_invoice_number');
     $sqrip_invoice_count = sqrip_get_order_meta_value($order, 'sqrip_multiple_invoice_count');
-    
+
     if ($sqrip_invoice_count && isset($sqrip_paid_invoice)) {
         $sqrip_invoice_count = (int) $sqrip_invoice_count;
         $sqrip_paid_invoice = (int) $sqrip_paid_invoice;
         $sqrip_next_paid_invoice_number = $sqrip_paid_invoice + 1;
+
+        // Never count past the number of invoices that actually exist. The action is a
+        // plain link with a nonce that stays valid for hours, so a double click or a
+        // browser prefetch used to keep incrementing the counter — marking a partially
+        // paid order as fully paid, and afterwards dragging a completed order back into
+        // a partial status.
+        if ($sqrip_next_paid_invoice_number > $sqrip_invoice_count) {
+            wp_safe_redirect($orders_url . $paged);
+            die();
+        }
+
         $payment_status = sqrip_get_plugin_option("partial_invoice_".$sqrip_next_paid_invoice_number."_status");
 
         if ($payment_status) {
@@ -361,15 +415,19 @@ function sqrip_payment_confirmed()
 
         $order->update_meta_data('sqrip_paid_invoice_number', $sqrip_next_paid_invoice_number);
         $order->save();
-        
+
         if ($sqrip_invoice_count > $sqrip_next_paid_invoice_number) {
-            wp_redirect(get_admin_url() . 'edit.php?post_type=shop_order' . $paged);
+            wp_safe_redirect($orders_url . $paged);
             die();
         }
     }
 
-    $order->update_status($status_completed, '');
+    // Fall back to the shop's completed status only when it is actually configured;
+    // update_status('') would make WooCommerce silently drop the order back to pending.
+    if ($status_completed) {
+        $order->update_status($status_completed, '');
+    }
 
-    wp_redirect(get_admin_url() . 'edit.php?post_type=shop_order' . $paged);
+    wp_safe_redirect($orders_url . $paged);
     die();
 }

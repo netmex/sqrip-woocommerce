@@ -64,48 +64,43 @@ class Sqrip_Media_Clearner
     
             if ($completed_orders) {
                 foreach ($completed_orders as $order) {
-                    $order_id = method_exists($order, 'get_id') ? $order->get_id() : $order->ID;
-                    
-                    $att_id = "";
-                    $attach_url = "";
-                    // Implement compatibility with WooCommerce HPOS
-                    if ( \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled() ) {
-                        $order = wc_get_order($order_id);
-                        $att_id = $order->get_meta('sqrip_qr_pdf_attachment_id', true);
-    
-                        if (!$att_id) {
-                            $attach_url = $order->get_meta('sqrip_pdf_file_url', true);
-                            $att_id = attachment_url_to_postid($attach_url);
-                        }
-                        // error_log("SQRIP:: Using HPOS pdf_file:: ".$att_id);
-    
-                        $deleted_att = wp_delete_attachment($att_id, true);
-                        $order->update_meta_data('sqrip_pdf_file_path', 'deleted');
-                        $order->update_meta_data('sqrip_pdf_file_url', 'deleted');
-                        $order->save();
-                    } else {
-                        $att_id = get_post_meta($order_id, 'sqrip_qr_pdf_attachment_id', true);
-    
-                        if (!$att_id) {
-                            $attach_url = get_post_meta($order_id, 'sqrip_pdf_file_url', true);
-                            $att_id = attachment_url_to_postid($attach_url);
-                        }
-                        // error_log("SQRIP:: Using Classic pdf_file:: ".$att_id);
-    
-                        $deleted_att = wp_delete_attachment($att_id, true);
-                        update_post_meta($order_id, 'sqrip_pdf_file_path', 'deleted');
-                        update_post_meta($order_id, 'sqrip_pdf_file_url', 'deleted');
+                    if (!$order instanceof WC_Order) {
+                        continue;
                     }
-    
+
+                    $order_id = $order->get_id();
+
+                    // sqrip_get_order_meta_value() reads through the order object, so this
+                    // works on HPOS and classic storage without branching.
+                    $att_id = sqrip_get_order_meta_value($order, 'sqrip_qr_pdf_attachment_id');
+
+                    if (!$att_id) {
+                        $attach_url = sqrip_get_order_meta_value($order, 'sqrip_pdf_file_url');
+                        $att_id = ($attach_url && $attach_url !== 'deleted') ? attachment_url_to_postid($attach_url) : 0;
+                    }
+
+                    $att_id = (int) $att_id;
+
+                    if (!$att_id) {
+                        // Nothing to delete. Do NOT write the 'deleted' markers here — they
+                        // are also used as an attachment path, so claiming a deletion that
+                        // never happened silently breaks later e-mails for this order.
+                        $logs .= ' No attachement deleted for order #' . $order_id;
+                        continue;
+                    }
+
+                    $deleted_att = wp_delete_attachment($att_id, true);
+
                     $logs .= $deleted_att ? ' Deleted attachement ' . $att_id . ' in order #' . $order_id . '.' : ' No attachement deleted for order #' . $order_id;
 
                     if ($deleted_att) {
-                        $logs .= ' Deleted sqrip_reference_id, sqrip_qr_pdf_attachment_id, sqrip_pdf_file_path & sqrip_pdf_file_url for order #' . $order_id . '.';
-        
+                        $order->update_meta_data('sqrip_pdf_file_path', 'deleted');
+                        $order->update_meta_data('sqrip_pdf_file_url', 'deleted');
+                        $order->save();
+
                         $order_notes = sprintf(__('The PDF file for order #%s has been deleted from the media library', 'sqrip-swiss-qr-invoice'), $order_id);
                         $order->add_order_note($order_notes);
                     }
-    
                 }
     
                 $logs .= 'Sqrip_Media_Cleaner ran and deleted ' . count($completed_orders) . ' invoices!';
@@ -114,12 +109,24 @@ class Sqrip_Media_Clearner
                 $logs .= 'Sqrip_Media_Cleaner ran and deleted 0 invoices!';
             }
     
+            // Clean up leftover test-e-mail invoices (the test mail uses order id 11111).
+            // This MUST stay restricted to attachments sqrip created itself: every upload
+            // from this plugin carries the 'sqrip_invoice' meta. Without that filter the
+            // query matched ANY PDF in the media library whose title, content or excerpt
+            // contained "11111" and force-deleted it — including files that had nothing
+            // to do with sqrip.
             $args = array(
                 'post_type' => 'attachment',
                 'post_mime_type' => 'application/pdf',
                 'posts_per_page' => -1,
                 'post_status' => 'any',
                 's' => '11111',
+                'meta_query' => array(
+                    array(
+                        'key' => 'sqrip_invoice',
+                        'compare' => 'EXISTS',
+                    ),
+                ),
                 'date_query' => array(
                     array(
                         'before' => date('Y-m-d H:00:00', $targeted_time),
