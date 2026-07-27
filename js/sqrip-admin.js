@@ -1187,6 +1187,7 @@ jQuery(document).ready(function ($) {
     if (ip_expired_date.length && typeof sqrip.txt_cleanup_now !== 'undefined') {
         ip_expired_date.closest('td').append(
             '<div class="sqrip-cleanup-box" style="margin-top:10px;">' +
+            '<p class="description" style="margin:0 0 6px;">' + sqrip.txt_cleanup_hint + '</p>' +
             '<button type="button" id="btn_sqrip_cleanup_now" class="button-secondary">' +
             sqrip.txt_cleanup_now + '</button>' +
             // Result goes on its own line BELOW the button, not trailing after it.

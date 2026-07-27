@@ -146,7 +146,8 @@ Yes. We are already working on comparing the reconciliation of orders/purchases 
 
 == Changelog ==
 = 1.10.1 : Juli 2026 – Fixes =
-* New button in the settings: delete all unneeded QR-invoice PDFs right away, instead of waiting for the daily clean-up;
+* New button in the settings: delete all QR-invoice PDFs created up to today right away, instead of waiting for the daily clean-up. Invoices of orders that are still waiting for payment are always kept;
+* The clean-up now also removes files that were previously left behind: refund QR codes, the PNG for the PDF-invoice integration, the individual slips of a multi-invoice order, and leftovers from earlier regenerations;
 * The refund QR code is shown immediately instead of being hidden behind a link;
 * Manual invoices in the media library are no longer at risk: the clean-up job only ever deletes PDFs that sqrip created itself (it could previously delete unrelated PDFs whose name contained a certain number);
 * Refunds no longer report success when no refund QR code could be created;

@@ -451,13 +451,6 @@ function sqrip_cleanup_invoices_now()
         wp_die(-1, 403);
     }
 
-    if (!sqrip_get_plugin_option('expired_date')) {
-        wp_send_json(array(
-            'result' => false,
-            'message' => __('Please first set after how many days QR invoices should be deleted, then save the settings.', 'sqrip-swiss-qr-invoice'),
-        ));
-    }
-
     if (!class_exists('Sqrip_Media_Clearner')) {
         wp_send_json(array(
             'result' => false,
@@ -465,8 +458,10 @@ function sqrip_cleanup_invoices_now()
         ));
     }
 
+    // true = ignore the retention period: this button deletes every sqrip file up to
+    // today. Orders that are still waiting for payment are protected inside clean().
     $cleaner = new Sqrip_Media_Clearner();
-    $deleted = (int) $cleaner->clean();
+    $deleted = (int) $cleaner->clean(true);
 
     if ($deleted > 0) {
         $message = sprintf(

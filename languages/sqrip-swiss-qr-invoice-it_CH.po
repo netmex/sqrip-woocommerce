@@ -152,10 +152,10 @@ msgstr "Stato degli ordini completati"
 msgid "Completed, Paid"
 msgstr "Completato, pagato"
 
-msgid "Confirm payment"
+msgid "Confirm Payment"
 msgstr "Conferma pagamento"
 
-msgid "Confirm Payment"
+msgid "Confirm payment"
 msgstr "Conferma pagamento"
 
 msgid "Confirm receipt of payment"
@@ -196,6 +196,9 @@ msgstr "Elimina la fattura QR quando lo stato è stato cambiato in"
 
 msgid "Deleted"
 msgstr "Eliminato"
+
+msgid "Deletes all QR invoices created up to today. Invoices of orders that are still waiting for payment are kept."
+msgstr "Elimina tutte le fatture QR create fino a oggi. Le fatture degli ordini ancora in attesa di pagamento vengono conservate."
 
 msgid "Deleting…"
 msgstr "Eliminazione…"
@@ -436,9 +439,6 @@ msgstr "Nome del metodo di pagamento"
 
 msgid "Please add IBAN in the settings of your webshop or on the sqrip dashboard."
 msgstr "Aggiunga l'IBAN nelle impostazioni del Suo negozio online o nella dashboard di sqrip."
-
-msgid "Please first set after how many days QR invoices should be deleted, then save the settings."
-msgstr "Imposta prima dopo quanti giorni eliminare le fatture QR, poi salva le impostazioni."
 
 msgid "Please make sure you have this defined correctly:"
 msgstr "Si assicuri di aver definito correttamente quanto segue:"

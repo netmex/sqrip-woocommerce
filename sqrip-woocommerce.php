@@ -284,6 +284,7 @@ add_action('admin_enqueue_scripts', function ($hook_suffix) {
                 'txt_cleanup_now' => __('Delete all unneeded QR-invoice PDFs now', 'sqrip-swiss-qr-invoice'),
                 'txt_cleanup_running' => __('Deleting…', 'sqrip-swiss-qr-invoice'),
                 'txt_cleanup_failed' => __('The clean-up could not be completed.', 'sqrip-swiss-qr-invoice'),
+                'txt_cleanup_hint' => __('Deletes all QR invoices created up to today. Invoices of orders that are still waiting for payment are kept.', 'sqrip-swiss-qr-invoice'),
                 'txt_address_update_warning' => sprintf(
                     "<p>%s</p><p>%s<ul><li>%s</li><li>%s</li><li>%s</li></ul><p>",
                     __('As from November 2025 on, the QR invoice is only accepted when addresses consist of separate fields for street and building number.', 'sqrip-swiss-qr-invoice'),
