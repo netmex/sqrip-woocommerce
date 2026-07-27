@@ -344,7 +344,10 @@ add_action('wp_enqueue_scripts', 'sqrip_enqueue_scripts');
 
 function sqrip_enqueue_scripts()
 {
-    wp_enqueue_style('sqrip', plugins_url('css/sqrip-order.css', __FILE__), false);
+    // The third argument is $deps, so the version was left at false and WordPress
+    // appended its own core version — which does not change when the plugin ships new
+    // CSS. Returning visitors then combined new JS with a cached stylesheet.
+    wp_enqueue_style('sqrip', plugins_url('css/sqrip-order.css', __FILE__), array(), '1.10.1');
 
     wp_enqueue_script('sqrip', plugins_url('js/sqrip-fe.js', __FILE__), array('jquery'), '1.10.1', true);
 
@@ -838,19 +841,47 @@ add_action('woocommerce_process_shop_order_meta', function($post_id) {
         $endpoint = 'code';
         $response = wp_remote_post(SQRIP_ENDPOINT . $endpoint, $args);
 
-        $response_body = wp_remote_retrieve_body($response);
-        $response_body = json_decode($response_body);
-
+        // Check the transport error BEFORE reading the body: wp_remote_retrieve_body()
+        // returns '' for a WP_Error, so decoding first turned every network failure into
+        // a blank "Error:" note instead of the real reason.
         if (is_wp_error($response)) {
 
             $order->add_order_note(
                 sprintf(
                     __('Error: %s', 'sqrip-swiss-qr-invoice'),
-                    esc_html($response_body->message)
+                    esc_html($response->get_error_message())
                 )
             );
 
-        } else {
+            return;
+        }
+
+        $status_code = wp_remote_retrieve_response_code($response);
+        $response_body = json_decode(wp_remote_retrieve_body($response));
+
+        // Without a status check an API error body such as {"message":"No credits left"}
+        // reached the count() below — a fatal TypeError on PHP 8 in the middle of saving
+        // the order, leaving the admin with a critical-error page. The two checkout paths
+        // have always had this guard; this one did not.
+        if ($status_code !== 200) {
+
+            $api_message = (is_object($response_body) && isset($response_body->message))
+                ? $response_body->message
+                : __('Connection error!', 'sqrip-swiss-qr-invoice');
+
+            $order->add_order_note(
+                sprintf(
+                    __('Error: %s', 'sqrip-swiss-qr-invoice'),
+                    esc_html($api_message)
+                )
+            );
+
+            sqrip_auto_turn_off();
+
+            return;
+        }
+
+        {
 
             if (isset($_POST['_sqrip_regenerate_qrcode'])) {
                 $order_notes = __('sqrip payment QR code was successfully regenerated', 'sqrip-swiss-qr-invoice');
@@ -861,9 +892,16 @@ add_action('woocommerce_process_shop_order_meta', function($post_id) {
                 $order->set_payment_method('sqrip');
             }
 
-            $is_multiple_invoices = $number_of_invoices && $number_of_invoices > 1;
-            $response_reference = $is_multiple_invoices && count($response_body) ? $response_body[0]->reference : $response_body->reference;
-    
+            // Honour the feature switch like both checkout paths do — testing only
+            // number_of_invoices meant shops with partial invoicing switched off still
+            // got half-amount slips, because the setting defaults to "2".
+            $is_multiple_invoices = sqrip_get_plugin_option('multiple_qr_slips_enabled') === 'yes'
+                && $number_of_invoices && $number_of_invoices > 1;
+
+            $response_reference = $is_multiple_invoices
+                ? (isset($response_body[0]->reference) ? $response_body[0]->reference : null)
+                : (isset($response_body->reference) ? $response_body->reference : null);
+
             if (isset($response_reference)) {
                 if ($is_multiple_invoices) {
                     $num = 1;
@@ -1481,9 +1519,14 @@ function sqrip_add_custom_order_status_actions_button($actions, $order)
 
     $status_awaiting = sqrip_get_plugin_option('status_awaiting');
     $status_awaiting = str_replace('wc-', '', $status_awaiting);
+    // Compare against 'yes': a WooCommerce checkbox stores the string 'no', which is
+    // truthy in PHP. Testing it for truthiness made the whole condition always true, so
+    // the confirm-payment action appeared on every sqrip order in every status —
+    // including cancelled, refunded and already completed ones — even for shops that had
+    // switched payment comparison off.
     if (
         ($order->has_status(array($status_awaiting)) && sqrip_get_plugin_option('payment_comparison_enabled') == 'yes')
-        || sqrip_get_plugin_option('multiple_qr_slips_enabled')
+        || sqrip_get_plugin_option('multiple_qr_slips_enabled') === 'yes'
     ) {
 
         // The key slug defined for your action button
@@ -1604,7 +1647,22 @@ add_action('woocommerce_order_status_changed', function ($post_id, $old_status, 
 
 add_action('woocommerce_thankyou', function ($order_id) {
     $order = wc_get_order($order_id);
+
+    if (!$order) {
+        return;
+    }
+
     if ($order->get_payment_method() == 'sqrip') {
+
+        // Set the sqrip status only once, right after checkout. This hook also fires
+        // every time the customer reopens the order-received URL (it stays in their
+        // history and bookmarks), and it used to rewrite the status unconditionally —
+        // so revisiting the page after the shop had confirmed the payment threw the
+        // order back to the waiting status and re-sent the "please pay" e-mail.
+        if (sqrip_get_order_meta_value($order, 'sqrip_thankyou_status_set') === 'yes') {
+            return;
+        }
+
         $sqrip_suppress_generation = sqrip_get_plugin_option('suppress_generation');
         $sqrip_default_suppressed_status = sqrip_get_plugin_option('status_suppressed');
         $sqrip_qr_order_status = sqrip_get_plugin_option('qr_order_status');
@@ -1629,6 +1687,11 @@ add_action('woocommerce_thankyou', function ($order_id) {
         } else {
             $order->update_status($sqrip_qr_order_status);
         }
+
+        // Remember that the initial status was applied, so a later revisit of the
+        // order-received page leaves the order alone.
+        $order->update_meta_data('sqrip_thankyou_status_set', 'yes');
+        $order->save();
     }
 }, 10, 3);
 

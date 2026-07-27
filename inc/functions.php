@@ -729,10 +729,27 @@ function file_upload_stt($fileurl, $type, $token = "", $order_id = "", $is_refun
 
     $context = stream_context_create($stream_options);
 
+    // Same failure handling as WC_Sqrip_Payment_Gateway::file_upload(): an unchecked
+    // download produced 0-byte "invoices", and fwrite() on a failed fopen() is a fatal
+    // TypeError on PHP 8. Return 0 so callers can report a real error.
     $contents = file_get_contents($fileurl, false, $context);
+
+    if ($contents === false || $contents === '') {
+        return 0;
+    }
+
     $savefile = fopen($uploadfile, 'w');
-    fwrite($savefile, $contents);
+
+    if (!$savefile) {
+        return 0;
+    }
+
+    $written = fwrite($savefile, $contents);
     fclose($savefile);
+
+    if ($written === false || !file_exists($uploadfile) || filesize($uploadfile) === 0) {
+        return 0;
+    }
 
     $wp_filetype = wp_check_filetype(basename($filename), null);
 
@@ -747,6 +764,10 @@ function file_upload_stt($fileurl, $type, $token = "", $order_id = "", $is_refun
     );
     // Insert the attachment.
     $attach_id = wp_insert_attachment($attachment, $uploadfile);
+
+    if (is_wp_error($attach_id) || !$attach_id) {
+        return 0;
+    }
 
     // Generate the metadata for the attachment, and update the database record.
     $attach_data = wp_generate_attachment_metadata($attach_id, $uploadfile);

@@ -1498,10 +1498,34 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         $response_body = json_decode($response_body);
 
         if (isset($response_body->reference)) {
-            $sqrip_png = $response_body->png_file;
+            // Do not report success unless a usable QR code really exists. Returning true
+            // makes WooCommerce record the refund as executed, so a missing png_file or a
+            // failed download used to leave the shop with a "refunded" order and nothing
+            // to pay the customer with.
+            $sqrip_png = isset($response_body->png_file) ? $response_body->png_file : '';
 
-            $sqrip_png = explode("path=", $sqrip_png)[1];
+            if (!$sqrip_png) {
+                $order->add_order_note(
+                    __('Error: sqrip did not return a QR code for this refund. No refund QR code was created.', 'sqrip-swiss-qr-invoice')
+                );
+
+                return false;
+            }
+
+            // png_file is not always a "…?path=<url>" redirect; take the plain URL when
+            // there is no path= segment instead of reading an undefined array key.
+            $sqrip_png_parts = explode('path=', $sqrip_png);
+            $sqrip_png = isset($sqrip_png_parts[1]) ? $sqrip_png_parts[1] : $sqrip_png;
+
             $sqrip_qr_png_attachment_id = $this->file_upload($sqrip_png, '.png', '', $order_id, true);
+
+            if (!$sqrip_qr_png_attachment_id) {
+                $order->add_order_note(
+                    __('Error: the sqrip refund QR code could not be saved to the media library. No refund QR code was created.', 'sqrip-swiss-qr-invoice')
+                );
+
+                return false;
+            }
 
             $order->add_order_note(__('sqrip QR-Code für Rückerstattung erstellt.', 'sqrip-swiss-qr-invoice'));
 
@@ -1822,10 +1846,29 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 
         $context = stream_context_create($stream_options);
 
+        // Every step below can fail, and none of it used to be checked: a failed download
+        // wrote a 0-byte "invoice" that was then attached to e-mails and reported as
+        // created, and an unwritable uploads folder made fwrite(false, …) a fatal
+        // TypeError on PHP 8 — on the checkout request, after the credit was spent.
+        // Return 0 instead so the callers can report a real error.
         $contents = file_get_contents($fileurl, false, $context);
+
+        if ($contents === false || $contents === '') {
+            return 0;
+        }
+
         $savefile = fopen($uploadfile, 'w');
-        fwrite($savefile, $contents);
+
+        if (!$savefile) {
+            return 0;
+        }
+
+        $written = fwrite($savefile, $contents);
         fclose($savefile);
+
+        if ($written === false || !file_exists($uploadfile) || filesize($uploadfile) === 0) {
+            return 0;
+        }
 
         $wp_filetype = wp_check_filetype(basename($filename), null);
 
@@ -1840,6 +1883,10 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         );
         // Insert the attachment.
         $attach_id = wp_insert_attachment($attachment, $uploadfile);
+
+        if (is_wp_error($attach_id) || !$attach_id) {
+            return 0;
+        }
 
         // Generate the metadata for the attachment, and update the database record.
         $attach_data = wp_generate_attachment_metadata($attach_id, $uploadfile);
