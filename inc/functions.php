@@ -131,25 +131,39 @@ function sqrip_get_billing_address_from_order($order)
 function sqrip_prepare_qr_code_request_body($currency_symbol, $amount, $order_number)
 {
     $plugin_options = sqrip_get_plugin_options();
-    $sqrip_due_date = $plugin_options['due_date'];
-    $iban = $plugin_options['iban'];
-    $token = $plugin_options['token'];
-    $initial_digits = $plugin_options['qr_reference_format'];
 
-    $product = $plugin_options['product'];
-    $qr_reference = $plugin_options['qr_reference'];
-    $address = $plugin_options['address'];
-    $lang = $plugin_options['lang'] ? $plugin_options['lang'] : "de";
+    // Read every setting defensively. Keys that were introduced by a later release are
+    // simply absent until the merchant saves the settings screen again, so these direct
+    // reads produced a batch of PHP 8 "Undefined array key" warnings on every single
+    // checkout — and with display_errors on, those warnings corrupt the checkout AJAX
+    // response and the order can no longer be placed.
+    $sqrip_due_date = isset($plugin_options['due_date']) ? $plugin_options['due_date'] : '';
+    $iban = isset($plugin_options['iban']) ? $plugin_options['iban'] : '';
+    $token = isset($plugin_options['token']) ? $plugin_options['token'] : '';
+    $initial_digits = isset($plugin_options['qr_reference_format']) ? $plugin_options['qr_reference_format'] : '';
+
+    $product = isset($plugin_options['product']) ? $plugin_options['product'] : '';
+    $qr_reference = isset($plugin_options['qr_reference']) ? $plugin_options['qr_reference'] : '';
+    $address = isset($plugin_options['address']) ? $plugin_options['address'] : '';
+    $lang = !empty($plugin_options['lang']) ? $plugin_options['lang'] : "de";
     $add_to_pdf_invoice = sqrip_get_plugin_option('pdf_invoice_integration');
 
     $date = date('Y-m-d');
-    $due_date_raw = strtotime($date . " + " . $sqrip_due_date . " days");
+
+    // A missing or non-numeric due date made strtotime() return false, and date('Y-m-d',
+    // false) silently yields 1970-01-01 — printing a 1970 payment deadline on a real QR
+    // bill with nothing in any log. Fall back to the field default instead.
+    if (!is_numeric($sqrip_due_date)) {
+        $sqrip_due_date = 30;
+    }
+
+    $due_date_raw = strtotime($date . " + " . (int) $sqrip_due_date . " days");
     $due_date = date('Y-m-d', $due_date_raw);
 
-    $additional_information = $plugin_options['additional_information'];
-    $partial_invoice_information = $plugin_options['partial_invoice_information'];
-    $multiple_qr_slips_enabled = $plugin_options['multiple_qr_slips_enabled'];
-    $number_of_invoices = $plugin_options['number_of_invoices'];
+    $additional_information = isset($plugin_options['additional_information']) ? $plugin_options['additional_information'] : '';
+    $partial_invoice_information = isset($plugin_options['partial_invoice_information']) ? $plugin_options['partial_invoice_information'] : '';
+    $multiple_qr_slips_enabled = isset($plugin_options['multiple_qr_slips_enabled']) ? $plugin_options['multiple_qr_slips_enabled'] : 'no';
+    $number_of_invoices = isset($plugin_options['number_of_invoices']) ? $plugin_options['number_of_invoices'] : 0;
 
     if ($additional_information) {
         $additional_information = sqrip_additional_information_shortcodes($additional_information, $lang, $due_date_raw, $order_number);
@@ -472,19 +486,38 @@ function sqrip_additional_information_shortcodes($additional_information, $lang,
     setlocale(LC_TIME, $current_lang);
 
     $date_shortcodes = [];
-    // finds [due_date format="{format}"]
-    preg_match_all('/\[due_date format="(.*)"\]/', $additional_information, $date_shortcodes);
+    // finds [due_date format="{format}"] — non-greedy, so two shortcodes in one message
+    // do not swallow everything between the first format=" and the last "].
+    preg_match_all('/\[due_date format="(.*?)"\]/', $additional_information, $date_shortcodes);
+
+    // IntlDateFormatter needs the intl extension, which is not guaranteed on shared
+    // hosting. Without this guard a due-date shortcode was a fatal "class not found" on
+    // every sqrip checkout: the order was created, no QR invoice existed and the
+    // customer saw a white screen. Fall back to WordPress' own date formatting.
+    $has_intl = class_exists('IntlDateFormatter');
+
     foreach ($date_shortcodes[0] as $index => $date_shortcode) {
         $format = $date_shortcodes[1][$index];
-        $formatter = new IntlDateFormatter(
-            $current_lang,
-            IntlDateFormatter::FULL,
-            IntlDateFormatter::NONE,
-            null,
-            null,
-            $format
-        );
-        $due_date_format = $formatter->format($due_date);
+
+        if ($has_intl) {
+            $formatter = new IntlDateFormatter(
+                $current_lang,
+                IntlDateFormatter::FULL,
+                IntlDateFormatter::NONE,
+                null,
+                null,
+                $format
+            );
+            $due_date_format = $formatter->format($due_date);
+        } else {
+            // Best-effort mapping of the documented ICU patterns to PHP date() ones.
+            $php_format = str_replace(
+                array('yyyy', 'y', 'MMMM', 'MMM', 'MM', 'dd', 'd'),
+                array('Y', 'Y', 'F', 'M', 'm', 'd', 'j'),
+                $format
+            );
+            $due_date_format = date_i18n($php_format, $due_date);
+        }
         // $due_date_format = strftime($format, $due_date);
 
         if (!$due_date_format) {
@@ -707,6 +740,12 @@ function sqrip_reference_id_format_with_order_id ($reference_id_formatted, $orde
 */
 function file_upload_stt($fileurl, $type, $token = "", $order_id = "", $is_refund = false)
 {
+    // Validate the URL BEFORE file_get_contents(): on PHP 8 an empty or null path throws
+    // a ValueError, i.e. a fatal on the checkout request, not a warning as on 7.4.
+    if (!is_string($fileurl) || $fileurl === '') {
+        return 0;
+    }
+
     include_once(ABSPATH . 'wp-admin/includes/image.php');
 
     $sqrip_name = sqrip_file_name($order_id, $is_refund);
@@ -903,7 +942,13 @@ function process_payment_stt($order_id)
     $response_body = wp_remote_retrieve_body($response);
     // error_log($response_body);
     $response_body = json_decode($response_body);
-    $response_reference = $is_multiple_invoices && count($response_body) ? $response_body[0]->reference : $response_body->reference;
+    // count() on a non-array is a fatal TypeError on PHP 8: an HTTP 200 whose body is not
+    // valid JSON (proxy interstitial, truncated or gzip-mangled response) makes
+    // json_decode() return null, which used to take down the checkout request *after* the
+    // sqrip credit had already been spent. On PHP 7.4 the same line only warned.
+    $response_reference = $is_multiple_invoices
+        ? (isset($response_body[0]->reference) ? $response_body[0]->reference : null)
+        : (isset($response_body->reference) ? $response_body->reference : null);
 
     if (isset($response_reference)) {
 
@@ -987,7 +1032,9 @@ function process_payment_stt($order_id)
         $woocommerce->cart->empty_cart();
         $order->save();
 
-        $invoice_info = $is_multiple_invoices ? $response_body[0] : $response_body;
+        // Array access on an object is a fatal Error, so only index when it really is an
+        // array (the API returns an object for a single invoice).
+        $invoice_info = ($is_multiple_invoices && isset($response_body[0])) ? $response_body[0] : $response_body;
         if (isset($invoice_info->total_codes_left) && $invoice_info->total_codes_left <= 0) {
             // turn off sqrip if auto turn-off enabled
             sqrip_auto_turn_off();

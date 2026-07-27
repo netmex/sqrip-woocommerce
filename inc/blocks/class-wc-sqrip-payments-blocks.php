@@ -28,7 +28,11 @@ final class WC_Gateway_Sqrip_Blocks_Support extends AbstractPaymentMethodType {
 	public function initialize() {
 		$this->settings = get_option( 'woocommerce_sqrip_settings', [] );
 		$gateways       = WC()->payment_gateways->payment_gateways();
-		$this->gateway  = $gateways[ $this->name ];
+		// Without the isset() guard this was an undefined index whenever another plugin
+		// filters sqrip out of woocommerce_payment_gateways, leaving $this->gateway null
+		// and turning is_active() into a fatal during woocommerce_blocks_loaded — which
+		// renders the block checkout with no payment methods at all.
+		$this->gateway  = isset( $gateways[ $this->name ] ) ? $gateways[ $this->name ] : null;
 	}
 
 	/**
@@ -37,6 +41,18 @@ final class WC_Gateway_Sqrip_Blocks_Support extends AbstractPaymentMethodType {
 	 * @return boolean
 	 */
 	public function is_active() {
+		if ( ! $this->gateway ) {
+			return false;
+		}
+
+		// Ask the gateway itself instead of only reading the 'enabled' setting: every
+		// availability rule (such as the invoice-country restriction) lives in
+		// is_available(), and reading 'enabled' bypassed all of them in the block
+		// checkout while classic checkout honoured them.
+		if ( is_callable( array( $this->gateway, 'is_available' ) ) ) {
+			return (bool) $this->gateway->is_available();
+		}
+
 		return $this->gateway->enabled === 'yes';
 	}
 
@@ -66,7 +82,10 @@ final class WC_Gateway_Sqrip_Blocks_Support extends AbstractPaymentMethodType {
 		);
 
 		if ( function_exists( 'wp_set_script_translations' ) ) {
-			wp_set_script_translations( 'wc-sqrip-payments-blocks', 'woocommerce-gateway-sqrip', trailingslashit( plugin_dir_path( __FILE__ ) ) . 'languages/' );
+			// The domain was 'woocommerce-gateway-sqrip' and the path pointed at
+			// inc/blocks/languages/, which does not exist — so block-checkout strings were
+			// never translated. Use the plugin's real domain and its languages folder.
+			wp_set_script_translations( 'wc-sqrip-payments-blocks', 'sqrip-swiss-qr-invoice', trailingslashit( plugin_dir_path( __FILE__ ) ) . '../../languages/' );
 		}
 
 		return [ 'wc-sqrip-payments-blocks' ];
