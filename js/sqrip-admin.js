@@ -1178,4 +1178,55 @@ jQuery(document).ready(function ($) {
             validate_form();
         });
     });
+
+    // "Delete unneeded QR-invoice PDFs now" — runs the same clean-up as the daily cron,
+    // so the "delete after x days" setting can actually be verified instead of waiting a
+    // day for the next cron run.
+    var ip_expired_date = $('#woocommerce_sqrip_expired_date');
+
+    if (ip_expired_date.length && typeof sqrip.txt_cleanup_now !== 'undefined') {
+        ip_expired_date.closest('td').append(
+            '<div class="sqrip-cleanup-box" style="margin-top:10px;">' +
+            '<p class="description" style="margin:0 0 6px;">' + sqrip.txt_cleanup_hint + '</p>' +
+            '<button type="button" id="btn_sqrip_cleanup_now" class="button-secondary">' +
+            sqrip.txt_cleanup_now + '</button>' +
+            // Result goes on its own line BELOW the button, not trailing after it.
+            '<div class="sqrip-cleanup-result" style="margin-top:8px;"></div>' +
+            '</div>'
+        );
+
+        $('#btn_sqrip_cleanup_now').on('click', function (e) {
+            e.preventDefault();
+
+            var btn = $(this);
+            var out = btn.siblings('.sqrip-cleanup-result');
+            var label = btn.text();
+
+            btn.prop('disabled', true).text(sqrip.txt_cleanup_running);
+            out.removeClass('sqrip-notice error updated').text('');
+
+            $.ajax({
+                type: 'post',
+                url: sqrip.ajax_url,
+                data: {
+                    action: 'sqrip_cleanup_invoices_now',
+                    security: sqrip.cleanup_nonce
+                },
+                success: function (response) {
+                    if (response && response.result) {
+                        out.text(response.message).css('color', 'green');
+                    } else {
+                        out.text((response && response.message) ? response.message : sqrip.txt_cleanup_failed).css('color', 'darkred');
+                    }
+                },
+                error: function () {
+                    out.text(sqrip.txt_cleanup_failed).css('color', 'darkred');
+                },
+                complete: function () {
+                    btn.prop('disabled', false).text(label);
+                }
+            });
+        });
+    }
+
 });

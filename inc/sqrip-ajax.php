@@ -431,3 +431,55 @@ function sqrip_payment_confirmed()
     wp_safe_redirect($orders_url . $paged);
     die();
 }
+
+/**
+ * Run the QR-invoice clean-up immediately from the settings screen.
+ *
+ * The clean-up otherwise only runs on a daily cron, which makes the "delete after x days"
+ * setting impossible to verify. This lets the shop owner trigger exactly the same routine
+ * on demand — it deletes only PDFs that sqrip created itself.
+ *
+ * @since 1.10.1
+ */
+add_action('wp_ajax_sqrip_cleanup_invoices_now', 'sqrip_cleanup_invoices_now');
+
+function sqrip_cleanup_invoices_now()
+{
+    check_ajax_referer('sqrip-cleanup-invoices', 'security');
+
+    if (!current_user_can('manage_woocommerce')) {
+        wp_die(-1, 403);
+    }
+
+    if (!class_exists('Sqrip_Media_Clearner')) {
+        wp_send_json(array(
+            'result' => false,
+            'message' => __('The clean-up could not be started.', 'sqrip-swiss-qr-invoice'),
+        ));
+    }
+
+    // true = ignore the retention period: this button deletes every sqrip file up to
+    // today. Orders that are still waiting for payment are protected inside clean().
+    $cleaner = new Sqrip_Media_Clearner();
+    $deleted = (int) $cleaner->clean(true);
+
+    if ($deleted > 0) {
+        $message = sprintf(
+            /* translators: %d: number of deleted files */
+            _n(
+                'Clean-up finished. %d file that was no longer needed has been deleted.',
+                'Clean-up finished. %d files that were no longer needed have been deleted.',
+                $deleted,
+                'sqrip-swiss-qr-invoice'
+            ),
+            $deleted
+        );
+    } else {
+        $message = __('Clean-up finished. There was nothing to delete.', 'sqrip-swiss-qr-invoice');
+    }
+
+    wp_send_json(array(
+        'result' => true,
+        'message' => $message,
+    ));
+}

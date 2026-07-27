@@ -280,6 +280,11 @@ add_action('admin_enqueue_scripts', function ($hook_suffix) {
                 'txt_send_test_email_no_credit' => __('You have no credits left', 'sqrip-swiss-qr-invoice'),
                 'details' => $sqrip_details,
                 'field_required_txt' => __('This field is required', 'sqrip-swiss-qr-invoice'),
+                'cleanup_nonce' => wp_create_nonce('sqrip-cleanup-invoices'),
+                'txt_cleanup_now' => __('Delete all unneeded QR-invoice PDFs now', 'sqrip-swiss-qr-invoice'),
+                'txt_cleanup_running' => __('Deleting…', 'sqrip-swiss-qr-invoice'),
+                'txt_cleanup_failed' => __('The clean-up could not be completed.', 'sqrip-swiss-qr-invoice'),
+                'txt_cleanup_hint' => __('Deletes all QR invoices created up to today. Invoices of orders that are still waiting for payment are kept.', 'sqrip-swiss-qr-invoice'),
                 'txt_address_update_warning' => sprintf(
                     "<p>%s</p><p>%s<ul><li>%s</li><li>%s</li><li>%s</li></ul><p>",
                     __('As from November 2025 on, the QR invoice is only accepted when addresses consist of separate fields for street and building number.', 'sqrip-swiss-qr-invoice'),
@@ -881,8 +886,16 @@ add_action('woocommerce_process_shop_order_meta', function($post_id) {
 
         $body['payable_to'] = sqrip_get_payable_to_address($address);
 
+        // Decide ONCE whether this is a multi-slip request, and use the same answer for
+        // building the request and for reading the response. Deciding it twice with
+        // different conditions meant we asked the API for several partial slips (it then
+        // answers with a list) while the response was read as a single invoice — so no
+        // reference was ever found and the admin only saw "Error:" with no detail.
         $number_of_invoices = sqrip_get_plugin_option('number_of_invoices');
-        if ($number_of_invoices && $number_of_invoices > 1) {
+        $is_multiple_invoices = sqrip_get_plugin_option('multiple_qr_slips_enabled') === 'yes'
+            && $number_of_invoices && $number_of_invoices > 1;
+
+        if ($is_multiple_invoices) {
             $body["invoice_fractions"] = [];
             for ($i=1; $i <= $number_of_invoices; $i++) {
                 $invoice_fraction = sqrip_get_plugin_option('invoice_fraction_'.$i);
@@ -948,12 +961,8 @@ add_action('woocommerce_process_shop_order_meta', function($post_id) {
                 $order->set_payment_method('sqrip');
             }
 
-            // Honour the feature switch like both checkout paths do — testing only
-            // number_of_invoices meant shops with partial invoicing switched off still
-            // got half-amount slips, because the setting defaults to "2".
-            $is_multiple_invoices = sqrip_get_plugin_option('multiple_qr_slips_enabled') === 'yes'
-                && $number_of_invoices && $number_of_invoices > 1;
-
+            // $is_multiple_invoices was already determined before the request was built,
+            // so request and response interpretation cannot drift apart.
             $response_reference = $is_multiple_invoices
                 ? (isset($response_body[0]->reference) ? $response_body[0]->reference : null)
                 : (isset($response_body->reference) ? $response_body->reference : null);
@@ -1117,10 +1126,14 @@ function sqrip_display_refund_qr_code($refund)
     // yields stored XSS on the order screen, running with shop-manager privileges.
     echo "<span class='woocommerce_sqrip_refund_status' data-paid='" . esc_attr($paid_status) . "' data-unpaid='" . esc_attr($unpaid_status) . "'>[" . esc_html($status) . "]</span>";
     echo "<br/>";
-    echo "<a class='woocommerce_sqrip_toggle_qr' href='" . esc_url($refund_qr_pdf_url) . "' title='" . esc_attr($title) . "' target='_blank' data-title-hide='" . esc_attr($hidden_title) . "' data-title='" . esc_attr($title) . "' style='margin-right: 10px; " . esc_attr($hide_paid_action_css) . "'>" . esc_html($title) . "</a>";
+    // The QR code starts expanded, so the toggle has to offer "Hide" first. The data-
+    // attributes keep both labels for the JS toggle.
+    echo "<a class='woocommerce_sqrip_toggle_qr' href='" . esc_url($refund_qr_pdf_url) . "' title='" . esc_attr($hidden_title) . "' target='_blank' data-title-hide='" . esc_attr($hidden_title) . "' data-title='" . esc_attr($title) . "' style='margin-right: 10px; " . esc_attr($hide_paid_action_css) . "'>" . esc_html($hidden_title) . "</a>";
     echo "<a class='woocommerce_sqrip_refund_paid' href='#' title='" . esc_attr($paid_title) . "' style='margin-right: 10px; color: green; " . esc_attr($hide_paid_action_css) . "' data-refund='" . esc_attr($refund_id) . "'>" . esc_html($paid_title) . "</a>";
     echo "<a class='woocommerce_sqrip_refund_unpaid' href='#' title='" . esc_attr($unpaid_title) . "' style='color: darkred; " . esc_attr($hide_unpaid_action_css) . "' data-refund='" . esc_attr($refund_id) . "'>" . esc_html($unpaid_title) . "</a>";
-    echo "<div class='woocommerce_sqrip_qr_wrapper' style='display:none; margin: 5px;'>";
+    // Show the refund QR code right away instead of hiding it behind the toggle — it is
+    // the whole point of the refund box. The link still collapses it again.
+    echo "<div class='woocommerce_sqrip_qr_wrapper' style='margin: 5px;'>";
     echo "<img src='" . esc_url($refund_qr_pdf_url) . "' width='300' height='300'/>";
     echo "</div>";
 

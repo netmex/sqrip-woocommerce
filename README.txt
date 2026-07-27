@@ -146,6 +146,18 @@ Yes. We are already working on comparing the reconciliation of orders/purchases 
 
 == Changelog ==
 = 1.10.1 : Juli 2026 – Fixes =
+* New button in the settings: delete all QR-invoice PDFs created up to today right away, instead of waiting for the daily clean-up. Invoices of orders that are still waiting for payment are always kept;
+* The clean-up now also removes files that were previously left behind: refund QR codes, the PNG for the PDF-invoice integration, the individual slips of a multi-invoice order, and leftovers from earlier regenerations;
+* The refund QR code is shown immediately instead of being hidden behind a link;
+* Manual invoices in the media library are no longer at risk: the clean-up job only ever deletes PDFs that sqrip created itself (it could previously delete unrelated PDFs whose name contained a certain number);
+* Refunds no longer report success when no refund QR code could be created;
+* Failed QR-invoice downloads are reported instead of producing an empty PDF, and can no longer interrupt the checkout;
+* Revisiting the order-received page no longer resets the order status or re-sends the payment e-mail;
+* 'Confirm receipt of payment' now only appears for orders that are actually waiting for payment, and can no longer be triggered twice for the same instalment;
+* The payment deadline printed on the QR bill is always correct, also when the due-date setting has never been saved;
+* Fixed several errors that could interrupt the checkout on PHP 8, and warnings that could break the order process on servers with error display enabled;
+* The QR invoice country restriction is now also applied in the block-based checkout;
+* Security and robustness: the refund API key is no longer readable by users who cannot manage the shop, admin screens escape stored data, and the weekly version check no longer interrupts other scheduled jobs;
 * Manually created orders: the 'Generate QR Invoice' button works again on shops that still use the classic order storage. The button was bound to the order form of the new High-Performance Order Storage only, so on those shops nothing happened at all — no QR invoice, no PDF and no error message;
 * The document icon in the sqrip order box is no longer shown before a QR invoice exists (it used to link back to the order instead of a PDF);
 * Test e-mail: if sending fails, the actual error reported by your e-mail service is now shown instead of a generic hint, the recipient address is named on success, and a failed PDF is reported separately;

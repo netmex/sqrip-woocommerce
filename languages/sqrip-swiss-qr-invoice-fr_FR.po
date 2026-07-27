@@ -134,6 +134,15 @@ msgstr "Remarques de la page de commande"
 msgid "City*"
 msgstr "Ville*"
 
+msgid "Clean-up finished. %d file that was no longer needed has been deleted."
+msgstr "Nettoyage terminé. %d fichier qui n'était plus nécessaire a été supprimé."
+
+msgid "Clean-up finished. %d files that were no longer needed have been deleted."
+msgstr "Nettoyage terminé. %d fichiers qui n'étaient plus nécessaires ont été supprimés."
+
+msgid "Clean-up finished. There was nothing to delete."
+msgstr "Nettoyage terminé. Il n'y avait rien à supprimer."
+
 msgid "Combine QR-Slip with Invoice into one document"
 msgstr "Combiner le bulletin QR et la facture en un seul document"
 
@@ -143,10 +152,10 @@ msgstr "Statut des commandes terminées"
 msgid "Completed, Paid"
 msgstr "Terminée, payée"
 
-msgid "Confirm payment"
+msgid "Confirm Payment"
 msgstr "Confirmer le paiement"
 
-msgid "Confirm Payment"
+msgid "Confirm payment"
 msgstr "Confirmer le paiement"
 
 msgid "Confirm receipt of payment"
@@ -154,6 +163,9 @@ msgstr "Confirmer la réception du paiement"
 
 msgid "Connection"
 msgstr "Connexion"
+
+msgid "Connection error!"
+msgstr "Erreur de connexion !"
 
 msgid "Connection test"
 msgstr "Test de connexion"
@@ -173,6 +185,9 @@ msgstr "jours."
 msgid "Define Status when QR-Invoice is suppressed"
 msgstr "Définir le statut lorsque la facture QR est supprimée"
 
+msgid "Delete all unneeded QR-invoice PDFs now"
+msgstr "Supprimer maintenant tous les PDF de factures QR inutiles"
+
 msgid "Delete any generated QR-invoice after "
 msgstr "Supprimer toute facture QR générée après "
 
@@ -181,6 +196,12 @@ msgstr "Supprimer la facture QR une fois que le statut a été changé en"
 
 msgid "Deleted"
 msgstr "Supprimée"
+
+msgid "Deletes all QR invoices created up to today. Invoices of orders that are still waiting for payment are kept."
+msgstr "Supprime toutes les factures QR créées jusqu'à aujourd'hui. Les factures des commandes encore en attente de paiement sont conservées."
+
+msgid "Deleting…"
+msgstr "Suppression…"
 
 msgid "Description"
 msgstr "Description"
@@ -229,6 +250,15 @@ msgstr "Erreur : %s"
 
 msgid "Error: Es wurde kein API Schlüssel für die Rückerstattungen angegeben. Bitte ergänze dies in den sqrip Plugin Einstellungen."
 msgstr "Erreur : aucune clé API n'a été indiquée pour les remboursements. Veuillez la compléter dans les réglages du plugin sqrip."
+
+msgid "Error: sqrip did not return a QR code for this refund. No refund QR code was created."
+msgstr "Erreur : sqrip n'a renvoyé aucun code QR pour ce remboursement. Aucun code QR de remboursement n'a été créé."
+
+msgid "Error: the sqrip refund QR code could not be saved to the media library. No refund QR code was created."
+msgstr "Erreur : le code QR de remboursement sqrip n'a pas pu être enregistré dans la médiathèque. Aucun code QR de remboursement n'a été créé."
+
+msgid "Error: the sqrip settings are incomplete (IBAN or format missing), so no refund QR code could be created."
+msgstr "Erreur : les réglages sqrip sont incomplets (IBAN ou format manquant), aucun code QR de remboursement n'a donc pu être créé."
 
 msgid "Features"
 msgstr "Fonctionnalités"
@@ -586,6 +616,12 @@ msgstr "Le (QR-)IBAN a été modifié. Veuillez confirmer le nouveau (QR-)IBAN d
 
 msgid "The address to appear on the QR invoice"
 msgstr "L'adresse à faire figurer sur la facture QR"
+
+msgid "The clean-up could not be completed."
+msgstr "Le nettoyage n'a pas pu être terminé."
+
+msgid "The clean-up could not be started."
+msgstr "Le nettoyage n'a pas pu être démarré."
 
 msgid "The only characters allowed are A-Z, dashes (-) and underscores (_). Any spaces will be replaced with underscores (_). You can also use the following variables:<br>[order_number] — your full order number;<br>[order_date] — in yymmdd format, e.g. 230210 for Feb. 10 2023;<br>[shop_name] — can only be used if the shop name conforms with the \"characters allowed\" rule, otherwise the setting will be highlighted in red."
 msgstr "Les seuls caractères autorisés sont A-Z, les tirets (-) et les traits de soulignement (_). Tout espace sera remplacé par un trait de soulignement (_). Vous pouvez également utiliser les variables suivantes :<br>[order_number] — votre numéro de commande complet ;<br>[order_date] — au format aammjj, par ex. 230210 pour le 10 février 2023 ;<br>[shop_name] — ne peut être utilisé que si le nom de la boutique respecte la règle des « caractères autorisés », sinon le réglage sera surligné en rouge."
