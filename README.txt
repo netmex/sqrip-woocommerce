@@ -156,7 +156,7 @@ Yes. We are already working on comparing the reconciliation of orders/purchases 
 * 'Confirm receipt of payment' now only appears for orders that are actually waiting for payment, and can no longer be triggered twice for the same instalment;
 * The payment deadline printed on the QR bill is always correct, also when the due-date setting has never been saved;
 * Fixed several errors that could interrupt the checkout on PHP 8, and warnings that could break the order process on servers with error display enabled;
-* The QR invoice country restriction is now also applied in the block-based checkout;
+* Block-based checkout: sqrip now applies the same availability rules as the classic checkout, so the payment method can no longer be offered in situations where the order cannot be completed with it;
 * Security and robustness: the refund API key is no longer readable by users who cannot manage the shop, admin screens escape stored data, and the weekly version check no longer interrupts other scheduled jobs;
 * Manually created orders: the 'Generate QR Invoice' button works again on shops that still use the classic order storage. The button was bound to the order form of the new High-Performance Order Storage only, so on those shops nothing happened at all — no QR invoice, no PDF and no error message;
 * The document icon in the sqrip order box is no longer shown before a QR invoice exists (it used to link back to the order instead of a PDF);
