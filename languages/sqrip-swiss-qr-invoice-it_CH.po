@@ -173,6 +173,9 @@ msgstr "Errore di connessione!"
 msgid "Connection test"
 msgstr "Test di connessione"
 
+msgid "Controls how large the sqrip logo appears next to the payment method. Enter 0 to hide the logo. Without this setting the size depended entirely on your theme, which made the logo huge in some shops and barely visible in others."
+msgstr "Determina la dimensione del logo sqrip accanto al metodo di pagamento. Inserisci 0 per nascondere il logo. Senza questa impostazione la dimensione dipendeva solo dal tema, rendendo il logo enorme in alcuni negozi e appena visibile in altri."
+
 msgid "Country*"
 msgstr "Paese*"
 
@@ -385,6 +388,9 @@ msgstr "Liechtenstein"
 
 msgid "Loading..."
 msgstr "Caricamento..."
+
+msgid "Logo height at the checkout (pixels)"
+msgstr "Altezza del logo alla cassa (pixel)"
 
 msgid "Mark as paid"
 msgstr "Contrassegna come pagato"

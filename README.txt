@@ -150,6 +150,7 @@ Yes. We are already working on comparing the reconciliation of orders/purchases 
 * The clean-up now also removes files that were previously left behind: refund QR codes, the PNG for the PDF-invoice integration, the individual slips of a multi-invoice order, and leftovers from earlier regenerations;
 * The refund QR code is shown immediately instead of being hidden behind a link;
 * Order confirmation page: the QR-invoice download is no longer offered when the invoice has already been deleted (the button used to lead nowhere) or when the order is cancelled, refunded or already paid;
+* New setting 'Logo height at the checkout': the sqrip logo next to the payment method now has a defined size (24 pixels by default, 0 hides it). Previously the size was left entirely to the theme, so the square logo appeared oversized in some shops and barely visible in others;
 * New setting 'Form of address in the shop front end': the texts your customers see — on the order confirmation page and the message shown when a QR invoice cannot be created — can now use the informal form (currently for German shops);
 * The error your customers see when a QR invoice cannot be created is now translated instead of appearing in English;
 * Manual invoices in the media library are no longer at risk: the clean-up job only ever deletes PDFs that sqrip created itself (it could previously delete unrelated PDFs whose name contained a certain number);

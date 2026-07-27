@@ -497,6 +497,14 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'default' => 'yes',
                 'class' => 'qrinvoice-tab ' . $this->show_integration_order()
             ),
+            'icon_height' => array(
+                'title' => __('Logo height at the checkout (pixels)', 'sqrip-swiss-qr-invoice'),
+                'type' => 'number',
+                'default' => '24',
+                'description' => __('Controls how large the sqrip logo appears next to the payment method. Enter 0 to hide the logo. Without this setting the size depended entirely on your theme, which made the logo huge in some shops and barely visible in others.', 'sqrip-swiss-qr-invoice'),
+                'custom_attributes' => array('min' => '0', 'max' => '128', 'step' => '1'),
+                'class' => 'qrinvoice-tab'
+            ),
             'frontend_anrede' => array(
                 'title' => __('Form of address in the shop front end', 'sqrip-swiss-qr-invoice'),
                 'type' => 'select',
@@ -769,6 +777,50 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'class' => 'refunds-tab'
             ),
         );
+    }
+
+    /**
+     * The payment-method logo, at a predictable size.
+     *
+     * WooCommerce's default markup is a bare <img> with no dimensions, so the size was
+     * decided by the active theme alone: an unconstrained theme rendered the square
+     * 128x128 logo at full size and blew up the checkout, while a theme with a tight
+     * max-height shrank it until it was barely readable. The shop now controls it.
+     *
+     * @return string
+     */
+    public function get_icon()
+    {
+        $height = sqrip_get_plugin_option('icon_height');
+
+        if ($height === null || $height === '') {
+            $height = 24;
+        }
+
+        $height = (int) $height;
+
+        // 0 = the shop does not want a logo at all.
+        if ($height <= 0) {
+            return apply_filters('woocommerce_gateway_icon', '', $this->id);
+        }
+
+        $height = max(1, min(128, $height));
+
+        // Inline and marked important on purpose: the point of this setting is that the
+        // result no longer depends on whichever rule the theme happens to ship.
+        $style = sprintf(
+            'max-height:%1$dpx !important;width:auto !important;margin-left:8px;vertical-align:middle;display:inline-block;',
+            $height
+        );
+
+        $icon = sprintf(
+            '<img src="%1$s" alt="%2$s" style="%3$s" />',
+            esc_url(WC_HTTPS::force_https_url($this->icon)),
+            esc_attr($this->get_title()),
+            esc_attr($style)
+        );
+
+        return apply_filters('woocommerce_gateway_icon', $icon, $this->id);
     }
 
     public function show_integration_order()
