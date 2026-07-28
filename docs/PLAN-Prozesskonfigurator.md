@@ -27,6 +27,15 @@ echte Bestellung im falschen Status hängt.
 **Und für Fall E gibt es heute gar keine Lösung.** Alle Einstellungen sind global.
 Zwei Kundengruppen mit zwei Abläufen sind mit einer Installation nicht abbildbar.
 
+**Wie Fall E heute gelöst wird — und was das für uns bedeutet.** In der Praxis
+(Beispiel eines Händlers mit „Privat" und „Öffentliche Instanz") entscheidet heute ein
+Mensch von Hand, zu welcher Gruppe eine Bestellung gehört, und handelt danach
+unterschiedlich. Es gibt also keinen technischen Marker, aus dem sqrip die Gruppe
+ableiten könnte — aber es gibt auch keinen, den es bräuchte: Wenn ohnehin ein Mensch
+entscheidet, muss sqrip die Gruppe nicht erraten. Der Konfigurator gibt ihm nur ein
+Werkzeug für die Entscheidung, die er heute schon trifft. Das macht Fall E **einfacher**
+als eine automatische Zuordnung, nicht schwerer (siehe „Prozesswahl" unten).
+
 ---
 
 ## Was heute den Prozess bestimmt
@@ -185,7 +194,7 @@ Zeitachse mit festem Vokabular fühlt sich gleich an, kann aber keinen Unsinn er
 
 **Der Trockenlauf ist der eigentliche Kern.** Genau gegen „man muss viel ausprobieren":
 
-> *Testbestellung, 120.00 CHF, Kunde aus Gruppe „Wiederverkäufer"*
+> *Testbestellung, 120.00 CHF, Prozess „Öffentliche Instanz"*
 > → Prozess **B — Prüfen, anpassen** greift
 > → Bei Bestelleingang: keine Rechnung, Status wird „in Prüfung"
 > → Nach Ihrem Klick auf „QR-Rechnung erzeugen": Rechnung über 120.00, E-Mail an den
@@ -196,13 +205,26 @@ Ohne eine einzige echte Bestellung. Dieselbe Ansicht rückwärts an einer besteh
 Bestellung beantwortet die zweite Hälfte der Ausprobiererei: *„Warum hat diese
 Bestellung keine Rechnung bekommen?"*
 
-**Prozessauswahl.** WooCommerce kennt keine Kundengruppen, sondern Benutzerrollen.
-Regeln in dieser Reihenfolge, erste Übereinstimmung gewinnt:
+**Prozesswahl — von Hand, nicht per Regel.** Heute entscheidet der Händler die
+Kundengruppe ohnehin selbst (siehe „Das Problem"). Der Konfigurator bildet genau das
+ab: Jede Bestellung trägt ein Auswahlfeld für den Prozess.
 
-1. Benutzerrolle (deckt B2B/B2C und die meisten Gruppen-Plugins ab)
-2. Bestellwert über/unter Schwelle
-3. Lieferland
-4. sonst: Standardprozess
+> **sqrip-Ablauf:  [ Privat ▾ ]**
+> ‣ Privat  ‣ Öffentliche Instanz
+
+- **Beim Bestelleingang** wird ein **Standardprozess** vorbelegt. Diesen einen Standard
+  darf eine einfache Regel setzen — eingeloggte Kunden bekommen Prozess X, alle anderen
+  Prozess Y —, aber das ist Kür, nicht Pflicht: Ohne Regel gilt schlicht der als
+  Standard markierte Prozess.
+- **Der Händler überschreibt die Wahl** an der Bestellung, solange noch keine Rechnung
+  erzeugt wurde. Danach ist der Prozess festgeschrieben (siehe Entscheid 2).
+
+**Warum von Hand statt automatisch.** Eine automatische Zuordnung nach Rolle, Bestellwert
+und Land klingt mächtiger, hat aber drei Nachteile: Sie rät dort, wo heute ein Mensch
+sicher entscheidet; sie liegt genau in den Grenzfällen falsch, die man erst an einer
+verkorksten Bestellung merkt; und sie ist deutlich mehr Bauaufwand. Die manuelle Wahl
+ist die kleinere, verlässlichere und ehrlichere Lösung — und lässt die automatische
+Regel als optionale Bequemlichkeit **obendrauf** zu, statt sie zur Grundlage zu machen.
 
 Drei Prozesse plus Standard sind die Obergrenze. Mehr wäre technisch kein Unterschied,
 aber die Oberfläche und der Trockenlauf werden dann unübersichtlich.
@@ -230,10 +252,14 @@ Zeitachse mit Hinzufügen, Entfernen, Verschieben. Validierung gegen die
 Voraussetzungen der Schritte. Schreibt weiterhin die bestehenden Einstellungen.
 
 **P4 — Mehrere Prozesse** *(gross)*
-Prozessspeicher, Auswahlregeln, `sqrip_process`-Stempel auf der Bestellung,
+Prozessspeicher, das Auswahlfeld auf der Bestellung, der `sqrip_process`-Stempel,
 `sqrip_process_option()` und die Umstellung der prozessrelevanten Aufrufe darauf.
-Der grösste und riskanteste Teil — bewusst zuletzt, weil P0–P3 auch ohne ihn Wert
-liefern.
+Die manuelle Prozesswahl vereinfacht diesen Teil gegenüber automatischen Regeln
+spürbar: Es gibt keine Regel-Engine mit Reihenfolge und Grenzfällen, sondern ein
+Auswahlfeld und einen vorbelegten Standard. Trotzdem der riskanteste Teil, weil er als
+einziger die vierzig prozessrelevanten Aufrufe umstellt — bewusst zuletzt, weil P0–P3
+auch ohne ihn Wert liefern. Die optionale Standard-Regel (eingeloggt → Prozess X) ist
+ein kleiner Nachtrag am Ende dieses Pakets, kein eigener Baustein.
 
 **P5 — Die Lücke schliessen** *(mittel)*
 Frei wählbare Auslöser für den Rechnungsversand („Status wechselt auf X → Rechnung
@@ -266,9 +292,10 @@ sorgt dafür, aber das gehört in jedem Paket geprüft.
 
 ## Offene Fragen
 
-1. **Kundengruppe = Benutzerrolle?** Wenn ihr Kunden habt, die Gruppen über ein
-   B2B-Plugin abbilden, muss die Auswahlregel dort andocken. Welche Plugins sind im
-   Einsatz?
+1. **Kundengruppe geklärt (27.07.2026):** Die Zuordnung passt heute von Hand, also wird
+   sie auch im Konfigurator von Hand getroffen — Auswahlfeld pro Bestellung, vorbelegter
+   Standard. Keine Regel-Engine nötig. Offen bleibt nur die Kür: Soll der Standard von
+   „eingeloggt/nicht eingeloggt" abhängen, oder genügt ein fixer Standardprozess?
 2. **Ist P0 allein schon die Antwort?** Möglicherweise löst „zeig mir, was meine
    Einstellungen bedeuten" den Schmerz zu achtzig Prozent. Das liesse sich in 1.12
    ausliefern und danach entscheiden.
