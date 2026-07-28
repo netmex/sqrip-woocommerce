@@ -627,9 +627,21 @@ class Sqrip_Camt_Admin
                     ? __('Paid more than once', 'sqrip-swiss-qr-invoice')
                     : __('Was already confirmed', 'sqrip-swiss-qr-invoice');
             case Sqrip_Camt_Reconciler::AMOUNT_MISMATCH:
-                return $slip['expected'] === null
-                    ? __('No amount stored for this instalment', 'sqrip-swiss-qr-invoice')
-                    : __('Amount differs', 'sqrip-swiss-qr-invoice');
+                if ($slip['expected'] === null) {
+                    return __('No amount stored for this instalment', 'sqrip-swiss-qr-invoice');
+                }
+
+                $payment = isset($slip['payments'][0]) ? $slip['payments'][0] : array();
+
+                if ($payment && Sqrip_Camt_Reconciler::paid_after_deadline($slip, $payment)) {
+                    return __('Skonto taken after the deadline', 'sqrip-swiss-qr-invoice');
+                }
+
+                if ($payment && abs((float) $payment['amount'] - (float) $slip['expected']) < 0.005) {
+                    return __('Amount agrees, but the late fee is unpaid', 'sqrip-swiss-qr-invoice');
+                }
+
+                return __('Amount differs', 'sqrip-swiss-qr-invoice');
             case Sqrip_Camt_Reconciler::OUT_OF_SEQUENCE:
                 return __('An earlier instalment is still unpaid', 'sqrip-swiss-qr-invoice');
         }

@@ -288,7 +288,14 @@ class Sqrip_Reminder
             $order->update_meta_data('sqrip_invoice_amount', $original_total);
         }
 
-        if (!self::add_fee_item($order, $fee)) {
+        // The fee has to be on the order before the new total can be read — it is the
+        // tax engine that decides what the order now costs. Every exit below therefore
+        // takes it off again: an order that was booked a fee but never received the
+        // reminder would be charged again on the next daily run, and again the day
+        // after, silently growing by one fee a day.
+        $fee_item_id = self::add_fee_item($order, $fee);
+
+        if (!$fee_item_id) {
             return false;
         }
 
@@ -298,7 +305,8 @@ class Sqrip_Reminder
         $body = sqrip_prepare_qr_code_request_body($currency, $new_total, strval($order->get_id()));
 
         if (!$body) {
-            $order->add_order_note(__('The payment reminder could not be created: the sqrip settings are incomplete.', 'sqrip-swiss-qr-invoice'));
+            self::remove_fee_item($order, $fee_item_id);
+            $order->add_order_note(__('The payment reminder could not be created: the sqrip settings are incomplete. The late fee was not charged.', 'sqrip-swiss-qr-invoice'));
 
             return false;
         }
@@ -325,9 +333,10 @@ class Sqrip_Reminder
         $response = wp_remote_post(SQRIP_ENDPOINT . 'code', sqrip_prepare_remote_args($body, 'POST'));
 
         if (is_wp_error($response)) {
+            self::remove_fee_item($order, $fee_item_id);
             $order->add_order_note(sprintf(
                 /* translators: %s: error message */
-                __('The payment reminder could not be created: %s', 'sqrip-swiss-qr-invoice'),
+                __('The payment reminder could not be created: %s The late fee was not charged.', 'sqrip-swiss-qr-invoice'),
                 esc_html($response->get_error_message())
             ));
 
@@ -338,9 +347,10 @@ class Sqrip_Reminder
 
         if (wp_remote_retrieve_response_code($response) !== 200
             || !isset($decoded->reference) || !isset($decoded->pdf_file)) {
+            self::remove_fee_item($order, $fee_item_id);
             $order->add_order_note(sprintf(
                 /* translators: %s: error reported by sqrip */
-                __('The payment reminder could not be created: %s', 'sqrip-swiss-qr-invoice'),
+                __('The payment reminder could not be created: %s The late fee was not charged.', 'sqrip-swiss-qr-invoice'),
                 isset($decoded->message) ? esc_html($decoded->message) : ''
             ));
 
@@ -364,6 +374,13 @@ class Sqrip_Reminder
         $order->update_meta_data('sqrip_reminder_pdf_file_path', get_attached_file($attachment_id));
         $order->update_meta_data('sqrip_reminder_sent_at', time());
 
+        // The customer is late, so the discount for paying early is gone. Left standing
+        // it would still be payable, and paying it would settle the order at a discount
+        // on top of never paying the fee.
+        if (sqrip_void_invoice($order, 'skonto')) {
+            $order->add_order_note(__('The QR invoice with Skonto has been voided: the payment is overdue.', 'sqrip-swiss-qr-invoice'));
+        }
+
         $order->add_order_note(sprintf(
             /* translators: 1: currency, 2: fee, 3: new order total */
             __('Payment reminder created: late fee %1$s %2$s added, new QR invoice over %1$s %3$s. The original invoice stays valid until one of the two is paid.', 'sqrip-swiss-qr-invoice'),
@@ -385,12 +402,12 @@ class Sqrip_Reminder
      *
      * @param WC_Order $order
      * @param float    $fee
-     * @return bool
+     * @return int Item id of the fee, 0 when it could not be added.
      */
     private static function add_fee_item($order, $fee)
     {
         if (!class_exists('WC_Order_Item_Fee')) {
-            return false;
+            return 0;
         }
 
         $item = new WC_Order_Item_Fee();
@@ -407,7 +424,25 @@ class Sqrip_Reminder
         $order->calculate_totals(self::fee_is_taxable());
         $order->save();
 
-        return true;
+        return (int) $item->get_id();
+    }
+
+    /**
+     * Take the fee back off after a failed reminder.
+     *
+     * @param WC_Order $order
+     * @param int      $item_id
+     * @return void
+     */
+    private static function remove_fee_item($order, $item_id)
+    {
+        if (!$item_id) {
+            return;
+        }
+
+        $order->remove_item($item_id);
+        $order->calculate_totals(self::fee_is_taxable());
+        $order->save();
     }
 
     /**

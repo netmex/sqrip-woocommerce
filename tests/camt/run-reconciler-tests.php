@@ -422,13 +422,16 @@ namespace {
     check('the reminder expects the raised total',
         $reminded[0]['slips'][1]['expected'], 120.00);
 
-    // The customer paid the original invoice — late, without the fee. That is still a
-    // payment of the original invoice and must not be judged against the new total.
+    // The customer paid the original invoice — late, without the fee. It is measured
+    // against what that invoice asked for, so the slip itself matches. The order does
+    // not: the fee is still outstanding, so this is never booked automatically.
     $report = $reconciler->match($reminded, payment('210000000003139471430009017', 100.00));
     $order = order_in($report, 601);
 
-    check('paying the original amount after the reminder is recognised',
-        $order['category'], Sqrip_Camt_Reconciler::PAID);
+    check('the original invoice is measured against its own amount',
+        $order['slips'][0]['category'], Sqrip_Camt_Reconciler::PAID);
+    check('but the order is held back while the fee is unpaid',
+        $order['category'], Sqrip_Camt_Reconciler::AMOUNT_MISMATCH);
     check('and is named as the ordinary invoice', $order['paid_alternative'], 'regular');
 
     // The customer paid the reminder including the fee.
@@ -459,6 +462,78 @@ namespace {
 
     check('without a reminder the order total is the expectation',
         $plain[0]['slips'][0]['expected'], 100.00);
+
+    echo "\n=== The Skonto deadline is binding ===\n";
+
+    function dated_payment($reference, $amount, $value_date)
+    {
+        return array($reference => array(array(
+            'reference' => $reference, 'amount' => $amount, 'currency' => 'CHF',
+            'value_date' => $value_date, 'booking_date' => $value_date,
+        )));
+    }
+
+    $with_deadline = $reconciler->build_expectations(array(new WC_Order(701, '100.00', array(
+        'sqrip_reference_id'        => '210000000003139471430009017',
+        'sqrip_skonto_reference_id' => 'RF18539007547034',
+        'sqrip_skonto_amount'       => '98.00',
+        'sqrip_skonto_valid_until'  => '2026-07-31',
+    ))));
+
+    check('the deadline is carried into the comparison',
+        $with_deadline[0]['slips'][1]['valid_until'], '2026-07-31');
+
+    $report = $reconciler->match($with_deadline, dated_payment('RF18539007547034', 98.00, '2026-07-30'));
+    check('the discount is granted when paid in time',
+        order_in($report, 701)['category'], Sqrip_Camt_Reconciler::PAID);
+
+    $report = $reconciler->match($with_deadline, dated_payment('RF18539007547034', 98.00, '2026-07-31'));
+    check('and still on the last day',
+        order_in($report, 701)['category'], Sqrip_Camt_Reconciler::PAID);
+
+    $report = $reconciler->match($with_deadline, dated_payment('RF18539007547034', 98.00, '2026-08-01'));
+    check('a day late is held back, not settled at a discount',
+        order_in($report, 701)['category'], Sqrip_Camt_Reconciler::AMOUNT_MISMATCH);
+
+    $report = $reconciler->match($with_deadline, dated_payment('RF18539007547034', 98.00, '2026-11-15'));
+    check('months late is held back too',
+        order_in($report, 701)['category'], Sqrip_Camt_Reconciler::AMOUNT_MISMATCH);
+
+    // Invoices created before this was recorded carry no deadline and must keep working.
+    $no_deadline = $reconciler->build_expectations(array(new WC_Order(702, '100.00', array(
+        'sqrip_reference_id'        => '210000000003139471430009017',
+        'sqrip_skonto_reference_id' => 'RF18539007547034',
+        'sqrip_skonto_amount'       => '98.00',
+    ))));
+
+    $report = $reconciler->match($no_deadline, dated_payment('RF18539007547034', 98.00, '2026-11-15'));
+    check('without a stored deadline nothing is refused',
+        order_in($report, 702)['category'], Sqrip_Camt_Reconciler::PAID);
+
+    echo "\n=== Paying the original invoice does not pay the late fee ===\n";
+
+    $after_reminder = $reconciler->build_expectations(array(new WC_Order(703, '120.00', array(
+        'sqrip_reference_id'          => '210000000003139471430009017',
+        'sqrip_invoice_amount'        => '100.00',
+        'sqrip_reminder_reference_id' => 'RF18539007547034',
+        'sqrip_reminder_amount'       => '120.00',
+    ))));
+
+    $report = $reconciler->match($after_reminder, payment('210000000003139471430009017', 100.00));
+    $order = order_in($report, 703);
+
+    check('the original amount alone does not settle the order',
+        $order['category'], Sqrip_Camt_Reconciler::AMOUNT_MISMATCH);
+    check('and nothing is booked automatically', $order['applicable_slips'], array());
+
+    $report = $reconciler->match($after_reminder, payment('RF18539007547034', 120.00));
+    check('paying the reminder in full still settles it',
+        order_in($report, 703)['category'], Sqrip_Camt_Reconciler::PAID);
+
+    // Without a reminder the ordinary invoice settles the order as before.
+    $report = $reconciler->match($skonto, payment('210000000003139471430009017', 100.00));
+    check('an order without a reminder is unaffected',
+        order_in($report, 501)['category'], Sqrip_Camt_Reconciler::PAID);
 
     echo "\n=== Safety rails ===\n";
 

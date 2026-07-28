@@ -197,36 +197,18 @@ function sqrip_void_other_invoices($order, $keep_kind)
         return array();
     }
 
-    $labels = array(
-        'regular'  => __('the ordinary QR invoice', 'sqrip-swiss-qr-invoice'),
-        'skonto'   => __('the QR invoice with Skonto', 'sqrip-swiss-qr-invoice'),
-        'reminder' => __('the payment reminder', 'sqrip-swiss-qr-invoice'),
-    );
-
     $voided = array();
 
-    foreach (sqrip_invoice_kinds() as $kind => $keys) {
+    foreach (array_keys(sqrip_invoice_kinds()) as $kind) {
         if ($kind === $keep_kind) {
             continue;
         }
 
-        $reference = sqrip_get_order_meta_value($order, $keys['reference']);
+        $label = sqrip_void_invoice($order, $kind);
 
-        if (!$reference || $reference === 'deleted') {
-            continue;
+        if ($label) {
+            $voided[] = $label;
         }
-
-        $attachment_id = (int) sqrip_get_order_meta_value($order, $keys['attachment']);
-
-        if ($attachment_id) {
-            wp_delete_attachment($attachment_id, true);
-        }
-
-        $order->update_meta_data($keys['reference'], 'deleted');
-        $order->update_meta_data($keys['url'], 'deleted');
-        $order->update_meta_data($keys['path'], 'deleted');
-
-        $voided[] = isset($labels[$kind]) ? $labels[$kind] : $kind;
     }
 
     if ($voided) {
@@ -240,6 +222,51 @@ function sqrip_void_other_invoices($order, $keep_kind)
     }
 
     return $voided;
+}
+
+/**
+ * Void one particular invoice of an order.
+ *
+ * Leaves no order note of its own, so the caller can explain why in one sentence
+ * instead of one per invoice.
+ *
+ * @since 1.11
+ * @param WC_Order $order
+ * @param string   $kind 'regular', 'skonto' or 'reminder'.
+ * @return string The readable name of what was voided, empty when there was nothing.
+ */
+function sqrip_void_invoice($order, $kind)
+{
+    $kinds = sqrip_invoice_kinds();
+
+    if (!is_a($order, 'WC_Order') || !isset($kinds[$kind])) {
+        return '';
+    }
+
+    $labels = array(
+        'regular'  => __('the ordinary QR invoice', 'sqrip-swiss-qr-invoice'),
+        'skonto'   => __('the QR invoice with Skonto', 'sqrip-swiss-qr-invoice'),
+        'reminder' => __('the payment reminder', 'sqrip-swiss-qr-invoice'),
+    );
+
+    $keys      = $kinds[$kind];
+    $reference = sqrip_get_order_meta_value($order, $keys['reference']);
+
+    if (!$reference || $reference === 'deleted') {
+        return '';
+    }
+
+    $attachment_id = (int) sqrip_get_order_meta_value($order, $keys['attachment']);
+
+    if ($attachment_id) {
+        wp_delete_attachment($attachment_id, true);
+    }
+
+    $order->update_meta_data($keys['reference'], 'deleted');
+    $order->update_meta_data($keys['url'], 'deleted');
+    $order->update_meta_data($keys['path'], 'deleted');
+
+    return isset($labels[$kind]) ? $labels[$kind] : $kind;
 }
 
 /**

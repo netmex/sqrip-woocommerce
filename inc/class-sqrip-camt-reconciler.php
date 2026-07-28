@@ -242,6 +242,8 @@ class Sqrip_Camt_Reconciler
                 if ($skonto_reference !== '') {
                     $skonto_amount = sqrip_get_order_meta_value($order, 'sqrip_skonto_amount');
 
+                    $valid_until = sqrip_get_order_meta_value($order, 'sqrip_skonto_valid_until');
+
                     $slips[] = array(
                         'index'        => null,
                         'kind'         => 'skonto',
@@ -249,6 +251,8 @@ class Sqrip_Camt_Reconciler
                         'expected'     => $skonto_amount === '' || $skonto_amount === null
                             ? null
                             : round((float) $skonto_amount, 2),
+                        // A discount for paying early is only owed while it is early.
+                        'valid_until'  => $valid_until ? (string) $valid_until : '',
                         'already_paid' => false,
                     );
                 }
@@ -410,7 +414,37 @@ class Sqrip_Camt_Reconciler
             return self::AMOUNT_MISMATCH;
         }
 
+        // A discount granted for paying by a certain date is not owed to somebody who
+        // paid after it. Held back rather than refused outright: whether to grant it
+        // anyway is the shop's call, not this code's.
+        if (self::paid_after_deadline($slip, $payment)) {
+            return self::AMOUNT_MISMATCH;
+        }
+
         return self::PAID;
+    }
+
+    /**
+     * Did this payment arrive after the deadline the slip was valid for?
+     *
+     * @param array $slip
+     * @param array $payment
+     * @return bool
+     */
+    public static function paid_after_deadline($slip, $payment)
+    {
+        if (empty($slip['valid_until']) || empty($payment['value_date'])) {
+            return false;
+        }
+
+        $deadline = strtotime($slip['valid_until']);
+        $paid_on  = strtotime($payment['value_date']);
+
+        if (!$deadline || !$paid_on) {
+            return false;
+        }
+
+        return $paid_on > $deadline;
     }
 
     /**
@@ -485,6 +519,14 @@ class Sqrip_Camt_Reconciler
             }
 
             if ($paid === 1) {
+                // Paying the original invoice after a reminder went out leaves the late
+                // fee unpaid, while the order total already includes it. Booking that as
+                // settled would close the order with money missing, so the shop decides:
+                // waive the fee, or chase it.
+                if ($this->paid_short_of_the_fee($slips)) {
+                    return self::AMOUNT_MISMATCH;
+                }
+
                 return self::PAID;
             }
 
@@ -526,6 +568,30 @@ class Sqrip_Camt_Reconciler
         }
 
         return self::PARTLY_PAID;
+    }
+
+    /**
+     * Was the ordinary invoice paid while a reminder had already raised the total?
+     *
+     * @param array $slips
+     * @return bool
+     */
+    private function paid_short_of_the_fee(array $slips)
+    {
+        $paid_kind    = '';
+        $has_reminder = false;
+
+        foreach ($slips as $slip) {
+            if ($slip['category'] === self::PAID) {
+                $paid_kind = $slip['kind'];
+            }
+
+            if ($slip['kind'] === 'reminder') {
+                $has_reminder = true;
+            }
+        }
+
+        return $has_reminder && $paid_kind === 'regular';
     }
 
     /**

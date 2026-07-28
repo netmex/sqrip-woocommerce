@@ -261,6 +261,13 @@ class Sqrip_Skonto
         $order->update_meta_data('sqrip_skonto_reference_id', $decoded->reference);
         $order->update_meta_data('sqrip_skonto_amount', $body['payment_information']['amount']);
         $order->update_meta_data('sqrip_skonto_percentage', self::format_percentage());
+        // The deadline the discount was granted for. Without it a payment of the
+        // reduced amount would settle the order months later, and the shop would have
+        // granted a discount for paying early to somebody who paid late.
+        $order->update_meta_data(
+            'sqrip_skonto_valid_until',
+            date('Y-m-d', strtotime(date('Y-m-d') . ' + ' . self::due_date_days() . ' days'))
+        );
         $order->update_meta_data('sqrip_skonto_qr_pdf_attachment_id', $attachment_id);
         $order->update_meta_data('sqrip_skonto_pdf_file_url', wp_get_attachment_url($attachment_id));
         $order->update_meta_data('sqrip_skonto_pdf_file_path', get_attached_file($attachment_id));
