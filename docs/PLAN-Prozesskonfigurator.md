@@ -104,6 +104,42 @@ mehr, als er hält.
 
 Ein Prozess ist eine geordnete Liste von **Auslöser → Aktion**.
 
+### Der Versand als Wegmarke
+
+sqrip versendet keine Ware, aber der Versand ist für den Händler ein Fixpunkt im
+Ablauf und gehört sichtbar gemacht — als **fremder Schritt**, deutlich von sqrips
+eigenen Aktionen unterschieden (im Mockup: gestrichelter Kreis, Lastwagen, „Ihr
+Schritt"). Wie genau sqrip den Moment kennt, hängt vom Ablauf ab, und die Ansicht
+sagt jeweils, was von beidem:
+
+- **Gemessen:** Hängt der Rechnungsversand an einem Statuswechsel wie „versandt",
+  *sieht* sqrip diesen Wechsel — der Versandpunkt ist exakt bekannt. (Abläufe C, D)
+- **Abgeleitet:** Passiert der Versand offline nach der Zahlung, sieht sqrip kein
+  Ereignis und kann den Punkt nur aus der Logik erschliessen: „nach der Zahlung". Die
+  Ansicht schreibt dann „sqrip erkennt aus Ihrem Ablauf", nicht „sqrip weiss". (Ablauf A)
+
+### Bedingungen (Wenn/Dann)
+
+Vieles, was nach einer Bedingung aussieht, ist in Wahrheit schon abgedeckt und braucht
+keinen Regeleditor:
+
+| Sieht aus wie eine Bedingung | Ist in Wahrheit |
+|---|---|
+| „Wenn x Tage keine Zahlung → mahnen" | ein **Auslöser** (Zeit + offen) |
+| „Wenn Skonto bezahlt → andere entwerten" | **automatisch** im Abgleich |
+| „Wenn Wiederverkäufer → anderer Ablauf" | die **manuelle Prozesswahl** |
+| „Wenn Skonto aktiviert → zweite Rechnung" | ein **Einstellungsschalter** |
+
+Echt übrig bleibt genau **ein** Typ: eine Bedingung am **Bestellwert**. Anders als die
+Kundengruppe ist der Wert maschinell erkennbar, also lohnt hier eine einzige,
+automatische Regel — „ab Betrag X den Prozess mit Anzahlung wählen". Sie belegt den
+Standardprozess vor, den der Händler weiterhin von Hand überschreiben kann.
+
+**Bewusst nicht gebaut:** ein allgemeiner Wenn/Dann-Editor für beliebige Regelketten.
+Das ist dieselbe Freiheit wie beim freien Baukasten — sie erlaubt unmögliche Abläufe,
+und jeder Fehler zeigt sich erst an einer verkorksten Bestellung. Die vier Auslöser,
+die Handwahl und die eine Bestellwert-Regel decken alle fünf Abläufe vollständig ab.
+
 ### Die fünf Abläufe in diesem Vokabular
 
 Der Beweis, dass das Modell trägt:
