@@ -352,3 +352,57 @@ wegen der Breite der Umstellung, nicht wegen ihrer Schwierigkeit.
 
 **Empfehlung:** P0 in 1.12, dann anhand echter Rückmeldungen entscheiden, ob P1–P2
 folgen oder direkt der volle Konfigurator als 2.0.
+
+---
+
+## Ausblick: der Konfigurator als Bezahlart-neutrale Schicht
+
+*Nordstern, kein Arbeitspaket. Bindet keinen Aufwand — bestimmt nur, welche Türen die
+Architektur von P4 offen lässt.*
+
+Die Aufteilungslogik (Anzahlung, Raten, Skonto, Mahnung) ist im Kern **unabhängig von
+der Bezahlart**. Heute führt sqrip sie nur über die eine Bezahlart aus, die es kennt:
+die Banküberweisung per QR-Rechnung. Die Frage, ob dieselbe Aufteilung eines Tages
+auch über Karte, Stripe, Klarna oder Apple Pay laufen könnte, ist berechtigt — mit
+einer klaren Antwort.
+
+**Der Mechanismus ist entgegengesetzt.** QR-Rechnung ist ein Briefkasten: Der Kunde
+zahlt, wann er will, sqrip erkennt es später im Kontoauszug. Karte/Stripe sind eine
+Kasse: Der Händler zieht das Geld selbst ein und weiss sofort Bescheid. Der ganze
+Abgleich existiert nur, weil die Überweisung zeitlich und kanalmässig von der
+Bestellung getrennt ist — bei der Karte fällt dieser Grund weg.
+
+**Drei Einordnungen, die vor jeder Diskussion stehen müssen:**
+
+- **Apple Pay / Google Pay** sind keine eigene Bezahlart, sondern eine Hülle für eine
+  Karte, abgewickelt über Stripe. „Unterstützen" heisst hier „Stripe mit dem
+  entsprechenden Schalter" — kein eigenes Vorhaben.
+- **Klarna** teilt Zahlungen bereits selbst auf und trägt das Risiko. Eine Ratenlogik
+  „über Klarna" wäre doppelt und würde mit Klarna kollidieren. Man bietet Klarna als
+  Kasse an; die Aufteilung macht Klarna.
+- **Echte Kartenraten** gibt es bei Stripe fertig (Abos, Zahlpläne), und „Stripe für
+  WooCommerce" ist reif und kostenlos. sqrip hätte dort keinen Vorsprung.
+
+**Der Graben liegt woanders.** sqrips Kronjuwel ist der Schweizer Abgleich — offline
+überwiesenes Geld ohne EBICS zuordnen. Das ist schwer und selten gut gelöst.
+Kartenzahlung ist ein voller, reifer Markt ohne Graben. Dorthin zu gehen hiesse, die
+eigene Stärke aufzugeben, um in fremdem Revier hinten anzustehen.
+
+**Die tragfähige Version** ist deshalb nicht „sqrip wird eine weitere Kasse", sondern
+„sqrip wird die Schicht *über* den Kassen": Der Konfigurator entscheidet, *wann*
+Rechnung, *wann* Mahnung, *wie* aufteilen — und die Bezahlart ist eine austauschbare
+Ebene darunter. Das Fernziel:
+
+> „Diese Anzahlung: per QR-Rechnung. Die Schlusszahlung: von der hinterlegten Karte
+> einziehen."
+
+Die QR-Rechnung bleibt dabei die erstklassige, am besten unterstützte Bezahlart, nicht
+die einzige.
+
+**Was das für heute bedeutet — und nur das:** Es ist eine Firmenentscheidung mit
+eigenem Regulierungs- und Supportrisiko (gespeicherte Karten, geplante Abbuchungen
+rücken näher an einen Zahlungsdienstleister), gehört **nicht** in 1.11 oder 2.0, und
+verlangt jetzt keine Zeile Code. Die einzige Verpflichtung, die daraus folgt: In P4 die
+Bezahlart von Anfang an als austauschbare Ebene denken — „QR-Rechnung" ist *eine* Wahl,
+nicht die einzige —, damit diese Tür nicht zugemauert wird, während wir sie noch gar
+nicht durchschreiten.
