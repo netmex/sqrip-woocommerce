@@ -1716,9 +1716,20 @@ function sqrip_add_custom_order_status_actions_button($actions, $order)
     // the confirm-payment action appeared on every sqrip order in every status —
     // including cancelled, refunded and already completed ones — even for shops that had
     // switched payment comparison off.
+    //
+    // The second branch (multiple QR slips) used to be a bare `|| multiple_qr_slips ===
+    // 'yes'`, with no status check at all — so with instalments switched on the button
+    // reappeared on cancelled, refunded and completed orders, and a stray click set the
+    // completed status. It now carries its own status gate: the instalment order moves
+    // through the partial-invoice statuses, all of which sqrip_awaiting_payment_statuses()
+    // covers, while cancelled/refunded/completed are excluded. The 1.10.1 changelog
+    // claimed this was fixed; it was fixed only for the single-invoice case above.
+    $comparison_on = sqrip_get_plugin_option('payment_comparison_enabled') == 'yes';
+    $multiple_on = sqrip_get_plugin_option('multiple_qr_slips_enabled') === 'yes';
+
     if (
-        ($order->has_status(array($status_awaiting)) && sqrip_get_plugin_option('payment_comparison_enabled') == 'yes')
-        || sqrip_get_plugin_option('multiple_qr_slips_enabled') === 'yes'
+        ($comparison_on && $order->has_status(array($status_awaiting)))
+        || ($multiple_on && $order->has_status(sqrip_awaiting_payment_statuses()))
     ) {
 
         // The key slug defined for your action button

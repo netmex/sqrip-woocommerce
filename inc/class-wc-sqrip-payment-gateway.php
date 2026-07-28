@@ -1311,18 +1311,26 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             "iban": "' . $iban . '"
         }';
 
-        //Only check iban status if IBAN is changed
-        if ($old_iban != $iban) {
+        // Verify the IBAN whenever it changed OR the plugin is being switched on. Keying
+        // this on "IBAN changed" alone left a hole: a merchant who entered an inactive
+        // IBAN got the warning and the plugin disabled, but on the next save — same,
+        // still-inactive IBAN — the check was skipped and the plugin came back on without
+        // ever being verified. The safety net has to hold at the moment the plugin would
+        // go live, not only when the number is edited. (Before 1.10 this ran on every
+        // save; the "only if changed" guard was the regression.)
+        $enabling = !empty($post_data['woocommerce_sqrip_enabled']);
+
+        if ($old_iban != $iban || $enabling) {
 
             $response = sqrip_remote_request($endpoint, $body, 'POST');
-    
+
             if (isset($response->status) && $response->status == "inactive") {
-    
+
                 unset($_POST['woocommerce_sqrip_enabled']);
-    
+
                 $settings = new WC_Admin_Settings();
-    
-                $settings->add_error(__('The (QR-)IBAN has been changed. Please confirm the new (QR-)IBAN in your sqrip.ch account.', 'sqrip-swiss-qr-invoice'));
+
+                $settings->add_error(__('The (QR-)IBAN is not active. Please confirm the (QR-)IBAN in your sqrip.ch account before activating sqrip.', 'sqrip-swiss-qr-invoice'));
             }
         }
 
