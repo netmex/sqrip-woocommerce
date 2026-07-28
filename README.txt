@@ -4,7 +4,7 @@ Donate link: https://sqrip.ch/
 Tags: woocommerce, payment, swiss qr invoice, qr-rechnung, einzahlungsschein
 Requires at least: 6.0
 Tested up to: 7.0
-Stable tag: 1.10.1
+Stable tag: 1.10.2
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -145,6 +145,11 @@ Yes. We are already working on comparing the reconciliation of orders/purchases 
 7. Refund functionality
 
 == Changelog ==
+= 1.10.2 : Juli 2026 – Fix =
+* Opening the sqrip settings no longer ticks 'Payment Comparison' by itself. On shops with the feature switched off the checkbox appeared ticked as soon as the settings screen was opened, so saving switched the feature on. It affects 1.10 and 1.10.1; if you do not use the payment comparison, check the setting once on the Services tab after updating;
+* Switching 'Payment Comparison' off no longer switches 'Multiple QR-Slips' on, and the other way round. The two still cannot run at the same time — switching one on turns the other off — but you can now leave both off, which was impossible before. Toggling the Refunds checkbox no longer affected the two either;
+* Clarification on the automatic clean-up: the retention period under 'Delete QR invoices after ... days' applies to your existing QR invoices as well, not only to newly created ones. Invoices of orders still waiting for payment are always kept, and order data, amounts and references are never affected;
+
 = 1.10.1 : Juli 2026 – Fixes =
 * New button in the settings: delete all QR-invoice PDFs created up to today right away, instead of waiting for the daily clean-up. Invoices of orders that are still waiting for payment are always kept;
 * The clean-up now also removes files that were previously left behind: refund QR codes, the PNG for the PDF-invoice integration, the individual slips of a multi-invoice order, and leftovers from earlier regenerations;
@@ -344,6 +349,9 @@ We made users (even more) happy with these changes:
 * Here we go!
 
 == Upgrade Notice ==
+= 1.10.2 =
+Recommended update for everyone on 1.10 or 1.10.1: opening the sqrip settings ticked 'Payment Comparison' by itself, so saving switched the feature on. If you do not use it, check that setting once on the Services tab after updating.
+
 = 1.10.1 =
 Recommended update for everyone on 1.10: fixes the clean-up so it can only ever delete sqrip's own files, prevents refunds from being recorded without a refund QR code, stops the order status being reset when the confirmation page is reopened, and restores the 'Generate QR Invoice' button for manually created orders. Also adds a clean-up button, a settable logo height and an informal form of address.
 

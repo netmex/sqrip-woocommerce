@@ -529,33 +529,28 @@ jQuery(document).ready(function ($) {
         })
     });
 
-    toggleComparisonAndMultipleSlips();
-    //Toggle "comparison" and "multiple-qr-slips"
+    // Switching one of the two features ON switches the other OFF — they cannot run at the
+    // same time. Switching one OFF must leave the other alone: a shop is free to use neither.
+    //
+    // The old version did the opposite in its "else" branches and ticked the other checkbox
+    // whenever one was unticked, so a shop could never end up with both off. It also ran on
+    // page load with no argument, which ticked "Payment Comparison" on every shop that had
+    // multiple QR-slips off — saving then switched the feature on and reported the service as
+    // active to the sqrip account, without the merchant ever choosing it. And because the old
+    // "else" caught every other feature too, toggling the Refunds checkbox went through the
+    // multiple-QR-slips branch as well.
+    //
+    // Called only from the change handler above, never on page load.
     function toggleComparisonAndMultipleSlips(feature) {
-        if (feature === 'comparison') {
-            if (ip_payment_comparison_enabled.is(':checked')) {
-                ip_multiple_qr_slips_enabled.prop("checked", false);
-                // ip_multiple_qr_slips_enabled.attr("disabled", true);
-                $('.sqrip-tab[data-tab="multiple-qr-slips"]').hide();
-            } else {
-                // ip_multiple_qr_slips_enabled.attr("disabled", false);
-                ip_multiple_qr_slips_enabled.prop("checked", true);
-                $('.sqrip-tab[data-tab="multiple-qr-slips"]').show();
-            }
-
-        } else {
-
-            if (ip_multiple_qr_slips_enabled.is(':checked')) {
-                ip_payment_comparison_enabled.prop("checked", false);
-                // ip_payment_comparison_enabled.attr("disabled", true);
-                $('.sqrip-tab[data-tab="comparison"]').hide();
-            } else {
-                // ip_payment_comparison_enabled.attr("disabled", false);
-                ip_payment_comparison_enabled.prop("checked", true);
-                $('.sqrip-tab[data-tab="comparison"]').show();
-            }
+        if (feature === 'comparison' && ip_payment_comparison_enabled.is(':checked')) {
+            ip_multiple_qr_slips_enabled.prop("checked", false);
+            $('.sqrip-tab[data-tab="multiple-qr-slips"]').hide();
         }
 
+        if (feature === 'multiple-qr-slips' && ip_multiple_qr_slips_enabled.is(':checked')) {
+            ip_payment_comparison_enabled.prop("checked", false);
+            $('.sqrip-tab[data-tab="comparison"]').hide();
+        }
     }
 
     tab_active = window.location.hash.slice(1);
