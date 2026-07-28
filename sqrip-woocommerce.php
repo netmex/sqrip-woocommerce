@@ -577,7 +577,7 @@ if (!function_exists('sqrip_add_fields_for_order_details')) {
                             <?php else : ?>
                                 <?php echo esc_html($currency_symbol . ' ' . $skonto_amount); ?><br>
                                 <?php echo sqrip_format_reference_id($skonto_reference, $order_id); ?>
-                                <?php if ($skonto_file && $skonto_file !== 'deleted') : ?>
+                                <?php if (sqrip_is_usable_file_url($skonto_file)) : ?>
                                     <a target="_blank" href="<?php echo esc_url($skonto_file); ?>"><span class="dashicons dashicons-media-document"></span></a>
                                 <?php endif; ?>
                             <?php endif; ?>
@@ -645,7 +645,7 @@ function sqrip_add_qrcode_in_email_after_order_table($order, $sent_to_admin, $pl
         $order_id = method_exists($order, 'get_id') ? $order->get_id() : $order->id;
         $png_file = get_post_meta($order_id, 'sqrip_png_file_url', true);
 
-        echo $png_file ? '<div class="sqrip-qrcode-png"><p>' . esc_html__('Use the QR invoice below to pay the outstanding balance.', 'sqrip-swiss-qr-invoice') . '</p><img src="' . esc_url($png_file) . '" alt="' . esc_attr('sqrip QR-Code', 'sqrip-swiss-qr-invoice') . '" width="200"/></div>' : '';
+        echo sqrip_is_usable_file_url($png_file) ? '<div class="sqrip-qrcode-png"><p>' . esc_html(sqrip_frontend_text('pay_with_qr_invoice')) . '</p><img src="' . esc_url($png_file) . '" alt="' . esc_attr('sqrip QR-Code', 'sqrip-swiss-qr-invoice') . '" width="200"/></div>' : '';
     }
 }
 
@@ -785,16 +785,20 @@ function sqrip_qr_action_order_details_after_order_table($order)
         if ($invoice_count) {
             $invoice_count = (int) $invoice_count;
 
-            for ($i=1; $i <= $invoice_count; $i++) { 
+            for ($i=1; $i <= $invoice_count; $i++) {
                 $pdf_file = sqrip_get_order_meta_value($order, 'sqrip_pdf_file_url_'.$i);
-                if ($pdf_file) {
-                    $pdf_file_html .= '<p style="text-align:'.$download_btn_align.';"><a class="button button-sqrip-invoice" href="' . esc_url($pdf_file) . '" >' . __('Download Invoice', 'sqrip-swiss-qr-invoice') . ' <i class="dashicons dashicons-pdf"></i></a><p>';
+
+                // Only link a file that really is one: the clean-up stores the string
+                // 'deleted' here, which is truthy and produced href="http://deleted".
+                if (sqrip_is_usable_file_url($pdf_file)) {
+                    $pdf_file_html .= '<p style="text-align:'.$download_btn_align.';"><a class="button button-sqrip-invoice" href="' . esc_url($pdf_file) . '" >' . __('Download Invoice', 'sqrip-swiss-qr-invoice') . ' <i class="dashicons dashicons-pdf"></i></a></p>';
                 }
             }
 
         } else {
             $pdf_file = sqrip_get_order_meta_value($order, 'sqrip_pdf_file_url');
-            if ($pdf_file && $pdf_file !== 'deleted') {
+
+            if (sqrip_is_usable_file_url($pdf_file)) {
                 $pdf_file_html = '<p style="text-align:'.$download_btn_align.';"><a class="button button-sqrip-invoice" href="' . esc_url($pdf_file) . '" >' . __('Download Invoice', 'sqrip-swiss-qr-invoice') . ' <i class="dashicons dashicons-pdf"></i></a></p>';
             }
 
@@ -802,7 +806,7 @@ function sqrip_qr_action_order_details_after_order_table($order)
             // choose between the two. Disappears as soon as one of them is voided.
             $skonto_file = sqrip_get_order_meta_value($order, 'sqrip_skonto_pdf_file_url');
 
-            if ($skonto_file && $skonto_file !== 'deleted') {
+            if (sqrip_is_usable_file_url($skonto_file)) {
                 $skonto_percentage = sqrip_get_order_meta_value($order, 'sqrip_skonto_percentage');
 
                 $pdf_file_html .= '<p style="text-align:'.$download_btn_align.';"><a class="button button-sqrip-invoice" href="' . esc_url($skonto_file) . '" >'
@@ -824,9 +828,12 @@ function sqrip_qr_action_order_details_after_order_table($order)
             echo wp_kses_post($checkout_remarks);
         }
 
-        // Keyed on the rendered buttons rather than on the ordinary invoice: once that
-        // one is voided the discounted invoice may still be the one to pay.
-        if ($integration_order == "yes" && $pdf_file_html) {
+        // Gate on the rendered markup, not on $pdf_file: in the multi-invoice loop above
+        // $pdf_file only ever holds the LAST slip, so a single missing or deleted slip
+        // used to decide the fate of the whole block.
+        // Additionally only offer the QR bill while the order is actually waiting for a
+        // payment — a cancelled, refunded or already paid order needs no payment slip.
+        if ($integration_order == "yes" && $pdf_file_html && sqrip_order_awaits_payment($order)) {
             /**
              *  Insert sqrip QR code PNG after customer details
              *
@@ -836,7 +843,7 @@ function sqrip_qr_action_order_details_after_order_table($order)
             // echo '<div class="sqrip-qrcode-png"><p>' . __( 'Use the QR invoice below to pay the outstanding balance.' , 'sqrip-swiss-qr-invoice') . '</p><a href="' . esc_url($png_file) . '" target="_blank"><img src="' . esc_url($png_file) . '" alt="'.esc_attr('sqrip QR-Code','sqrip-swiss-qr-invoice').'" width="300" /></a></div>';
 
             // Insert download button PDF
-            echo '<div class="sqrip-qrcode-pdf"><p>' . __('Use the QR invoice below to pay the outstanding balance.', 'sqrip-swiss-qr-invoice') . '</p>'. $pdf_file_html .'</div>';
+            echo '<div class="sqrip-qrcode-pdf"><p>' . esc_html(sqrip_frontend_text('pay_with_qr_invoice')) . '</p>'. $pdf_file_html .'</div>';
         }
 
         //add sqrip info to page

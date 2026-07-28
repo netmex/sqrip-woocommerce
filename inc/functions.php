@@ -242,6 +242,112 @@ function sqrip_void_other_invoices($order, $keep_kind)
     return $voided;
 }
 
+/**
+ * Whether a stored file reference can actually be used as a link target.
+ *
+ * The clean-up writes the literal string 'deleted' into sqrip_pdf_file_url and friends.
+ * That string is truthy, so a plain `if ($url)` produced a download button pointing at
+ * href="deleted", which the browser resolved to "http://deleted".
+ *
+ * @param mixed $value Stored meta value.
+ * @return bool
+ */
+function sqrip_is_usable_file_url($value)
+{
+    if (!is_string($value) || $value === '' || $value === 'deleted') {
+        return false;
+    }
+
+    return (bool) filter_var($value, FILTER_VALIDATE_URL);
+}
+
+/**
+ * Order statuses in which the customer may still pay.
+ *
+ * WooCommerce's own pre-payment statuses plus whatever this shop configured — including
+ * the partial-payment statuses, because a partially paid order is not settled yet. Used
+ * both for hiding the download block and for protecting files from the clean-up, so the
+ * two can never drift apart.
+ *
+ * @return array Status slugs without the 'wc-' prefix.
+ */
+function sqrip_awaiting_payment_statuses()
+{
+    $statuses = array('pending', 'on-hold', 'failed', 'checkout-draft');
+
+    $option_keys = array(
+        'status_awaiting',
+        'qr_order_status',
+        'status_suppressed',
+        'partial_invoice_1_status',
+        'partial_invoice_2_status',
+        'partial_invoice_3_status',
+    );
+
+    foreach ($option_keys as $key) {
+        $status = sqrip_get_plugin_option($key);
+
+        if ($status) {
+            $statuses[] = str_replace('wc-', '', (string) $status);
+        }
+    }
+
+    return array_values(array_unique(array_filter($statuses)));
+}
+
+/**
+ * Whether the order is still waiting for a payment.
+ *
+ * @param WC_Order $order
+ * @return bool
+ */
+function sqrip_order_awaits_payment($order)
+{
+    if (!is_object($order) || !method_exists($order, 'has_status')) {
+        return false;
+    }
+
+    if (method_exists($order, 'needs_payment') && $order->needs_payment()) {
+        return true;
+    }
+
+    return (bool) $order->has_status(sqrip_awaiting_payment_statuses());
+}
+
+/**
+ * Customer-facing text in the form of address the shop configured.
+ *
+ * Only German has an informal variant here: the informal wording is a fixed German
+ * sentence, so for any other site language we deliberately fall back to the regular
+ * translated text instead of leaking German onto a French or Italian shop.
+ *
+ * @param string $key Text identifier.
+ * @return string
+ */
+function sqrip_frontend_text($key)
+{
+    $informal = sqrip_get_plugin_option('frontend_anrede') === 'du';
+    $is_german = strpos((string) get_locale(), 'de') === 0;
+
+    switch ($key) {
+        case 'pay_with_qr_invoice':
+            if ($informal && $is_german) {
+                return 'Verwende die untenstehende QR-Rechnung, um den ausstehenden Betrag zu bezahlen.';
+            }
+
+            return __('Use the QR invoice below to pay the outstanding balance.', 'sqrip-swiss-qr-invoice');
+
+        case 'qr_invoice_failed':
+            if ($informal && $is_german) {
+                return 'Die QR-Rechnung konnte im Moment leider nicht erstellt werden. Bitte versuche es später erneut, wende dich an den Shop oder wähle eine andere Zahlungsart.';
+            }
+
+            return __("It seems we couldn't provide you with a QR-invoice at this time. Please try later, contact the shop or use a different payment method.", 'sqrip-swiss-qr-invoice');
+    }
+
+    return '';
+}
+
 function sqrip_prepare_remote_args($body, $method, $token = null)
 {
     $plugin_token = sqrip_get_plugin_option('token');
@@ -1140,7 +1246,7 @@ function process_payment_stt($order_id)
         $sqrip_link = $has_purchase ? 
             " here <a href='https://www.sqrip.ch/#pricing' target='_blank'>https://www.sqrip.ch/#pricing</a>" 
             : ($has_request ? " And we don't yet know why. Please contact our <a href='mailto:support@sqrip.ch'>support</a>" : "");
-        $customer_msg = "It seems we couldn't provide you with a QR-invoice at this time. Please try later, contact the shop or use a different payment method.";
+        $customer_msg = sqrip_frontend_text('qr_invoice_failed');
         // <a href="mailto:someone@example.com">Send email</a>
         wc_add_notice(
             sprintf(
@@ -1273,7 +1379,7 @@ function process_payment_stt($order_id)
         );
     } else {
 
-        $customer_msg = "It seems we couldn't provide you with a QR-invoice at this time. Please try later, contact the shop or use a different payment method.";
+        $customer_msg = sqrip_frontend_text('qr_invoice_failed');
         wc_add_notice(
             sprintf(
                 __('Error: %s', 'sqrip-swiss-qr-invoice'),

@@ -80,6 +80,9 @@ msgstr "Chiave API"
 msgid "API key for Refunds"
 msgstr "Chiave API per i rimborsi"
 
+msgid "Applies to the texts your customers see on the order confirmation page. The informal wording is currently available for German shops; other languages keep the regular wording."
+msgstr "Vale per i testi che la tua clientela vede nella pagina di conferma dell'ordine. La forma informale è attualmente disponibile per i negozi in lingua tedesca; le altre lingue mantengono la formulazione consueta."
+
 msgid "As from November 2025 on, the QR invoice is only accepted when addresses consist of separate fields for street and building number."
 msgstr "A partire da novembre 2025, la fattura QR viene accettata solo se gli indirizzi sono composti da campi separati per via e numero civico."
 
@@ -152,10 +155,10 @@ msgstr "Stato degli ordini completati"
 msgid "Completed, Paid"
 msgstr "Completato, pagato"
 
-msgid "Confirm Payment"
+msgid "Confirm payment"
 msgstr "Conferma pagamento"
 
-msgid "Confirm payment"
+msgid "Confirm Payment"
 msgstr "Conferma pagamento"
 
 msgid "Confirm receipt of payment"
@@ -269,6 +272,12 @@ msgstr "Nome del file"
 msgid "For security reasons, a separate API key with <strong>deactived</strong> confirmation is needed for the Refund function."
 msgstr "Per motivi di sicurezza, per la funzione di rimborso è necessaria una chiave API separata con conferma <strong>disattivata</strong>."
 
+msgid "Form of address in the shop front end"
+msgstr "Forma di cortesia nel negozio"
+
+msgid "Formal (default)"
+msgstr "Forma di cortesia (predefinito)"
+
 msgid "Format"
 msgstr "Formato"
 
@@ -301,6 +310,9 @@ msgstr "Germania"
 
 msgid "Handling"
 msgstr "Gestione"
+
+msgid "Height of the sqrip logo next to the payment method at the checkout. Enter 0 to hide the logo."
+msgstr "Altezza del logo sqrip accanto al metodo di pagamento alla cassa. Inserisci 0 per nascondere il logo."
 
 msgid "here"
 msgstr "qui"
@@ -341,6 +353,9 @@ msgstr "nel Suo account sqrip;"
 msgid "incorrect"
 msgstr "errato"
 
+msgid "Informal"
+msgstr "Forma informale"
+
 msgid "Initiate QR-Ref# with these 6 digits"
 msgstr "Inizia il numero di riferimento QR con queste 6 cifre"
 
@@ -352,6 +367,9 @@ msgstr "Dettagli della fattura"
 
 msgid "It seems that an invalid (QR-)IBAN has been submitted. Please check the designated transfers-receiving IBAN you submitted."
 msgstr "Sembra che sia stato inviato un (QR-)IBAN non valido. Verifichi l'IBAN destinatario dei bonifici che ha inviato."
+
+msgid "It seems we couldn't provide you with a QR-invoice at this time. Please try later, contact the shop or use a different payment method."
+msgstr "Al momento non è stato possibile creare la fattura QR. Riprova più tardi, contatta il negozio oppure scegli un altro metodo di pagamento."
 
 msgid "Italian"
 msgstr "Italiano"
@@ -370,6 +388,9 @@ msgstr "Liechtenstein"
 
 msgid "Loading..."
 msgstr "Caricamento..."
+
+msgid "Logo height at the checkout (pixels)"
+msgstr "Altezza del logo alla cassa (pixel)"
 
 msgid "Mark as paid"
 msgstr "Contrassegna come pagato"
