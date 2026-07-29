@@ -707,7 +707,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'type' => 'text',
                 'class' => 'sqrip-additional-information',
                 'default' => __("Partial payment [invoice] of [max_invoice]", "sqrip-swiss-qr-invoice"),
-                'description' => __('Will be displayed on the QR invoice under the section “Additional information”.', 'sqrip-swiss-qr-invoice'),
+                'description' => __('Will be displayed on the QR invoice under the section “Additional information”.<br>The following variables are available:<br>[invoice] — the number of this instalment (1, 2, 3 …);<br>[max_invoice] — the total number of instalments.', 'sqrip-swiss-qr-invoice'),
                 'class' => 'multiple-qr-slips-tab'
             ),
             'invoice_fraction_1' => array(
