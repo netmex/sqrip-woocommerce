@@ -1123,6 +1123,19 @@ add_action('woocommerce_process_shop_order_meta', function($post_id) {
                     $order->update_meta_data('sqrip_pdf_file_url', $sqrip_qr_pdf_url);
                     $order->update_meta_data('sqrip_pdf_file_path', $sqrip_qr_pdf_path);
 
+                    // The image the "PDF Invoices & Packing Slips" integration embeds into
+                    // the invoice. Both checkout paths store it — the gateway's
+                    // process_payment() and process_payment_stt() in inc/functions.php —
+                    // but this third copy of the QR generation never did. So an order taken
+                    // by phone or e-mail and entered by hand produced an invoice without the
+                    // QR slip, while the identical order placed through the shop produced
+                    // one with it.
+                    if (sqrip_get_plugin_option('pdf_invoice_integration') === 'yes'
+                        && isset($response_body->png_file)
+                    ) {
+                        $order->update_meta_data('sqrip_png_file_url', $response_body->png_file);
+                    }
+
                     // Second invoice over the discounted amount, if the shop grants
                     // Skonto. A regeneration replaces the previous pair, so an earlier
                     // discounted invoice is cleared out first.
@@ -1131,9 +1144,6 @@ add_action('woocommerce_process_shop_order_meta', function($post_id) {
                 }
 
                 $order->update_meta_data('sqrip_refund_iban_num', get_user_meta($order->get_user_id(), 'iban_num', true));
-
-                // $order->update_meta_data('sqrip_png_file_url', $sqrip_qr_png_url);
-                // $order->update_meta_data('sqrip_png_file_path', $sqrip_qr_png_path);
 
                 $order->save();
 

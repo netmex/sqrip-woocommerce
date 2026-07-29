@@ -675,6 +675,12 @@ function sqrip_get_user_details($token = "", $return = "address")
                 'name' => $name,
                 'postal_code' => $address->zip,
                 'street' => $address->street,
+                // The sqrip account keeps street and building number apart, exactly as the
+                // structured addresses require, and GET /details returns both. This branch
+                // used to drop the number, so shops set to "from the sqrip account" printed
+                // a payee address without it — while the other two address sources, and the
+                // payer address, have always passed it on.
+                'building_number' => isset($address->building_number) ? $address->building_number : "",
             );
         }
 
