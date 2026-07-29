@@ -1,2 +1,8 @@
 .DS_Store
 .idea
+
+# Real bank statements used while testing the camt reconciliation. Never commit
+# these: one file holds a shop's entire month of banking — IBANs, and the names
+# and addresses of every payer. Deliberately narrow, so the synthetic fixtures
+# under tests/camt/fixtures/ stay tracked.
+CAMT/
