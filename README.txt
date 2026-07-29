@@ -145,8 +145,9 @@ Yes. We are already working on comparing the reconciliation of orders/purchases 
 7. Refund functionality
 
 == Changelog ==
-= 1.10.3 : Juli 2026 – Fix =
+= 1.10.3 : Juli 2026 – Fixes =
 * Orders you enter by hand in the backend now get the QR slip inside the PDF invoice as well, if you use the 'PDF Invoices & Packing Slips' integration. Until now only orders placed through the shop did, so the same order taken by phone or e-mail produced an invoice without the QR slip;
+* The payee address now shows the building number when the address is taken from your sqrip account. The number is stored in your account and delivered by the sqrip API, but the plugin left it out of the QR bill — so the payee address was printed incomplete, which the structured addresses require it not to be. The other two address sources, and the payer address, were never affected;
 
 = 1.10.2 : Juli 2026 – Fix =
 * Opening the sqrip settings no longer ticks 'Payment Comparison' by itself. On shops with the feature switched off the checkbox appeared ticked as soon as the settings screen was opened, so saving switched the feature on. It affects 1.10 and 1.10.1; if you do not use the payment comparison, check the setting once on the Services tab after updating;
