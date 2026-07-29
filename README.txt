@@ -4,7 +4,7 @@ Donate link: https://sqrip.ch/
 Tags: woocommerce, payment, swiss qr invoice, qr-rechnung, einzahlungsschein
 Requires at least: 6.0
 Tested up to: 7.0
-Stable tag: 1.10.2
+Stable tag: 1.10.3
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -145,6 +145,9 @@ Yes. We are already working on comparing the reconciliation of orders/purchases 
 7. Refund functionality
 
 == Changelog ==
+= 1.10.3 : Juli 2026 – Fix =
+* Orders you enter by hand in the backend now get the QR slip inside the PDF invoice as well, if you use the 'PDF Invoices & Packing Slips' integration. Until now only orders placed through the shop did, so the same order taken by phone or e-mail produced an invoice without the QR slip;
+
 = 1.10.2 : Juli 2026 – Fix =
 * Opening the sqrip settings no longer ticks 'Payment Comparison' by itself. On shops with the feature switched off the checkbox appeared ticked as soon as the settings screen was opened, so saving switched the feature on. It affects 1.10 and 1.10.1; if you do not use the payment comparison, check the setting once on the Services tab after updating;
 * Switching 'Payment Comparison' off no longer switches 'Multiple QR-Slips' on, and the other way round. The two still cannot run at the same time — switching one on turns the other off — but you can now leave both off, which was impossible before. Toggling the Refunds checkbox no longer affected the two either;
@@ -349,6 +352,9 @@ We made users (even more) happy with these changes:
 * Here we go!
 
 == Upgrade Notice ==
+= 1.10.3 =
+For shops that combine the QR slip with the invoice of 'PDF Invoices & Packing Slips': orders entered by hand in the backend now get the QR slip in the invoice too, just like orders placed through the shop. No settings change.
+
 = 1.10.2 =
 Recommended update for everyone on 1.10 or 1.10.1: opening the sqrip settings ticked 'Payment Comparison' by itself, so saving switched the feature on. If you do not use it, check that setting once on the Services tab after updating.
 
