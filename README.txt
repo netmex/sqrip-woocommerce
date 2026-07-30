@@ -144,9 +144,11 @@ Yes. We are already working on comparing the reconciliation of orders/purchases 
 7. Refund functionality
 
 == Changelog ==
+= 1.10.4 : not released yet =
+* Corrected the description of the language setting. It said the QR invoice could be produced in the language your customer selected on a multilingual site — the plugin cannot do that. The language is taken from the shop setting for every QR invoice. Following the customer's language is planned for a future release;
+
 = 1.10.3 : Juli 2026 – Fixes =
 * Orders you enter by hand in the backend now get the QR slip inside the PDF invoice as well, if you use the 'PDF Invoices & Packing Slips' integration. Until now only orders placed through the shop did, so the same order taken by phone or e-mail produced an invoice without the QR slip;
-* Corrected the description of the language setting. It said the QR invoice could be produced in the language your customer selected on a multilingual site — the plugin cannot do that. The language is taken from the shop setting for every QR invoice. Following the customer's language is planned for a future release;
 * The payee address now shows the building number when the address is taken from your sqrip account. The number is stored in your account and delivered by the sqrip API, but the plugin left it out of the QR bill — so the payee address was printed incomplete, which the structured addresses require it not to be. The other two address sources, and the payer address, were never affected;
 
 = 1.10.2 : Juli 2026 – Fix =
