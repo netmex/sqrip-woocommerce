@@ -442,6 +442,11 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'default' => 'de',
                 'class' => 'qrinvoice-tab'
             ),
+            /* [HOLD 1.11 — B2 Skonto + B3 Mahngebühr] Both feature setting blocks are
+               parked while the focus moves to the camt reconciliation (C). The classes
+               stay in the code but are switched off in their is_enabled(); hiding these
+               fields keeps the features from being enabled at all. Uncomment this whole
+               block (and the guards marked [HOLD 1.11]) to restore.
             'section_skonto' => array(
                 'title' => __('Discount for early payment (Skonto)', 'sqrip-swiss-qr-invoice'),
                 'type' => 'section',
@@ -562,6 +567,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'description' => __('Printed on the reminder invoice. Same short codes as above, plus [reminder_fee] and [currency]. Here [due_date] is the maturity of the reminder.', 'sqrip-swiss-qr-invoice'),
                 'class' => 'qrinvoice-tab sqrip-reminder-field'
             ),
+            [HOLD 1.11 — end of parked B2/B3 settings] */
             'section_handling' => array(
                 'title' => __('Handling', 'sqrip-swiss-qr-invoice'),
                 'type' => 'section',

@@ -27,6 +27,13 @@ class Sqrip_Reminder
      */
     public static function is_enabled()
     {
+        // [HOLD 1.11 — B3 Mahngebühr] Feature parked while the focus moves to the camt
+        // reconciliation (C). The class stays in place but is switched off here, so the
+        // daily run does nothing and no reminder is ever sent. The cron registration in
+        // sqrip-woocommerce.php and the settings fields are commented out with the same
+        // marker. Remove this return to reactivate.
+        return false;
+
         return sqrip_get_plugin_option('reminder_enabled') === 'yes';
     }
 

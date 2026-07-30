@@ -26,6 +26,13 @@ class Sqrip_Skonto
      */
     public static function is_enabled()
     {
+        // [HOLD 1.11 — B2 Skonto] Feature parked while the focus moves to the camt
+        // reconciliation (C). The whole class stays in place but is switched off here,
+        // so no second invoice is ever generated regardless of any stored setting.
+        // Remove this return to reactivate; the settings fields are commented out in
+        // inc/class-wc-sqrip-payment-gateway.php with the same marker.
+        return false;
+
         return sqrip_get_plugin_option('skonto_enabled') === 'yes'
             && self::percentage() > 0;
     }

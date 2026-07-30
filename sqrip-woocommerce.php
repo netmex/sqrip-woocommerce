@@ -172,7 +172,9 @@ function sqrip_version_sync_require()
 
 // Daily sweep for overdue orders. Registered late so WooCommerce and its order
 // storage are fully up before the schedule is touched.
-add_action('plugins_loaded', array('Sqrip_Reminder', 'init'), 20);
+// [HOLD 1.11 — B3 Mahngebühr] Cron registration parked; no reminder run is scheduled.
+// Sqrip_Reminder::is_enabled() is also hard-false. Uncomment to reactivate.
+// add_action('plugins_loaded', array('Sqrip_Reminder', 'init'), 20);
 
 /**
  * Unschedule media clean cron job on sqrip deactivation
