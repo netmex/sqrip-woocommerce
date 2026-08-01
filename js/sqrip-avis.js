@@ -131,8 +131,12 @@
                     var err = (res && res.data && res.data.message) ? res.data.message : (s.txt_avis_failed || '');
                     $result.text(err);
                 }
-            }).fail(function () {
-                $result.text(s.txt_avis_failed || '');
+            }).fail(function (jqXHR) {
+                var status = jqXHR ? jqXHR.status : '?';
+                var body = jqXHR && jqXHR.responseText
+                    ? ' — ' + String(jqXHR.responseText).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 300)
+                    : '';
+                $result.text((s.txt_avis_failed || '') + ' [AJAX ' + status + ']' + body);
             }).always(function () {
                 $btn.prop('disabled', false);
             });
