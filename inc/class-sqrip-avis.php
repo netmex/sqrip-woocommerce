@@ -26,6 +26,10 @@ class Sqrip_Avis
     const NONCE = 'sqrip-avis';
     const TOKEN_OPTION = 'sqrip_avis_token';
 
+    // The service is the same for every shop, so no one has to type it. A stored
+    // 'avis_service_url' option still overrides it if one is ever set by hand.
+    const DEFAULT_SERVICE_URL = 'https://avis-service-ajeqivb4ra-oa.a.run.app';
+
     /**
      * @return void
      */
@@ -71,7 +75,9 @@ class Sqrip_Avis
      */
     private static function service_url()
     {
-        return rtrim((string) sqrip_get_plugin_option('avis_service_url'), '/');
+        $url = (string) sqrip_get_plugin_option('avis_service_url');
+
+        return rtrim($url !== '' ? $url : self::DEFAULT_SERVICE_URL, '/');
     }
 
     /**
@@ -179,8 +185,11 @@ class Sqrip_Avis
         }
 
         if (self::service_url() === '' || self::customer() === '') {
-            return __('The payment notification service is not configured yet.', 'sqrip-swiss-qr-invoice');
+            return __('Please set the mailbox name under "camt Reconciliation" and save first.', 'sqrip-swiss-qr-invoice');
         }
+
+        // Make sure the service knows this shop before we ask it anything.
+        self::register_with_service();
 
         $reconciler = new Sqrip_Camt_Reconciler();
         $orders     = $reconciler->collect_open_orders();
@@ -396,6 +405,13 @@ class Sqrip_Avis
         if (!isset($map[$step])) {
             wp_send_json_error(array('message' => __('Unknown step.', 'sqrip-swiss-qr-invoice')));
         }
+
+        if (self::customer() === '') {
+            wp_send_json_error(array('message' => __('Please set the mailbox name and save the settings first.', 'sqrip-swiss-qr-invoice')));
+        }
+
+        // Register on demand so the service always knows this shop's token/callback.
+        self::register_with_service();
 
         $result = self::post($map[$step], array('token' => self::token()));
 

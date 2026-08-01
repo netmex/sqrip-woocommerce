@@ -258,32 +258,10 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'title' => '',
                 'label' => __('Activate the payment notification service', 'sqrip-swiss-qr-invoice'),
                 'type' => 'checkbox',
-                'description' => __('Detect incoming payments from the credit-notification emails your bank sends. Order-driven: only credits that match one of your open orders are used, and nothing about your banking is stored.', 'sqrip-swiss-qr-invoice'),
+                'description' => __('Detect incoming payments from the credit-notification emails your bank sends. Order-driven: only credits that match one of your open orders are used, and nothing about your banking is stored. Set it up under the "camt Reconciliation" tab.', 'sqrip-swiss-qr-invoice'),
                 'default' => 'no',
                 // Sub-feature of the payment comparison, shown only while it is on.
                 'class' => 'services-tab sqrip-camt-toggle'
-            ),
-            'avis_service_url' => array(
-                'title' => __('Service address', 'sqrip-swiss-qr-invoice'),
-                'type' => 'text',
-                'description' => __('The address of your sqrip payment notification service.', 'sqrip-swiss-qr-invoice'),
-                'default' => '',
-                'class' => 'services-tab sqrip-avis-field'
-            ),
-            'avis_localpart' => array(
-                'title' => __('Your mailbox name', 'sqrip-swiss-qr-invoice'),
-                'type' => 'text',
-                'description' => __('The name before @avis.sqrip.ch that your bank notifications are sent to.', 'sqrip-swiss-qr-invoice'),
-                'default' => '',
-                'class' => 'services-tab sqrip-avis-field'
-            ),
-            'avis_threshold' => array(
-                'title' => __('Confirm amounts from', 'sqrip-swiss-qr-invoice'),
-                'type' => 'number',
-                'custom_attributes' => array('step' => '0.01', 'min' => '0'),
-                'description' => __('Payments of this amount or more are not booked automatically — you confirm them by hand. Leave at 0 to book every match automatically.', 'sqrip-swiss-qr-invoice'),
-                'default' => '0',
-                'class' => 'services-tab sqrip-avis-field'
             ),
             'multiple_qr_slips_enabled' => array(
                 'title' => __('Activate/Deactivate Multiple QR-slips', 'sqrip-swiss-qr-invoice'),
@@ -984,6 +962,21 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'type' => 'section',
                 'class' => 'camt-tab'
             ),
+            'avis_localpart' => array(
+                'title' => __('Your mailbox name', 'sqrip-swiss-qr-invoice'),
+                'type' => 'text',
+                'description' => __('Pick a short name for this shop. Your bank notifications are sent to it before @avis.sqrip.ch.', 'sqrip-swiss-qr-invoice'),
+                'default' => '',
+                'class' => 'camt-tab'
+            ),
+            'avis_threshold' => array(
+                'title' => __('Confirm amounts from', 'sqrip-swiss-qr-invoice'),
+                'type' => 'number',
+                'custom_attributes' => array('step' => '0.01', 'min' => '0'),
+                'description' => __('Payments of this amount or more are not booked automatically — you confirm them by hand. Leave at 0 to book every match automatically.', 'sqrip-swiss-qr-invoice'),
+                'default' => '0',
+                'class' => 'camt-tab'
+            ),
             'avis_wizard' => array(
                 'title' => __('Setup', 'sqrip-swiss-qr-invoice'),
                 'type' => 'avis_wizard',
@@ -1346,7 +1339,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                             ?></code></p>
                         </li>
                         <li>
-                            <?php esc_html_e('Your bank sends a confirmation code. Start the verification window — sqrip catches the code and shows it here:', 'sqrip-swiss-qr-invoice'); ?>
+                            <?php esc_html_e('Some banks send a one-time confirmation code to that address. If yours does, start the verification window — sqrip catches the code and shows it here, so you can enter it back in your e-banking:', 'sqrip-swiss-qr-invoice'); ?>
                             <p>
                                 <button type="button" class="button-secondary sqrip-avis-start"<?php echo $address ? '' : ' disabled="disabled"'; ?>>
                                     <?php esc_html_e('Start verification', 'sqrip-swiss-qr-invoice'); ?>
@@ -1356,9 +1349,12 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                                 </button>
                             </p>
                             <div class="sqrip-avis-code"></div>
+                            <p class="description">
+                                <?php esc_html_e('No code? Some banks (for example AKB) send none. Then just skip this step — the service is active as soon as your settings are saved and the first notification arrives.', 'sqrip-swiss-qr-invoice'); ?>
+                            </p>
                         </li>
                         <li>
-                            <?php esc_html_e('Enter that code in your e-banking to confirm the address. Done — incoming payments are now detected automatically.', 'sqrip-swiss-qr-invoice'); ?>
+                            <?php esc_html_e('Done — incoming payments are now detected automatically. Use "Check now" below any time.', 'sqrip-swiss-qr-invoice'); ?>
                         </li>
                     </ol>
 
