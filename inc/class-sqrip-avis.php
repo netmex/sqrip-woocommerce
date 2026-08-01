@@ -30,6 +30,9 @@ class Sqrip_Avis
     // 'avis_service_url' option still overrides it if one is ever set by hand.
     const DEFAULT_SERVICE_URL = 'https://avis-service-ajeqivb4ra-oa.a.run.app';
 
+    /** @var string The last transport failure, appended to the "unreachable" message. */
+    private static $last_error = '';
+
     /**
      * @return void
      */
@@ -91,9 +94,9 @@ class Sqrip_Avis
      */
     private static function service_url()
     {
-        $url = (string) sqrip_get_plugin_option('avis_service_url');
-
-        return rtrim($url !== '' ? $url : self::DEFAULT_SERVICE_URL, '/');
+        // Fixed for every shop. Not read from any option so a stale value from an
+        // earlier version can never point it somewhere wrong.
+        return rtrim(self::DEFAULT_SERVICE_URL, '/');
     }
 
     /**
@@ -220,7 +223,7 @@ class Sqrip_Avis
         $claim = self::post('/v1/claim', array('token' => self::token(), 'orders' => $payload));
 
         if (!is_array($claim)) {
-            return __('The payment notification service could not be reached.', 'sqrip-swiss-qr-invoice');
+            return self::unreachable_message();
         }
 
         $matches = isset($claim['matches']) && is_array($claim['matches']) ? $claim['matches'] : array();
@@ -564,7 +567,7 @@ class Sqrip_Avis
         $result = self::post($map[$step], array('token' => self::token()));
 
         if (!is_array($result)) {
-            wp_send_json_error(array('message' => __('The payment notification service could not be reached.', 'sqrip-swiss-qr-invoice')));
+            wp_send_json_error(array('message' => self::unreachable_message()));
         }
 
         wp_send_json_success($result);
@@ -624,17 +627,34 @@ class Sqrip_Avis
         ));
 
         if (is_wp_error($response)) {
+            self::$last_error = $response->get_error_message();
+
             return null;
         }
 
         $code = (int) wp_remote_retrieve_response_code($response);
 
         if ($code < 200 || $code >= 300) {
+            self::$last_error = 'HTTP ' . $code;
+
             return null;
         }
 
         $data = json_decode(wp_remote_retrieve_body($response), true);
 
         return is_array($data) ? $data : null;
+    }
+
+    /**
+     * The "could not be reached" message, with the transport detail when we have one
+     * (e.g. a cURL error or an HTTP status) so the cause is visible.
+     *
+     * @return string
+     */
+    private static function unreachable_message()
+    {
+        $msg = __('The payment notification service could not be reached.', 'sqrip-swiss-qr-invoice');
+
+        return self::$last_error !== '' ? $msg . ' (' . self::$last_error . ')' : $msg;
     }
 }
