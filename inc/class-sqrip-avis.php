@@ -232,6 +232,7 @@ class Sqrip_Avis
         $report['credits_total']    = count($matches);
         $report['unmatched_credits'] = isset($claim['dropped']) ? (int) $claim['dropped'] : 0;
         $report['warnings']         = isset($claim['warnings']) && is_array($claim['warnings']) ? $claim['warnings'] : array();
+        $report['last_seen']        = isset($claim['last_seen']) && is_array($claim['last_seen']) ? $claim['last_seen'] : null;
 
         return $report;
     }
@@ -423,6 +424,39 @@ class Sqrip_Avis
             );
             ?>
         </p>
+
+        <?php
+        if (!empty($report['last_seen'])) :
+            $ls  = $report['last_seen'];
+            $ref = isset($ls['reference']) ? (string) $ls['reference'] : '';
+
+            $link = '';
+            foreach ($orders as $entry) {
+                foreach ($entry['slips'] as $slip) {
+                    if ($slip['reference'] === $ref) {
+                        $link = ' ' . self::order_link($entry['order_id'], $entry['order_number']);
+                        break 2;
+                    }
+                }
+            }
+
+            $when = isset($ls['seen_at']) ? strtotime((string) $ls['seen_at']) : 0;
+            $when = $when ? date_i18n(get_option('date_format') . ' ' . get_option('time_format'), $when) : '';
+            ?>
+            <p class="description">
+                <?php
+                printf(
+                    /* translators: 1: currency, 2: amount, 3: reference, 4: date/time */
+                    esc_html__('Last recognised: %1$s %2$s, reference %3$s, on %4$s', 'sqrip-swiss-qr-invoice'),
+                    esc_html(isset($ls['currency']) ? $ls['currency'] : ''),
+                    esc_html(isset($ls['amount']) ? number_format((float) $ls['amount'], 2, '.', '') : ''),
+                    esc_html($ref),
+                    esc_html($when)
+                );
+                echo $link; // already-escaped markup from order_link()
+                ?>
+            </p>
+        <?php endif; ?>
 
         <?php if (!$orders) : ?>
             <p><?php esc_html_e('There are no orders waiting for payment right now.', 'sqrip-swiss-qr-invoice'); ?></p>

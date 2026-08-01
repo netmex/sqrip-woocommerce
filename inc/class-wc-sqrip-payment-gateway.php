@@ -1334,8 +1334,8 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                             <?php esc_html_e('Enter this address in your e-banking as the destination for credit notifications:', 'sqrip-swiss-qr-invoice'); ?>
                             <p>
                                 <code class="sqrip-avis-address"><?php echo $address ? esc_html($address) : ''; ?></code>
-                                <button type="button" class="button button-small sqrip-avis-copy" title="<?php esc_attr_e('Copy', 'sqrip-swiss-qr-invoice'); ?>"<?php echo $address ? '' : ' style="display:none;"'; ?>>
-                                    <span class="dashicons dashicons-admin-page" style="vertical-align:text-bottom;"></span>
+                                <button type="button" class="sqrip-avis-copy" title="<?php esc_attr_e('Copy', 'sqrip-swiss-qr-invoice'); ?>" style="border:0; background:none; cursor:pointer; padding:0 2px; vertical-align:middle;<?php echo $address ? '' : ' display:none;'; ?>">
+                                    <span class="dashicons dashicons-admin-page"></span>
                                 </button>
                                 <span class="sqrip-avis-copied" style="display:none; color:#00794d;">
                                     <?php esc_html_e('Copied', 'sqrip-swiss-qr-invoice'); ?>

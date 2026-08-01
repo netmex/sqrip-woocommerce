@@ -1196,3 +1196,12 @@ msgid "%d order waiting for payment checked."
 msgid_plural "%d orders waiting for payment checked."
 msgstr[0] "%d Bestellung mit offener Zahlung geprüft."
 msgstr[1] "%d Bestellungen mit offener Zahlung geprüft."
+
+msgid "Order"
+msgstr "Bestellung"
+
+msgid "Status"
+msgstr "Status"
+
+msgid "Last recognised: %1$s %2$s, reference %3$s, on %4$s"
+msgstr "Zuletzt erkannt: %1$s %2$s, Referenz %3$s, am %4$s"
