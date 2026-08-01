@@ -392,11 +392,109 @@ class Sqrip_Avis
         // A human pressed the button, so the threshold guard does not apply here.
         $applied = self::apply($report, true);
 
-        wp_send_json_success(array(
-            'applied'  => count($applied),
-            'warnings' => $report['warnings'],
-            'scanned'  => (int) $report['orders_scanned'],
-        ));
+        wp_send_json_success(array('html' => self::render_check($report, $applied)));
+    }
+
+    /**
+     * The table shown after "check now": every order waiting for payment and whether
+     * a payment has come in for it. Doubles as the confirmation that notifications are
+     * arriving and being recognised.
+     *
+     * @param array $report
+     * @param array $applied order_id => order_number that were booked just now
+     * @return string
+     */
+    private static function render_check(array $report, array $applied)
+    {
+        $orders = $report['orders'];
+
+        ob_start();
+        ?>
+        <p>
+            <?php
+            printf(
+                esc_html(_n(
+                    '%d order waiting for payment checked.',
+                    '%d orders waiting for payment checked.',
+                    (int) $report['orders_scanned'],
+                    'sqrip-swiss-qr-invoice'
+                )),
+                (int) $report['orders_scanned']
+            );
+            ?>
+        </p>
+
+        <?php if (!$orders) : ?>
+            <p><?php esc_html_e('There are no orders waiting for payment right now.', 'sqrip-swiss-qr-invoice'); ?></p>
+        <?php else : ?>
+            <table class="widefat striped">
+                <thead>
+                    <tr>
+                        <th><?php esc_html_e('Order', 'sqrip-swiss-qr-invoice'); ?></th>
+                        <th><?php esc_html_e('Amount', 'sqrip-swiss-qr-invoice'); ?></th>
+                        <th><?php esc_html_e('Status', 'sqrip-swiss-qr-invoice'); ?></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($orders as $entry) : ?>
+                        <tr>
+                            <td><?php echo self::order_link($entry['order_id'], $entry['order_number']); ?></td>
+                            <td><?php echo esc_html($entry['currency'] . ' ' . number_format((float) $entry['total'], 2, '.', '')); ?></td>
+                            <td><?php echo esc_html(self::status_label($entry, isset($applied[$entry['order_id']]))); ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        <?php endif; ?>
+
+        <?php foreach ($report['warnings'] as $warning) : ?>
+            <p class="description"><?php echo esc_html($warning); ?></p>
+        <?php endforeach; ?>
+        <?php
+
+        return ob_get_clean();
+    }
+
+    /**
+     * @param array $entry
+     * @param bool  $booked
+     * @return string
+     */
+    private static function status_label($entry, $booked)
+    {
+        switch ($entry['category']) {
+            case Sqrip_Camt_Reconciler::PAID:
+                return $booked
+                    ? __('Paid — status updated', 'sqrip-swiss-qr-invoice')
+                    : __('Paid — waiting for your confirmation', 'sqrip-swiss-qr-invoice');
+            case Sqrip_Camt_Reconciler::PARTLY_PAID:
+                return __('Partly paid', 'sqrip-swiss-qr-invoice');
+            case Sqrip_Camt_Reconciler::AMOUNT_MISMATCH:
+                return __('Amount differs — please check', 'sqrip-swiss-qr-invoice');
+            case Sqrip_Camt_Reconciler::DUPLICATE:
+                return __('Paid more than once — please check', 'sqrip-swiss-qr-invoice');
+            case Sqrip_Camt_Reconciler::OUT_OF_SEQUENCE:
+                return __('An earlier instalment is still unpaid', 'sqrip-swiss-qr-invoice');
+        }
+
+        return __('Still waiting for payment', 'sqrip-swiss-qr-invoice');
+    }
+
+    /**
+     * @param int    $order_id
+     * @param string $order_number
+     * @return string Escaped markup.
+     */
+    private static function order_link($order_id, $order_number)
+    {
+        $url = admin_url('post.php?post=' . (int) $order_id . '&action=edit');
+
+        if (class_exists('\Automattic\WooCommerce\Utilities\OrderUtil')
+            && \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled()) {
+            $url = admin_url('admin.php?page=wc-orders&action=edit&id=' . (int) $order_id);
+        }
+
+        return '<a href="' . esc_url($url) . '" target="_blank">#' . esc_html($order_number) . '</a>';
     }
 
     // --- onboarding proxy (verification code) ------------------------------

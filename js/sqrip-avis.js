@@ -125,12 +125,8 @@
                 action: 'sqrip_avis_reconcile',
                 security: s.avis_nonce
             }, function (res) {
-                if (res && res.success && res.data) {
-                    var msg = (res.data.applied || 0) + ' ' + (s.txt_avis_applied || '');
-                    if (res.data.warnings && res.data.warnings.length) {
-                        msg += ' — ' + res.data.warnings.join(' ');
-                    }
-                    $result.text(msg);
+                if (res && res.success && res.data && res.data.html) {
+                    $result.html(res.data.html);
                 } else {
                     var err = (res && res.data && res.data.message) ? res.data.message : (s.txt_avis_failed || '');
                     $result.text(err);
