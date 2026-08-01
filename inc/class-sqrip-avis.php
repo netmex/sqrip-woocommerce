@@ -41,6 +41,22 @@ class Sqrip_Avis
             add_action('wp_ajax_sqrip_avis_reconcile', array(__CLASS__, 'ajax_reconcile'));
             add_action('wp_ajax_sqrip_avis_onboard', array(__CLASS__, 'ajax_onboard'));
             add_action('woocommerce_update_options_payment_gateways_sqrip', array(__CLASS__, 'maybe_register'));
+            add_action('admin_notices', array(__CLASS__, 'maybe_notice'));
+        }
+    }
+
+    /**
+     * Show a notice when the chosen mailbox name is already taken by another shop.
+     *
+     * @return void
+     */
+    public static function maybe_notice()
+    {
+        if (get_transient('sqrip_avis_name_taken')) {
+            delete_transient('sqrip_avis_name_taken');
+            echo '<div class="notice notice-error"><p>'
+                . esc_html__('That mailbox name is already in use by another shop. Please choose a different one.', 'sqrip-swiss-qr-invoice')
+                . '</p></div>';
         }
     }
 
@@ -434,13 +450,30 @@ class Sqrip_Avis
             return false;
         }
 
-        $result = self::post('/v1/register', array(
-            'token'        => self::token(),
-            'customer'     => self::customer(),
-            'callback_url' => rest_url('sqrip/v1/reconcile'),
+        $response = wp_remote_post(self::service_url() . '/v1/register', array(
+            'timeout' => 20,
+            'headers' => array('Content-Type' => 'application/json', 'Accept' => 'application/json'),
+            'body'    => wp_json_encode(array(
+                'token'        => self::token(),
+                'customer'     => self::customer(),
+                'callback_url' => rest_url('sqrip/v1/reconcile'),
+            )),
         ));
 
-        return is_array($result) && !empty($result['ok']);
+        if (is_wp_error($response)) {
+            return false;
+        }
+
+        $code = (int) wp_remote_retrieve_response_code($response);
+
+        // The service rejects a mailbox name that already belongs to another shop.
+        if ($code === 409) {
+            set_transient('sqrip_avis_name_taken', 1, 60);
+
+            return false;
+        }
+
+        return $code >= 200 && $code < 300;
     }
 
     // --- service client ----------------------------------------------------

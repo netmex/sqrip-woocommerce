@@ -16,6 +16,54 @@
         var s = window.sqrip;
         var pollTimer = null;
         var pollTries = 0;
+        var DOMAIN = '@avis.sqrip.ch';
+
+        // Show the "Activate automatic payment reconciliation" switch only while the
+        // payment comparison itself is on (same rule as the camt reconciliation).
+        var $comparison = $('#woocommerce_sqrip_payment_comparison_enabled');
+        var $avisRow = $('#woocommerce_sqrip_avis_enabled').closest('tr');
+        function toggleAvisRow() {
+            $avisRow.toggle($comparison.is(':checked'));
+        }
+        if ($comparison.length && $avisRow.length) {
+            toggleAvisRow();
+            $comparison.on('change', toggleAvisRow);
+        }
+
+        // Keep the shown address in step 1 in sync with the mailbox-name field live —
+        // before the settings are even saved.
+        var $localpart = $('#woocommerce_sqrip_avis_localpart');
+        function updateAddress() {
+            var name = ($localpart.val() || '').toLowerCase().replace(/[^a-z0-9_-]/g, '');
+            var addr = name ? name + DOMAIN : '';
+            $('.sqrip-avis-address').text(addr);
+            $('.sqrip-avis-copy').toggle(!!addr);
+            $('.sqrip-avis-noaddr').toggle(!addr);
+            $('.sqrip-avis-start').prop('disabled', !addr);
+        }
+        if ($localpart.length) {
+            $localpart.on('input change', updateAddress);
+        }
+
+        $(document).on('click', '.sqrip-avis-copy', function () {
+            var addr = $('.sqrip-avis-address').text();
+            if (!addr) {
+                return;
+            }
+            var done = function () {
+                var $c = $('.sqrip-avis-copied').show();
+                window.setTimeout(function () { $c.fadeOut(); }, 1500);
+            };
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(addr).then(done, done);
+            } else {
+                var $tmp = $('<input>').val(addr).appendTo('body');
+                $tmp.trigger('select');
+                try { document.execCommand('copy'); } catch (e) {}
+                $tmp.remove();
+                done();
+            }
+        });
 
         function onboard(step, done) {
             $.post(s.ajax_url, {

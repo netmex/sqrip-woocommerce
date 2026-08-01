@@ -246,9 +246,9 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             ),
             'camt_reconciliation_enabled' => array(
                 'title' => '',
-                'label' => __('Activate camt reconciliation', 'sqrip-swiss-qr-invoice'),
+                'label' => __('Activate manual camt reconciliation', 'sqrip-swiss-qr-invoice'),
                 'type' => 'checkbox',
-                'description' => __('Upload the camt file from your e-banking and let sqrip mark the paid orders. Runs entirely in your shop: the file is read once, only payments belonging to an open order are used, and the file is discarded straight afterwards.', 'sqrip-swiss-qr-invoice'),
+                'description' => __('Upload the camt file from your e-banking and let sqrip set the status of the paid orders. Runs entirely in your shop: the file is read once, only payments belonging to an open order are used, and the file is discarded straight afterwards.', 'sqrip-swiss-qr-invoice'),
                 'default' => 'no',
                 // Sub-feature of the payment comparison. sqrip-admin.js only shows this
                 // row while that one is switched on.
@@ -256,9 +256,9 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             ),
             'avis_enabled' => array(
                 'title' => '',
-                'label' => __('Activate the payment notification service', 'sqrip-swiss-qr-invoice'),
+                'label' => __('Activate automatic payment reconciliation', 'sqrip-swiss-qr-invoice'),
                 'type' => 'checkbox',
-                'description' => __('Detect incoming payments from the credit-notification emails your bank sends. Order-driven: only credits that match one of your open orders are used, and nothing about your banking is stored. Set it up under the "camt Reconciliation" tab.', 'sqrip-swiss-qr-invoice'),
+                'description' => __('Detect incoming payments from the credit-notification emails your bank sends. Order-driven: only credits that match one of your open orders are used, and nothing about your banking is stored.', 'sqrip-swiss-qr-invoice'),
                 'default' => 'no',
                 // Sub-feature of the payment comparison, shown only while it is on.
                 'class' => 'services-tab sqrip-camt-toggle'
@@ -1332,11 +1332,18 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                     <ol class="sqrip-avis-steps">
                         <li>
                             <?php esc_html_e('Enter this address in your e-banking as the destination for credit notifications:', 'sqrip-swiss-qr-invoice'); ?>
-                            <p><code class="sqrip-avis-address"><?php
-                                echo $address
-                                    ? esc_html($address)
-                                    : esc_html__('— fill in "Your mailbox name" above and save first', 'sqrip-swiss-qr-invoice');
-                            ?></code></p>
+                            <p>
+                                <code class="sqrip-avis-address"><?php echo $address ? esc_html($address) : ''; ?></code>
+                                <button type="button" class="button-secondary sqrip-avis-copy"<?php echo $address ? '' : ' style="display:none;"'; ?>>
+                                    <?php esc_html_e('Copy', 'sqrip-swiss-qr-invoice'); ?>
+                                </button>
+                                <span class="sqrip-avis-copied" style="display:none; color:#00794d;">
+                                    <?php esc_html_e('Copied', 'sqrip-swiss-qr-invoice'); ?>
+                                </span>
+                            </p>
+                            <p class="description sqrip-avis-noaddr"<?php echo $address ? ' style="display:none;"' : ''; ?>>
+                                <?php esc_html_e('Choose a mailbox name above — the address then appears here.', 'sqrip-swiss-qr-invoice'); ?>
+                            </p>
                         </li>
                         <li>
                             <?php esc_html_e('Some banks send a one-time confirmation code to that address. If yours does, start the verification window — sqrip catches the code and shows it here, so you can enter it back in your e-banking:', 'sqrip-swiss-qr-invoice'); ?>
