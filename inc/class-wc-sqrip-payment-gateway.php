@@ -172,12 +172,6 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                         'class' => '',
                     ],
                     [
-                        'id' => 'camt',
-                        'title' => __('camt Reconciliation', 'sqrip-swiss-qr-invoice'),
-                        'description' => '',
-                        'class' => '',
-                    ],
-                    [
                         'id' => 'refunds',
                         'title' => __('Refunds', 'sqrip-swiss-qr-invoice'),
                         'class' => '',
@@ -947,27 +941,31 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'css' => 'visibility: hidden; position: absolute',
                 'class' => 'comparison-tab sqrip-no-height'
             ),
+            // The manual camt upload and the automatic notification service used to live
+            // on their own "camt Reconciliation" tab. They now sit at the bottom of the
+            // Payment Comparison ("Zahlungsabgleich") tab; each half is shown only while
+            // its own sub-feature switch is on (sqrip-camt-detail / sqrip-avis-detail).
             'section_camt' => array(
                 'title' => __('camt Reconciliation', 'sqrip-swiss-qr-invoice'),
                 'type' => 'section',
-                'class' => 'camt-tab'
+                'class' => 'comparison-tab sqrip-camt-detail'
             ),
             'camt_upload' => array(
                 'title' => __('Bank file', 'sqrip-swiss-qr-invoice'),
                 'type' => 'camt_upload',
-                'class' => 'camt-tab'
+                'class' => 'comparison-tab sqrip-camt-detail'
             ),
             'section_avis' => array(
                 'title' => __('Payment notification service', 'sqrip-swiss-qr-invoice'),
                 'type' => 'section',
-                'class' => 'camt-tab'
+                'class' => 'comparison-tab sqrip-avis-detail'
             ),
             'avis_localpart' => array(
                 'title' => __('Your mailbox name', 'sqrip-swiss-qr-invoice'),
                 'type' => 'text',
                 'description' => __('Pick a short name for this shop. Your bank notifications are sent to it before @avis.sqrip.ch.', 'sqrip-swiss-qr-invoice'),
                 'default' => '',
-                'class' => 'camt-tab'
+                'class' => 'comparison-tab sqrip-avis-detail'
             ),
             'avis_threshold' => array(
                 'title' => __('Confirm amounts from', 'sqrip-swiss-qr-invoice'),
@@ -975,12 +973,12 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'custom_attributes' => array('step' => '0.01', 'min' => '0'),
                 'description' => __('Payments of this amount or more are not booked automatically — you confirm them by hand. Leave at 0 to book every match automatically.', 'sqrip-swiss-qr-invoice'),
                 'default' => '0',
-                'class' => 'camt-tab'
+                'class' => 'comparison-tab sqrip-avis-detail'
             ),
             'avis_wizard' => array(
                 'title' => __('Setup', 'sqrip-swiss-qr-invoice'),
                 'type' => 'avis_wizard',
-                'class' => 'camt-tab'
+                'class' => 'comparison-tab sqrip-avis-detail'
             ),
             'return_token' => array(
                 'title' => __('API key for Refunds', 'sqrip-swiss-qr-invoice'),

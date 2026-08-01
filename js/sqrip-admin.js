@@ -1207,9 +1207,10 @@ jQuery(document).ready(function ($) {
      * camt reconciliation.
      *
      * The activation checkbox is a sub-feature of the payment comparison, so it only
-     * appears while that one is ticked, and its tab only while both are. Kept out of
-     * the toggleFeatures list above, which pairs one checkbox with one tab of the same
-     * name — this one depends on two checkboxes.
+     * appears while that one is ticked. Its detail rows now live at the bottom of the
+     * Payment Comparison tab (there is no separate camt tab any more) and are shown
+     * only while both switches are on. Kept out of the toggleFeatures list above, which
+     * pairs one checkbox with one tab of the same name — this one depends on two.
      */
     var ip_camt_enabled = $('#woocommerce_sqrip_camt_reconciliation_enabled');
 
@@ -1226,11 +1227,8 @@ jQuery(document).ready(function ($) {
             ip_camt_enabled.closest('tr').toggle(comparison_on);
         }
 
-        if (comparison_on && ip_camt_enabled.is(':checked')) {
-            $('.sqrip-tab[data-tab="camt"]').show();
-        } else {
-            $('.sqrip-tab[data-tab="camt"]').hide();
-        }
+        var on = comparison_on && ip_camt_enabled.is(':checked');
+        $('.sqrip-camt-detail').closest('tr').toggleClass('sqrip-hide-camt', !on);
     }
 
     /**

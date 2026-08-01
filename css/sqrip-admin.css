@@ -517,3 +517,9 @@ tr.sqrip-no-height {
     cursor: pointer;
     font-weight: bold;
   }
+/* Payment Comparison tab: hide a sub-feature's detail rows while its switch is off.
+   !important so it survives sqrip_tab_init() re-showing every row of the active tab. */
+tr.sqrip-hide-avis,
+tr.sqrip-hide-camt {
+  display: none !important;
+}

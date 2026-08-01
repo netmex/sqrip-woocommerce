@@ -383,8 +383,12 @@ class Sqrip_Avis
     {
         check_ajax_referer(self::NONCE, 'security');
 
-        if (!current_user_can('manage_woocommerce') || !self::is_enabled()) {
+        if (!current_user_can('manage_woocommerce')) {
             wp_send_json_error(array('message' => __('You are not allowed to do this.', 'sqrip-swiss-qr-invoice')), 403);
+        }
+
+        if (!self::is_enabled()) {
+            wp_send_json_error(array('message' => __('Please switch on the automatic payment reconciliation first.', 'sqrip-swiss-qr-invoice')), 403);
         }
 
         $report = self::run();

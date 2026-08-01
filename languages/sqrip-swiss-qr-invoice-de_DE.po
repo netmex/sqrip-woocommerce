@@ -7,6 +7,221 @@ msgstr ""
 "Language: de_DE\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+msgid "Activate manual camt reconciliation"
+msgstr "Manuellen camt-Abgleich aktivieren"
+
+msgid ""
+"Upload the camt file from your e-banking and let sqrip set the status of the "
+"paid orders. Runs entirely in your shop: the file is read once, only "
+"payments belonging to an open order are used, and the file is discarded "
+"straight afterwards."
+msgstr ""
+"Laden Sie die camt-Datei aus Ihrem E-Banking hoch und lassen Sie sqrip den "
+"Status der bezahlten Bestellungen setzen. Läuft vollständig in Ihrem Shop: "
+"Die Datei wird einmal gelesen, nur Zahlungen zu einer offenen Bestellung "
+"werden verwendet, und die Datei wird danach sofort verworfen."
+
+msgid "Activate automatic payment reconciliation"
+msgstr "Automatischen Zahlungsabgleich aktivieren"
+
+msgid ""
+"Detect incoming payments from the credit-notification emails your bank "
+"sends. Order-driven: only credits that match one of your open orders are "
+"used, and nothing about your banking is stored."
+msgstr ""
+"Erkennt eingehende Zahlungen aus den Gutschriftavisierungen, die Ihre Bank "
+"per E-Mail schickt. Bestellungsgetrieben: Nur Gutschriften, die zu einer "
+"Ihrer offenen Bestellungen passen, werden verwendet, und nichts über Ihre "
+"Bankdaten wird gespeichert."
+
+msgid "Payment notification service"
+msgstr "Zahlungsavisierungs-Dienst"
+
+msgid "Your mailbox name"
+msgstr "Ihr Postfach-Name"
+
+msgid ""
+"Pick a short name for this shop. Your bank notifications are sent to it "
+"before @avis.sqrip.ch."
+msgstr ""
+"Wählen Sie einen kurzen Namen für diesen Shop. Ihre Bank-Avisierungen gehen "
+"an diesen Namen vor @avis.sqrip.ch."
+
+msgid "Confirm amounts from"
+msgstr "Beträge bestätigen ab"
+
+msgid ""
+"Payments of this amount or more are not booked automatically — you confirm "
+"them by hand. Leave at 0 to book every match automatically."
+msgstr ""
+"Zahlungen ab diesem Betrag werden nicht automatisch verbucht – Sie "
+"bestätigen sie von Hand. Bei 0 wird jeder Treffer automatisch verbucht."
+
+msgid "Setup"
+msgstr "Einrichtung"
+
+msgid ""
+"Enter this address in your e-banking as the destination for credit "
+"notifications:"
+msgstr ""
+"Tragen Sie diese Adresse im E-Banking als Ziel für Gutschriftavisierungen "
+"ein:"
+
+msgid "Copy"
+msgstr "Kopieren"
+
+msgid "Copied"
+msgstr "Kopiert"
+
+msgid "Choose a mailbox name above — the address then appears here."
+msgstr ""
+"Wählen Sie oben einen Postfach-Namen – die Adresse erscheint dann hier."
+
+msgid ""
+"Some banks send a one-time confirmation code to that address. If yours does, "
+"start the verification window — sqrip catches the code and shows it here, so "
+"you can enter it back in your e-banking:"
+msgstr ""
+"Manche Banken senden einen einmaligen Bestätigungscode an diese Adresse. "
+"Falls Ihre Bank das tut, starten Sie die Verifizierung – sqrip fängt den "
+"Code ab und zeigt ihn hier an, damit Sie ihn im E-Banking eingeben können:"
+
+msgid "Start verification"
+msgstr "Verifizierung starten"
+
+msgid "Finish verification"
+msgstr "Verifizierung abschliessen"
+
+msgid ""
+"No code? Some banks (for example AKB) send none. Then just skip this step — "
+"the service is active as soon as your settings are saved and the first "
+"notification arrives."
+msgstr ""
+"Kein Code? Manche Banken (zum Beispiel die AKB) senden keinen. Dann "
+"überspringen Sie diesen Schritt einfach – der Dienst ist aktiv, sobald Ihre "
+"Einstellungen gespeichert sind und die erste Avisierung eintrifft."
+
+msgid ""
+"Done — incoming payments are now detected automatically. Use \"Check now\" "
+"below any time."
+msgstr ""
+"Fertig – eingehende Zahlungen werden nun automatisch erkannt. Nutzen Sie "
+"jederzeit «Jetzt abgleichen» unten."
+
+msgid "Check at any time whether open orders have been paid:"
+msgstr "Prüfen Sie jederzeit, ob offene Bestellungen bezahlt wurden:"
+
+msgid "Check now"
+msgstr "Jetzt abgleichen"
+
+msgid ""
+"That mailbox name is already in use by another shop. Please choose a "
+"different one."
+msgstr ""
+"Dieser Postfach-Name wird bereits von einem anderen Shop verwendet. Bitte "
+"wählen Sie einen anderen."
+
+msgid "The payment notification service is switched off."
+msgstr "Der Zahlungsavisierungs-Dienst ist ausgeschaltet."
+
+msgid ""
+"Please set the mailbox name under \"camt Reconciliation\" and save first."
+msgstr ""
+"Bitte legen Sie zuerst unter «camt Reconciliation» den Postfach-Namen fest "
+"und speichern Sie."
+
+msgid "The payment notification service could not be reached."
+msgstr "Der Zahlungsavisierungs-Dienst konnte nicht erreicht werden."
+
+msgid "Please set the mailbox name and save the settings first."
+msgstr ""
+"Bitte legen Sie zuerst den Postfach-Namen fest und speichern Sie die "
+"Einstellungen."
+
+msgid "Unknown step."
+msgstr "Unbekannter Schritt."
+
+msgid ""
+"Payment received: %1$s %2$s, reference %3$s. Confirmed by the sqrip payment "
+"notification service."
+msgstr ""
+"Zahlung erhalten: %1$s %2$s, Referenz %3$s. Bestätigt durch den sqrip-"
+"Zahlungsavisierungs-Dienst."
+
+msgid "There are no orders waiting for payment right now."
+msgstr "Zurzeit warten keine Bestellungen auf Zahlung."
+
+msgid "Amount"
+msgstr "Betrag"
+
+msgid "Order"
+msgstr "Bestellung"
+
+msgid "Status"
+msgstr "Status"
+
+msgid "Paid — status updated"
+msgstr "Bezahlt – Status aktualisiert"
+
+msgid "Paid — waiting for your confirmation"
+msgstr "Bezahlt – wartet auf Ihre Bestätigung"
+
+msgid "Partly paid"
+msgstr "Teilweise bezahlt"
+
+msgid "Amount differs — please check"
+msgstr "Betrag weicht ab – bitte prüfen"
+
+msgid "Paid more than once — please check"
+msgstr "Mehrfach bezahlt – bitte prüfen"
+
+msgid "An earlier instalment is still unpaid"
+msgstr "Eine frühere Teilzahlung ist noch offen"
+
+msgid "Still waiting for payment"
+msgstr "Wartet noch auf Zahlung"
+
+msgid "Last recognised: %1$s %2$s, reference %3$s, on %4$s"
+msgstr "Zuletzt erkannt: %1$s %2$s, Referenz %3$s, am %4$s"
+
+msgid "Waiting for the code from your bank…"
+msgstr "Warte auf den Code Ihrer Bank …"
+
+msgid "Your confirmation code:"
+msgstr "Ihr Bestätigungscode:"
+
+msgid ""
+"No code arrived yet. Check the address is entered correctly and try again."
+msgstr ""
+"Noch kein Code eingetroffen. Prüfen Sie, ob die Adresse korrekt eingetragen "
+"ist, und versuchen Sie es erneut."
+
+msgid ""
+"Verification complete. Incoming payments are now detected automatically."
+msgstr ""
+"Verifizierung abgeschlossen. Eingehende Zahlungen werden nun automatisch "
+"erkannt."
+
+msgid "Checking…"
+msgstr "Prüfe …"
+
+msgid "Could not reach the payment notification service."
+msgstr "Der Zahlungsavisierungs-Dienst konnte nicht erreicht werden."
+
+msgid "order(s) marked as paid."
+msgstr "Bestellung(en) als bezahlt markiert."
+
+msgid "camt Reconciliation"
+msgstr "camt-Abgleich"
+
+msgid "Please switch on the automatic payment reconciliation first."
+msgstr "Bitte schalten Sie zuerst den automatischen Zahlungsabgleich ein."
+
+msgid "%d order waiting for payment checked."
+msgid_plural "%d orders waiting for payment checked."
+msgstr[0] "%d Bestellung mit offener Zahlung geprüft."
+msgstr[1] "%d Bestellungen mit offener Zahlung geprüft."
+
 msgid "% of total amount in 1st qr-invoice"
 msgstr "% des Gesamtbetrags in der 1. QR-Rechnung"
 
@@ -996,212 +1211,3 @@ msgstr "Ihre Website kann derzeit kein PDF hochladen."
 
 msgid "ZIP*"
 msgstr "PLZ*"
-
-msgid "Activate manual camt reconciliation"
-msgstr "Manuellen camt-Abgleich aktivieren"
-
-msgid ""
-"Upload the camt file from your e-banking and let sqrip set the status of the "
-"paid orders. Runs entirely in your shop: the file is read once, only "
-"payments belonging to an open order are used, and the file is discarded "
-"straight afterwards."
-msgstr ""
-"Laden Sie die camt-Datei aus Ihrem E-Banking hoch und lassen Sie sqrip den "
-"Status der bezahlten Bestellungen setzen. Läuft vollständig in Ihrem Shop: "
-"Die Datei wird einmal gelesen, nur Zahlungen zu einer offenen Bestellung "
-"werden verwendet, und die Datei wird danach sofort verworfen."
-
-msgid "Activate automatic payment reconciliation"
-msgstr "Automatischen Zahlungsabgleich aktivieren"
-
-msgid ""
-"Detect incoming payments from the credit-notification emails your bank "
-"sends. Order-driven: only credits that match one of your open orders are "
-"used, and nothing about your banking is stored."
-msgstr ""
-"Erkennt eingehende Zahlungen aus den Gutschriftavisierungen, die Ihre Bank "
-"per E-Mail schickt. Bestellungsgetrieben: Nur Gutschriften, die zu einer "
-"Ihrer offenen Bestellungen passen, werden verwendet, und nichts über Ihre "
-"Bankdaten wird gespeichert."
-
-msgid "Payment notification service"
-msgstr "Zahlungsavisierungs-Dienst"
-
-msgid "Your mailbox name"
-msgstr "Ihr Postfach-Name"
-
-msgid ""
-"Pick a short name for this shop. Your bank notifications are sent to it "
-"before @avis.sqrip.ch."
-msgstr ""
-"Wählen Sie einen kurzen Namen für diesen Shop. Ihre Bank-Avisierungen gehen "
-"an diesen Namen vor @avis.sqrip.ch."
-
-msgid "Confirm amounts from"
-msgstr "Beträge bestätigen ab"
-
-msgid ""
-"Payments of this amount or more are not booked automatically — you confirm "
-"them by hand. Leave at 0 to book every match automatically."
-msgstr ""
-"Zahlungen ab diesem Betrag werden nicht automatisch verbucht – Sie "
-"bestätigen sie von Hand. Bei 0 wird jeder Treffer automatisch verbucht."
-
-msgid "Setup"
-msgstr "Einrichtung"
-
-msgid ""
-"Enter this address in your e-banking as the destination for credit "
-"notifications:"
-msgstr ""
-"Tragen Sie diese Adresse im E-Banking als Ziel für Gutschriftavisierungen "
-"ein:"
-
-msgid "Copy"
-msgstr "Kopieren"
-
-msgid "Copied"
-msgstr "Kopiert"
-
-msgid "Choose a mailbox name above — the address then appears here."
-msgstr ""
-"Wählen Sie oben einen Postfach-Namen – die Adresse erscheint dann hier."
-
-msgid ""
-"Some banks send a one-time confirmation code to that address. If yours does, "
-"start the verification window — sqrip catches the code and shows it here, so "
-"you can enter it back in your e-banking:"
-msgstr ""
-"Manche Banken senden einen einmaligen Bestätigungscode an diese Adresse. "
-"Falls Ihre Bank das tut, starten Sie die Verifizierung – sqrip fängt den "
-"Code ab und zeigt ihn hier an, damit Sie ihn im E-Banking eingeben können:"
-
-msgid "Start verification"
-msgstr "Verifizierung starten"
-
-msgid "Finish verification"
-msgstr "Verifizierung abschliessen"
-
-msgid ""
-"No code? Some banks (for example AKB) send none. Then just skip this step — "
-"the service is active as soon as your settings are saved and the first "
-"notification arrives."
-msgstr ""
-"Kein Code? Manche Banken (zum Beispiel die AKB) senden keinen. Dann "
-"überspringen Sie diesen Schritt einfach – der Dienst ist aktiv, sobald Ihre "
-"Einstellungen gespeichert sind und die erste Avisierung eintrifft."
-
-msgid ""
-"Done — incoming payments are now detected automatically. Use \"Check now\" "
-"below any time."
-msgstr ""
-"Fertig – eingehende Zahlungen werden nun automatisch erkannt. Nutzen Sie "
-"jederzeit «Jetzt abgleichen» unten."
-
-msgid "Check at any time whether open orders have been paid:"
-msgstr "Prüfen Sie jederzeit, ob offene Bestellungen bezahlt wurden:"
-
-msgid "Check now"
-msgstr "Jetzt abgleichen"
-
-msgid ""
-"That mailbox name is already in use by another shop. Please choose a "
-"different one."
-msgstr ""
-"Dieser Postfach-Name wird bereits von einem anderen Shop verwendet. Bitte "
-"wählen Sie einen anderen."
-
-msgid "The payment notification service is switched off."
-msgstr "Der Zahlungsavisierungs-Dienst ist ausgeschaltet."
-
-msgid ""
-"Please set the mailbox name under \"camt Reconciliation\" and save first."
-msgstr ""
-"Bitte legen Sie zuerst unter «camt Reconciliation» den Postfach-Namen fest "
-"und speichern Sie."
-
-msgid "The payment notification service could not be reached."
-msgstr "Der Zahlungsavisierungs-Dienst konnte nicht erreicht werden."
-
-msgid "Please set the mailbox name and save the settings first."
-msgstr ""
-"Bitte legen Sie zuerst den Postfach-Namen fest und speichern Sie die "
-"Einstellungen."
-
-msgid "Unknown step."
-msgstr "Unbekannter Schritt."
-
-msgid ""
-"Payment received: %1$s %2$s, reference %3$s. Confirmed by the sqrip payment "
-"notification service."
-msgstr ""
-"Zahlung erhalten: %1$s %2$s, Referenz %3$s. Bestätigt durch den sqrip-"
-"Zahlungsavisierungs-Dienst."
-
-msgid "There are no orders waiting for payment right now."
-msgstr "Zurzeit warten keine Bestellungen auf Zahlung."
-
-msgid "Amount"
-msgstr "Betrag"
-
-msgid "Paid — status updated"
-msgstr "Bezahlt – Status aktualisiert"
-
-msgid "Paid — waiting for your confirmation"
-msgstr "Bezahlt – wartet auf Ihre Bestätigung"
-
-msgid "Partly paid"
-msgstr "Teilweise bezahlt"
-
-msgid "Amount differs — please check"
-msgstr "Betrag weicht ab – bitte prüfen"
-
-msgid "Paid more than once — please check"
-msgstr "Mehrfach bezahlt – bitte prüfen"
-
-msgid "An earlier instalment is still unpaid"
-msgstr "Eine frühere Teilzahlung ist noch offen"
-
-msgid "Still waiting for payment"
-msgstr "Wartet noch auf Zahlung"
-
-msgid "Waiting for the code from your bank…"
-msgstr "Warte auf den Code Ihrer Bank …"
-
-msgid "Your confirmation code:"
-msgstr "Ihr Bestätigungscode:"
-
-msgid ""
-"No code arrived yet. Check the address is entered correctly and try again."
-msgstr ""
-"Noch kein Code eingetroffen. Prüfen Sie, ob die Adresse korrekt eingetragen "
-"ist, und versuchen Sie es erneut."
-
-msgid ""
-"Verification complete. Incoming payments are now detected automatically."
-msgstr ""
-"Verifizierung abgeschlossen. Eingehende Zahlungen werden nun automatisch "
-"erkannt."
-
-msgid "Checking…"
-msgstr "Prüfe …"
-
-msgid "Could not reach the payment notification service."
-msgstr "Der Zahlungsavisierungs-Dienst konnte nicht erreicht werden."
-
-msgid "order(s) marked as paid."
-msgstr "Bestellung(en) als bezahlt markiert."
-
-msgid "%d order waiting for payment checked."
-msgid_plural "%d orders waiting for payment checked."
-msgstr[0] "%d Bestellung mit offener Zahlung geprüft."
-msgstr[1] "%d Bestellungen mit offener Zahlung geprüft."
-
-msgid "Order"
-msgstr "Bestellung"
-
-msgid "Status"
-msgstr "Status"
-
-msgid "Last recognised: %1$s %2$s, reference %3$s, on %4$s"
-msgstr "Zuletzt erkannt: %1$s %2$s, Referenz %3$s, am %4$s"

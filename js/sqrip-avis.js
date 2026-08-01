@@ -30,6 +30,19 @@
             $comparison.on('change', toggleAvisRow);
         }
 
+        // Hide the setup details on the "camt Reconciliation" tab unless the service is
+        // actually switched on (both the payment comparison and its own switch).
+        var $avisEnabled = $('#woocommerce_sqrip_avis_enabled');
+        function toggleAvisDetail() {
+            var on = $comparison.is(':checked') && $avisEnabled.is(':checked');
+            $('.sqrip-avis-detail').closest('tr').toggleClass('sqrip-hide-avis', !on);
+        }
+        if ($avisEnabled.length) {
+            toggleAvisDetail();
+            $avisEnabled.on('change', toggleAvisDetail);
+            $comparison.on('change', toggleAvisDetail);
+        }
+
         // Keep the shown address in step 1 in sync with the mailbox-name field live —
         // before the settings are even saved.
         var $localpart = $('#woocommerce_sqrip_avis_localpart');
