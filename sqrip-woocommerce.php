@@ -39,6 +39,12 @@ require_once __DIR__ . '/inc/class-sqrip-skonto.php';
 require_once __DIR__ . '/inc/class-sqrip-reminder.php';
 require_once __DIR__ . '/inc/class-sqrip-camt-parser.php';
 require_once __DIR__ . '/inc/class-sqrip-camt-reconciler.php';
+require_once __DIR__ . '/inc/class-sqrip-avis.php';
+
+// The service nudges the shop over REST, which runs outside the admin context, so
+// the Auskunftsdienst is wired up on every request; its admin-only actions guard
+// themselves inside init().
+Sqrip_Avis::init();
 
 // Reconciling is an admin-only job; the frontend never needs any of it.
 if (is_admin()) {
@@ -273,6 +279,8 @@ add_action('admin_enqueue_scripts', function ($hook_suffix) {
     if (isset($_GET['section']) && $_GET['section'] == "sqrip") {
         wp_enqueue_script('sqrip-admin', plugins_url('js/sqrip-admin.js', __FILE__), array('jquery', 'selectWoo'), '1.11.0-beta4', true);
 
+        wp_enqueue_script('sqrip-avis', plugins_url('js/sqrip-avis.js', __FILE__), array('jquery', 'sqrip-admin'), '1.11.0-beta4', true);
+
         $sqrip_new_status = sqrip_get_plugin_option('enabled_new_status');
         $sqrip_new_awaiting_status = sqrip_get_plugin_option('enabled_new_awstatus');
         $sqrip_new_suppressed_status = sqrip_get_plugin_option('enabled_new_sustatus');
@@ -305,6 +313,14 @@ add_action('admin_enqueue_scripts', function ($hook_suffix) {
                 'field_required_txt' => __('This field is required', 'sqrip-swiss-qr-invoice'),
                 'cleanup_nonce' => wp_create_nonce('sqrip-cleanup-invoices'),
                 'camt_nonce' => wp_create_nonce(Sqrip_Camt_Admin::NONCE),
+                'avis_nonce' => wp_create_nonce(Sqrip_Avis::NONCE),
+                'txt_avis_waiting' => __('Waiting for the code from your bank…', 'sqrip-swiss-qr-invoice'),
+                'txt_avis_code' => __('Your confirmation code:', 'sqrip-swiss-qr-invoice'),
+                'txt_avis_timeout' => __('No code arrived yet. Check the address is entered correctly and try again.', 'sqrip-swiss-qr-invoice'),
+                'txt_avis_done' => __('Verification complete. Incoming payments are now detected automatically.', 'sqrip-swiss-qr-invoice'),
+                'txt_avis_checking' => __('Checking…', 'sqrip-swiss-qr-invoice'),
+                'txt_avis_applied' => __('order(s) marked as paid.', 'sqrip-swiss-qr-invoice'),
+                'txt_avis_failed' => __('Could not reach the payment notification service.', 'sqrip-swiss-qr-invoice'),
                 'txt_camt_choose_file' => __('Please choose a file first.', 'sqrip-swiss-qr-invoice'),
                 'txt_camt_reading' => __('Reading…', 'sqrip-swiss-qr-invoice'),
                 'txt_camt_applying' => __('Applying…', 'sqrip-swiss-qr-invoice'),
