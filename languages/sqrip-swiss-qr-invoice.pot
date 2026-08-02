@@ -898,3 +898,31 @@ msgstr ""
 msgid "ZIP*"
 msgstr ""
 
+
+#: inc/class-wc-sqrip-payment-gateway.php inc/functions.php
+msgid "Restrict QR-invoice by country"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php inc/functions.php
+msgid "Offer sqrip only for the invoice countries selected below"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php inc/functions.php
+msgid "A QR-invoice is always in Swiss francs. For customers abroad this causes confusion, bank charges for paying in the wrong currency, and manual work. With this enabled, sqrip is hidden at the checkout for every other invoice country and no QR-invoice is created for such orders. Leave it off to keep offering sqrip to everyone."
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php inc/functions.php
+msgid "Countries that get a QR-invoice"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php inc/functions.php
+msgid "Judged by the invoice address, which is the address printed on the QR-invoice. An empty list switches the restriction off rather than blocking every order."
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php inc/functions.php
+msgid "No sqrip QR invoice was created: the invoice address is in %s, which is not among the countries selected in the sqrip settings."
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php inc/functions.php
+msgid "The QR invoice is not available for your invoice address. Please choose a different payment method."
+msgstr ""

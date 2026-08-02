@@ -4,7 +4,7 @@
  * Plugin Name:             sqrip.ch
  * Plugin URI:              https://sqrip.ch/
  * Description:             sqrip – A comprehensive, flexible and clever WooCommerce finance tool for the most widely used payment method in Switzerland: the bank transfers.
- * Version:                 1.10.3
+ * Version:                 1.10.4
  * Author:                  netmex digital gmbh
  * Author URI:              https://sqrip.ch/
  * Text Domain:             sqrip-swiss-qr-invoice
@@ -245,10 +245,10 @@ function sqrip_add_admin_notice()
 
 add_action('admin_enqueue_scripts', function ($hook_suffix) {
 
-    wp_enqueue_style('sqrip-admin', plugins_url('css/sqrip-admin.css', __FILE__), '', '1.10.3');
+    wp_enqueue_style('sqrip-admin', plugins_url('css/sqrip-admin.css', __FILE__), '', '1.10.4');
 
     if (isset($_GET['section']) && $_GET['section'] == "sqrip") {
-        wp_enqueue_script('sqrip-admin', plugins_url('js/sqrip-admin.js', __FILE__), array('jquery', 'selectWoo'), '1.10.3', true);
+        wp_enqueue_script('sqrip-admin', plugins_url('js/sqrip-admin.js', __FILE__), array('jquery', 'selectWoo'), '1.10.4', true);
 
         $sqrip_new_status = sqrip_get_plugin_option('enabled_new_status');
         $sqrip_new_awaiting_status = sqrip_get_plugin_option('enabled_new_awstatus');
@@ -316,8 +316,8 @@ add_action('admin_enqueue_scripts', function ($hook_suffix) {
         $screen->id === $sqrip_hpos_order_screen
     )) {
 
-        wp_enqueue_script('sqrip-order', plugins_url('js/sqrip-order.js', __FILE__), array('jquery'), '1.10.3', true);
-        wp_enqueue_script('sqrip-refund', plugins_url('js/sqrip-refund.js', __FILE__), array('jquery'), '1.10.3', true);
+        wp_enqueue_script('sqrip-order', plugins_url('js/sqrip-order.js', __FILE__), array('jquery'), '1.10.4', true);
+        wp_enqueue_script('sqrip-refund', plugins_url('js/sqrip-refund.js', __FILE__), array('jquery'), '1.10.4', true);
 
         wp_localize_script('sqrip-order', 'sqrip',
             array(
@@ -332,7 +332,7 @@ add_action('admin_enqueue_scripts', function ($hook_suffix) {
     }
 
     if (in_array($hook_suffix, ['user-edit.php', 'profile.php'])) {
-        wp_enqueue_script('sqrip-customer-profile', plugins_url('js/sqrip-customer-profile.js', __FILE__), array('jquery'), '1.10.3', true);
+        wp_enqueue_script('sqrip-customer-profile', plugins_url('js/sqrip-customer-profile.js', __FILE__), array('jquery'), '1.10.4', true);
         wp_localize_script('sqrip-customer-profile', 'sqrip', array('ajax_url' => admin_url('admin-ajax.php')));
     }
 
@@ -352,9 +352,9 @@ function sqrip_enqueue_scripts()
     // The third argument is $deps, so the version was left at false and WordPress
     // appended its own core version — which does not change when the plugin ships new
     // CSS. Returning visitors then combined new JS with a cached stylesheet.
-    wp_enqueue_style('sqrip', plugins_url('css/sqrip-order.css', __FILE__), array(), '1.10.3');
+    wp_enqueue_style('sqrip', plugins_url('css/sqrip-order.css', __FILE__), array(), '1.10.4');
 
-    wp_enqueue_script('sqrip', plugins_url('js/sqrip-fe.js', __FILE__), array('jquery'), '1.10.3', true);
+    wp_enqueue_script('sqrip', plugins_url('js/sqrip-fe.js', __FILE__), array('jquery'), '1.10.4', true);
 
     wp_localize_script('sqrip', 'sqrip',
         array(
@@ -810,6 +810,18 @@ add_action('woocommerce_process_shop_order_meta', function($post_id) {
         $order_billing_postcode = $_POST['_billing_postcode'];
         $order_billing_country = $_POST['_billing_country'];
         $order_billing_company = $_POST['_billing_company'];
+
+        // The shop can limit QR invoices to certain invoice countries. Manual creation has
+        // to respect that too, otherwise the restriction is only half a gate. Judged by the
+        // address just submitted in the form, which is the one the invoice would carry.
+        // No customer notice here — this runs in wp-admin, so the order note is what the
+        // shop manager sees. (NET2-2329)
+        if (!sqrip_is_invoice_country_allowed($order_billing_country)) {
+            sqrip_add_country_blocked_order_note($order);
+            $order->save();
+
+            return;
+        }
 
         $currency_symbol = $order_data['currency'];
         $amount = floatval($order_data['total']);

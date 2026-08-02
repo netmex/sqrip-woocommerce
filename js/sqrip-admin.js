@@ -563,6 +563,10 @@ jQuery(document).ready(function ($) {
         sqrip_tab_init($(this).data('tab'));
     })
 
+    $(document).on('change', '#woocommerce_sqrip_country_restriction_enabled', function () {
+        sqrip_toggle_country_field(tab_active);
+    });
+
     $('.sqrip-tabs').siblings('table.form-table').find('td p.description').each(function (i, e) {
         wrap = $(this).closest('tr').find('th');
 
@@ -750,6 +754,24 @@ jQuery(document).ready(function ($) {
         if (tab_active == 'multiple-qr-slips') {
             toggleMultipleInvoiceFields();
         }
+
+        sqrip_toggle_country_field(data);
+    }
+
+    /**
+     * The country list belongs to the restriction checkbox and stays hidden while that is
+     * off. Deliberately guarded by the active tab: a document-wide toggle(true) would also
+     * reveal the row on every other tab, right after sqrip_tab_init had hidden it there.
+     */
+    function sqrip_toggle_country_field(active_tab) {
+        var restriction = $('#woocommerce_sqrip_country_restriction_enabled');
+
+        if (!restriction.length) {
+            return;
+        }
+
+        $('.sqrip-country-field').closest('tr')
+            .toggle(restriction.is(':checked') && active_tab === 'qrinvoice');
     }
 
     function init_ip_qrref_format() {

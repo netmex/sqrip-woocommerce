@@ -127,6 +127,13 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
 
         $suppressed_qr_invoice_orders = wc_get_order_statuses();
         $suppressed_qr_invoice_orders = ['wc-sqrip-default-status' => __('Please select an option', 'sqrip-swiss-qr-invoice')] + $suppressed_qr_invoice_orders;
+
+        // Full WooCommerce country table for the QR-invoice restriction. countries-array.php
+        // only holds the handful of countries sqrip accepts as the *payee*, which is a
+        // different question from where the *customer* may be.
+        $invoice_countries = (function_exists('WC') && WC() && !empty(WC()->countries))
+            ? WC()->countries->get_countries()
+            : array();
         
         $qr_order_status_options = wc_get_order_statuses();
         if (isset($qr_order_status_options['wc-on-hold'])) {
@@ -263,6 +270,27 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'type' => 'textarea',
                 'description' => __('Description of what the customer can expect from this payment option.', 'sqrip-swiss-qr-invoice'),
                 'class' => 'qrinvoice-tab'
+            ),
+
+            // Off by default, and sqrip_get_plugin_option() ignores form-field defaults —
+            // so a shop that updates and changes nothing keeps exactly today's checkout.
+            'country_restriction_enabled' => array(
+                'title' => __('Restrict QR-invoice by country', 'sqrip-swiss-qr-invoice'),
+                'label' => __('Offer sqrip only for the invoice countries selected below', 'sqrip-swiss-qr-invoice'),
+                'type' => 'checkbox',
+                'description' => __('A QR-invoice is always in Swiss francs. For customers abroad this causes confusion, bank charges for paying in the wrong currency, and manual work. With this enabled, sqrip is hidden at the checkout for every other invoice country and no QR-invoice is created for such orders. Leave it off to keep offering sqrip to everyone.', 'sqrip-swiss-qr-invoice'),
+                'default' => 'no',
+                'class' => 'qrinvoice-tab'
+            ),
+            'allowed_invoice_countries' => array(
+                'title' => __('Countries that get a QR-invoice', 'sqrip-swiss-qr-invoice'),
+                'type' => 'multiselect',
+                'options' => $invoice_countries,
+                'default' => array('CH', 'LI'),
+                'description' => __('Judged by the invoice address, which is the address printed on the QR-invoice. An empty list switches the restriction off rather than blocking every order.', 'sqrip-swiss-qr-invoice'),
+                'css' => 'width: 400px;',
+                // sqrip-country-field: only shown while the restriction is switched on.
+                'class' => 'qrinvoice-tab wc-enhanced-select sqrip-country-field'
             ),
 
             'section_payment_recevier' => array(
@@ -1629,6 +1657,59 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         }
     }
 
+    /**
+     * Hide sqrip at the checkout when the invoice address is in a country the shop
+     * excluded from QR invoices. (NET2-2329)
+     *
+     * Returns true unchanged while the restriction is switched off, so shops that never
+     * touch the setting keep the behaviour they have today.
+     *
+     * @since 1.10.4
+     * @return bool
+     */
+    public function is_available()
+    {
+        if (!parent::is_available()) {
+            return false;
+        }
+
+        return sqrip_is_invoice_country_allowed($this->get_context_billing_country());
+    }
+
+    /**
+     * Invoice country of whoever is about to pay.
+     *
+     * @since 1.10.4
+     * @return string Two letter country code, empty when there is nothing to judge by.
+     */
+    private function get_context_billing_country()
+    {
+        // Orders created by hand in wp-admin must keep the payment method. Note that
+        // admin-ajax (the checkout's own refresh) reports is_admin() too, hence the
+        // second check.
+        if (is_admin() && !wp_doing_ajax()) {
+            return '';
+        }
+
+        // Paying an existing order: the order carries the invoice address, the session
+        // customer may be somebody else entirely.
+        global $wp;
+
+        if (!empty($wp->query_vars['order-pay'])) {
+            $order = wc_get_order(absint($wp->query_vars['order-pay']));
+
+            if ($order) {
+                return $order->get_billing_country();
+            }
+        }
+
+        if (function_exists('WC') && WC() && !empty(WC()->customer)) {
+            return WC()->customer->get_billing_country();
+        }
+
+        return '';
+    }
+
     /*
      *  Processing payment
      */
@@ -1657,6 +1738,24 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             return array(
                 'result' => 'success',
                 'redirect' => $this->get_return_url($order),
+            );
+        }
+
+        // Second line of defence behind is_available(): an order can still arrive here with
+        // sqrip selected — the invoice country may have been changed after the payment
+        // methods were rendered, and the block-based checkout decides only once when the
+        // page is built. (NET2-2329)
+        //
+        // Tell the customer instead of quietly completing an order they cannot pay: the
+        // whole point of the restriction is that no QR invoice exists for them, so letting
+        // the order through would leave them on the thank-you page with no way to pay.
+        if (!sqrip_order_allows_qr_invoice($order)) {
+            sqrip_add_country_blocked_order_note($order);
+
+            wc_add_notice(sqrip_frontend_text('country_blocked'), 'error');
+
+            return array(
+                'result' => 'failure',
             );
         }
 
