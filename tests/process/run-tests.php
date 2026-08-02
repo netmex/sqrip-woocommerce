@@ -49,7 +49,8 @@ function base_tuple()
         'skonto_percentage'     => 0.0,
         'status_suppressed'     => '',
         'qr_order_status'       => 'wc-on-hold',
-        'email_attached'        => '',
+        'email_attached'        => array(),
+        'integration_order'     => true,
         'send_status_emails'    => false,
         'payment_comparison'    => false,
         'camt'                  => false,
@@ -84,14 +85,14 @@ echo "\n--- Ablauf A — Rechnung zuerst ---\n";
 // Rechnung sofort, Zahlung von Hand bestätigt, Standard-Folgestatus.
 $a = base_tuple();
 $a['payment_comparison'] = true;             // manuell bestätigt
-$a['email_attached']     = 'customer_invoice';
+$a['email_attached']     = array('customer_on_hold_order');
 $da = Sqrip_Process_Overview::derive_steps($a);
 check('A: Schrittfolge', step_ids($da), array('on_order', 'invoice_delivery', 'payment_detection', 'after_payment'));
 check('A: erzeugt Rechnung', step($da, 'on_order')['flags']['creates_invoice'], true);
 check('A: Status nach Erzeugung', step($da, 'on_order')['status'], 'wc-on-hold');
 check('A: Rechnungsart einzeln', step($da, 'on_order')['flags']['invoice_shape'], 'single');
-check('A: Versand ist fremder Schritt', step($da, 'invoice_delivery')['kind'], 'extern');
-check('A: E-Mail-Ziel erkannt', step($da, 'invoice_delivery')['flags']['has_email_target'], true);
+check('A: Download-Kanal an', step($da, 'invoice_delivery')['flags']['download_on_confirmation'], true);
+check('A: E-Mail-Auslöser abgeleitet', step($da, 'invoice_delivery')['flags']['emails'][0], array('id' => 'customer_on_hold_order', 'role' => 'customer', 'trigger' => 'status:on-hold'));
 check('A: Zahlung manuell', step($da, 'payment_detection')['flags']['method'], 'manual');
 check('A: Wartestatus', step($da, 'payment_detection')['status'], 'wc-on-hold');
 check('A: Endstatus', step($da, 'after_payment')['status'], 'wc-completed');
@@ -123,7 +124,7 @@ echo "\n--- Ablauf C — Ware zuerst, mit Mahnung ---\n";
 $c = base_tuple();
 $c['payment_comparison'] = true;
 $c['camt']               = true;
-$c['email_attached']     = 'customer_completed_order';
+$c['email_attached']     = array('customer_completed_order');
 $c['reminder']           = true;
 $c['reminder_days']      = 10;
 $c['reminder_fee_label'] = 'Mahngebühr';
@@ -151,6 +152,35 @@ $m['avis'] = false;
 check('nur manuell', step(Sqrip_Process_Overview::derive_steps($m), 'payment_detection')['flags']['method'], 'manual');
 $m['payment_comparison'] = false;
 check('kein Abgleich', step(Sqrip_Process_Overview::derive_steps($m), 'payment_detection')['flags']['method'], 'none');
+
+echo "\n--- E-Mail-Timing: WANN welche Rechnung rausgeht ---\n";
+$e = base_tuple();
+$e['email_attached'] = array('customer_processing_order', 'customer_invoice', 'new_order', 'some_custom_plugin_email');
+$de = step(Sqrip_Process_Overview::derive_steps($e), 'invoice_delivery');
+check('processing → Statuswechsel', $de['flags']['emails'][0], array('id' => 'customer_processing_order', 'role' => 'customer', 'trigger' => 'status:processing'));
+check('customer_invoice → manuell', $de['flags']['emails'][1]['trigger'], 'manual');
+check('new_order → Admin/neue Bestellung', $de['flags']['emails'][2], array('id' => 'new_order', 'role' => 'admin', 'trigger' => 'on_new_order'));
+check('unbekannte E-Mail → unknown', $de['flags']['emails'][3]['trigger'], 'unknown');
+
+$e2 = base_tuple();
+$e2['integration_order'] = false;     // Download-Kanal aus
+$e2['email_attached']    = array();   // keine E-Mail gewählt
+$e2['send_status_emails'] = false;
+$de2 = step(Sqrip_Process_Overview::derive_steps($e2), 'invoice_delivery');
+check('kein Kanal: leere E-Mail-Liste', $de2['flags']['emails'], array());
+check('kein Kanal: Download aus', $de2['flags']['download_on_confirmation'], false);
+
+$e3 = base_tuple();
+$e3['send_status_emails'] = true;     // Checkout-Zwang, aber On-Hold-Mail nicht als Anhang
+$de3 = step(Sqrip_Process_Overview::derive_steps($e3), 'invoice_delivery');
+check('Checkout-Zwang erkannt', $de3['flags']['force_checkout_emails'], true);
+check('Zwang trägt Rechnung NICHT (On-Hold nicht gewählt)', $de3['flags']['force_carries_invoice'], false);
+
+$e4 = base_tuple();
+$e4['send_status_emails'] = true;
+$e4['email_attached'] = array('customer_on_hold_order');  // On-Hold als Anhang -> Rechnung reitet mit
+$de4 = step(Sqrip_Process_Overview::derive_steps($e4), 'invoice_delivery');
+check('Zwang trägt Rechnung (On-Hold gewählt)', $de4['flags']['force_carries_invoice'], true);
 
 echo "\n--- Ablauf D — Teilrechnungen: ehrlich zurückgestellt ---\n";
 // P0 stellt Anzahlungs-/Ratenabläufe noch nicht vollständig dar. Statt einen

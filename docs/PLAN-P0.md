@@ -65,14 +65,23 @@ Bewusst NUR beschreibend, keine Archetyp-Klassifizierung (A–E) im MVP.
    - Rechnungsart: `multiple_qr_slips_enabled === 'yes'` → „{number_of_invoices}
      Teilrechnungen ({invoice_fraction_1..3})"; `skonto_enabled === 'yes'` → „+
      Skonto {skonto_percentage}%".
-2. **Rechnungsversand** — als **externer/abhängiger** Schritt kennzeichnen, NICHT
-   als sicherer sqrip-Schritt. Ob eine Mail rausgeht, hängt an WooCommerce-Vorlagen
-   (`email_attached` = Ziel-Mail-ID, sqrip-woocommerce.php:657/695; 
-   `qr_order_status_send_emails` respektiert den enabled-Status jeder WC-Mail,
-   :2308–2320). Text: „Rechnung wird der WooCommerce-E-Mail *{ID}* angehängt —
-   ob & wann sie versendet, richtet sich nach Ihren WooCommerce-E-Mail-
-   Einstellungen." Das ist genau die P5-Lücke; P0 macht sie sichtbar statt sie zu
-   überspielen.
+2. **Rechnungsversand — WANN erreicht die Rechnung den Kunden** (Kern-Anforderung,
+   nachgerüstet): drei Kanäle mit je eigenem Zeitpunkt, alle ableitbar:
+   - (a) **Sofort** als Download auf der Bestätigungsseite (`integration_order`,
+     Default „yes").
+   - (b) **Als PDF-Anhang** an jeder in `email_attached` (Multiselect) gewählten
+     WC-E-Mail — und jede WC-E-Mail feuert bei IHREM Auslöser, meist einem
+     Statuswechsel. Auslöser-Tabelle `EMAIL_TRIGGERS` (customer_on_hold_order →
+     on-hold, customer_processing_order → processing, …, customer_invoice →
+     manuell, new_order → Admin/neue Bestellung). Unbekannte/Fremd-Mails →
+     ehrlicher Fallback „gemäss den Auslösern dieser E-Mail".
+   - (c) **Beim Checkout erzwungen** (`qr_order_status_send_emails`, gateway:2336):
+     On-Hold-Kundenmail + Neue-Bestellung-Adminmail direkt. Trägt die Rechnung nur
+     mit, wenn `customer_on_hold_order` auch als Anhang gewählt ist
+     (`force_carries_invoice`).
+   Ehrlichkeits-Zusatz: „Jede E-Mail wird nur versendet, wenn sie in WooCommerce
+   aktiviert ist." Damit ist die vom Plan-Doc P5 zugeschriebene Lücke für den
+   ableitbaren Teil geschlossen; rein WC-vorlagenseitige Zustände bleiben benannt.
 3. **Zahlungsfeststellung** — camt und avis sind BEIDE Sub-Features von
    `payment_comparison_enabled` (camt: payment_comparison && camt_reconciliation,
    class-sqrip-camt-admin.php:40–41; avis: payment_comparison && avis_enabled,
