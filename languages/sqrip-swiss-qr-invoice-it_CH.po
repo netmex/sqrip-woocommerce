@@ -1193,3 +1193,31 @@ msgstr "Il Suo sito web al momento non è in grado di caricare un PDF."
 
 msgid "ZIP*"
 msgstr "CAP*"
+
+#: inc/class-wc-sqrip-payment-gateway.php inc/functions.php
+msgid "Restrict QR-invoice by country"
+msgstr "Limitare la fattura QR a determinati paesi"
+
+#: inc/class-wc-sqrip-payment-gateway.php inc/functions.php
+msgid "Offer sqrip only for the invoice countries selected below"
+msgstr "Offrire sqrip solo per i paesi di fatturazione selezionati qui sotto"
+
+#: inc/class-wc-sqrip-payment-gateway.php inc/functions.php
+msgid "A QR-invoice is always in Swiss francs. For customers abroad this causes confusion, bank charges for paying in the wrong currency, and manual work. With this enabled, sqrip is hidden at the checkout for every other invoice country and no QR-invoice is created for such orders. Leave it off to keep offering sqrip to everyone."
+msgstr "Una fattura QR è sempre in franchi svizzeri. Per la clientela all'estero questo genera confusione, spese bancarie per il pagamento in una valuta errata e lavoro manuale. Con questa opzione attiva, sqrip viene nascosto alla cassa per tutti gli altri paesi di fatturazione e per tali ordini non viene creata alcuna fattura QR. Lasciala disattivata per continuare a offrire sqrip a tutti."
+
+#: inc/class-wc-sqrip-payment-gateway.php inc/functions.php
+msgid "Countries that get a QR-invoice"
+msgstr "Paesi che ricevono una fattura QR"
+
+#: inc/class-wc-sqrip-payment-gateway.php inc/functions.php
+msgid "Judged by the invoice address, which is the address printed on the QR-invoice. An empty list switches the restriction off rather than blocking every order."
+msgstr "Fa fede l'indirizzo di fatturazione, ossia quello riportato sulla fattura QR. Un elenco vuoto disattiva la limitazione invece di bloccare ogni ordine."
+
+#: inc/class-wc-sqrip-payment-gateway.php inc/functions.php
+msgid "No sqrip QR invoice was created: the invoice address is in %s, which is not among the countries selected in the sqrip settings."
+msgstr "Non è stata creata alcuna fattura QR sqrip: l'indirizzo di fatturazione si trova in %s, che non rientra tra i paesi selezionati nelle impostazioni sqrip."
+
+#: inc/class-wc-sqrip-payment-gateway.php inc/functions.php
+msgid "The QR invoice is not available for your invoice address. Please choose a different payment method."
+msgstr "La fattura QR non è disponibile per il Suo indirizzo di fatturazione. La preghiamo di scegliere un altro metodo di pagamento."
