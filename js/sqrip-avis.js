@@ -16,7 +16,6 @@
         var s = window.sqrip;
         var pollTimer = null;
         var pollTries = 0;
-        var DOMAIN = '@avis.sqrip.ch';
 
         // Show the "Activate automatic payment reconciliation" switch only while the
         // payment comparison itself is on (same rule as the camt reconciliation).
@@ -41,21 +40,6 @@
             toggleAvisDetail();
             $avisEnabled.on('change', toggleAvisDetail);
             $comparison.on('change', toggleAvisDetail);
-        }
-
-        // Keep the shown address in step 1 in sync with the mailbox-name field live —
-        // before the settings are even saved.
-        var $localpart = $('#woocommerce_sqrip_avis_localpart');
-        function updateAddress() {
-            var name = ($localpart.val() || '').toLowerCase().replace(/[^a-z0-9_-]/g, '');
-            var addr = name ? name + DOMAIN : '';
-            $('.sqrip-avis-address').text(addr);
-            $('.sqrip-avis-copy').toggle(!!addr);
-            $('.sqrip-avis-noaddr').toggle(!addr);
-            $('.sqrip-avis-start').prop('disabled', !addr);
-        }
-        if ($localpart.length) {
-            $localpart.on('input change', updateAddress);
         }
 
         $(document).on('click', '.sqrip-avis-copy', function () {

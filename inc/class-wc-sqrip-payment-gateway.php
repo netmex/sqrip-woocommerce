@@ -964,26 +964,24 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             'section_avis' => array(
                 'title' => __('Payment notification service', 'sqrip-swiss-qr-invoice'),
                 'type' => 'section',
-                'class' => 'comparison-tab sqrip-avis-detail'
-            ),
-            'avis_localpart' => array(
-                'title' => __('Your mailbox name', 'sqrip-swiss-qr-invoice'),
-                'type' => 'text',
-                'description' => __('Pick a short name for this shop. Your bank notifications are sent to it before @avis.sqrip.ch.', 'sqrip-swiss-qr-invoice'),
-                'default' => '',
-                'class' => 'comparison-tab sqrip-avis-detail'
-            ),
-            'avis_threshold' => array(
-                'title' => __('Confirm amounts from', 'sqrip-swiss-qr-invoice'),
-                'type' => 'number',
-                'custom_attributes' => array('step' => '0.01', 'min' => '0'),
-                'description' => __('Payments of this amount or more are not booked automatically — you confirm them by hand. Leave at 0 to book every match automatically.', 'sqrip-swiss-qr-invoice'),
-                'default' => '0',
+                'description' => __('We use information that banks already send out today: e-mail notifications about account credits. These e-mails carry enough to guarantee a unique match to your orders. The banks expressly permit the further use of these notifications; it is the responsibility of their customer — that is, YOU — how these e-mails are handled. For every successful reconciliation we charge you 1 credit.', 'sqrip-swiss-qr-invoice'),
                 'class' => 'comparison-tab sqrip-avis-detail'
             ),
             'avis_wizard' => array(
                 'title' => __('Setup', 'sqrip-swiss-qr-invoice'),
                 'type' => 'avis_wizard',
+                'class' => 'comparison-tab sqrip-avis-detail'
+            ),
+            'avis_threshold' => array(
+                'title' => sprintf(
+                    /* translators: %s: the shop currency, e.g. CHF */
+                    __('Confirm by hand from (%s)', 'sqrip-swiss-qr-invoice'),
+                    get_woocommerce_currency()
+                ),
+                'type' => 'number',
+                'custom_attributes' => array('step' => '0.01', 'min' => '0'),
+                'description' => __('Payments of this amount or more are not booked automatically — you confirm them by hand. Leave at 0 to book every match automatically.', 'sqrip-swiss-qr-invoice'),
+                'default' => '0',
                 'class' => 'comparison-tab sqrip-avis-detail'
             ),
             'return_token' => array(
@@ -1340,7 +1338,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
     {
         $data = wp_parse_args($data, array('title' => '', 'class' => ''));
 
-        $localpart = sanitize_key((string) sqrip_get_plugin_option('avis_localpart'));
+        $localpart = class_exists('Sqrip_Avis') ? Sqrip_Avis::localpart() : '';
         $address   = $localpart ? $localpart . '@avis.sqrip.ch' : '';
 
         ob_start();
@@ -1362,9 +1360,6 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                                 <span class="sqrip-avis-copied" style="display:none; color:#00794d;">
                                     <?php esc_html_e('Copied', 'sqrip-swiss-qr-invoice'); ?>
                                 </span>
-                            </p>
-                            <p class="description sqrip-avis-noaddr"<?php echo $address ? ' style="display:none;"' : ''; ?>>
-                                <?php esc_html_e('Choose a mailbox name above — the address then appears here.', 'sqrip-swiss-qr-invoice'); ?>
                             </p>
                         </li>
                         <li>

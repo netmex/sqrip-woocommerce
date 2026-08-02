@@ -25,6 +25,7 @@ class Sqrip_Avis
 {
     const NONCE = 'sqrip-avis';
     const TOKEN_OPTION = 'sqrip_avis_token';
+    const LOCALPART_OPTION = 'sqrip_avis_localpart';
 
     // The service is the same for every shop, so no one has to type it. A stored
     // 'avis_service_url' option still overrides it if one is ever set by hand.
@@ -106,7 +107,39 @@ class Sqrip_Avis
      */
     private static function customer()
     {
-        return sanitize_key((string) sqrip_get_plugin_option('avis_localpart'));
+        return self::localpart();
+    }
+
+    /**
+     * The mailbox name before @avis.sqrip.ch — auto-assigned once, never chosen by
+     * hand. A readable slug of the shop name plus a short unique suffix, so it is
+     * guaranteed unique across shops and stays stable (the e-banking address must
+     * never change once entered).
+     *
+     * @return string
+     */
+    public static function localpart()
+    {
+        $stored = sanitize_key((string) get_option(self::LOCALPART_OPTION, ''));
+        if ($stored !== '') {
+            return $stored;
+        }
+
+        // Keep an address a beta tester set by hand in the old text field.
+        $legacy = sanitize_key((string) sqrip_get_plugin_option('avis_localpart'));
+        if ($legacy !== '') {
+            update_option(self::LOCALPART_OPTION, $legacy, false);
+            return $legacy;
+        }
+
+        $slug = preg_replace('/[^a-z0-9]/', '', strtolower((string) sanitize_title(get_bloginfo('name'))));
+        $slug = ($slug === '') ? 'shop' : substr($slug, 0, 20);
+        $suffix = substr(strtolower(wp_generate_password(8, false)), 0, 5);
+        $localpart = sanitize_key($slug . '-' . $suffix);
+
+        update_option(self::LOCALPART_OPTION, $localpart, false);
+
+        return $localpart;
     }
 
     /**
