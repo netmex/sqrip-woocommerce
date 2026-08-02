@@ -273,6 +273,12 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'default' => 'no',
                 'class' => 'services-tab'
             ),
+            // Prozesskonfigurator P0 — read-only overview, last thing on the
+            // Services tab. Derives the current flow from the settings above.
+            'process_overview' => array(
+                'type' => 'process_overview',
+                'class' => 'services-tab'
+            ),
             'section_display' => array(
                 'title' => __('Display', 'sqrip-swiss-qr-invoice'),
                 'type' => 'section',
@@ -1111,6 +1117,24 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         <?php
 
         return ob_get_clean();
+    }
+
+    /**
+     * Render the read-only Prozesskonfigurator P0 overview.
+     *
+     * The derivation and HTML live in Sqrip_Process_Overview; this is only the
+     * WooCommerce settings-field hook (type => 'process_overview').
+     *
+     * @param string $key  Field key.
+     * @param array  $data Field data.
+     * @return string
+     */
+    public function generate_process_overview_html($key, $data)
+    {
+        if (class_exists('Sqrip_Process_Overview')) {
+            return Sqrip_Process_Overview::render();
+        }
+        return '';
     }
 
     public function generate_radio_html($key, $data)

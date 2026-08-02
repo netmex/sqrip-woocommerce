@@ -51,6 +51,12 @@ if (is_admin()) {
     require_once __DIR__ . '/inc/class-sqrip-camt-admin.php';
 
     Sqrip_Camt_Admin::init();
+
+    // Prozesskonfigurator P0 — read-only "So sieht Ihr Prozess heute aus".
+    // Renders inside the Services settings tab; changes nothing.
+    require_once __DIR__ . '/inc/class-sqrip-process-overview.php';
+
+    Sqrip_Process_Overview::init();
 }
 
 /**
