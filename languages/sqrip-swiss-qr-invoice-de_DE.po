@@ -7,6 +7,221 @@ msgstr ""
 "Language: de_DE\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+msgid "Payment notification service"
+msgstr "Abgleich über Zahlungsavisierungen"
+
+msgid "The payment notification service is switched off."
+msgstr "Der Abgleich über Zahlungsavisierungen ist ausgeschaltet."
+
+msgid "The payment notification service could not be reached."
+msgstr "Der Abgleich über Zahlungsavisierungen konnte nicht erreicht werden."
+
+msgid "Could not reach the payment notification service."
+msgstr "Der Abgleich über Zahlungsavisierungen konnte nicht erreicht werden."
+
+msgid ""
+"Payment received: %1$s %2$s, reference %3$s. Confirmed by the sqrip payment "
+"notification service."
+msgstr ""
+"Zahlung erhalten: %1$s %2$s, Referenz %3$s. Bestätigt durch den sqrip-"
+"Abgleich über Zahlungsavisierungen."
+
+msgid ""
+"We use information that banks already send out today: e-mail notifications "
+"about account credits. These e-mails carry enough to guarantee a unique "
+"match to your orders. The banks expressly permit the further use of these "
+"notifications; it is the responsibility of their customer — that is, YOU — "
+"how these e-mails are handled. For every successful reconciliation we charge "
+"you 1 credit."
+msgstr ""
+"Wir nutzen Informationen, die von der Bank bereits heute nach aussen "
+"geliefert werden: Benachrichtigungen über Kontogutschriften per E-Mail. In "
+"diesen E-Mails sind genügend Informationen enthalten, um eine eindeutige "
+"Zuweisung zu den Bestellungen sicherstellen zu können. Die weitere "
+"Verwendung dieser Benachrichtigungen wird von den Banken ausdrücklich "
+"zugelassen. Es liegt in der Verantwortung deren Kunden – also IHNEN – wie "
+"diese E-Mails bearbeitet werden. Für jeden erfolgreichen Abgleich buchen wir "
+"Ihnen 1 Credit ab."
+
+msgid "Confirm by hand from (%s)"
+msgstr "Von Hand bestätigen ab (%s)"
+
+msgid "sqrip camt Reconciliation"
+msgstr "sqrip camt-Abgleich"
+
+msgid "You are not allowed to do this."
+msgstr "Sie dürfen das nicht tun."
+
+msgid "The camt reconciliation is switched off."
+msgstr "Der camt-Abgleich ist ausgeschaltet."
+
+msgid "Please choose a file first."
+msgstr "Bitte wählen Sie zuerst eine Datei."
+
+msgid "The file is larger than this server accepts for uploads."
+msgstr "Die Datei ist grösser, als dieser Server für Uploads akzeptiert."
+
+msgid "The file could not be uploaded."
+msgstr "Die Datei konnte nicht hochgeladen werden."
+
+msgid "Only the XML file from your e-banking can be read here."
+msgstr "Hier kann nur die XML-Datei aus Ihrem E-Banking gelesen werden."
+
+msgid "The file is larger than %s."
+msgstr "Die Datei ist grösser als %s."
+
+msgid ""
+"No order status for \"waiting for payment\" is configured yet. Please set it "
+"under Payment Comparison first."
+msgstr ""
+"Es ist noch kein Bestellstatus für „wartet auf Zahlung“ festgelegt. Bitte "
+"legen Sie ihn zuerst unter Zahlungsabgleich fest."
+
+msgid "The file is empty."
+msgstr "Die Datei ist leer."
+
+msgid "The file is too large."
+msgstr "Die Datei ist zu gross."
+
+msgid ""
+"This file could not be read. Please download the camt file from your e-"
+"banking again."
+msgstr ""
+"Diese Datei konnte nicht gelesen werden. Bitte laden Sie die camt-Datei "
+"erneut aus Ihrem E-Banking herunter."
+
+msgid ""
+"There are no bookings in this file. Please check whether you downloaded the "
+"right period."
+msgstr ""
+"In dieser Datei sind keine Buchungen. Bitte prüfen Sie, ob Sie den richtigen "
+"Zeitraum heruntergeladen haben."
+
+msgid "The file could not be processed."
+msgstr "Die Datei konnte nicht verarbeitet werden."
+
+msgid "Instalment %1$d of %2$d paid"
+msgstr "Teilzahlung %1$d von %2$d bezahlt"
+
+msgid "Payment received"
+msgstr "Zahlung erhalten"
+
+msgid ""
+"%1$s: %2$s %3$s, reference %4$s, value date %5$s. Reconciled from the bank "
+"file %6$s."
+msgstr ""
+"%1$s: %2$s %3$s, Referenz %4$s, Valuta %5$s. Abgeglichen aus der Bankdatei "
+"%6$s."
+
+msgid ""
+"File %1$s: %2$d incoming payments, checked against %3$d orders waiting for "
+"payment."
+msgstr ""
+"Datei %1$s: %2$d Zahlungseingänge, geprüft gegen %3$d Bestellungen, die auf "
+"Zahlung warten."
+
+msgid ""
+"There are more orders waiting for payment than can be checked in one go. "
+"Please reconcile again after applying this run."
+msgstr ""
+"Es warten mehr Bestellungen auf Zahlung, als auf einmal geprüft werden "
+"können. Bitte gleichen Sie nach diesem Durchlauf erneut ab."
+
+msgid "Will be marked as paid"
+msgstr "Wird als bezahlt markiert"
+
+msgid "There is no payment that can be booked without checking."
+msgstr "Es gibt keine Zahlung, die ohne Prüfung gebucht werden kann."
+
+msgid "Please check these yourself"
+msgstr "Bitte prüfen Sie diese selbst"
+
+msgid "sqrip changes nothing here."
+msgstr "sqrip ändert hier nichts."
+
+msgid "Nothing was changed."
+msgstr "Es wurde nichts geändert."
+
+msgid "Marked as paid"
+msgstr "Als bezahlt markiert"
+
+msgid "Expected"
+msgstr "Erwartet"
+
+msgid "Received"
+msgstr "Erhalten"
+
+msgid "Reference"
+msgstr "Referenz"
+
+msgid "Note"
+msgstr "Hinweis"
+
+msgid "Amount agrees"
+msgstr "Betrag stimmt"
+
+msgid "Paid more than once"
+msgstr "Mehrfach bezahlt"
+
+msgid "Was already confirmed"
+msgstr "Wurde bereits bestätigt"
+
+msgid "No amount stored for this instalment"
+msgstr "Für diese Teilzahlung ist kein Betrag hinterlegt"
+
+msgid "Skonto taken after the deadline"
+msgstr "Skonto nach Ablauf der Frist gezogen"
+
+msgid "Amount agrees, but the late fee is unpaid"
+msgstr "Betrag stimmt, aber die Mahngebühr ist offen"
+
+msgid "Amount differs"
+msgstr "Betrag weicht ab"
+
+msgid "Bank file"
+msgstr "Bankdatei"
+
+msgid ""
+"Download the camt.053 or camt.054 file of the account that receives your "
+"customers' payments from your e-banking, then choose it here. \"Preview\" "
+"only shows what would happen and changes nothing."
+msgstr ""
+"Laden Sie die camt.053- oder camt.054-Datei des Kontos, das die Zahlungen "
+"Ihrer Kunden empfängt, aus Ihrem E-Banking herunter und wählen Sie sie hier. "
+"„Vorschau“ zeigt nur, was passieren würde, und ändert nichts."
+
+msgid "XML file, at most %s."
+msgstr "XML-Datei, höchstens %s."
+
+msgid "Preview"
+msgstr "Vorschau"
+
+msgid "Apply"
+msgstr "Anwenden"
+
+msgid ""
+"%d further incoming payment in this file belongs to no order waiting for "
+"payment. It was counted and otherwise ignored."
+msgid_plural ""
+"%d further incoming payments in this file belong to no order waiting for "
+"payment. They were counted and otherwise ignored."
+msgstr[0] ""
+"%d weiterer Zahlungseingang in dieser Datei gehört zu keiner auf Zahlung "
+"wartenden Bestellung. Er wurde gezählt und sonst ignoriert."
+msgstr[1] ""
+"%d weitere Zahlungseingänge in dieser Datei gehören zu keiner auf Zahlung "
+"wartenden Bestellung. Sie wurden gezählt und sonst ignoriert."
+
+msgid ""
+"%d order is still waiting for payment; there is nothing for it in this file."
+msgid_plural ""
+"%d orders are still waiting for payment; there is nothing for them in this "
+"file."
+msgstr[0] ""
+"%d Bestellung wartet noch auf Zahlung; in dieser Datei gibt es dazu nichts."
+msgstr[1] ""
+"%d Bestellungen warten noch auf Zahlung; in dieser Datei gibt es dazu nichts."
+
 msgid "Activate manual camt reconciliation"
 msgstr "Manuellen camt-Abgleich aktivieren"
 
@@ -33,9 +248,6 @@ msgstr ""
 "per E-Mail schickt. Bestellungsgetrieben: Nur Gutschriften, die zu einer "
 "Ihrer offenen Bestellungen passen, werden verwendet, und nichts über Ihre "
 "Bankdaten wird gespeichert."
-
-msgid "Payment notification service"
-msgstr "Zahlungsavisierungs-Dienst"
 
 msgid "Your mailbox name"
 msgstr "Ihr Postfach-Name"
@@ -121,17 +333,11 @@ msgstr ""
 "Dieser Postfach-Name wird bereits von einem anderen Shop verwendet. Bitte "
 "wählen Sie einen anderen."
 
-msgid "The payment notification service is switched off."
-msgstr "Der Zahlungsavisierungs-Dienst ist ausgeschaltet."
-
 msgid ""
 "Please set the mailbox name under \"camt Reconciliation\" and save first."
 msgstr ""
 "Bitte legen Sie zuerst unter «camt Reconciliation» den Postfach-Namen fest "
 "und speichern Sie."
-
-msgid "The payment notification service could not be reached."
-msgstr "Der Zahlungsavisierungs-Dienst konnte nicht erreicht werden."
 
 msgid "Please set the mailbox name and save the settings first."
 msgstr ""
@@ -140,13 +346,6 @@ msgstr ""
 
 msgid "Unknown step."
 msgstr "Unbekannter Schritt."
-
-msgid ""
-"Payment received: %1$s %2$s, reference %3$s. Confirmed by the sqrip payment "
-"notification service."
-msgstr ""
-"Zahlung erhalten: %1$s %2$s, Referenz %3$s. Bestätigt durch den sqrip-"
-"Zahlungsavisierungs-Dienst."
 
 msgid "There are no orders waiting for payment right now."
 msgstr "Zurzeit warten keine Bestellungen auf Zahlung."
@@ -204,9 +403,6 @@ msgstr ""
 
 msgid "Checking…"
 msgstr "Prüfe …"
-
-msgid "Could not reach the payment notification service."
-msgstr "Der Zahlungsavisierungs-Dienst konnte nicht erreicht werden."
 
 msgid "order(s) marked as paid."
 msgstr "Bestellung(en) als bezahlt markiert."
