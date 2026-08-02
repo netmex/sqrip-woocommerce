@@ -79,9 +79,16 @@ Bewusst NUR beschreibend, keine Archetyp-Klassifizierung (A–E) im MVP.
      On-Hold-Kundenmail + Neue-Bestellung-Adminmail direkt. Trägt die Rechnung nur
      mit, wenn `customer_on_hold_order` auch als Anhang gewählt ist
      (`force_carries_invoice`).
-   Ehrlichkeits-Zusatz: „Jede E-Mail wird nur versendet, wenn sie in WooCommerce
-   aktiviert ist." Damit ist die vom Plan-Doc P5 zugeschriebene Lücke für den
-   ableitbaren Teil geschlossen; rein WC-vorlagenseitige Zustände bleiben benannt.
+   **Nur Fakten, keine Konditionen (Markus 02.08.):**
+   - Der E-Mail-Auslöser wird gegen die Status abgeglichen, die DIESER Ablauf
+     tatsächlich setzt (on_order-Status, status_completed). Deckt sich der
+     Auslöser-Status mit dem on-order-Status → „geht **beim Bestelleingang** raus";
+     mit dem Abschluss-Status → „geht **nach erkannter Zahlung** raus". Kein
+     abstraktes „sobald es wechselt", wenn der Wechsel im Ablauf schon passiert.
+   - Der enabled-Status jeder Mail wird real ausgelesen
+     (`WC()->mailer()->get_emails()[..]->is_enabled()`, Layer B `email_enabled_map()`).
+     Aktiv → Zeitpunkt-Fakt ohne Hedge; deaktiviert → „in WooCommerce
+     ausgeschaltet — wird nicht versendet". KEIN „nur wenn aktiviert" mehr.
 3. **Zahlungsfeststellung** — camt und avis sind BEIDE Sub-Features von
    `payment_comparison_enabled` (camt: payment_comparison && camt_reconciliation,
    class-sqrip-camt-admin.php:40–41; avis: payment_comparison && avis_enabled,

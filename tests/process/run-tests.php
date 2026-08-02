@@ -50,6 +50,7 @@ function base_tuple()
         'status_suppressed'     => '',
         'qr_order_status'       => 'wc-on-hold',
         'email_attached'        => array(),
+        'email_enabled'         => array(),
         'integration_order'     => true,
         'send_status_emails'    => false,
         'payment_comparison'    => false,
@@ -92,7 +93,7 @@ check('A: erzeugt Rechnung', step($da, 'on_order')['flags']['creates_invoice'], 
 check('A: Status nach Erzeugung', step($da, 'on_order')['status'], 'wc-on-hold');
 check('A: Rechnungsart einzeln', step($da, 'on_order')['flags']['invoice_shape'], 'single');
 check('A: Download-Kanal an', step($da, 'invoice_delivery')['flags']['download_on_confirmation'], true);
-check('A: E-Mail-Auslöser abgeleitet', step($da, 'invoice_delivery')['flags']['emails'][0], array('id' => 'customer_on_hold_order', 'role' => 'customer', 'trigger' => 'status:on-hold'));
+check('A: E-Mail geht BEIM BESTELLEINGANG raus (Status = on-hold gesetzt)', step($da, 'invoice_delivery')['flags']['emails'][0], array('id' => 'customer_on_hold_order', 'role' => 'customer', 'moment' => 'on_order', 'enabled' => true));
 check('A: Zahlung manuell', step($da, 'payment_detection')['flags']['method'], 'manual');
 check('A: Wartestatus', step($da, 'payment_detection')['status'], 'wc-on-hold');
 check('A: Endstatus', step($da, 'after_payment')['status'], 'wc-completed');
@@ -131,6 +132,7 @@ $c['reminder_fee_label'] = 'Mahngebühr';
 $dc = Sqrip_Process_Overview::derive_steps($c);
 check('C: Schrittfolge mit Mahnung', step_ids($dc), array('on_order', 'invoice_delivery', 'payment_detection', 'after_payment', 'reminder'));
 check('C: Zahlung via camt', step($dc, 'payment_detection')['flags']['method'], 'camt');
+check('C: Rechnung geht NACH ZAHLUNG raus (completed-Mail)', step($dc, 'invoice_delivery')['flags']['emails'][0]['moment'], 'after_payment');
 check('C: Mahnfrist', step($dc, 'reminder')['flags']['days'], 10);
 
 echo "\n--- Geparkte Features: reminder=false blendet den Schritt aus ---\n";
@@ -155,12 +157,21 @@ check('kein Abgleich', step(Sqrip_Process_Overview::derive_steps($m), 'payment_d
 
 echo "\n--- E-Mail-Timing: WANN welche Rechnung rausgeht ---\n";
 $e = base_tuple();
+// on_order-Status = wc-on-hold, completed = wc-completed. Ein Auslöser-Status,
+// den der Ablauf NICHT setzt (processing), bleibt als Status-Moment stehen.
 $e['email_attached'] = array('customer_processing_order', 'customer_invoice', 'new_order', 'some_custom_plugin_email');
 $de = step(Sqrip_Process_Overview::derive_steps($e), 'invoice_delivery');
-check('processing → Statuswechsel', $de['flags']['emails'][0], array('id' => 'customer_processing_order', 'role' => 'customer', 'trigger' => 'status:processing'));
-check('customer_invoice → manuell', $de['flags']['emails'][1]['trigger'], 'manual');
-check('new_order → Admin/neue Bestellung', $de['flags']['emails'][2], array('id' => 'new_order', 'role' => 'admin', 'trigger' => 'on_new_order'));
-check('unbekannte E-Mail → unknown', $de['flags']['emails'][3]['trigger'], 'unknown');
+check('processing: Status, den der Ablauf nicht setzt', $de['flags']['emails'][0], array('id' => 'customer_processing_order', 'role' => 'customer', 'moment' => 'status:wc-processing', 'enabled' => true));
+check('customer_invoice → manuell', $de['flags']['emails'][1]['moment'], 'manual');
+check('new_order → Admin, beim Bestelleingang', $de['flags']['emails'][2], array('id' => 'new_order', 'role' => 'admin', 'moment' => 'on_order', 'enabled' => true));
+check('unbekannte E-Mail → unknown', $de['flags']['emails'][3]['moment'], 'unknown');
+
+// Echter enabled-Status aus WooCommerce: deaktivierte Mail wird als Fakt gemeldet.
+$edis = base_tuple();
+$edis['email_attached'] = array('customer_on_hold_order');
+$edis['email_enabled']  = array('customer_on_hold_order' => false);
+$ddis = step(Sqrip_Process_Overview::derive_steps($edis), 'invoice_delivery');
+check('deaktivierte Mail → enabled=false (Fakt, keine Kondition)', $ddis['flags']['emails'][0]['enabled'], false);
 
 $e2 = base_tuple();
 $e2['integration_order'] = false;     // Download-Kanal aus

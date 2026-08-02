@@ -166,6 +166,21 @@ class Sqrip_Process_Overview
         // Each e-mail still respects its own enabled state in WooCommerce; that
         // caveat is surfaced in the render, not silently assumed away.
         if ($creates_invoice) {
+            // Which concrete moments in THIS flow set which status. An attached
+            // e-mail whose trigger status is one the flow actually reaches goes
+            // out AT that moment — stated as a fact, not as "when it changes".
+            $flow_moments = array();
+            if ($on_order_status !== '') {
+                $flow_moments[self::with_wc_prefix($on_order_status)] = 'on_order';
+            }
+            if ($r['status_completed'] !== '') {
+                // Do not overwrite the intake moment if both are the same status.
+                $done = self::with_wc_prefix($r['status_completed']);
+                if (!isset($flow_moments[$done])) {
+                    $flow_moments[$done] = 'after_payment';
+                }
+            }
+
             $emails = array();
             foreach ((array) $r['email_attached'] as $email_id) {
                 if ($email_id === '' || $email_id === null) {
@@ -174,10 +189,26 @@ class Sqrip_Process_Overview
                 $map = isset(self::EMAIL_TRIGGERS[$email_id])
                     ? self::EMAIL_TRIGGERS[$email_id]
                     : array('role' => 'unknown', 'trigger' => 'unknown');
+
+                // Resolve the trigger to a concrete flow moment where possible.
+                $moment = $map['trigger'];   // default: the raw trigger code
+                if ($map['trigger'] === 'on_new_order') {
+                    $moment = 'on_order';    // admin new-order mail fires at intake
+                } elseif (strpos($map['trigger'], 'status:') === 0) {
+                    $slug = self::with_wc_prefix(substr($map['trigger'], strlen('status:')));
+                    $moment = isset($flow_moments[$slug])
+                        ? $flow_moments[$slug]           // 'on_order' | 'after_payment'
+                        : 'status:' . $slug;             // status the flow never sets itself
+                }
+
+                // Effective send state read from WooCommerce (fact, not condition).
+                $enabled = !isset($r['email_enabled'][$email_id]) || $r['email_enabled'][$email_id] !== false;
+
                 $emails[] = array(
                     'id'      => $email_id,
                     'role'    => $map['role'],
-                    'trigger' => $map['trigger'],
+                    'moment'  => $moment,
+                    'enabled' => $enabled,
                 );
             }
 
@@ -258,6 +289,22 @@ class Sqrip_Process_Overview
         return array('steps' => $steps, 'notes' => $notes);
     }
 
+    /**
+     * Normalize an order-status slug to its 'wc-' prefixed form.
+     * Pure; usable from Layer A.
+     *
+     * @param string $slug
+     * @return string
+     */
+    protected static function with_wc_prefix($slug)
+    {
+        $slug = (string) $slug;
+        if ($slug === '') {
+            return '';
+        }
+        return (strpos($slug, 'wc-') === 0) ? $slug : 'wc-' . $slug;
+    }
+
     /* ===================================================================
      * Layer B — WordPress-bound resolution + render
      * =================================================================== */
@@ -296,6 +343,7 @@ class Sqrip_Process_Overview
             'status_suppressed'   => $status_suppressed,
             'qr_order_status'     => (string) $opt('qr_order_status'),
             'email_attached'      => self::normalize_email_attached(sqrip_get_plugin_option('email_attached')),
+            'email_enabled'       => self::email_enabled_map(),
             'integration_order'   => $opt('integration_order', 'yes') === 'yes',
             'send_status_emails'  => sqrip_get_plugin_option('qr_order_status_send_emails') === 'yes',
             'payment_comparison'  => sqrip_get_plugin_option('payment_comparison_enabled') === 'yes',
@@ -355,6 +403,27 @@ class Sqrip_Process_Overview
             return array();
         }
         return array($value);
+    }
+
+    /**
+     * Real enabled/disabled state of each WooCommerce e-mail, keyed by ->id.
+     * Lets P0 state whether an attached e-mail actually sends, as a fact rather
+     * than a "if enabled" condition. Empty when WooCommerce mail is unavailable
+     * (then callers treat every e-mail as enabled).
+     *
+     * @return array id => bool
+     */
+    protected static function email_enabled_map()
+    {
+        $map = array();
+        if (function_exists('WC') && WC()->mailer()) {
+            foreach ((array) WC()->mailer()->get_emails() as $email) {
+                if (isset($email->id) && method_exists($email, 'is_enabled')) {
+                    $map[$email->id] = (bool) $email->is_enabled();
+                }
+            }
+        }
+        return $map;
     }
 
     /**
@@ -511,43 +580,43 @@ class Sqrip_Process_Overview
 
                 foreach ((array) $f['emails'] as $email) {
                     $title = esc_html(self::email_title($email['id']));
-                    $when  = self::trigger_phrase($email['trigger']);
-                    if ($email['role'] === 'admin') {
+                    $who   = ($email['role'] === 'admin')
+                        ? esc_html__('Admin-E-Mail', 'sqrip-swiss-qr-invoice')
+                        : esc_html__('Kunden-E-Mail', 'sqrip-swiss-qr-invoice');
+
+                    // Deactivated in WooCommerce: state the fact, no timing needed.
+                    if (empty($email['enabled'])) {
                         $lines[] = sprintf(
-                            /* translators: 1: e-mail title, 2: when it is sent */
-                            esc_html__('Als PDF an der Admin-E-Mail „%1$s" — %2$s.', 'sqrip-swiss-qr-invoice'),
-                            $title, $when
+                            /* translators: 1: who, 2: e-mail title */
+                            esc_html__('%1$s „%2$s": in WooCommerce ausgeschaltet — wird nicht versendet.', 'sqrip-swiss-qr-invoice'),
+                            $who, $title
                         );
-                    } else {
-                        $lines[] = sprintf(
-                            /* translators: 1: e-mail title, 2: when it is sent */
-                            esc_html__('Als PDF an der Kunden-E-Mail „%1$s" — %2$s.', 'sqrip-swiss-qr-invoice'),
-                            $title, $when
-                        );
+                        continue;
                     }
+
+                    $lines[] = sprintf(
+                        /* translators: 1: who, 2: e-mail title, 3: concrete moment */
+                        esc_html__('%1$s „%2$s" mit der QR-Rechnung im Anhang: %3$s.', 'sqrip-swiss-qr-invoice'),
+                        $who, $title, self::moment_phrase($email['moment'])
+                    );
                 }
 
                 if (!empty($f['force_checkout_emails'])) {
                     if (!empty($f['force_carries_invoice'])) {
-                        $lines[] = esc_html__('Direkt beim Checkout: die Kundenmail „Bestellung wartet" geht sofort raus — mit der QR-Rechnung im Anhang. (Zusätzlich die Admin-Mail „Neue Bestellung".)', 'sqrip-swiss-qr-invoice');
+                        $lines[] = esc_html__('Beim Checkout geht die Kundenmail „Bestellung wartet" sofort raus — mit der QR-Rechnung im Anhang. Dazu die Admin-Mail „Neue Bestellung".', 'sqrip-swiss-qr-invoice');
                     } else {
-                        $lines[] = esc_html__('Direkt beim Checkout: Bestätigung an den Kunden („Bestellung wartet") und an den Shop-Admin („Neue Bestellung"). Diese tragen die QR-Rechnung nur, wenn Sie „Bestellung wartet" oben als Anhang-E-Mail wählen.', 'sqrip-swiss-qr-invoice');
+                        $lines[] = esc_html__('Beim Checkout gehen die Bestätigungsmails „Bestellung wartet" (Kunde) und „Neue Bestellung" (Admin) sofort raus — ohne die QR-Rechnung, da „Bestellung wartet" nicht als Anhang gewählt ist.', 'sqrip-swiss-qr-invoice');
                     }
                 }
 
                 if (empty($lines)) {
-                    $action = esc_html__('Kein automatischer Versand konfiguriert — der Kunde erhält die Rechnung nur, wenn Sie sie von Hand senden.', 'sqrip-swiss-qr-invoice');
+                    $action = esc_html__('Der Kunde erhält die Rechnung nur, wenn Sie sie von Hand aus dem Bestellmenü senden.', 'sqrip-swiss-qr-invoice');
                 } else {
                     $action = '<ul style="margin:0 0 0 1em;list-style:disc">';
                     foreach ($lines as $line) {
                         $action .= '<li>' . $line . '</li>';
                     }
                     $action .= '</ul>';
-                    if (!empty($f['emails'])) {
-                        $action .= '<p class="description" style="margin:6px 0 0">'
-                            . esc_html__('Jede E-Mail wird nur versendet, wenn sie in WooCommerce aktiviert ist.', 'sqrip-swiss-qr-invoice')
-                            . '</p>';
-                    }
                 }
                 return array($trigger, $action);
 
@@ -609,36 +678,38 @@ class Sqrip_Process_Overview
     }
 
     /**
-     * Translate an EMAIL_TRIGGERS 'trigger' code into a "when" phrase.
+     * Translate a resolved delivery moment into a concrete "when" phrase.
+     * The moment is already reconciled against the statuses THIS flow sets, so
+     * these are statements of fact, not conditionals.
      *
-     * @param string $trigger e.g. 'status:on-hold', 'manual', 'on_new_order'.
+     * @param string $moment 'on_order'|'after_payment'|'manual'|'on_refund'|
+     *                       'on_note'|'unknown'|'status:wc-<slug>'.
      * @return string Localized, escaped.
      */
-    protected static function trigger_phrase($trigger)
+    protected static function moment_phrase($moment)
     {
-        if (strpos($trigger, 'status:') === 0) {
-            $slug = substr($trigger, strlen('status:'));
-            if (strpos($slug, 'wc-') !== 0) {
-                $slug = 'wc-' . $slug;
-            }
+        if (strpos($moment, 'status:') === 0) {
+            $slug = substr($moment, strlen('status:'));
             return sprintf(
-                /* translators: %s = order status label */
-                esc_html__('sobald die Bestellung auf „%s" wechselt', 'sqrip-swiss-qr-invoice'),
+                /* translators: %s = order status label the flow does not set itself */
+                esc_html__('sobald die Bestellung den Status „%s" erreicht (den dieser Ablauf nicht selbst setzt)', 'sqrip-swiss-qr-invoice'),
                 esc_html(self::status_label($slug))
             );
         }
-        switch ($trigger) {
-            case 'on_new_order':
-                return esc_html__('sobald eine neue Bestellung eingeht', 'sqrip-swiss-qr-invoice');
+        switch ($moment) {
+            case 'on_order':
+                return esc_html__('geht beim Bestelleingang raus', 'sqrip-swiss-qr-invoice');
+            case 'after_payment':
+                return esc_html__('geht nach erkannter Zahlung raus (Wechsel auf „Abgeschlossen")', 'sqrip-swiss-qr-invoice');
             case 'on_refund':
-                return esc_html__('bei einer Rückerstattung', 'sqrip-swiss-qr-invoice');
+                return esc_html__('geht bei einer Rückerstattung raus', 'sqrip-swiss-qr-invoice');
             case 'on_note':
-                return esc_html__('wenn Sie dem Kunden eine Notiz senden', 'sqrip-swiss-qr-invoice');
+                return esc_html__('geht raus, wenn Sie dem Kunden eine Notiz senden', 'sqrip-swiss-qr-invoice');
             case 'manual':
-                return esc_html__('nur wenn Sie im Bestellmenü „Rechnung / Bestelldetails an Kunden senden" auslösen', 'sqrip-swiss-qr-invoice');
+                return esc_html__('geht raus, wenn Sie im Bestellmenü „Rechnung / Bestelldetails an Kunden senden" auslösen', 'sqrip-swiss-qr-invoice');
             case 'unknown':
             default:
-                return esc_html__('gemäss den Auslösern dieser E-Mail in WooCommerce', 'sqrip-swiss-qr-invoice');
+                return esc_html__('geht gemäss den Auslösern dieser E-Mail in WooCommerce raus', 'sqrip-swiss-qr-invoice');
         }
     }
 
