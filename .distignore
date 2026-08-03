@@ -4,6 +4,16 @@
 /docs
 /tests
 
+# Never ship untracked developer or data cruft, even when the package is built
+# from a working copy that happens to contain it (real bank files, dev config,
+# composer's dev dependencies). These must never reach a customer or wp.org.
+/CAMT
+/.claude
+/vendor
+/scratchpad
+composer.json
+composer.lock
+
 .DS_Store
 .distignore
 .gitignore
