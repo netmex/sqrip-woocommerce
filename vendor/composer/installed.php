@@ -1,0 +1,41 @@
+<?php return array(
+    'root' => array(
+        'name' => 'netmexdigital/sqrip-woocommerce',
+        'pretty_version' => 'dev-main',
+        'version' => 'dev-main',
+        'reference' => '7da485990a56c6190726309ec46cb61e483afb63',
+        'type' => 'wordpress-plugin',
+        'install_path' => __DIR__ . '/../../',
+        'aliases' => array(),
+        'dev' => true,
+    ),
+    'versions' => array(
+        'chillerlan/php-qrcode' => array(
+            'pretty_version' => '4.4.2',
+            'version' => '4.4.2.0',
+            'reference' => '345ed8e4ffb56e6b3fcd9f42e3970b9026fa6ce4',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../chillerlan/php-qrcode',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'chillerlan/php-settings-container' => array(
+            'pretty_version' => '2.1.6',
+            'version' => '2.1.6.0',
+            'reference' => '5553558bd381fce5108c6d0343c12e488cfec6bb',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../chillerlan/php-settings-container',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'netmexdigital/sqrip-woocommerce' => array(
+            'pretty_version' => 'dev-main',
+            'version' => 'dev-main',
+            'reference' => '7da485990a56c6190726309ec46cb61e483afb63',
+            'type' => 'wordpress-plugin',
+            'install_path' => __DIR__ . '/../../',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+    ),
+);

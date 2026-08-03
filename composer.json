@@ -1,0 +1,17 @@
+{
+    "name": "netmexdigital/sqrip-woocommerce",
+    "description": "sqrip Swiss QR-invoice & GiroCode/SEPA for WooCommerce",
+    "type": "wordpress-plugin",
+    "license": "GPL-2.0-or-later",
+    "require": {
+        "php": ">=7.4",
+        "chillerlan/php-qrcode": "^4.3"
+    },
+    "config": {
+        "platform": {
+            "php": "7.4.33"
+        },
+        "optimize-autoloader": true,
+        "sort-packages": true
+    }
+}

@@ -6,3 +6,6 @@
 # and addresses of every payer. Deliberately narrow, so the synthetic fixtures
 # under tests/camt/fixtures/ stay tracked.
 CAMT/
+
+# Artefacts written by tests/girocode/run-girocode-tests.php on each run.
+tests/girocode/girocode-plugin.*

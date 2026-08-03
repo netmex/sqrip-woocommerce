@@ -53,6 +53,14 @@ if (is_admin()) {
     Sqrip_Camt_Admin::init();
 }
 
+// GiroCode (EPC-QR / SEPA) support. The bundled QR library is optional at load time —
+// the classes stay inert until a GiroCode is actually generated.
+if (file_exists(__DIR__ . '/vendor/autoload.php')) {
+    require_once __DIR__ . '/vendor/autoload.php';
+}
+require_once __DIR__ . '/inc/class-sqrip-sepa-iban.php';
+require_once __DIR__ . '/inc/class-sqrip-girocode.php';
+
 /**
  * Load the plugin's bundled translations from /languages.
  *
