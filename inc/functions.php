@@ -44,7 +44,7 @@ function sqrip_get_plugin_options()
 /**
  * Countries a QR invoice may be created for.
  *
- * @since 1.11
+ * @since 1.10.4
  * @return string[] Upper case ISO 3166-1 alpha-2 codes, empty if nothing is configured.
  */
 function sqrip_get_allowed_invoice_countries()
@@ -63,12 +63,17 @@ function sqrip_get_allowed_invoice_countries()
 }
 
 /**
- * Is the country gatekeeper switched on and usable?
+ * Is the country restriction switched on and usable?
  *
- * A switched-on but empty country list would block every single order, which is
- * never what the shop meant. That counts as switched off.
+ * This is the single off-switch for the whole feature. It reads the stored option, and
+ * sqrip_get_plugin_option() deliberately ignores the form-field defaults — so on a shop
+ * that simply updates and changes nothing, the option is absent and this returns false.
+ * Nothing about such a shop's checkout changes.
  *
- * @since 1.11
+ * A switched-on but empty country list would block every single order, which is never
+ * what the shop meant. That counts as switched off as well.
+ *
+ * @since 1.10.4
  * @return bool
  */
 function sqrip_country_gatekeeper_active()
@@ -83,10 +88,11 @@ function sqrip_country_gatekeeper_active()
 /**
  * May a QR invoice be created for this invoice country?
  *
- * A QR invoice is always in CHF. Sending one to a customer abroad causes confusion
- * and bank charges, so the shop can limit it to the countries it wants. (NET2-2329)
+ * A QR invoice is always in Swiss francs. Sending one to a customer abroad causes
+ * confusion and bank charges, so the shop can limit it to the countries it wants.
+ * (NET2-2329)
  *
- * @since 1.11
+ * @since 1.10.4
  * @param string $country Two letter country code of the billing address.
  * @return bool
  */
@@ -109,10 +115,10 @@ function sqrip_is_invoice_country_allowed($country)
 /**
  * May a QR invoice be created for this order?
  *
- * Judged by the invoice (billing) address, because that is the address printed on
- * the QR bill as the debtor and the one the customer pays from.
+ * Judged by the invoice (billing) address, because that is the address printed on the
+ * QR bill as the debtor and the one the customer pays from.
  *
- * @since 1.11
+ * @since 1.10.4
  * @param WC_Order $order
  * @return bool
  */
@@ -128,7 +134,7 @@ function sqrip_order_allows_qr_invoice($order)
 /**
  * Record on the order why no QR invoice was created, so the shop is not left guessing.
  *
- * @since 1.11
+ * @since 1.10.4
  * @param WC_Order $order
  * @return void
  */
@@ -370,6 +376,13 @@ function sqrip_frontend_text($key)
             }
 
             return __("It seems we couldn't provide you with a QR-invoice at this time. Please try later, contact the shop or use a different payment method.", 'sqrip-swiss-qr-invoice');
+
+        case 'country_blocked':
+            if ($informal && $is_german) {
+                return 'Die QR-Rechnung steht für deine Rechnungsadresse nicht zur Verfügung. Bitte wähle eine andere Zahlungsart.';
+            }
+
+            return __('The QR invoice is not available for your invoice address. Please choose a different payment method.', 'sqrip-swiss-qr-invoice');
     }
 
     return '';
