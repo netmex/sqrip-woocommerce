@@ -7,6 +7,331 @@ msgstr ""
 "Language: fr_CH\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
+msgid "Restrict QR-invoice by country"
+msgstr "Limiter la QR-facture par pays"
+
+msgid "Offer sqrip only for the invoice countries selected below"
+msgstr ""
+"Proposer sqrip uniquement pour les pays de facturation sélectionnés ci-"
+"dessous"
+
+msgid ""
+"A QR-invoice is always in Swiss francs. For customers abroad this causes "
+"confusion, bank charges for paying in the wrong currency, and manual work. "
+"With this enabled, sqrip is hidden at the checkout for every other invoice "
+"country and no QR-invoice is created for such orders. Leave it off to keep "
+"offering sqrip to everyone."
+msgstr ""
+"Une QR-facture est toujours libellée en francs suisses. Pour les clients à "
+"l'étranger, cela crée de la confusion, des frais bancaires pour un paiement "
+"dans la mauvaise devise et du travail manuel. Si activé, sqrip est masqué à "
+"la caisse pour tout autre pays de facturation et aucune QR-facture n'est "
+"créée pour ces commandes."
+
+msgid "Countries that get a QR-invoice"
+msgstr "Pays qui reçoivent une QR-facture"
+
+msgid ""
+"Judged by the invoice address, which is the address printed on the QR-"
+"invoice. An empty list switches the restriction off rather than blocking "
+"every order."
+msgstr ""
+"Déterminé par l'adresse de facturation, c'est-à-dire l'adresse imprimée sur "
+"la QR-facture."
+
+msgid ""
+"No sqrip QR invoice was created: the invoice address is in %s, which is not "
+"among the countries selected in the sqrip settings."
+msgstr ""
+"Aucune QR-facture sqrip n'a été créée : l'adresse de facturation se trouve "
+"en %s, qui ne fait pas partie des pays sélectionnés dans les réglages sqrip."
+
+msgid "No order status for \"waiting for payment\" is configured yet."
+msgstr ""
+"Aucun statut de commande pour « en attente de paiement » n'est encore "
+"configuré."
+
+msgid ""
+"The (QR-)IBAN is not active. Please confirm the (QR-)IBAN in your sqrip.ch "
+"account before activating sqrip."
+msgstr ""
+"L'IBAN (QR) n'est pas actif. Veuillez confirmer l'IBAN (QR) dans votre "
+"compte sqrip.ch avant d'activer sqrip."
+
+msgid ""
+"Action required:\n"
+"Please confirm change of IBAN on <a href='https://api.sqrip.ch/login' "
+"target='_blank'>sqrip.ch</a> in order to continue the service."
+msgstr ""
+"Action requise :\n"
+"Veuillez confirmer le changement d'IBAN sur <a href='https://api.sqrip.ch/"
+"login' target='_blank'>sqrip.ch</a> pour continuer le service."
+
+msgid "Once every week"
+msgstr "Une fois par semaine"
+
+msgid "IBAN"
+msgstr "IBAN"
+
+msgid "This iban will be used to generate a sqrip qr code in case of a refund."
+msgstr ""
+"Cet IBAN sera utilisé pour générer un code QR sqrip en cas de remboursement."
+
+msgid ""
+"Due date: [due_date format=\"y-MM-dd\"]\n"
+"Order: [order_number]\n"
+"Thank you for your purchase!"
+msgstr ""
+"Échéance : [due_date format=\"y-MM-dd\"]\n"
+"Commande : [order_number]\n"
+"Merci pour votre achat !"
+
+msgid ""
+"Will be displayed on the QR invoice under the section “Additional "
+"information”.<br>The following variables are available:<br>[invoice] — the "
+"number of this instalment (1, 2, 3 …);<br>[max_invoice] — the total number "
+"of instalments."
+msgstr ""
+"Sera affiché sur la QR-facture dans la section « Informations "
+"complémentaires ».<br>Les variables suivantes sont disponibles :"
+"<br>[invoice] — le numéro de cet acompte (1, 2, 3 …) ;<br>[max_invoice] — le "
+"nombre total d'acomptes."
+
+msgid "Reading…"
+msgstr "Lecture…"
+
+msgid "Applying…"
+msgstr "Application…"
+
+msgid "Mark the listed orders as paid?"
+msgstr "Marquer les commandes listées comme payées ?"
+
+msgid ""
+"Damit sqrip die QR-Rechnungen in der Mediathek speichern kann muss "
+"\"allow_url_open\" in der php.ini oder htaccess-Datei zugelassen werden."
+msgstr ""
+"Pour que sqrip puisse enregistrer les QR-factures dans la médiathèque, "
+"« allow_url_open » doit être autorisé dans le fichier php.ini ou .htaccess."
+
+msgid "Payment notification service"
+msgstr "Rapprochement par avis de paiement"
+
+msgid "The payment notification service is switched off."
+msgstr "Le rapprochement par avis de paiement est désactivé."
+
+msgid "The payment notification service could not be reached."
+msgstr "Le rapprochement par avis de paiement est injoignable."
+
+msgid "Could not reach the payment notification service."
+msgstr "Le rapprochement par avis de paiement est injoignable."
+
+msgid ""
+"Payment received: %1$s %2$s, reference %3$s. Confirmed by the sqrip payment "
+"notification service."
+msgstr ""
+"Paiement reçu : %1$s %2$s, référence %3$s. Confirmé par le rapprochement par "
+"avis de paiement sqrip."
+
+msgid ""
+"We use information that banks already send out today: e-mail notifications "
+"about account credits. These e-mails carry enough to guarantee a unique "
+"match to your orders. The banks expressly permit the further use of these "
+"notifications; it is the responsibility of their customer — that is, YOU — "
+"how these e-mails are handled. For every successful reconciliation we charge "
+"you 1 credit."
+msgstr ""
+"Nous utilisons des informations que les banques envoient déjà aujourd'hui : "
+"les notifications de crédits sur le compte par e-mail. Ces e-mails "
+"contiennent assez d'informations pour garantir une attribution univoque aux "
+"commandes. Les banques autorisent expressément l'utilisation ultérieure de "
+"ces notifications ; il relève de la responsabilité de leur client – c'est-à-"
+"dire VOUS – de décider comment ces e-mails sont traités. Pour chaque "
+"rapprochement réussi, nous vous décomptons 1 crédit."
+
+msgid "Confirm by hand from (%s)"
+msgstr "Confirmer à la main à partir de (%s)"
+
+msgid "sqrip camt Reconciliation"
+msgstr "sqrip Rapprochement camt"
+
+msgid "You are not allowed to do this."
+msgstr "Vous n'êtes pas autorisé à faire cela."
+
+msgid "The camt reconciliation is switched off."
+msgstr "Le rapprochement camt est désactivé."
+
+msgid "Please choose a file first."
+msgstr "Veuillez d'abord choisir un fichier."
+
+msgid "The file is larger than this server accepts for uploads."
+msgstr ""
+"Le fichier est plus grand que ce que ce serveur accepte pour les "
+"téléversements."
+
+msgid "The file could not be uploaded."
+msgstr "Le fichier n'a pas pu être téléversé."
+
+msgid "Only the XML file from your e-banking can be read here."
+msgstr "Seul le fichier XML de votre e-banking peut être lu ici."
+
+msgid "The file is larger than %s."
+msgstr "Le fichier est plus grand que %s."
+
+msgid ""
+"No order status for \"waiting for payment\" is configured yet. Please set it "
+"under Payment Comparison first."
+msgstr ""
+"Aucun statut de commande pour « en attente de paiement » n'est encore "
+"configuré. Veuillez d'abord le définir sous Comparaison des paiements."
+
+msgid "The file is empty."
+msgstr "Le fichier est vide."
+
+msgid "The file is too large."
+msgstr "Le fichier est trop grand."
+
+msgid ""
+"This file could not be read. Please download the camt file from your e-"
+"banking again."
+msgstr ""
+"Ce fichier n'a pas pu être lu. Veuillez télécharger à nouveau le fichier "
+"camt depuis votre e-banking."
+
+msgid ""
+"There are no bookings in this file. Please check whether you downloaded the "
+"right period."
+msgstr ""
+"Ce fichier ne contient aucune écriture. Veuillez vérifier si vous avez "
+"téléchargé la bonne période."
+
+msgid "The file could not be processed."
+msgstr "Le fichier n'a pas pu être traité."
+
+msgid "Instalment %1$d of %2$d paid"
+msgstr "Acompte %1$d sur %2$d payé"
+
+msgid "Payment received"
+msgstr "Paiement reçu"
+
+msgid ""
+"%1$s: %2$s %3$s, reference %4$s, value date %5$s. Reconciled from the bank "
+"file %6$s."
+msgstr ""
+"%1$s : %2$s %3$s, référence %4$s, date de valeur %5$s. Rapproché depuis le "
+"fichier bancaire %6$s."
+
+msgid ""
+"File %1$s: %2$d incoming payments, checked against %3$d orders waiting for "
+"payment."
+msgstr ""
+"Fichier %1$s : %2$d paiements entrants, vérifiés avec %3$d commandes en "
+"attente de paiement."
+
+msgid ""
+"There are more orders waiting for payment than can be checked in one go. "
+"Please reconcile again after applying this run."
+msgstr ""
+"Il y a plus de commandes en attente de paiement qu'il n'est possible de "
+"vérifier en une fois. Veuillez effectuer un nouveau rapprochement après "
+"avoir appliqué cette exécution."
+
+msgid "Will be marked as paid"
+msgstr "Sera marqué comme payé"
+
+msgid "There is no payment that can be booked without checking."
+msgstr "Aucun paiement ne peut être comptabilisé sans vérification."
+
+msgid "Please check these yourself"
+msgstr "Veuillez vérifier vous-même"
+
+msgid "sqrip changes nothing here."
+msgstr "sqrip ne change rien ici."
+
+msgid "Nothing was changed."
+msgstr "Rien n'a été modifié."
+
+msgid "Marked as paid"
+msgstr "Marqué comme payé"
+
+msgid "Expected"
+msgstr "Attendu"
+
+msgid "Received"
+msgstr "Reçu"
+
+msgid "Reference"
+msgstr "Référence"
+
+msgid "Note"
+msgstr "Remarque"
+
+msgid "Amount agrees"
+msgstr "Le montant correspond"
+
+msgid "Paid more than once"
+msgstr "Payé plusieurs fois"
+
+msgid "Was already confirmed"
+msgstr "A déjà été confirmé"
+
+msgid "No amount stored for this instalment"
+msgstr "Aucun montant enregistré pour cet acompte"
+
+msgid "Skonto taken after the deadline"
+msgstr "Escompte pris après le délai"
+
+msgid "Amount agrees, but the late fee is unpaid"
+msgstr "Le montant correspond, mais les frais de rappel ne sont pas payés"
+
+msgid "Amount differs"
+msgstr "Le montant diffère"
+
+msgid "Bank file"
+msgstr "Fichier bancaire"
+
+msgid ""
+"Download the camt.053 or camt.054 file of the account that receives your "
+"customers' payments from your e-banking, then choose it here. \"Preview\" "
+"only shows what would happen and changes nothing."
+msgstr ""
+"Téléchargez le fichier camt.053 ou camt.054 du compte qui reçoit les "
+"paiements de vos clients depuis votre e-banking, puis choisissez-le ici. "
+"« Aperçu » montre seulement ce qui se passerait et ne change rien."
+
+msgid "XML file, at most %s."
+msgstr "Fichier XML, au maximum %s."
+
+msgid "Preview"
+msgstr "Aperçu"
+
+msgid "Apply"
+msgstr "Appliquer"
+
+msgid ""
+"%d further incoming payment in this file belongs to no order waiting for "
+"payment. It was counted and otherwise ignored."
+msgid_plural ""
+"%d further incoming payments in this file belong to no order waiting for "
+"payment. They were counted and otherwise ignored."
+msgstr[0] ""
+"%d paiement entrant supplémentaire dans ce fichier ne correspond à aucune "
+"commande en attente de paiement. Il a été compté et sinon ignoré."
+msgstr[1] ""
+"%d paiements entrants supplémentaires dans ce fichier ne correspondent à "
+"aucune commande en attente de paiement. Ils ont été comptés et sinon ignorés."
+
+msgid ""
+"%d order is still waiting for payment; there is nothing for it in this file."
+msgid_plural ""
+"%d orders are still waiting for payment; there is nothing for them in this "
+"file."
+msgstr[0] ""
+"%d commande est encore en attente de paiement ; il n'y a rien pour elle dans "
+"ce fichier."
+msgstr[1] ""
+"%d commandes sont encore en attente de paiement ; il n'y a rien pour elles "
+"dans ce fichier."
+
 msgid "Activate manual camt reconciliation"
 msgstr "Activer le rapprochement camt manuel"
 
@@ -33,9 +358,6 @@ msgstr ""
 "par votre banque. Basé sur les commandes : seuls les crédits correspondant à "
 "l'une de vos commandes ouvertes sont utilisés, et rien de vos données "
 "bancaires n'est conservé."
-
-msgid "Payment notification service"
-msgstr "Service d'avis de paiement"
 
 msgid "Your mailbox name"
 msgstr "Nom de votre boîte aux lettres"
@@ -123,17 +445,11 @@ msgstr ""
 "Ce nom de boîte aux lettres est déjà utilisé par une autre boutique. "
 "Veuillez en choisir un autre."
 
-msgid "The payment notification service is switched off."
-msgstr "Le service d'avis de paiement est désactivé."
-
 msgid ""
 "Please set the mailbox name under \"camt Reconciliation\" and save first."
 msgstr ""
 "Veuillez d'abord définir le nom de la boîte aux lettres sous « camt "
 "Reconciliation » et enregistrer."
-
-msgid "The payment notification service could not be reached."
-msgstr "Le service d'avis de paiement est injoignable."
 
 msgid "Please set the mailbox name and save the settings first."
 msgstr ""
@@ -142,13 +458,6 @@ msgstr ""
 
 msgid "Unknown step."
 msgstr "Étape inconnue."
-
-msgid ""
-"Payment received: %1$s %2$s, reference %3$s. Confirmed by the sqrip payment "
-"notification service."
-msgstr ""
-"Paiement reçu : %1$s %2$s, référence %3$s. Confirmé par le service d'avis de "
-"paiement sqrip."
 
 msgid "There are no orders waiting for payment right now."
 msgstr "Aucune commande n'attend de paiement pour le moment."
@@ -206,9 +515,6 @@ msgstr ""
 
 msgid "Checking…"
 msgstr "Vérification…"
-
-msgid "Could not reach the payment notification service."
-msgstr "Le service d'avis de paiement est injoignable."
 
 msgid "order(s) marked as paid."
 msgstr "commande(s) marquée(s) comme payée(s)."
@@ -1212,29 +1518,9 @@ msgid "ZIP*"
 msgstr "ZIP*"
 
 #: inc/class-wc-sqrip-payment-gateway.php inc/functions.php
-msgid "Restrict QR-invoice by country"
-msgstr "Limiter la facture QR à certains pays"
-
-#: inc/class-wc-sqrip-payment-gateway.php inc/functions.php
-msgid "Offer sqrip only for the invoice countries selected below"
-msgstr "Proposer sqrip uniquement pour les pays de facturation sélectionnés ci-dessous"
-
-#: inc/class-wc-sqrip-payment-gateway.php inc/functions.php
-msgid "A QR-invoice is always in Swiss francs. For customers abroad this causes confusion, bank charges for paying in the wrong currency, and manual work. With this enabled, sqrip is hidden at the checkout for every other invoice country and no QR-invoice is created for such orders. Leave it off to keep offering sqrip to everyone."
-msgstr "Une facture QR est toujours libellée en francs suisses. Pour la clientèle à l'étranger, cela génère de la confusion, des frais bancaires liés au paiement dans une mauvaise devise et du travail manuel. Lorsque cette option est activée, sqrip est masqué à la caisse pour tous les autres pays de facturation et aucune facture QR n'est créée pour ces commandes. Laissez-la désactivée pour continuer à proposer sqrip à tout le monde."
-
-#: inc/class-wc-sqrip-payment-gateway.php inc/functions.php
-msgid "Countries that get a QR-invoice"
-msgstr "Pays qui reçoivent une facture QR"
-
-#: inc/class-wc-sqrip-payment-gateway.php inc/functions.php
-msgid "Judged by the invoice address, which is the address printed on the QR-invoice. An empty list switches the restriction off rather than blocking every order."
-msgstr "L'adresse de facturation fait foi, celle qui figure sur la facture QR. Une liste vide désactive la restriction au lieu de bloquer toutes les commandes."
-
-#: inc/class-wc-sqrip-payment-gateway.php inc/functions.php
-msgid "No sqrip QR invoice was created: the invoice address is in %s, which is not among the countries selected in the sqrip settings."
-msgstr "Aucune facture QR sqrip n'a été créée : l'adresse de facturation se trouve en %s, qui ne fait pas partie des pays sélectionnés dans les réglages sqrip."
-
-#: inc/class-wc-sqrip-payment-gateway.php inc/functions.php
-msgid "The QR invoice is not available for your invoice address. Please choose a different payment method."
-msgstr "La facture QR n'est pas disponible pour votre adresse de facturation. Veuillez choisir un autre moyen de paiement."
+msgid ""
+"The QR invoice is not available for your invoice address. Please choose a "
+"different payment method."
+msgstr ""
+"La facture QR n'est pas disponible pour votre adresse de facturation. "
+"Veuillez choisir un autre moyen de paiement."
