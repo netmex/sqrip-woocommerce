@@ -7,6 +7,112 @@ msgstr ""
 "Language: fr_FR\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
+msgid "Restrict QR-invoice by country"
+msgstr "Limiter la QR-facture par pays"
+
+msgid "Offer sqrip only for the invoice countries selected below"
+msgstr ""
+"Proposer sqrip uniquement pour les pays de facturation sélectionnés ci-"
+"dessous"
+
+msgid ""
+"A QR-invoice is always in Swiss francs. For customers abroad this causes "
+"confusion, bank charges for paying in the wrong currency, and manual work. "
+"With this enabled, sqrip is hidden at the checkout for every other invoice "
+"country and no QR-invoice is created for such orders. Leave it off to keep "
+"offering sqrip to everyone."
+msgstr ""
+"Une QR-facture est toujours libellée en francs suisses. Pour les clients à "
+"l'étranger, cela crée de la confusion, des frais bancaires pour un paiement "
+"dans la mauvaise devise et du travail manuel. Si activé, sqrip est masqué à "
+"la caisse pour tout autre pays de facturation et aucune QR-facture n'est "
+"créée pour ces commandes."
+
+msgid "Countries that get a QR-invoice"
+msgstr "Pays qui reçoivent une QR-facture"
+
+msgid ""
+"Judged by the invoice address, which is the address printed on the QR-"
+"invoice. An empty list switches the restriction off rather than blocking "
+"every order."
+msgstr ""
+"Déterminé par l'adresse de facturation, c'est-à-dire l'adresse imprimée sur "
+"la QR-facture."
+
+msgid ""
+"No sqrip QR invoice was created: the invoice address is in %s, which is not "
+"among the countries selected in the sqrip settings."
+msgstr ""
+"Aucune QR-facture sqrip n'a été créée : l'adresse de facturation se trouve "
+"en %s, qui ne fait pas partie des pays sélectionnés dans les réglages sqrip."
+
+msgid "No order status for \"waiting for payment\" is configured yet."
+msgstr ""
+"Aucun statut de commande pour « en attente de paiement » n'est encore "
+"configuré."
+
+msgid ""
+"The (QR-)IBAN is not active. Please confirm the (QR-)IBAN in your sqrip.ch "
+"account before activating sqrip."
+msgstr ""
+"L'IBAN (QR) n'est pas actif. Veuillez confirmer l'IBAN (QR) dans votre "
+"compte sqrip.ch avant d'activer sqrip."
+
+msgid ""
+"Action required:\n"
+"Please confirm change of IBAN on <a href='https://api.sqrip.ch/login' "
+"target='_blank'>sqrip.ch</a> in order to continue the service."
+msgstr ""
+"Action requise :\n"
+"Veuillez confirmer le changement d'IBAN sur <a href='https://api.sqrip.ch/"
+"login' target='_blank'>sqrip.ch</a> pour continuer le service."
+
+msgid "Once every week"
+msgstr "Une fois par semaine"
+
+msgid "IBAN"
+msgstr "IBAN"
+
+msgid "This iban will be used to generate a sqrip qr code in case of a refund."
+msgstr ""
+"Cet IBAN sera utilisé pour générer un code QR sqrip en cas de remboursement."
+
+msgid ""
+"Due date: [due_date format=\"y-MM-dd\"]\n"
+"Order: [order_number]\n"
+"Thank you for your purchase!"
+msgstr ""
+"Échéance : [due_date format=\"y-MM-dd\"]\n"
+"Commande : [order_number]\n"
+"Merci pour votre achat !"
+
+msgid ""
+"Will be displayed on the QR invoice under the section “Additional "
+"information”.<br>The following variables are available:<br>[invoice] — the "
+"number of this instalment (1, 2, 3 …);<br>[max_invoice] — the total number "
+"of instalments."
+msgstr ""
+"Sera affiché sur la QR-facture dans la section « Informations "
+"complémentaires ».<br>Les variables suivantes sont disponibles :"
+"<br>[invoice] — le numéro de cet acompte (1, 2, 3 …) ;<br>[max_invoice] — le "
+"nombre total d'acomptes."
+
+msgid "Reading…"
+msgstr "Lecture…"
+
+msgid "Applying…"
+msgstr "Application…"
+
+msgid "Mark the listed orders as paid?"
+msgstr "Marquer les commandes listées comme payées ?"
+
+msgid ""
+"Damit sqrip die QR-Rechnungen in der Mediathek speichern kann muss "
+"\"allow_url_open\" in der php.ini oder htaccess-Datei zugelassen werden."
+msgstr ""
+"Pour que sqrip puisse enregistrer les QR-factures dans la médiathèque, "
+"« allow_url_open » doit être autorisé dans le fichier php.ini ou .htaccess."
+
 msgid "Payment notification service"
 msgstr "Rapprochement par avis de paiement"
 
@@ -1412,29 +1518,9 @@ msgid "ZIP*"
 msgstr "ZIP*"
 
 #: inc/class-wc-sqrip-payment-gateway.php inc/functions.php
-msgid "Restrict QR-invoice by country"
-msgstr "Limiter la facture QR à certains pays"
-
-#: inc/class-wc-sqrip-payment-gateway.php inc/functions.php
-msgid "Offer sqrip only for the invoice countries selected below"
-msgstr "Proposer sqrip uniquement pour les pays de facturation sélectionnés ci-dessous"
-
-#: inc/class-wc-sqrip-payment-gateway.php inc/functions.php
-msgid "A QR-invoice is always in Swiss francs. For customers abroad this causes confusion, bank charges for paying in the wrong currency, and manual work. With this enabled, sqrip is hidden at the checkout for every other invoice country and no QR-invoice is created for such orders. Leave it off to keep offering sqrip to everyone."
-msgstr "Une facture QR est toujours libellée en francs suisses. Pour la clientèle à l'étranger, cela génère de la confusion, des frais bancaires liés au paiement dans une mauvaise devise et du travail manuel. Lorsque cette option est activée, sqrip est masqué à la caisse pour tous les autres pays de facturation et aucune facture QR n'est créée pour ces commandes. Laissez-la désactivée pour continuer à proposer sqrip à tout le monde."
-
-#: inc/class-wc-sqrip-payment-gateway.php inc/functions.php
-msgid "Countries that get a QR-invoice"
-msgstr "Pays qui reçoivent une facture QR"
-
-#: inc/class-wc-sqrip-payment-gateway.php inc/functions.php
-msgid "Judged by the invoice address, which is the address printed on the QR-invoice. An empty list switches the restriction off rather than blocking every order."
-msgstr "L'adresse de facturation fait foi, celle qui figure sur la facture QR. Une liste vide désactive la restriction au lieu de bloquer toutes les commandes."
-
-#: inc/class-wc-sqrip-payment-gateway.php inc/functions.php
-msgid "No sqrip QR invoice was created: the invoice address is in %s, which is not among the countries selected in the sqrip settings."
-msgstr "Aucune facture QR sqrip n'a été créée : l'adresse de facturation se trouve en %s, qui ne fait pas partie des pays sélectionnés dans les réglages sqrip."
-
-#: inc/class-wc-sqrip-payment-gateway.php inc/functions.php
-msgid "The QR invoice is not available for your invoice address. Please choose a different payment method."
-msgstr "La facture QR n'est pas disponible pour votre adresse de facturation. Veuillez choisir un autre moyen de paiement."
+msgid ""
+"The QR invoice is not available for your invoice address. Please choose a "
+"different payment method."
+msgstr ""
+"La facture QR n'est pas disponible pour votre adresse de facturation. "
+"Veuillez choisir un autre moyen de paiement."
