@@ -4,7 +4,7 @@ Donate link: https://sqrip.ch/
 Tags: woocommerce, payment, swiss qr invoice, qr-rechnung, einzahlungsschein
 Requires at least: 6.0
 Tested up to: 7.0
-Stable tag: 1.10.3
+Stable tag: 1.10.4
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -144,6 +144,14 @@ Yes. We are already working on comparing the reconciliation of orders/purchases 
 7. Refund functionality
 
 == Changelog ==
+= 1.10.4 : August 2026 – Feature =
+* New setting 'Restrict QR-invoice by country': sqrip is then offered only for the invoice countries you select (Switzerland and Liechtenstein by default). A QR-invoice is always in Swiss francs, so for customers abroad it causes confusion, bank charges for paying in the wrong currency, and manual work on your side;
+* The restriction is switched **off** on update. Nothing changes for your shop until you switch it on yourself;
+* If a customer nevertheless reaches the payment step with an invoice address outside your list — for instance by changing the country late in the checkout — the order is not placed silently. The customer is told that the QR-invoice is unavailable for their address and can pick another payment method. The order is also never left without a way to pay;
+* The same rule applies to orders you create by hand in the backend: no QR-invoice is generated, and the reason is recorded in the order notes;
+* An empty country list switches the restriction off instead of blocking every order.
+
+
 = 1.10.4 : not released yet =
 * Corrected the description of the language setting. It said the QR invoice could be produced in the language your customer selected on a multilingual site — the plugin cannot do that. The language is taken from the shop setting for every QR invoice. Following the customer's language is planned for a future release;
 
@@ -355,6 +363,10 @@ We made users (even more) happy with these changes:
 * Here we go!
 
 == Upgrade Notice ==
+= 1.10.4 =
+Adds an optional country restriction: offer sqrip only for the invoice countries you choose. Switched off on update — nothing changes until you enable it under QR-Invoice in the sqrip settings.
+
+
 = 1.10.3 =
 For shops that combine the QR slip with the invoice of 'PDF Invoices & Packing Slips': orders entered by hand in the backend now get the QR slip in the invoice too, just like orders placed through the shop. No settings change.
 
