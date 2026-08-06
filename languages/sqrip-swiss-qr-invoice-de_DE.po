@@ -7,6 +7,18 @@ msgstr ""
 "Language: de_DE\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+msgid "Order number"
+msgstr "Bestellnummer"
+
+msgid "QR reference / SCOR"
+msgstr "QR-Referenz / SCOR"
+
+msgid "Name"
+msgstr "Name"
+
+msgid "Action"
+msgstr "Aktion"
+
 msgid "Incoming payment"
 msgstr "Zahlungseingang"
 
@@ -1112,9 +1124,6 @@ msgstr ""
 "Eröffnen Sie ein Konto unter <a href=\"https://sqrip.ch\" "
 "target=\"_blank\">https://sqrip.ch</a>, erstellen Sie einen API-Schlüssel, "
 "kopieren Sie ihn und fügen Sie ihn hier ein. Fertig!"
-
-msgid "Order number"
-msgstr "Bestellnummer"
 
 msgid "Paid"
 msgstr "Bezahlt"

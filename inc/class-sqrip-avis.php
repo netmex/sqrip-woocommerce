@@ -453,10 +453,11 @@ class Sqrip_Avis
 
                 if ($key !== '') {
                     $by_ref[$key] = array(
-                        'order_id'     => $order['order_id'],
-                        'order_number' => $order['order_number'],
-                        'currency'     => $order['currency'],
-                        'expected'     => $slip['expected'],
+                        'order_id'          => $order['order_id'],
+                        'order_number'      => $order['order_number'],
+                        'currency'          => $order['currency'],
+                        'expected'          => $slip['expected'],
+                        'reference_display' => (string) $slip['reference'],
                     );
                 }
             }
@@ -535,36 +536,53 @@ class Sqrip_Avis
                 'siblings'     => $siblings,
             ), DAY_IN_SECONDS);
 
-            $order    = wc_get_order($cand['order_id']);
-            $open_url = $order ? $order->get_edit_order_url() : '';
-            $expected = ($cand['expected'] === null || $cand['expected'] === '')
+            $order     = wc_get_order($cand['order_id']);
+            $open_url  = $order ? $order->get_edit_order_url() : '';
+            $name      = $order ? $order->get_formatted_billing_full_name() : '';
+            $ref_disp  = (isset($cand['reference_display']) && $cand['reference_display'] !== '')
+                ? $cand['reference_display'] : $key;
+            $order_amt = ($cand['expected'] === null || $cand['expected'] === '')
                 ? '—'
-                : $cand['currency'] . ' ' . number_format((float) $cand['expected'], 2, '.', '');
+                : trim($cand['currency'] . ' ' . number_format((float) $cand['expected'], 2, '.', ''));
+
+            $actions = '<a href="' . esc_url(self::action_link($id, 'confirm')) . '">' . esc_html__('Confirm', 'sqrip-swiss-qr-invoice') . '</a> &nbsp;|&nbsp; '
+                . '<a href="' . esc_url(self::action_link($id, 'reject')) . '">' . esc_html__('Reject', 'sqrip-swiss-qr-invoice') . '</a>'
+                . ($open_url ? ' &nbsp;|&nbsp; <a href="' . esc_url($open_url) . '">' . esc_html__('Open order', 'sqrip-swiss-qr-invoice') . '</a>' : '');
 
             $rows .= '<tr>'
-                . '<td style="vertical-align:top;padding:10px 18px 10px 0;">'
-                . '<strong>' . esc_html__('Incoming payment', 'sqrip-swiss-qr-invoice') . '</strong><br>'
-                . esc_html(trim($currency . ' ' . $amount)) . '<br>'
-                . esc_html($sender) . '<br>'
-                . esc_html($value)
-                . '</td>'
-                . '<td style="vertical-align:top;padding:10px 18px;border-left:1px solid #ddd;">'
-                . '<strong>' . esc_html(sprintf(__('Order %s', 'sqrip-swiss-qr-invoice'), $cand['order_number'])) . '</strong><br>'
-                . esc_html(sprintf(__('Expected: %s', 'sqrip-swiss-qr-invoice'), $expected))
-                . '</td>'
-                . '<td style="vertical-align:top;padding:10px 0;">'
-                . '<a href="' . esc_url(self::action_link($id, 'confirm')) . '">' . esc_html__('Confirm', 'sqrip-swiss-qr-invoice') . '</a> &nbsp;|&nbsp; '
-                . '<a href="' . esc_url(self::action_link($id, 'reject')) . '">' . esc_html__('Reject', 'sqrip-swiss-qr-invoice') . '</a>'
-                . ($open_url ? ' &nbsp;|&nbsp; <a href="' . esc_url($open_url) . '">' . esc_html__('Open order', 'sqrip-swiss-qr-invoice') . '</a>' : '')
-                . '</td>'
+                . '<td style="padding:8px 14px;border-bottom:1px solid #eee;">' . esc_html($cand['order_number']) . '</td>'
+                . '<td style="padding:8px 14px;border-bottom:1px solid #eee;">' . esc_html($order_amt) . '</td>'
+                . '<td style="padding:8px 14px;border-bottom:1px solid #eee;"><code>' . esc_html($ref_disp) . '</code></td>'
+                . '<td style="padding:8px 14px;border-bottom:1px solid #eee;">' . esc_html($name) . '</td>'
+                . '<td style="padding:8px 14px;border-bottom:1px solid #eee;">' . $actions . '</td>'
                 . '</tr>';
         }
 
+        $head = '<tr>'
+            . '<th style="text-align:left;padding:8px 14px;border-bottom:2px solid #333;">' . esc_html__('Order number', 'sqrip-swiss-qr-invoice') . '</th>'
+            . '<th style="text-align:left;padding:8px 14px;border-bottom:2px solid #333;">' . esc_html__('Amount', 'sqrip-swiss-qr-invoice') . '</th>'
+            . '<th style="text-align:left;padding:8px 14px;border-bottom:2px solid #333;">' . esc_html__('QR reference / SCOR', 'sqrip-swiss-qr-invoice') . '</th>'
+            . '<th style="text-align:left;padding:8px 14px;border-bottom:2px solid #333;">' . esc_html__('Name', 'sqrip-swiss-qr-invoice') . '</th>'
+            . '<th style="text-align:left;padding:8px 14px;border-bottom:2px solid #333;">' . esc_html__('Action', 'sqrip-swiss-qr-invoice') . '</th>'
+            . '</tr>';
+
         $intro = __('The sqrip payment notification service found a probable payment that could not be assigned automatically. Please check it against the order, then confirm, reject, or open the order for details. The links are valid for 24 hours and work once.', 'sqrip-swiss-qr-invoice');
 
-        $body = '<p>' . esc_html($intro) . '</p>'
+        // The incoming payment shown once above the candidate orders it might belong to.
+        $paid_line = sprintf(
+            /* translators: 1: "Incoming payment" label, 2: amount with currency, 3: sender, 4: value date */
+            '<p style="font-family:sans-serif;font-size:14px;"><strong>%1$s:</strong> %2$s &nbsp;&middot;&nbsp; %3$s &nbsp;&middot;&nbsp; %4$s</p>',
+            esc_html__('Incoming payment', 'sqrip-swiss-qr-invoice'),
+            esc_html(trim($currency . ' ' . $amount)),
+            esc_html($sender),
+            esc_html($value)
+        );
+
+        $body = '<p style="font-family:sans-serif;font-size:14px;">' . esc_html($intro) . '</p>'
+            . $paid_line
             . '<table cellpadding="0" cellspacing="0" style="border-collapse:collapse;font-family:sans-serif;font-size:14px;">'
-            . $rows
+            . '<thead>' . $head . '</thead>'
+            . '<tbody>' . $rows . '</tbody>'
             . '</table>';
 
         $subject = __('sqrip: probable payment — please check', 'sqrip-swiss-qr-invoice');
