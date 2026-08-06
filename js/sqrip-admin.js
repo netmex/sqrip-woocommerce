@@ -127,9 +127,17 @@ jQuery(document).ready(function ($) {
     function displayStatusList (statusArr) {
 
         if (!ip_sqrip_enabled.is(':checked')) {
-            statusArr[0] = '<li><span></span> sqrip plugin is turned off</li>';
+            statusArr[0] = '<li><span></span> ' + sqrip.status_plugin_off + '</li>';
         } else {
-            statusArr[0] = '<li><span class="status-success"></span> sqrip plugin is turned on</li>';
+            statusArr[0] = '<li><span class="status-success"></span> ' + sqrip.status_plugin_on + '</li>';
+        }
+
+        // Payment reconciliation via the notification service (Auskunftsdienst) — listed
+        // only when it and its parent (payment comparison) are switched on.
+        if (ip_sqrip_enabled.is(':checked')
+            && ip_payment_comparison_enabled.is(':checked')
+            && $('#woocommerce_sqrip_avis_enabled').is(':checked')) {
+            statusArr[5] = '<li><span class="status-success"></span> ' + sqrip.status_avis_active + '</li>';
         }
 
         let statusListString = statusArr.join('');
@@ -182,12 +190,12 @@ jQuery(document).ready(function ($) {
                     // output_html = '<p class="sqrip-description">'+ errorResolveText + '<br/><ul><li>No Credits left. Please purchase Credits here <a href="https://www.sqrip.ch/#pricing" target="_blank">https://www.sqrip.ch/#pricing</a></li></ul></p>';
                     // ip_sqrip_turn_off_if_error.closest('td.forminp').append(output_html);
                     hasError = true;
-                    statusArr[1] = '<li><span></span> Not enough Credits available. Please purchase Credits here <a href="https://www.sqrip.ch/#pricing" target="_blank">https://www.sqrip.ch/#pricing</a></li>';
+                    statusArr[1] = '<li><span></span> ' + sqrip.status_credits_none + ' <a href="https://www.sqrip.ch/#pricing" target="_blank">https://www.sqrip.ch/#pricing</a></li>';
                 } else if (response.credits_left > 0) {
-                    statusArr[1] = '<li><span class="status-success"></span> Enough Credits ('+ response.credits_left +') available.</li>';
+                    statusArr[1] = '<li><span class="status-success"></span> ' + sqrip.status_credits_enough.replace('%s', response.credits_left) + '</li>';
                 } else {
                     // if !response.credits_left
-                    statusArr[1] = '<li><span></span> Unable to fetch Credits available.</li>';
+                    statusArr[1] = '<li><span></span> ' + sqrip.status_credits_unknown + '</li>';
                 }
                 
                 if (response.result == false) {
@@ -196,21 +204,21 @@ jQuery(document).ready(function ($) {
                     hasError = true;
                     statusArr[3] = '<li><span></span> '+displayMessage+'</li>';
                 } else {
-                    statusArr[3] = '<li><span class="status-success"></span> API key is correct and active.</li>';
+                    statusArr[3] = '<li><span class="status-success"></span> ' + sqrip.status_apikey_ok + '</li>';
                 }
 
                 if (hasError && response.response_code == "") {                    
-                    statusArr[4] = '<li><span></span> sqrip-server not reachable</li>';
+                    statusArr[4] = '<li><span></span> ' + sqrip.status_server_no + '</li>';
                 }else {
-                    statusArr[4] = '<li><span class="status-success"></span> Connected to sqrip-server</li>';                        
+                    statusArr[4] = '<li><span class="status-success"></span> ' + sqrip.status_server_ok + '</li>';
                 }
                 
 
                 // Set IBAN validity from Check for reference format
                 if (ip_qrref_format.hasClass('qr-iban') || ip_qrref_format.hasClass('simple-iban')) {
-                    statusArr[2] = '<li class="iban-status-item"><span class="status-success"></span> (QR)-IBAN confirmed.</li>';
+                    statusArr[2] = '<li class="iban-status-item"><span class="status-success"></span> ' + sqrip.status_iban_ok + '</li>';
                 } else {
-                    statusArr[2] = '<li class="iban-status-item"><span></span> (QR)-IBAN not confirmed.</li>';                    
+                    statusArr[2] = '<li class="iban-status-item"><span></span> ' + sqrip.status_iban_no + '</li>';
                 }
                 
 
@@ -232,7 +240,7 @@ jQuery(document).ready(function ($) {
 
             } else {
                 let statusArr = [];
-                statusArr[1] = '<li><span></span> An error occurred! Unable to send status details request.</li>';
+                statusArr[1] = '<li><span></span> ' + sqrip.status_error + '</li>';
                 displayStatusList(statusArr);                
             }
         },
@@ -248,9 +256,9 @@ jQuery(document).ready(function ($) {
         let item = $('.iban-status-item');
 
         if (status == 'verified') {
-            item.html('<span class="status-success"></span> (QR)-IBAN confirmed.');
+            item.html('<span class="status-success"></span> ' + sqrip.status_iban_ok);
         } else {
-            item.html('<span></span> (QR)-IBAN not confirmed.');
+            item.html('<span></span> ' + sqrip.status_iban_no);
         }
     }
 

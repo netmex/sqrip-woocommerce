@@ -7,6 +7,43 @@ msgstr ""
 "Language: fr_FR\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
+msgid "sqrip is turned on."
+msgstr "sqrip est activé."
+
+msgid "sqrip is turned off."
+msgstr "sqrip est désactivé."
+
+msgid "Not enough credits available. Please purchase credits here:"
+msgstr "Crédits insuffisants. Veuillez acheter des crédits ici :"
+
+msgid "Enough credits (%s) available."
+msgstr "Crédits suffisants (%s) disponibles."
+
+msgid "Unable to fetch the available credits."
+msgstr "Impossible de récupérer les crédits disponibles."
+
+msgid "(QR-)IBAN confirmed."
+msgstr "IBAN (QR) confirmé."
+
+msgid "(QR-)IBAN not confirmed."
+msgstr "IBAN (QR) non confirmé."
+
+msgid "API key is correct and active."
+msgstr "La clé API est correcte et active."
+
+msgid "Connected to the sqrip server."
+msgstr "Connecté au serveur sqrip."
+
+msgid "sqrip server not reachable."
+msgstr "Serveur sqrip injoignable."
+
+msgid "An error occurred. Could not request the status details."
+msgstr ""
+"Une erreur s'est produite. Impossible de demander les détails du statut."
+
+msgid "Payment reconciliation via bank notifications is active."
+msgstr "Le rapprochement par avis de paiement est actif."
+
 msgid "Received via the bank notification"
 msgstr "Reçu via l'avis bancaire"
 
