@@ -184,7 +184,10 @@ class Sqrip_Avis
     }
 
     /**
-     * The service authenticates with the shared token in a header.
+     * The service authenticates with the shared token. The push (src/notify.py) sends
+     * it in the JSON body ({"token","pending"}), not in a header — so we read the body
+     * parameter here. (The header form was never sent by the service; the nudge used to
+     * fail authorisation and only the manual "Check now" pull worked.)
      *
      * @param \WP_REST_Request $request
      * @return bool
@@ -195,7 +198,7 @@ class Sqrip_Avis
             return false;
         }
 
-        $sent = (string) $request->get_header('x_sqrip_token');
+        $sent = (string) $request->get_param('token');
 
         return $sent !== '' && hash_equals(self::token(), $sent);
     }
@@ -203,11 +206,20 @@ class Sqrip_Avis
     /**
      * Nudge received: reconcile now and book what is safe to book automatically.
      *
+     * The service tells us how many notifications are waiting via `pending`; if it is
+     * explicitly zero there is nothing to fetch and we skip the round-trip.
+     *
      * @param \WP_REST_Request $request
      * @return \WP_REST_Response
      */
     public static function rest_reconcile($request)
     {
+        $pending = $request->get_param('pending');
+
+        if ($pending !== null && (int) $pending <= 0) {
+            return new WP_REST_Response(array('applied' => 0, 'held' => 0, 'pending' => 0), 200);
+        }
+
         $report = self::run();
 
         if (!is_array($report)) {
