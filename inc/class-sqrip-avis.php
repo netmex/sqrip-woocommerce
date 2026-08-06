@@ -257,8 +257,11 @@ class Sqrip_Avis
             return __('Please set the mailbox name under "camt Reconciliation" and save first.', 'sqrip-swiss-qr-invoice');
         }
 
-        // Make sure the service knows this shop before we ask it anything.
-        self::register_with_service();
+        // Register (v2) also gates on the sqrip account. Surface "no credits"/"inactive"
+        // instead of asking the service for a claim it would reject anyway.
+        if (!self::register_with_service() && self::$last_error !== '') {
+            return self::$last_error;
+        }
 
         $reconciler = new Sqrip_Camt_Reconciler();
         $orders     = $reconciler->collect_open_orders();
@@ -270,13 +273,18 @@ class Sqrip_Avis
         $expectations = $reconciler->build_expectations($orders['orders']);
         $payload      = self::orders_payload($expectations);
 
-        $claim = self::post('/v1/claim', array('token' => self::token(), 'orders' => $payload));
+        $claim = self::post('/v2/claim', array('token' => self::token(), 'orders' => $payload));
 
         if (!is_array($claim)) {
             return self::unreachable_message();
         }
 
-        $matches = isset($claim['matches']) && is_array($claim['matches']) ? $claim['matches'] : array();
+        if (isset($claim['error'])) {
+            return self::gate_message((string) $claim['error']);
+        }
+
+        $matches  = isset($claim['matches']) && is_array($claim['matches']) ? $claim['matches'] : array();
+        $warnings = isset($claim['warnings']) && is_array($claim['warnings']) ? $claim['warnings'] : array();
 
         $report = $reconciler->match($expectations, $matches);
 
@@ -284,16 +292,27 @@ class Sqrip_Avis
         $report['orders_truncated'] = $orders['truncated'];
         $report['credits_total']    = count($matches);
         $report['unmatched_credits'] = isset($claim['dropped']) ? (int) $claim['dropped'] : 0;
-        $report['warnings']         = isset($claim['warnings']) && is_array($claim['warnings']) ? $claim['warnings'] : array();
-        $report['last_seen']        = isset($claim['last_seen']) && is_array($claim['last_seen']) ? $claim['last_seen'] : null;
+        $report['warnings']          = $warnings;
+        $report['last_seen']         = isset($claim['last_seen']) && is_array($claim['last_seen']) ? $claim['last_seen'] : null;
+        $report['pending_charges']   = isset($claim['pending_charges']) ? (int) $claim['pending_charges'] : 0;
 
-        // Stufe 3 (probable, name+amount): never booked automatically. Each one is
-        // e-mailed to the shop admin, who confirms or rejects it by hand.
-        $suggestions = isset($claim['suggestions']) && is_array($claim['suggestions']) ? $claim['suggestions'] : array();
-        $report['suggestions'] = count($suggestions);
+        // Stufe 3 (probable): v2 carries these in `warnings` (types no_reference and
+        // bulk_payment carry candidate_references) — never booked automatically. Each
+        // gets e-mailed to the shop admin, who confirms or rejects it by hand.
+        $probable = array();
 
-        if ($suggestions) {
-            self::notify_suggestions($suggestions, $expectations);
+        foreach ($warnings as $warning) {
+            if (isset($warning['candidate_references'])
+                && is_array($warning['candidate_references'])
+                && $warning['candidate_references']) {
+                $probable[] = $warning;
+            }
+        }
+
+        $report['suggestions'] = count($probable);
+
+        if ($probable) {
+            self::notify_suggestions($probable, $expectations);
         }
 
         return $report;
@@ -569,14 +588,13 @@ class Sqrip_Avis
         $intro = __('The sqrip payment notification service found a probable payment that could not be assigned automatically. Please check it against the order, then confirm, reject, or open the order for details. The links are valid for 24 hours and work once.', 'sqrip-swiss-qr-invoice');
 
         // The incoming payment shown once above the candidate orders it might belong to.
-        $paid_line = sprintf(
-            /* translators: 1: "Incoming payment" label, 2: amount with currency, 3: sender, 4: value date */
-            '<p style="font-family:sans-serif;font-size:14px;"><strong>%1$s:</strong> %2$s &nbsp;&middot;&nbsp; %3$s &nbsp;&middot;&nbsp; %4$s</p>',
-            esc_html__('Incoming payment', 'sqrip-swiss-qr-invoice'),
-            esc_html(trim($currency . ' ' . $amount)),
-            esc_html($sender),
-            esc_html($value)
-        );
+        // Sender / value date are only present on some (v1) sources — omit them if empty.
+        $parts = array_filter(array(trim($currency . ' ' . $amount), $sender, $value), 'strlen');
+
+        $paid_line = '<p style="font-family:sans-serif;font-size:14px;"><strong>'
+            . esc_html__('Incoming payment', 'sqrip-swiss-qr-invoice') . ':</strong> '
+            . esc_html(implode('  ·  ', $parts))
+            . '</p>';
 
         $body = '<p style="font-family:sans-serif;font-size:14px;">' . esc_html($intro) . '</p>'
             . $paid_line
@@ -877,7 +895,7 @@ class Sqrip_Avis
         }
 
         $step = isset($_POST['step']) ? sanitize_key(wp_unslash($_POST['step'])) : '';
-        $map  = array('start' => '/v1/onboarding/start', 'code' => '/v1/onboarding/code', 'complete' => '/v1/onboarding/complete');
+        $map  = array('start' => '/v2/onboarding/start', 'code' => '/v2/onboarding/code', 'complete' => '/v2/onboarding/complete');
 
         if (!isset($map[$step])) {
             wp_send_json_error(array('message' => __('Unknown step.', 'sqrip-swiss-qr-invoice')));
@@ -887,13 +905,19 @@ class Sqrip_Avis
             wp_send_json_error(array('message' => __('Please set the mailbox name and save the settings first.', 'sqrip-swiss-qr-invoice')));
         }
 
-        // Register on demand so the service always knows this shop's token/callback.
-        self::register_with_service();
+        // Register on demand; v2 also gates on the sqrip account (credits/active).
+        if (!self::register_with_service() && self::$last_error !== '') {
+            wp_send_json_error(array('message' => self::$last_error));
+        }
 
         $result = self::post($map[$step], array('token' => self::token()));
 
         if (!is_array($result)) {
             wp_send_json_error(array('message' => self::unreachable_message()));
+        }
+
+        if (isset($result['error'])) {
+            wp_send_json_error(array('message' => self::gate_message((string) $result['error'])));
         }
 
         wp_send_json_success($result);
@@ -911,17 +935,25 @@ class Sqrip_Avis
             return false;
         }
 
-        $response = wp_remote_post(self::service_url() . '/v1/register', array(
+        self::$last_error = '';
+
+        // v2 register also carries the shop's real sqrip API token: the service checks
+        // that account (active? credits?) and books each match to it, so every shop pays
+        // on its own account.
+        $response = wp_remote_post(self::service_url() . '/v2/register', array(
             'timeout' => 20,
             'headers' => array('Content-Type' => 'application/json', 'Accept' => 'application/json'),
             'body'    => wp_json_encode(array(
                 'token'        => self::token(),
                 'customer'     => self::customer(),
                 'callback_url' => rest_url('sqrip/v1/reconcile'),
+                'sqrip_token'  => (string) sqrip_get_plugin_option('token'),
             )),
         ));
 
         if (is_wp_error($response)) {
+            self::$last_error = $response->get_error_message();
+
             return false;
         }
 
@@ -934,7 +966,38 @@ class Sqrip_Avis
             return false;
         }
 
-        return $code >= 200 && $code < 300;
+        if ($code >= 200 && $code < 300) {
+            return true;
+        }
+
+        // Gate failure (402 no credits / 403 account inactive) — remember why, so the
+        // caller can show it instead of a generic "unreachable".
+        $data = json_decode(wp_remote_retrieve_body($response), true);
+        $err  = (is_array($data) && isset($data['error'])) ? (string) $data['error'] : '';
+        self::$last_error = self::gate_message($err);
+
+        return false;
+    }
+
+    /**
+     * Turn a v2 gate error code into a message the shop admin can act on.
+     *
+     * @param string $error
+     * @return string
+     */
+    private static function gate_message($error)
+    {
+        switch ($error) {
+            case 'keine_credits':
+                return __('No sqrip credits left — please top up your sqrip account to use the payment reconciliation.', 'sqrip-swiss-qr-invoice');
+            case 'sqrip_konto_inaktiv':
+                return __('Your sqrip account is not active. Please confirm it at sqrip.ch before using the payment reconciliation.', 'sqrip-swiss-qr-invoice');
+            case 'kein_v2_konto':
+            case 'unbekannter Token':
+                return __('Please save the sqrip settings again to register this shop for the service.', 'sqrip-swiss-qr-invoice');
+        }
+
+        return self::unreachable_message();
     }
 
     // --- service client ----------------------------------------------------
@@ -959,16 +1022,17 @@ class Sqrip_Avis
         }
 
         $code = (int) wp_remote_retrieve_response_code($response);
+        $data = json_decode(wp_remote_retrieve_body($response), true);
 
-        if ($code < 200 || $code >= 300) {
+        // The service answers gate failures (402/403/400) with a JSON {"error": ...} body.
+        // Return it so the caller can react; only a non-JSON body counts as unreachable.
+        if (!is_array($data)) {
             self::$last_error = 'HTTP ' . $code;
 
             return null;
         }
 
-        $data = json_decode(wp_remote_retrieve_body($response), true);
-
-        return is_array($data) ? $data : null;
+        return $data;
     }
 
     /**

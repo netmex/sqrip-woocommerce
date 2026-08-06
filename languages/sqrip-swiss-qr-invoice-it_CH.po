@@ -7,6 +7,26 @@ msgstr ""
 "Language: it_CH\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+msgid ""
+"No sqrip credits left — please top up your sqrip account to use the payment "
+"reconciliation."
+msgstr ""
+"Nessun credito sqrip rimasto — ricarica il tuo account sqrip per usare la "
+"riconciliazione dei pagamenti."
+
+msgid ""
+"Your sqrip account is not active. Please confirm it at sqrip.ch before using "
+"the payment reconciliation."
+msgstr ""
+"Il tuo account sqrip non è attivo. Confermalo su sqrip.ch prima di usare la "
+"riconciliazione dei pagamenti."
+
+msgid ""
+"Please save the sqrip settings again to register this shop for the service."
+msgstr ""
+"Salva di nuovo le impostazioni sqrip per registrare questo negozio al "
+"servizio."
+
 msgid "Order number"
 msgstr "Numero d'ordine"
 
