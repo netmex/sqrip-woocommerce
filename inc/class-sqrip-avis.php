@@ -44,6 +44,7 @@ class Sqrip_Avis
         if (is_admin()) {
             add_action('wp_ajax_sqrip_avis_reconcile', array(__CLASS__, 'ajax_reconcile'));
             add_action('wp_ajax_sqrip_avis_onboard', array(__CLASS__, 'ajax_onboard'));
+            add_action('wp_ajax_sqrip_avis_status', array(__CLASS__, 'ajax_status'));
             add_action('woocommerce_update_options_payment_gateways_sqrip', array(__CLASS__, 'maybe_register'));
             add_action('admin_notices', array(__CLASS__, 'maybe_notice'));
 
@@ -712,6 +713,41 @@ class Sqrip_Avis
             esc_html__('sqrip payment notification', 'sqrip-swiss-qr-invoice'),
             array('response' => 200, 'back_link' => true)
         );
+    }
+
+    // --- live status (settings page) --------------------------------------
+
+    /**
+     * Report whether the reconciliation really operates for this shop: the service must
+     * be reachable AND the shop registered (which also runs the v2 account gate). Only
+     * then does the service actually poll this shop's mailbox every minute.
+     *
+     * @return void
+     */
+    public static function ajax_status()
+    {
+        check_ajax_referer(self::NONCE, 'security');
+
+        if (!current_user_can('manage_woocommerce')) {
+            wp_send_json_error(array('message' => __('You are not allowed to do this.', 'sqrip-swiss-qr-invoice')), 403);
+        }
+
+        if (!self::is_enabled()) {
+            wp_send_json_success(array('state' => 'off'));
+        }
+
+        $health = wp_remote_get(self::service_url() . '/', array('timeout' => 8));
+
+        if (is_wp_error($health) || (int) wp_remote_retrieve_response_code($health) !== 200) {
+            wp_send_json_success(array('state' => 'unreachable'));
+        }
+
+        // register_with_service() is idempotent and also runs the v2 account gate.
+        if (self::register_with_service()) {
+            wp_send_json_success(array('state' => 'running'));
+        }
+
+        wp_send_json_success(array('state' => 'problem', 'message' => self::$last_error));
     }
 
     // --- admin trigger ("check now") --------------------------------------

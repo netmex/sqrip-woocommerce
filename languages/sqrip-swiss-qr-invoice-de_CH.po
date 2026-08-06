@@ -7,6 +7,16 @@ msgstr ""
 "Language: de_CH\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+msgid "Payment reconciliation via bank notifications checks every minute."
+msgstr "Der Abgleich über Zahlungsavisierungen prüft minütlich."
+
+msgid ""
+"Payment reconciliation via bank notifications: the service is not reachable."
+msgstr "Abgleich über Zahlungsavisierungen: Der Dienst ist nicht erreichbar."
+
+msgid "Payment reconciliation via bank notifications:"
+msgstr "Abgleich über Zahlungsavisierungen:"
+
 msgid "sqrip is turned on."
 msgstr "sqrip ist eingeschaltet."
 

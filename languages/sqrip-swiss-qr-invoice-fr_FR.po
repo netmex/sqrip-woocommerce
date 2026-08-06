@@ -7,6 +7,16 @@ msgstr ""
 "Language: fr_FR\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
+msgid "Payment reconciliation via bank notifications checks every minute."
+msgstr "Le rapprochement par avis de paiement vérifie chaque minute."
+
+msgid ""
+"Payment reconciliation via bank notifications: the service is not reachable."
+msgstr "Rapprochement par avis de paiement : le service est injoignable."
+
+msgid "Payment reconciliation via bank notifications:"
+msgstr "Rapprochement par avis de paiement :"
+
 msgid "sqrip is turned on."
 msgstr "sqrip est activé."
 

@@ -132,21 +132,51 @@ jQuery(document).ready(function ($) {
             statusArr[0] = '<li><span class="status-success"></span> ' + sqrip.status_plugin_on + '</li>';
         }
 
-        // Payment reconciliation via the notification service (Auskunftsdienst) — listed
-        // only when it and its parent (payment comparison) are switched on.
-        if (ip_sqrip_enabled.is(':checked')
-            && ip_payment_comparison_enabled.is(':checked')
-            && $('#woocommerce_sqrip_avis_enabled').is(':checked')) {
-            statusArr[5] = '<li><span class="status-success"></span> ' + sqrip.status_avis_active + '</li>';
-        }
-
         let statusListString = statusArr.join('');
         
         statusListString = '<ul class="sqrip-status-list">'+statusListString+'</ul>';
         // ip_sqrip_turn_off_if_error.closest('td.forminp').append(statusList);
         $(".loader-box").remove();
         ip_sqrip_current_status.after(statusListString);
-        ip_sqrip_current_status.hide()
+        ip_sqrip_current_status.hide();
+
+        // The notification-service line reflects the real operating state, so it is
+        // fetched live and appended once the list exists.
+        checkAvisStatus();
+    }
+
+    // Ask the plugin whether the notification-service reconciliation is really running
+    // for this shop (service reachable + registered + account gate). Appends one line.
+    function checkAvisStatus() {
+        if (!(ip_sqrip_enabled.is(':checked')
+            && ip_payment_comparison_enabled.is(':checked')
+            && $('#woocommerce_sqrip_avis_enabled').is(':checked'))) {
+            return;
+        }
+
+        $.post(sqrip.ajax_url, { action: 'sqrip_avis_status', security: sqrip.avis_status_nonce }, function (res) {
+            if (!res || !res.success || !res.data) {
+                return;
+            }
+
+            var ul = $('.sqrip-status-list');
+            if (!ul.length) {
+                return;
+            }
+
+            var li = '';
+            if (res.data.state === 'running') {
+                li = '<li><span class="status-success"></span> ' + sqrip.status_avis_running + '</li>';
+            } else if (res.data.state === 'unreachable') {
+                li = '<li><span></span> ' + sqrip.status_avis_unreachable + '</li>';
+            } else if (res.data.state === 'problem') {
+                li = '<li><span></span> ' + sqrip.status_avis_prefix + ' ' + (res.data.message || '') + '</li>';
+            }
+
+            if (li) {
+                ul.append(li);
+            }
+        });
     }
 
     $.ajax({
