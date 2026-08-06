@@ -1514,6 +1514,13 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         $additional_services = [
             'refund' => 'return_enabled',
             'payment_comparison' => 'payment_comparison_enabled',
+            // Which form(s) of the payment comparison are on. They are not exclusive:
+            //   payment_comparison on, both of these off = manual confirmation only;
+            //   payment_comparison_camt = manual bank-file (camt) upload;
+            //   payment_comparison_avis = the e-mail notification service (Auskunftsdienst).
+            // Both sub-forms are only effective while payment_comparison itself is on.
+            'payment_comparison_camt' => 'camt_reconciliation_enabled',
+            'payment_comparison_avis' => 'avis_enabled',
             'multiple_qr_slips' => 'multiple_qr_slips_enabled',
         ];
         $services_arr = ["services" => []];
