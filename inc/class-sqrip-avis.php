@@ -947,7 +947,11 @@ class Sqrip_Avis
                 'token'        => self::token(),
                 'customer'     => self::customer(),
                 'callback_url' => rest_url('sqrip/v1/reconcile'),
-                'sqrip_token'  => (string) sqrip_get_plugin_option('token'),
+                // Clean the API key before forwarding: the field is a textarea and may
+                // carry a trailing newline. WordPress strips it from its own request
+                // headers, but the service uses Python urllib, which rejects a newline in
+                // a header value — turning a valid account into a bogus 403 "inactive".
+                'sqrip_token'  => sanitize_text_field((string) sqrip_get_plugin_option('token')),
             )),
         ));
 
