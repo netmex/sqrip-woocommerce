@@ -46,6 +46,11 @@ class Sqrip_Avis
             add_action('wp_ajax_sqrip_avis_onboard', array(__CLASS__, 'ajax_onboard'));
             add_action('woocommerce_update_options_payment_gateways_sqrip', array(__CLASS__, 'maybe_register'));
             add_action('admin_notices', array(__CLASS__, 'maybe_notice'));
+
+            // The signed confirm/reject links from the suggestion e-mail land on
+            // admin-post.php, which the shop admin may open without being logged in.
+            add_action('admin_post_sqrip_avis_suggestion', array(__CLASS__, 'handle_suggestion_action'));
+            add_action('admin_post_nopriv_sqrip_avis_suggestion', array(__CLASS__, 'handle_suggestion_action'));
         }
     }
 
@@ -282,6 +287,15 @@ class Sqrip_Avis
         $report['warnings']         = isset($claim['warnings']) && is_array($claim['warnings']) ? $claim['warnings'] : array();
         $report['last_seen']        = isset($claim['last_seen']) && is_array($claim['last_seen']) ? $claim['last_seen'] : null;
 
+        // Stufe 3 (probable, name+amount): never booked automatically. Each one is
+        // e-mailed to the shop admin, who confirms or rejects it by hand.
+        $suggestions = isset($claim['suggestions']) && is_array($claim['suggestions']) ? $claim['suggestions'] : array();
+        $report['suggestions'] = count($suggestions);
+
+        if ($suggestions) {
+            self::notify_suggestions($suggestions, $expectations);
+        }
+
         return $report;
     }
 
@@ -416,6 +430,251 @@ class Sqrip_Avis
             $currency,
             $amount,
             $slip['reference']
+        );
+    }
+
+    // --- Stufe 3: probable payments, confirmed by the admin via signed links ----
+
+    /**
+     * E-mail each probable (Stufe 3) payment to the shop admin. Never books anything
+     * on its own — the admin decides with the confirm/reject links.
+     *
+     * @param array $suggestions From the service: {amount,currency,sender,value_date,candidate_references}.
+     * @param array $expectations The open orders, to resolve a candidate reference to an order.
+     * @return void
+     */
+    private static function notify_suggestions(array $suggestions, array $expectations)
+    {
+        $by_ref = array();
+
+        foreach ($expectations as $order) {
+            foreach ($order['slips'] as $slip) {
+                $key = preg_replace('/[^A-Z0-9]/', '', strtoupper((string) $slip['reference']));
+
+                if ($key !== '') {
+                    $by_ref[$key] = array(
+                        'order_id'     => $order['order_id'],
+                        'order_number' => $order['order_number'],
+                        'currency'     => $order['currency'],
+                        'expected'     => $slip['expected'],
+                    );
+                }
+            }
+        }
+
+        foreach ($suggestions as $sug) {
+            $refs = isset($sug['candidate_references']) && is_array($sug['candidate_references'])
+                ? $sug['candidate_references'] : array();
+
+            $candidates = array();
+
+            foreach ($refs as $ref) {
+                $key = preg_replace('/[^A-Z0-9]/', '', strtoupper((string) $ref));
+
+                if (isset($by_ref[$key])) {
+                    $candidates[$key] = $by_ref[$key];
+                }
+            }
+
+            if (!$candidates) {
+                continue; // no open order to point at — nothing to confirm
+            }
+
+            // One e-mail per probable payment, even if the service repeats it.
+            $dedup = md5(wp_json_encode(array(
+                isset($sug['amount']) ? $sug['amount'] : '',
+                isset($sug['currency']) ? $sug['currency'] : '',
+                isset($sug['sender']) ? $sug['sender'] : '',
+                isset($sug['value_date']) ? $sug['value_date'] : '',
+                array_keys($candidates),
+            )));
+
+            if (get_transient('sqrip_avis_seen_' . $dedup)) {
+                continue;
+            }
+
+            set_transient('sqrip_avis_seen_' . $dedup, 1, 2 * DAY_IN_SECONDS);
+
+            self::send_suggestion_email($sug, $candidates);
+        }
+    }
+
+    /**
+     * @param array $sug        One suggestion from the service.
+     * @param array $candidates normalized reference => {order_id, order_number, currency, expected}.
+     * @return void
+     */
+    private static function send_suggestion_email(array $sug, array $candidates)
+    {
+        $amount   = isset($sug['amount']) ? number_format((float) $sug['amount'], 2, '.', '') : '';
+        $currency = isset($sug['currency']) ? (string) $sug['currency'] : '';
+        $sender   = isset($sug['sender']) ? (string) $sug['sender'] : '';
+        $value    = isset($sug['value_date']) ? (string) $sug['value_date'] : '';
+
+        // One signed, single-use token per candidate; acting on any one resolves the
+        // whole payment, so each token also carries its sibling ids to clear together.
+        $tokens = array();
+
+        foreach ($candidates as $key => $cand) {
+            $tokens[$key] = wp_generate_password(20, false);
+        }
+
+        $all_ids = array_values($tokens);
+        $rows    = '';
+
+        foreach ($candidates as $key => $cand) {
+            $id       = $tokens[$key];
+            $siblings = array_values(array_diff($all_ids, array($id)));
+
+            set_transient('sqrip_avis_sug_' . $id, array(
+                'order_id'     => $cand['order_id'],
+                'order_number' => $cand['order_number'],
+                'amount'       => $amount,
+                'currency'     => $currency,
+                'reference'    => $key,
+                'siblings'     => $siblings,
+            ), DAY_IN_SECONDS);
+
+            $order    = wc_get_order($cand['order_id']);
+            $open_url = $order ? $order->get_edit_order_url() : '';
+            $expected = ($cand['expected'] === null || $cand['expected'] === '')
+                ? '—'
+                : $cand['currency'] . ' ' . number_format((float) $cand['expected'], 2, '.', '');
+
+            $rows .= '<tr>'
+                . '<td style="vertical-align:top;padding:10px 18px 10px 0;">'
+                . '<strong>' . esc_html__('Incoming payment', 'sqrip-swiss-qr-invoice') . '</strong><br>'
+                . esc_html(trim($currency . ' ' . $amount)) . '<br>'
+                . esc_html($sender) . '<br>'
+                . esc_html($value)
+                . '</td>'
+                . '<td style="vertical-align:top;padding:10px 18px;border-left:1px solid #ddd;">'
+                . '<strong>' . esc_html(sprintf(__('Order %s', 'sqrip-swiss-qr-invoice'), $cand['order_number'])) . '</strong><br>'
+                . esc_html(sprintf(__('Expected: %s', 'sqrip-swiss-qr-invoice'), $expected))
+                . '</td>'
+                . '<td style="vertical-align:top;padding:10px 0;">'
+                . '<a href="' . esc_url(self::action_link($id, 'confirm')) . '">' . esc_html__('Confirm', 'sqrip-swiss-qr-invoice') . '</a> &nbsp;|&nbsp; '
+                . '<a href="' . esc_url(self::action_link($id, 'reject')) . '">' . esc_html__('Reject', 'sqrip-swiss-qr-invoice') . '</a>'
+                . ($open_url ? ' &nbsp;|&nbsp; <a href="' . esc_url($open_url) . '">' . esc_html__('Open order', 'sqrip-swiss-qr-invoice') . '</a>' : '')
+                . '</td>'
+                . '</tr>';
+        }
+
+        $intro = __('The sqrip payment notification service found a probable payment that could not be assigned automatically. Please check it against the order, then confirm, reject, or open the order for details. The links are valid for 24 hours and work once.', 'sqrip-swiss-qr-invoice');
+
+        $body = '<p>' . esc_html($intro) . '</p>'
+            . '<table cellpadding="0" cellspacing="0" style="border-collapse:collapse;font-family:sans-serif;font-size:14px;">'
+            . $rows
+            . '</table>';
+
+        $subject = __('sqrip: probable payment — please check', 'sqrip-swiss-qr-invoice');
+        $to      = apply_filters('sqrip_avis_suggestion_recipient', get_option('admin_email'));
+
+        wp_mail($to, $subject, $body, array('Content-Type: text/html; charset=UTF-8'));
+    }
+
+    /**
+     * A signed, single-use link to admin-post.php for a confirm/reject action.
+     *
+     * @param string $id
+     * @param string $do 'confirm' or 'reject'.
+     * @return string
+     */
+    private static function action_link($id, $do)
+    {
+        $sig = hash_hmac('sha256', $id . '|' . $do, self::token());
+
+        return add_query_arg(array(
+            'action' => 'sqrip_avis_suggestion',
+            'id'     => rawurlencode($id),
+            'do'     => $do,
+            'sig'    => $sig,
+        ), admin_url('admin-post.php'));
+    }
+
+    /**
+     * The confirm/reject link was clicked. Verify the signature, act exactly once, and
+     * show the admin a short result page. Reachable without a login (nopriv), so the
+     * signature + single-use transient are the only guard.
+     *
+     * @return void
+     */
+    public static function handle_suggestion_action()
+    {
+        $id  = isset($_GET['id']) ? sanitize_text_field(wp_unslash($_GET['id'])) : '';
+        $do  = isset($_GET['do']) ? sanitize_key(wp_unslash($_GET['do'])) : '';
+        $sig = isset($_GET['sig']) ? sanitize_text_field(wp_unslash($_GET['sig'])) : '';
+
+        if ($id === '' || ($do !== 'confirm' && $do !== 'reject')) {
+            self::suggestion_page(__('This link is not valid.', 'sqrip-swiss-qr-invoice'));
+        }
+
+        $expected = hash_hmac('sha256', $id . '|' . $do, self::token());
+
+        if (!hash_equals($expected, $sig)) {
+            self::suggestion_page(__('This link is not valid.', 'sqrip-swiss-qr-invoice'));
+        }
+
+        $data = get_transient('sqrip_avis_sug_' . $id);
+
+        if (!is_array($data)) {
+            self::suggestion_page(__('This link has expired or was already used.', 'sqrip-swiss-qr-invoice'));
+        }
+
+        // Single use, and resolve the whole payment: clear this token and its siblings.
+        delete_transient('sqrip_avis_sug_' . $id);
+
+        if (!empty($data['siblings']) && is_array($data['siblings'])) {
+            foreach ($data['siblings'] as $sibling) {
+                delete_transient('sqrip_avis_sug_' . $sibling);
+            }
+        }
+
+        if ($do === 'reject') {
+            self::suggestion_page(__('The suggested payment was rejected. Nothing was changed.', 'sqrip-swiss-qr-invoice'));
+        }
+
+        $order = wc_get_order($data['order_id']);
+
+        if (!$order || $order->get_payment_method() !== 'sqrip') {
+            self::suggestion_page(__('The order could not be found, so nothing was changed.', 'sqrip-swiss-qr-invoice'));
+        }
+
+        $order->add_order_note(sprintf(
+            /* translators: 1: currency, 2: amount, 3: reference */
+            __('Payment confirmed by hand from an e-mail suggestion: %1$s %2$s, reference %3$s (probable match from the sqrip payment notification service).', 'sqrip-swiss-qr-invoice'),
+            $data['currency'],
+            $data['amount'],
+            $data['reference']
+        ));
+
+        $status_completed = sqrip_get_plugin_option('status_completed');
+
+        if ($status_completed) {
+            $order->update_status($status_completed, '');
+        } else {
+            $order->save();
+        }
+
+        self::suggestion_page(sprintf(
+            /* translators: %s: order number */
+            __('Order %s was marked as paid.', 'sqrip-swiss-qr-invoice'),
+            $data['order_number']
+        ));
+    }
+
+    /**
+     * Short human-facing result page for a clicked link. Ends the request.
+     *
+     * @param string $message
+     * @return void
+     */
+    private static function suggestion_page($message)
+    {
+        wp_die(
+            esc_html($message),
+            esc_html__('sqrip payment notification', 'sqrip-swiss-qr-invoice'),
+            array('response' => 200, 'back_link' => true)
         );
     }
 

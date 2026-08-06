@@ -7,6 +7,64 @@ msgstr ""
 "Language: fr_FR\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
+msgid "Incoming payment"
+msgstr "Paiement entrant"
+
+msgid "Order %s"
+msgstr "Commande %s"
+
+msgid "Expected: %s"
+msgstr "Attendu : %s"
+
+msgid "Confirm"
+msgstr "Confirmer"
+
+msgid "Reject"
+msgstr "Refuser"
+
+msgid "Open order"
+msgstr "Ouvrir la commande"
+
+msgid ""
+"The sqrip payment notification service found a probable payment that could "
+"not be assigned automatically. Please check it against the order, then "
+"confirm, reject, or open the order for details. The links are valid for 24 "
+"hours and work once."
+msgstr ""
+"Le rapprochement par avis de paiement a trouvé un paiement probable qui n'a "
+"pas pu être attribué automatiquement. Veuillez le vérifier par rapport à la "
+"commande, puis le confirmer, le refuser ou ouvrir la commande pour les "
+"détails. Les liens sont valables 24 heures et fonctionnent une seule fois."
+
+msgid "sqrip: probable payment — please check"
+msgstr "sqrip : paiement probable — à vérifier"
+
+msgid "This link is not valid."
+msgstr "Ce lien n'est pas valide."
+
+msgid "This link has expired or was already used."
+msgstr "Ce lien a expiré ou a déjà été utilisé."
+
+msgid "The suggested payment was rejected. Nothing was changed."
+msgstr "Le paiement proposé a été refusé. Rien n'a été modifié."
+
+msgid "The order could not be found, so nothing was changed."
+msgstr "La commande est introuvable, rien n'a donc été modifié."
+
+msgid ""
+"Payment confirmed by hand from an e-mail suggestion: %1$s %2$s, reference "
+"%3$s (probable match from the sqrip payment notification service)."
+msgstr ""
+"Paiement confirmé à la main depuis une suggestion par e-mail : %1$s %2$s, "
+"référence %3$s (correspondance probable du rapprochement par avis de "
+"paiement)."
+
+msgid "Order %s was marked as paid."
+msgstr "La commande %s a été marquée comme payée."
+
+msgid "sqrip payment notification"
+msgstr "Avis de paiement sqrip"
+
 msgid "Restrict QR-invoice by country"
 msgstr "Limiter la QR-facture par pays"
 

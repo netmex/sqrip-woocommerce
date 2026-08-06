@@ -7,6 +7,64 @@ msgstr ""
 "Language: de_CH\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+msgid "Incoming payment"
+msgstr "Zahlungseingang"
+
+msgid "Order %s"
+msgstr "Bestellung %s"
+
+msgid "Expected: %s"
+msgstr "Erwartet: %s"
+
+msgid "Confirm"
+msgstr "Bestätigen"
+
+msgid "Reject"
+msgstr "Ablehnen"
+
+msgid "Open order"
+msgstr "Bestellung öffnen"
+
+msgid ""
+"The sqrip payment notification service found a probable payment that could "
+"not be assigned automatically. Please check it against the order, then "
+"confirm, reject, or open the order for details. The links are valid for 24 "
+"hours and work once."
+msgstr ""
+"Der Abgleich über Zahlungsavisierungen hat eine wahrscheinliche Zahlung "
+"gefunden, die sich nicht automatisch zuordnen liess. Bitte prüfen Sie sie "
+"gegen die Bestellung und bestätigen sie, lehnen sie ab oder öffnen die "
+"Bestellung für Details. Die Links sind 24 Stunden gültig und funktionieren "
+"einmalig."
+
+msgid "sqrip: probable payment — please check"
+msgstr "sqrip: wahrscheinliche Zahlung — bitte prüfen"
+
+msgid "This link is not valid."
+msgstr "Dieser Link ist ungültig."
+
+msgid "This link has expired or was already used."
+msgstr "Dieser Link ist abgelaufen oder wurde bereits verwendet."
+
+msgid "The suggested payment was rejected. Nothing was changed."
+msgstr "Die vorgeschlagene Zahlung wurde abgelehnt. Es wurde nichts geändert."
+
+msgid "The order could not be found, so nothing was changed."
+msgstr "Die Bestellung wurde nicht gefunden, daher wurde nichts geändert."
+
+msgid ""
+"Payment confirmed by hand from an e-mail suggestion: %1$s %2$s, reference "
+"%3$s (probable match from the sqrip payment notification service)."
+msgstr ""
+"Zahlung von Hand aus einem E-Mail-Vorschlag bestätigt: %1$s %2$s, Referenz "
+"%3$s (wahrscheinlicher Treffer aus dem Abgleich über Zahlungsavisierungen)."
+
+msgid "Order %s was marked as paid."
+msgstr "Bestellung %s wurde als bezahlt markiert."
+
+msgid "sqrip payment notification"
+msgstr "sqrip-Zahlungsavisierung"
+
 msgid "Restrict QR-invoice by country"
 msgstr "QR-Rechnung nach Land einschränken"
 
