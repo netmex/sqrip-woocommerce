@@ -587,17 +587,17 @@ class Sqrip_Avis
 
         $intro = __('The sqrip payment notification service found a probable payment that could not be assigned automatically. Please check it against the order, then confirm, reject, or open the order for details. The links are valid for 24 hours and work once.', 'sqrip-swiss-qr-invoice');
 
-        // The incoming payment shown once above the candidate orders it might belong to.
-        // Sender / value date are only present on some (v1) sources — omit them if empty.
+        // Two clearly labelled sources: what the bank reported (via the notification
+        // service) vs. what your shop holds. Sender / value date only exist on some
+        // sources — omitted if empty.
         $parts = array_filter(array(trim($currency . ' ' . $amount), $sender, $value), 'strlen');
 
-        $paid_line = '<p style="font-family:sans-serif;font-size:14px;"><strong>'
-            . esc_html__('Incoming payment', 'sqrip-swiss-qr-invoice') . ':</strong> '
-            . esc_html(implode('  ·  ', $parts))
-            . '</p>';
+        $lbl = 'font-family:sans-serif;font-size:13px;color:#555;text-transform:uppercase;letter-spacing:.04em;margin:0 0 3px;';
 
         $body = '<p style="font-family:sans-serif;font-size:14px;">' . esc_html($intro) . '</p>'
-            . $paid_line
+            . '<p style="' . $lbl . '">' . esc_html__('Received via the bank notification', 'sqrip-swiss-qr-invoice') . '</p>'
+            . '<p style="font-family:sans-serif;font-size:15px;margin:0 0 18px;"><strong>' . esc_html(implode('  ·  ', $parts)) . '</strong></p>'
+            . '<p style="' . $lbl . '">' . esc_html__('From your shop', 'sqrip-swiss-qr-invoice') . '</p>'
             . '<table cellpadding="0" cellspacing="0" style="border-collapse:collapse;font-family:sans-serif;font-size:14px;">'
             . '<thead>' . $head . '</thead>'
             . '<tbody>' . $rows . '</tbody>'
@@ -811,16 +811,29 @@ class Sqrip_Avis
             <table class="widefat striped">
                 <thead>
                     <tr>
-                        <th><?php esc_html_e('Order', 'sqrip-swiss-qr-invoice'); ?></th>
+                        <th><?php esc_html_e('Order number', 'sqrip-swiss-qr-invoice'); ?></th>
                         <th><?php esc_html_e('Amount', 'sqrip-swiss-qr-invoice'); ?></th>
+                        <th><?php esc_html_e('QR reference / SCOR', 'sqrip-swiss-qr-invoice'); ?></th>
+                        <th><?php esc_html_e('Name', 'sqrip-swiss-qr-invoice'); ?></th>
                         <th><?php esc_html_e('Status', 'sqrip-swiss-qr-invoice'); ?></th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($orders as $entry) : ?>
+                    <?php foreach ($orders as $entry) :
+                        $refs = array();
+                        foreach ($entry['slips'] as $slip) {
+                            if (!empty($slip['reference'])) {
+                                $refs[] = $slip['reference'];
+                            }
+                        }
+                        $order = wc_get_order($entry['order_id']);
+                        $name  = $order ? $order->get_formatted_billing_full_name() : '';
+                        ?>
                         <tr>
                             <td><?php echo self::order_link($entry['order_id'], $entry['order_number']); ?></td>
                             <td><?php echo esc_html($entry['currency'] . ' ' . number_format((float) $entry['total'], 2, '.', '')); ?></td>
+                            <td><code><?php echo esc_html(implode(', ', $refs)); ?></code></td>
+                            <td><?php echo esc_html($name); ?></td>
                             <td><?php echo esc_html(self::status_label($entry, isset($applied[$entry['order_id']]))); ?></td>
                         </tr>
                     <?php endforeach; ?>

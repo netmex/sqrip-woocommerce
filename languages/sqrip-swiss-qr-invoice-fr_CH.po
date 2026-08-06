@@ -7,6 +7,12 @@ msgstr ""
 "Language: fr_CH\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
+msgid "Received via the bank notification"
+msgstr "Reçu via l'avis bancaire"
+
+msgid "From your shop"
+msgstr "De votre boutique"
+
 msgid ""
 "No sqrip credits left — please top up your sqrip account to use the payment "
 "reconciliation."
