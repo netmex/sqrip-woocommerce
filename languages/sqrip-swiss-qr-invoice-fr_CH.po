@@ -1664,3 +1664,141 @@ msgid ""
 msgstr ""
 "La facture QR n'est pas disponible pour votre adresse de facturation. "
 "Veuillez choisir un autre moyen de paiement."
+
+msgid "Set up"
+msgstr "Mise en place"
+
+msgid "Configure"
+msgstr "Réglage"
+
+msgid "Reconcile"
+msgstr "Rapprochement"
+
+msgid "Overpayment"
+msgstr "Paiement excédentaire"
+
+msgid "Forward your shop account's credit notifications to our notification service. The service reads them, compares the payment details, and tells the plugin which order was paid. The plugin updates the order status according to your \"Status of completed orders\" setting."
+msgstr "Transférez les avis de crédit de votre compte de boutique vers notre service d'information. Le service en lit le contenu, compare les informations de paiement et indique au plugin quelle commande a été payée. Le plugin met à jour le statut de la commande selon votre réglage « Statut des commandes terminées »."
+
+msgid "In your online banking, create a new notification for credits to your shop account. Allow as much information as possible. Enter this address in your e-banking as the destination for credit notifications:"
+msgstr "Créez dans votre e-banking un nouvel avis pour les crédits sur votre compte de boutique. Autorisez le plus d'informations possible. Saisissez cette adresse dans votre e-banking comme destination des avis de crédit :"
+
+msgid "To verify, forward an earlier notification e-mail or an e-mail with a bank document (PDF) to %s, then click \"Reconcile now\" below. You will get the current list of unpaid orders and the information read from the e-mail. If both are shown correctly, the service is ready."
+msgstr "Pour vérifier, transférez un ancien e-mail d'avis ou un e-mail contenant un document bancaire (PDF) à %s, puis cliquez ci-dessous sur « Rapprocher maintenant ». Vous obtiendrez la liste actuelle des commandes impayées ainsi que les informations lues dans l'e-mail. Si les deux s'affichent correctement, le service est prêt."
+
+msgid "your address above"
+msgstr "votre adresse ci-dessus"
+
+msgid "Reconcile now"
+msgstr "Rapprocher maintenant"
+
+msgid "Want to release larger amounts yourself, for safety? Set the limit above which sqrip e-mails you the reconciled data for release. At 0, every payment needs your release. To accept all payments automatically, set the value very high, e.g. above 1,000,000."
+msgstr "Souhaitez-vous approuver vous-même les montants plus élevés, par sécurité ? Définissez ici la limite au-delà de laquelle sqrip vous envoie par e-mail les données rapprochées pour approbation. À 0, chaque paiement requiert votre approbation. Pour accepter tous les paiements automatiquement, réglez la valeur très haut, p. ex. au-dessus de 1'000'000."
+
+msgid "Hold the order and e-mail me"
+msgstr "Retenir la commande et m'envoyer un e-mail"
+
+msgid "Mark as paid and e-mail me"
+msgstr "Marquer comme payée et m'envoyer un e-mail"
+
+msgid "What to do when a customer pays more than the order total."
+msgstr "Que faire lorsqu'un client paie plus que le total de la commande."
+
+msgid "Reconciliation runs regularly every minute, without display. Trigger a reconciliation by hand to see the currently available data here."
+msgstr "Le rapprochement s'exécute régulièrement chaque minute, sans affichage. Déclenchez un rapprochement manuel pour voir ici les données actuellement disponibles."
+
+msgid "Recently recognised payments"
+msgstr "Paiements récemment reconnus"
+
+msgid "Orders still waiting for payment"
+msgstr "Commandes encore en attente de paiement"
+
+msgid "Date / time"
+msgstr "Date / heure"
+
+msgid "Score"
+msgstr "Score"
+
+msgid "Findings"
+msgstr "Constatations"
+
+msgid "Consequence"
+msgstr "Conséquence"
+
+msgid "%d/10"
+msgstr "%d/10"
+
+msgid "Booked as paid."
+msgstr "Comptabilisé comme payé."
+
+msgid "Booked as paid (overpaid)."
+msgstr "Comptabilisé comme payé (excédentaire)."
+
+msgid "Held — overpaid, e-mailed for your release."
+msgstr "Retenu – excédentaire, envoyé par e-mail pour votre approbation."
+
+msgid "Held — above your limit, e-mailed for your release."
+msgstr "Retenu – au-dessus de votre limite, envoyé par e-mail pour votre approbation."
+
+msgid "Held — batch total mismatch, please check."
+msgstr "Retenu – total du lot incohérent, veuillez vérifier."
+
+msgid "Held — underpaid."
+msgstr "Retenu – sous-payé."
+
+msgid "Flagged — please check."
+msgstr "Signalé – veuillez vérifier."
+
+msgid "Flagged — order needs a reference."
+msgstr "Signalé – la commande a besoin d'une référence."
+
+msgid "E-mailed for your assignment."
+msgstr "Envoyé par e-mail pour votre attribution."
+
+msgid "Flagged."
+msgstr "Signalé."
+
+msgid "Payment received but held: above your release limit. Waiting for your release."
+msgstr "Paiement reçu mais retenu : au-dessus de votre limite d'approbation. En attente de votre approbation."
+
+msgid "Payment received but held: the amount is higher than the order. Waiting for your release."
+msgstr "Paiement reçu mais retenu : le montant est supérieur à la commande. En attente de votre approbation."
+
+msgid "Payment received but held: a batch total did not add up. Please check."
+msgstr "Paiement reçu mais retenu : un total de lot ne correspondait pas. Veuillez vérifier."
+
+msgid "Reference %s. sqrip payment notification service."
+msgstr "Référence %s. Service d'information sqrip."
+
+msgid "Customer paid too little: received %1$s, expected %2$s (reference %3$s). The order is held."
+msgstr "Le client a trop peu payé : reçu %1$s, attendu %2$s (référence %3$s). La commande est retenue."
+
+msgid "Customer paid more than the order: received %1$s, expected %2$s (reference %3$s)."
+msgstr "Le client a payé plus que la commande : reçu %1$s, attendu %2$s (référence %3$s)."
+
+msgid "A payment matched order %s by its number, but the order has no QR reference — please add one so it can be assigned."
+msgstr "Un paiement correspond à la commande %s par son numéro, mais la commande n'a pas de référence QR — veuillez en ajouter une pour permettre l'attribution."
+
+msgid "A batch payment was received, but the total of the assigned orders does not match the sum in the notification. The affected order is held — please check."
+msgstr "Un paiement groupé a été reçu, mais le total des commandes attribuées ne correspond pas à la somme figurant dans l'avis. La commande concernée est retenue — veuillez vérifier."
+
+msgid "A payment could not be assigned with confidence (score %1$d of 10, reference %2$s). Please check by hand."
+msgstr "Un paiement n'a pas pu être attribué avec certitude (score %1$d sur 10, référence %2$s). Veuillez vérifier à la main."
+
+msgid "The payment currency does not match the order."
+msgstr "La devise du paiement ne correspond pas à la commande."
+
+msgid "A payment needs your attention."
+msgstr "Un paiement requiert votre attention."
+
+msgid "sqrip: a payment needs your attention"
+msgstr "sqrip : un paiement requiert votre attention"
+
+msgid "sqrip: payment held — please release"
+msgstr "sqrip : paiement retenu — veuillez approuver"
+
+msgid "This payment is above your release limit. Please check it, then confirm to mark the order paid, reject to leave it open, or open the order for details. The links are valid for 24 hours and work once."
+msgstr "Ce paiement dépasse votre limite d'approbation. Veuillez le vérifier, puis confirmer pour marquer la commande comme payée, refuser pour la laisser ouverte, ou ouvrir la commande pour les détails. Les liens sont valables 24 heures et fonctionnent une seule fois."
+
+msgid "The customer paid more than the order total. Please check it, then confirm to mark the order paid, reject to leave it open, or open the order for details. The links are valid for 24 hours and work once."
+msgstr "Le client a payé plus que le total de la commande. Veuillez le vérifier, puis confirmer pour marquer la commande comme payée, refuser pour la laisser ouverte, ou ouvrir la commande pour les détails. Les liens sont valables 24 heures et fonctionnent une seule fois."

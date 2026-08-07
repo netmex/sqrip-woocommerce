@@ -1652,3 +1652,141 @@ msgid ""
 msgstr ""
 "Die QR-Rechnung steht für Ihre Rechnungsadresse nicht zur Verfügung. Bitte "
 "wählen Sie eine andere Zahlungsart."
+
+msgid "Set up"
+msgstr "Einrichten"
+
+msgid "Configure"
+msgstr "Einstellen"
+
+msgid "Reconcile"
+msgstr "Abgleichen"
+
+msgid "Overpayment"
+msgstr "Überzahlung"
+
+msgid "Forward your shop account's credit notifications to our notification service. The service reads them, compares the payment details, and tells the plugin which order was paid. The plugin updates the order status according to your \"Status of completed orders\" setting."
+msgstr "Leiten Sie die Gutschrift-Avisierung Ihres Shop-Kontos zu unserem Auskunftsdienst. Der Dienst liest den Inhalt, vergleicht die Zahlungsinformationen und teilt dem Plugin mit, welche Bestellung bezahlt wurde. Das Plugin aktualisiert den Bestellstatus gemäss Ihrer Vorgabe „Status abgeschlossener Bestellungen\"."
+
+msgid "In your online banking, create a new notification for credits to your shop account. Allow as much information as possible. Enter this address in your e-banking as the destination for credit notifications:"
+msgstr "Erstellen Sie im Online-Banking eine neue Avisierung für Gutschriften auf Ihrem Shop-Konto. Lassen Sie möglichst viele Informationen zu. Tragen Sie diese Adresse im E-Banking als Ziel für Gutschriftavisierungen ein:"
+
+msgid "To verify, forward an earlier notification e-mail or an e-mail with a bank document (PDF) to %s, then click \"Reconcile now\" below. You will get the current list of unpaid orders and the information read from the e-mail. If both are shown correctly, the service is ready."
+msgstr "Leiten Sie zur Verifizierung eine frühere Benachrichtigungs-E-Mail oder eine E-Mail mit Bankdokument (PDF) an %s und klicken Sie anschliessend unten auf „Jetzt abgleichen\". Sie erhalten die aktuelle Liste der unbezahlten Bestellungen sowie die aus der E-Mail ausgelesene Information. Wenn beides korrekt angezeigt wird, ist der Dienst einsatzbereit."
+
+msgid "your address above"
+msgstr "Ihre Adresse oben"
+
+msgid "Reconcile now"
+msgstr "Jetzt abgleichen"
+
+msgid "Want to release larger amounts yourself, for safety? Set the limit above which sqrip e-mails you the reconciled data for release. At 0, every payment needs your release. To accept all payments automatically, set the value very high, e.g. above 1,000,000."
+msgstr "Möchten Sie grössere Beträge zur Sicherheit persönlich freigeben? Definieren Sie hier die Grenze, ab der Ihnen sqrip eine E-Mail mit den abgeglichenen Daten zur Freigabe zustellt. Bei 0 muss jede Zahlung von Ihnen freigegeben werden. Um alle Zahlungen automatisch zu akzeptieren, setzen Sie den Wert möglichst hoch, z. B. über 1'000'000."
+
+msgid "Hold the order and e-mail me"
+msgstr "Bestellung zurückhalten und mir eine E-Mail senden"
+
+msgid "Mark as paid and e-mail me"
+msgstr "Als bezahlt markieren und mir eine E-Mail senden"
+
+msgid "What to do when a customer pays more than the order total."
+msgstr "Was geschehen soll, wenn ein Kunde mehr als den Bestellbetrag bezahlt."
+
+msgid "Reconciliation runs regularly every minute, without display. Trigger a reconciliation by hand to see the currently available data here."
+msgstr "Der Abgleich erfolgt regulär jede Minute und ohne Anzeige. Stossen Sie manuell einen Abgleich an, um die aktuell verfügbaren Daten hier zu sehen."
+
+msgid "Recently recognised payments"
+msgstr "Zuletzt erkannte Zahlungen"
+
+msgid "Orders still waiting for payment"
+msgstr "Aktuell auf die Zahlung wartende Bestellungen"
+
+msgid "Date / time"
+msgstr "Datum/Uhrzeit"
+
+msgid "Score"
+msgstr "Score"
+
+msgid "Findings"
+msgstr "Erkenntnisse"
+
+msgid "Consequence"
+msgstr "Konsequenz"
+
+msgid "%d/10"
+msgstr "%d/10"
+
+msgid "Booked as paid."
+msgstr "Als bezahlt verbucht."
+
+msgid "Booked as paid (overpaid)."
+msgstr "Als bezahlt verbucht (überzahlt)."
+
+msgid "Held — overpaid, e-mailed for your release."
+msgstr "Zurückgehalten – überzahlt, zur Freigabe per E-Mail gesendet."
+
+msgid "Held — above your limit, e-mailed for your release."
+msgstr "Zurückgehalten – über Ihrer Grenze, zur Freigabe per E-Mail gesendet."
+
+msgid "Held — batch total mismatch, please check."
+msgstr "Zurückgehalten – Sammelsumme stimmt nicht, bitte prüfen."
+
+msgid "Held — underpaid."
+msgstr "Zurückgehalten – unterbezahlt."
+
+msgid "Flagged — please check."
+msgstr "Markiert – bitte prüfen."
+
+msgid "Flagged — order needs a reference."
+msgstr "Markiert – Bestellung braucht eine Referenz."
+
+msgid "E-mailed for your assignment."
+msgstr "Zur Zuordnung per E-Mail gesendet."
+
+msgid "Flagged."
+msgstr "Markiert."
+
+msgid "Payment received but held: above your release limit. Waiting for your release."
+msgstr "Zahlung erhalten, aber zurückgehalten: über Ihrer Freigabe-Grenze. Wartet auf Ihre Freigabe."
+
+msgid "Payment received but held: the amount is higher than the order. Waiting for your release."
+msgstr "Zahlung erhalten, aber zurückgehalten: der Betrag ist höher als die Bestellung. Wartet auf Ihre Freigabe."
+
+msgid "Payment received but held: a batch total did not add up. Please check."
+msgstr "Zahlung erhalten, aber zurückgehalten: eine Sammelsumme ging nicht auf. Bitte prüfen."
+
+msgid "Reference %s. sqrip payment notification service."
+msgstr "Referenz %s. sqrip Auskunftsdienst."
+
+msgid "Customer paid too little: received %1$s, expected %2$s (reference %3$s). The order is held."
+msgstr "Kunde hat zu wenig bezahlt: erhalten %1$s, erwartet %2$s (Referenz %3$s). Die Bestellung wird zurückgehalten."
+
+msgid "Customer paid more than the order: received %1$s, expected %2$s (reference %3$s)."
+msgstr "Kunde hat mehr als die Bestellung bezahlt: erhalten %1$s, erwartet %2$s (Referenz %3$s)."
+
+msgid "A payment matched order %s by its number, but the order has no QR reference — please add one so it can be assigned."
+msgstr "Eine Zahlung passt über die Nummer zu Bestellung %s, aber die Bestellung hat keine QR-Referenz – bitte ergänzen Sie eine, damit sie zugeordnet werden kann."
+
+msgid "A batch payment was received, but the total of the assigned orders does not match the sum in the notification. The affected order is held — please check."
+msgstr "Es ging eine Sammelzahlung ein, aber die Summe der zugeordneten Bestellungen stimmt nicht mit dem Betrag in der Avisierung überein. Die betroffene Bestellung wird zurückgehalten – bitte prüfen."
+
+msgid "A payment could not be assigned with confidence (score %1$d of 10, reference %2$s). Please check by hand."
+msgstr "Eine Zahlung konnte nicht sicher zugeordnet werden (Score %1$d von 10, Referenz %2$s). Bitte von Hand prüfen."
+
+msgid "The payment currency does not match the order."
+msgstr "Die Währung der Zahlung passt nicht zur Bestellung."
+
+msgid "A payment needs your attention."
+msgstr "Eine Zahlung erfordert Ihre Aufmerksamkeit."
+
+msgid "sqrip: a payment needs your attention"
+msgstr "sqrip: Eine Zahlung erfordert Ihre Aufmerksamkeit"
+
+msgid "sqrip: payment held — please release"
+msgstr "sqrip: Zahlung zurückgehalten – bitte freigeben"
+
+msgid "This payment is above your release limit. Please check it, then confirm to mark the order paid, reject to leave it open, or open the order for details. The links are valid for 24 hours and work once."
+msgstr "Diese Zahlung liegt über Ihrer Freigabe-Grenze. Bitte prüfen Sie sie und bestätigen Sie, um die Bestellung als bezahlt zu markieren, lehnen Sie ab, um sie offen zu lassen, oder öffnen Sie die Bestellung für Details. Die Links sind 24 Stunden gültig und funktionieren einmal."
+
+msgid "The customer paid more than the order total. Please check it, then confirm to mark the order paid, reject to leave it open, or open the order for details. The links are valid for 24 hours and work once."
+msgstr "Der Kunde hat mehr als den Bestellbetrag bezahlt. Bitte prüfen Sie es und bestätigen Sie, um die Bestellung als bezahlt zu markieren, lehnen Sie ab, um sie offen zu lassen, oder öffnen Sie die Bestellung für Details. Die Links sind 24 Stunden gültig und funktionieren einmal."

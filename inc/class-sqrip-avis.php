@@ -8,12 +8,15 @@
  *   - hands the service the shop's open QR references (order-driven: nothing else
  *     leaves the shop, and the service returns only credits that match one of them),
  *   - feeds those matches into the same Sqrip_Camt_Reconciler::match() used by the
- *     camt reconciliation, and applies the outcome,
+ *     camt reconciliation, and acts on the outcome in one place (process()),
  *   - exposes a REST callback the service nudges when a credit arrives (no cron),
  *   - proxies the onboarding (verification-code) calls for the setup assistant.
  *
- * Amounts at or above the shop's threshold are never booked automatically — they
- * are left for the shop to confirm by hand.
+ * Payments above the shop's release limit are not booked automatically — the admin
+ * releases them from a signed one-time e-mail. Warnings (under-/overpayment, low
+ * confidence, missing reference, batch mismatch) are held or flagged and never booked
+ * blindly. Each match and warning is delivered by the service exactly once, so process()
+ * acts on and logs each on first sight.
  *
  * @package sqrip
  * @since 1.11
@@ -27,6 +30,18 @@ class Sqrip_Avis
     const TOKEN_OPTION = 'sqrip_avis_token';
     const LOCALPART_OPTION = 'sqrip_avis_localpart';
 
+    // Rolling log of recently recognised payments (shown under "Reconcile") and the set
+    // of already-processed items. /v2/claim delivers each match and warning exactly once
+    // and then drops it, so both the action and the log entry must be written on first
+    // sight; the processed set guards against a second, racing claim.
+    const LOG_OPTION = 'sqrip_avis_log';
+    const SEEN_OPTION = 'sqrip_avis_processed';
+    const LOG_MAX = 25;
+
+    // Empty release limit means "book everything automatically" — a limit no real payment
+    // reaches. An explicit 0, by contrast, means "confirm every payment by hand".
+    const AUTO_THRESHOLD = 1000000.0;
+
     // The service is the same for every shop, so no one has to type it. A stored
     // 'avis_service_url' option still overrides it if one is ever set by hand.
     const DEFAULT_SERVICE_URL = 'https://avis-service-ajeqivb4ra-oa.a.run.app';
@@ -39,6 +54,8 @@ class Sqrip_Avis
      */
     public static function init()
     {
+        self::maybe_migrate_threshold();
+
         add_action('rest_api_init', array(__CLASS__, 'register_routes'));
 
         if (is_admin()) {
@@ -53,6 +70,32 @@ class Sqrip_Avis
             add_action('admin_post_sqrip_avis_suggestion', array(__CLASS__, 'handle_suggestion_action'));
             add_action('admin_post_nopriv_sqrip_avis_suggestion', array(__CLASS__, 'handle_suggestion_action'));
         }
+    }
+
+    /**
+     * One-time: keep the release limit meaningful across the semantics change. It used to
+     * mean "book everything automatically" at 0; now 0 means "confirm every payment by
+     * hand", and a blank/high value books all. A shop that saved the old default (0) meant
+     * "book all", so lift that one 0 to the high auto-limit — no shop has yet chosen 0
+     * under the new meaning. Fresh shops get the high default from the field itself.
+     *
+     * @return void
+     */
+    private static function maybe_migrate_threshold()
+    {
+        if (get_option('sqrip_avis_threshold_migrated')) {
+            return;
+        }
+
+        $opts = get_option('woocommerce_sqrip_settings', array());
+
+        if (is_array($opts) && isset($opts['avis_threshold'])
+            && ($opts['avis_threshold'] === '0' || $opts['avis_threshold'] === 0 || $opts['avis_threshold'] === 0.0)) {
+            $opts['avis_threshold'] = '1000000';
+            update_option('woocommerce_sqrip_settings', $opts);
+        }
+
+        update_option('sqrip_avis_threshold_migrated', 1, false);
     }
 
     /**
@@ -149,13 +192,45 @@ class Sqrip_Avis
     }
 
     /**
-     * Amounts of this size or larger are never booked without a human.
+     * The release limit. A payment strictly above it is not booked automatically — the
+     * shop admin releases it from an e-mail. An unset/blank value means "book everything
+     * automatically" (a limit no payment reaches); an explicit 0 means "confirm every
+     * payment by hand".
      *
-     * @return float 0 means every match may be booked automatically.
+     * @return float
      */
     private static function threshold()
     {
-        return (float) sqrip_get_plugin_option('avis_threshold');
+        $raw = sqrip_get_plugin_option('avis_threshold');
+
+        if ($raw === null || $raw === '' || $raw === false) {
+            return self::AUTO_THRESHOLD;
+        }
+
+        return (float) $raw;
+    }
+
+    /**
+     * What to do when a customer pays more than the order total: 'hold' (default, wait
+     * for the admin) or 'pay' (book it, notify the admin).
+     *
+     * @return string 'hold' or 'pay'.
+     */
+    private static function overpayment_mode()
+    {
+        return sqrip_get_plugin_option('avis_overpayment') === 'pay' ? 'pay' : 'hold';
+    }
+
+    /**
+     * Normalise a reference the same way the service and the camt reconciler do:
+     * uppercase, keep only A–Z and 0–9.
+     *
+     * @param string $reference
+     * @return string
+     */
+    private static function normalize($reference)
+    {
+        return preg_replace('/[^A-Z0-9]/', '', strtoupper((string) $reference));
     }
 
     /**
@@ -232,11 +307,11 @@ class Sqrip_Avis
             return new WP_REST_Response(array('error' => $report), 200);
         }
 
-        $applied = self::apply($report, false);
+        $summary = self::process($report, false);
 
         return new WP_REST_Response(array(
-            'applied' => count($applied),
-            'held'    => count(self::orders_over_threshold($report)),
+            'applied' => count($summary['applied']),
+            'held'    => count($summary['held']),
         ), 200);
     }
 
@@ -296,26 +371,12 @@ class Sqrip_Avis
         $report['warnings']          = $warnings;
         $report['last_seen']         = isset($claim['last_seen']) && is_array($claim['last_seen']) ? $claim['last_seen'] : null;
         $report['pending_charges']   = isset($claim['pending_charges']) ? (int) $claim['pending_charges'] : 0;
+        $report['expectations']      = $expectations;
 
-        // Stufe 3 (probable): v2 carries these in `warnings` (types no_reference and
-        // bulk_payment carry candidate_references) — never booked automatically. Each
-        // gets e-mailed to the shop admin, who confirms or rejects it by hand.
-        $probable = array();
-
-        foreach ($warnings as $warning) {
-            if (isset($warning['candidate_references'])
-                && is_array($warning['candidate_references'])
-                && $warning['candidate_references']) {
-                $probable[] = $warning;
-            }
-        }
-
-        $report['suggestions'] = count($probable);
-
-        if ($probable) {
-            self::notify_suggestions($probable, $expectations);
-        }
-
+        // No side effects here. All booking, holding, e-mailing and logging happens in
+        // process() — the single place that acts on a claim, so the nudge path and the
+        // manual "Reconcile now" behave identically and each match/warning is acted on
+        // exactly once (the service delivers each only once, then drops it).
         return $report;
     }
 
@@ -346,27 +407,67 @@ class Sqrip_Avis
     }
 
     /**
-     * Book the payments that need no judgement. In the automatic path, matches at or
-     * above the threshold are held back for the shop to confirm.
+     * Act on one claim response: book the safe matches, hold or e-mail the rest, and
+     * record every recognised payment in the log. This is the ONLY place that acts on a
+     * claim, so the nudge and the manual button behave the same; each match and warning
+     * is handled at most once (the service delivers each only once, then drops it).
      *
-     * @param array $report
-     * @param bool  $confirmed True when a human triggered this (threshold ignored).
-     * @return array Order ids that were changed.
+     * @param array $report From run().
+     * @param bool  $manual True when a human pressed "Reconcile now": the release limit
+     *                      does not apply and over-limit matches are booked directly.
+     * @return array {applied: order_number[], held: order_number[]}
      */
-    public static function apply(array $report, $confirmed = false)
+    public static function process(array $report, $manual = false)
     {
-        $status_completed = sqrip_get_plugin_option('status_completed');
-        $threshold        = self::threshold();
-        $applied          = array();
+        $expectations = isset($report['expectations']) && is_array($report['expectations']) ? $report['expectations'] : array();
+        $warnings     = isset($report['warnings']) && is_array($report['warnings']) ? $report['warnings'] : array();
+        $orders       = isset($report['orders']) && is_array($report['orders']) ? $report['orders'] : array();
 
-        foreach ($report['orders'] as $entry) {
-            if ($entry['category'] !== Sqrip_Camt_Reconciler::PAID
-                && !($entry['category'] === Sqrip_Camt_Reconciler::PARTLY_PAID && !empty($entry['applicable_slips']))) {
+        // Overpayment carries both a match and a warning; checksum flags a whole batch.
+        // Read them first so the booking step can react.
+        $overpaid     = array();
+        $has_checksum = false;
+
+        foreach ($warnings as $w) {
+            $type = isset($w['type']) ? $w['type'] : '';
+            if ($type === 'overpayment' && isset($w['reference'])) {
+                $overpaid[self::normalize($w['reference'])] = $w;
+            } elseif ($type === 'checksum') {
+                $has_checksum = true;
+            }
+        }
+
+        $threshold    = self::threshold();
+        $overpay_mode = self::overpayment_mode();
+        $applied      = array();
+        $held         = array();
+
+        foreach ($orders as $entry) {
+            $is_paid = ($entry['category'] === Sqrip_Camt_Reconciler::PAID)
+                || ($entry['category'] === Sqrip_Camt_Reconciler::PARTLY_PAID && !empty($entry['applicable_slips']));
+
+            if (!$is_paid) {
                 continue;
             }
 
-            // The threshold guard: large amounts wait for a human.
-            if (!$confirmed && $threshold > 0 && (float) $entry['total'] >= $threshold) {
+            $paid_slip = self::paid_slip($entry);
+
+            if (!$paid_slip) {
+                continue;
+            }
+
+            $payment  = isset($paid_slip['payments'][0]) ? $paid_slip['payments'][0] : array();
+            $ref_norm = self::normalize($paid_slip['reference']);
+            $amount   = isset($payment['amount']) ? (float) $payment['amount'] : (float) $entry['total'];
+            $currency = isset($payment['currency']) ? (string) $payment['currency'] : (string) $entry['currency'];
+            $score    = isset($payment['score']) ? (int) $payment['score'] : null;
+            $aspects  = isset($payment['matched_aspects']) && is_array($payment['matched_aspects']) ? $payment['matched_aspects'] : array();
+
+            $dedup = self::dedup_key(array('match', $ref_norm, round($amount, 2),
+                isset($payment['value_date']) ? $payment['value_date'] : '',
+                isset($payment['booking_date']) ? $payment['booking_date'] : ''));
+
+            if (self::already_processed($dedup)) {
                 continue;
             }
 
@@ -376,62 +477,234 @@ class Sqrip_Avis
                 continue;
             }
 
-            $paid_slip = null;
+            // Decide what happens to this clean match.
+            $is_overpaid = isset($overpaid[$ref_norm]);
+            $decision    = self::decide($amount, $threshold, $manual, $is_overpaid, $overpay_mode, $has_checksum);
 
-            foreach ($entry['slips'] as $slip) {
-                if ($slip['category'] === Sqrip_Camt_Reconciler::PAID) {
-                    $paid_slip = $slip;
-                    break;
+            self::mark_processed($dedup);
+
+            if ($decision === 'book') {
+                self::book_order($order, $entry, $paid_slip);
+                $applied[] = $entry['order_number'];
+
+                if ($is_overpaid) {
+                    self::send_warning_email($overpaid[$ref_norm], $order);
+                    self::log_add($ref_norm, $paid_slip['reference'], $amount, $currency, $score, $aspects,
+                        __('Booked as paid (overpaid).', 'sqrip-swiss-qr-invoice'));
+                } else {
+                    self::log_add($ref_norm, $paid_slip['reference'], $amount, $currency, $score, $aspects,
+                        __('Booked as paid.', 'sqrip-swiss-qr-invoice'));
                 }
+            } elseif ($decision === 'hold_approval') {
+                $reason = $is_overpaid ? 'overpayment' : 'over_threshold';
+                self::send_approval_email($entry, $paid_slip, $amount, $currency, $reason);
+                $order->add_order_note(self::hold_note($paid_slip, $reason));
+                $held[] = $entry['order_number'];
+                $consequence = ($reason === 'overpayment')
+                    ? __('Held — overpaid, e-mailed for your release.', 'sqrip-swiss-qr-invoice')
+                    : __('Held — above your limit, e-mailed for your release.', 'sqrip-swiss-qr-invoice');
+                self::log_add($ref_norm, $paid_slip['reference'], $amount, $currency, $score, $aspects, $consequence);
+            } else { // hold_notify (checksum)
+                self::send_warning_email(array('type' => 'checksum', 'reference' => $paid_slip['reference']), $order);
+                $order->add_order_note(self::hold_note($paid_slip, 'checksum'));
+                $held[] = $entry['order_number'];
+                self::log_add($ref_norm, $paid_slip['reference'], $amount, $currency, $score, $aspects,
+                    __('Held — batch total mismatch, please check.', 'sqrip-swiss-qr-invoice'));
             }
-
-            if (!$paid_slip) {
-                continue;
-            }
-
-            $order->add_order_note(self::note($paid_slip));
-
-            // Skonto/reminder: whichever invoice was paid, the others stop being payable.
-            if (!empty($entry['alternatives']) && !empty($entry['paid_alternative'])) {
-                sqrip_void_other_invoices($order, $entry['paid_alternative']);
-            }
-
-            if ($status_completed) {
-                $order->update_status($status_completed, '');
-            } else {
-                $order->save();
-            }
-
-            $applied[$entry['order_id']] = $entry['order_number'];
         }
 
-        return $applied;
+        // Warnings not tied to a booked match: underpayment / low_confidence /
+        // no_reference_key (notify), and no_reference / bulk_payment (candidate e-mail).
+        self::process_warnings($warnings, $expectations);
+
+        return array('applied' => $applied, 'held' => $held);
     }
 
     /**
-     * Orders that matched but were held back because of the threshold.
+     * Pure decision for one clean, fully-paid match. Extracted so the money path is
+     * unit-tested without WordPress.
      *
-     * @param array $report
-     * @return array
+     * Order of precedence: a batch mismatch holds for a look; then an overpayment the
+     * shop wants to confirm; then the release limit (only in the automatic path). A
+     * manual "Reconcile now" ignores the limit but still respects overpayment/checksum.
+     *
+     * @param float  $amount
+     * @param float  $threshold
+     * @param bool   $manual
+     * @param bool   $is_overpaid
+     * @param string $overpay_mode 'hold' | 'pay'
+     * @param bool   $has_checksum
+     * @return string 'book' | 'hold_approval' | 'hold_notify'
      */
-    private static function orders_over_threshold(array $report)
+    public static function decide($amount, $threshold, $manual, $is_overpaid, $overpay_mode, $has_checksum)
     {
-        $threshold = self::threshold();
-
-        if ($threshold <= 0) {
-            return array();
+        if ($has_checksum) {
+            return 'hold_notify';
         }
 
-        $held = array();
+        if ($is_overpaid && $overpay_mode === 'hold') {
+            return 'hold_approval';
+        }
 
-        foreach ($report['orders'] as $entry) {
-            if ($entry['category'] === Sqrip_Camt_Reconciler::PAID
-                && (float) $entry['total'] >= $threshold) {
-                $held[] = $entry;
+        if (!$manual && (float) $amount > (float) $threshold) {
+            return 'hold_approval';
+        }
+
+        return 'book';
+    }
+
+    /**
+     * Handle the warnings that are not resolved together with a match.
+     *
+     * @param array $warnings
+     * @param array $expectations
+     * @return void
+     */
+    private static function process_warnings(array $warnings, array $expectations)
+    {
+        $by_ref     = self::orders_by_ref($expectations);
+        $candidates = array();
+
+        foreach ($warnings as $w) {
+            $type = isset($w['type']) ? $w['type'] : '';
+
+            // Overpayment and checksum are handled next to the match in process().
+            if ($type === 'overpayment' || $type === 'checksum' || $type === '') {
+                continue;
+            }
+
+            $dedup = self::dedup_key(array('warn', $type, isset($w['reference']) ? self::normalize($w['reference']) : '', $w));
+
+            if (self::already_processed($dedup)) {
+                continue;
+            }
+
+            self::mark_processed($dedup);
+
+            if ($type === 'no_reference' || $type === 'bulk_payment') {
+                $candidates[] = $w; // candidate suggestion e-mail, sent together below
+
+                $cref = isset($w['candidate_references'][0]) ? (string) $w['candidate_references'][0] : '';
+                self::log_add(
+                    self::normalize($cref), $cref,
+                    isset($w['amount']) ? (float) $w['amount'] : null,
+                    isset($w['currency']) ? (string) $w['currency'] : '',
+                    null, array(), self::warning_consequence($type)
+                );
+
+                continue;
+            }
+
+            self::handle_simple_warning($w, $by_ref);
+        }
+
+        if ($candidates) {
+            self::notify_suggestions($candidates, $expectations);
+        }
+    }
+
+    /**
+     * A warning that points at (at most) one order: e-mail the admin, add an order note
+     * where a reference resolves, and log it. Never books anything.
+     *
+     * @param array $w      One warning from the service.
+     * @param array $by_ref normalised reference => order info.
+     * @return void
+     */
+    private static function handle_simple_warning(array $w, array $by_ref)
+    {
+        $type     = $w['type'];
+        $ref_norm = isset($w['reference']) ? self::normalize($w['reference']) : '';
+        $order    = ($ref_norm !== '' && isset($by_ref[$ref_norm])) ? wc_get_order($by_ref[$ref_norm]['order_id']) : null;
+
+        if ($order && $order->get_payment_method() === 'sqrip') {
+            $order->add_order_note(self::warning_message($w));
+        } else {
+            $order = null;
+        }
+
+        self::send_warning_email($w, $order);
+
+        $ref_display = ($ref_norm !== '' && isset($by_ref[$ref_norm]['reference_display']))
+            ? $by_ref[$ref_norm]['reference_display'] : $ref_norm;
+        $amount   = isset($w['received']) ? (float) $w['received'] : (isset($w['amount']) ? (float) $w['amount'] : null);
+        $currency = isset($w['currency']) ? (string) $w['currency']
+            : (($ref_norm !== '' && isset($by_ref[$ref_norm]['currency'])) ? $by_ref[$ref_norm]['currency'] : '');
+        $score    = isset($w['score']) ? (int) $w['score'] : null;
+        $aspects  = isset($w['matched_aspects']) && is_array($w['matched_aspects']) ? $w['matched_aspects'] : array();
+
+        self::log_add($ref_norm, $ref_display, $amount, $currency, $score, $aspects, self::warning_consequence($type));
+    }
+
+    /**
+     * Book one order as paid: order note, void sibling invoices (Skonto/reminder), and
+     * move it to the shop's "completed" status.
+     *
+     * @param \WC_Order $order
+     * @param array     $entry
+     * @param array     $paid_slip
+     * @return void
+     */
+    private static function book_order($order, $entry, $paid_slip)
+    {
+        $order->add_order_note(self::note($paid_slip));
+
+        if (!empty($entry['alternatives']) && !empty($entry['paid_alternative'])) {
+            sqrip_void_other_invoices($order, $entry['paid_alternative']);
+        }
+
+        $status_completed = sqrip_get_plugin_option('status_completed');
+
+        if ($status_completed) {
+            $order->update_status($status_completed, '');
+        } else {
+            $order->save();
+        }
+    }
+
+    /**
+     * @param array $entry
+     * @return array|null The first fully-paid slip of the entry.
+     */
+    private static function paid_slip($entry)
+    {
+        foreach ($entry['slips'] as $slip) {
+            if ($slip['category'] === Sqrip_Camt_Reconciler::PAID) {
+                return $slip;
             }
         }
 
-        return $held;
+        return null;
+    }
+
+    /**
+     * normalised reference => {order_id, order_number, currency, expected, reference_display}
+     * for every open slip, so a warning's reference can be resolved to an order.
+     *
+     * @param array $expectations
+     * @return array
+     */
+    private static function orders_by_ref(array $expectations)
+    {
+        $by_ref = array();
+
+        foreach ($expectations as $order) {
+            foreach ($order['slips'] as $slip) {
+                $key = self::normalize($slip['reference']);
+
+                if ($key !== '') {
+                    $by_ref[$key] = array(
+                        'order_id'          => $order['order_id'],
+                        'order_number'      => $order['order_number'],
+                        'currency'          => $order['currency'],
+                        'expected'          => $slip['expected'],
+                        'reference_display' => (string) $slip['reference'],
+                    );
+                }
+            }
+        }
+
+        return $by_ref;
     }
 
     /**
@@ -451,6 +724,366 @@ class Sqrip_Avis
             $amount,
             $slip['reference']
         );
+    }
+
+    /**
+     * The order note added when a matched payment is held instead of booked.
+     *
+     * @param array  $slip
+     * @param string $reason 'overpayment' | 'checksum' | 'over_threshold'
+     * @return string
+     */
+    private static function hold_note($slip, $reason)
+    {
+        switch ($reason) {
+            case 'overpayment':
+                $lead = __('Payment received but held: the amount is higher than the order. Waiting for your release.', 'sqrip-swiss-qr-invoice');
+                break;
+            case 'checksum':
+                $lead = __('Payment received but held: a batch total did not add up. Please check.', 'sqrip-swiss-qr-invoice');
+                break;
+            default:
+                $lead = __('Payment received but held: above your release limit. Waiting for your release.', 'sqrip-swiss-qr-invoice');
+        }
+
+        return $lead . ' ' . sprintf(
+            /* translators: %s: reference */
+            __('Reference %s. sqrip payment notification service.', 'sqrip-swiss-qr-invoice'),
+            $slip['reference']
+        );
+    }
+
+    /**
+     * A human-readable sentence for one warning (order note and e-mail body).
+     *
+     * @param array $w
+     * @return string
+     */
+    private static function warning_message(array $w)
+    {
+        $type = isset($w['type']) ? $w['type'] : '';
+
+        switch ($type) {
+            case 'underpayment':
+                return sprintf(
+                    /* translators: 1: received amount, 2: expected amount, 3: reference */
+                    __('Customer paid too little: received %1$s, expected %2$s (reference %3$s). The order is held.', 'sqrip-swiss-qr-invoice'),
+                    self::money($w, 'received'), self::money($w, 'expected'),
+                    isset($w['reference']) ? $w['reference'] : ''
+                );
+            case 'overpayment':
+                return sprintf(
+                    /* translators: 1: received amount, 2: expected amount, 3: reference */
+                    __('Customer paid more than the order: received %1$s, expected %2$s (reference %3$s).', 'sqrip-swiss-qr-invoice'),
+                    self::money($w, 'received'), self::money($w, 'expected'),
+                    isset($w['reference']) ? $w['reference'] : ''
+                );
+            case 'no_reference_key':
+                return sprintf(
+                    /* translators: %s: order number */
+                    __('A payment matched order %s by its number, but the order has no QR reference — please add one so it can be assigned.', 'sqrip-swiss-qr-invoice'),
+                    isset($w['order_number']) ? $w['order_number'] : ''
+                );
+            case 'checksum':
+                return __('A batch payment was received, but the total of the assigned orders does not match the sum in the notification. The affected order is held — please check.', 'sqrip-swiss-qr-invoice');
+            case 'low_confidence':
+                $base = sprintf(
+                    /* translators: 1: score (0-10), 2: reference */
+                    __('A payment could not be assigned with confidence (score %1$d of 10, reference %2$s). Please check by hand.', 'sqrip-swiss-qr-invoice'),
+                    isset($w['score']) ? (int) $w['score'] : 0,
+                    isset($w['reference']) ? $w['reference'] : ''
+                );
+
+                if (!empty($w['currency_mismatch'])) {
+                    $base .= ' ' . __('The payment currency does not match the order.', 'sqrip-swiss-qr-invoice');
+                }
+
+                return $base;
+        }
+
+        return isset($w['message']) ? (string) $w['message'] : __('A payment needs your attention.', 'sqrip-swiss-qr-invoice');
+    }
+
+    /**
+     * Short label for the log's "Consequence" column.
+     *
+     * @param string $type
+     * @return string
+     */
+    private static function warning_consequence($type)
+    {
+        switch ($type) {
+            case 'underpayment':
+                return __('Held — underpaid.', 'sqrip-swiss-qr-invoice');
+            case 'low_confidence':
+                return __('Flagged — please check.', 'sqrip-swiss-qr-invoice');
+            case 'no_reference_key':
+                return __('Flagged — order needs a reference.', 'sqrip-swiss-qr-invoice');
+            case 'no_reference':
+            case 'bulk_payment':
+                return __('E-mailed for your assignment.', 'sqrip-swiss-qr-invoice');
+        }
+
+        return __('Flagged.', 'sqrip-swiss-qr-invoice');
+    }
+
+    /**
+     * @param array  $w
+     * @param string $key
+     * @return string Currency + formatted amount (currency omitted if unknown).
+     */
+    private static function money(array $w, $key)
+    {
+        if (!isset($w[$key])) {
+            return '';
+        }
+
+        $ccy = isset($w['currency']) && $w['currency'] !== '' ? trim((string) $w['currency']) . ' ' : '';
+
+        return $ccy . number_format((float) $w[$key], 2, '.', '');
+    }
+
+    /**
+     * E-mail the admin about a warning that needs a look but is not a one-click release.
+     *
+     * @param array          $w
+     * @param \WC_Order|null $order
+     * @return void
+     */
+    private static function send_warning_email(array $w, $order = null)
+    {
+        $link = ($order && is_a($order, 'WC_Order'))
+            ? '<p style="font-family:sans-serif;font-size:14px;"><a href="' . esc_url($order->get_edit_order_url()) . '">'
+                . esc_html__('Open order', 'sqrip-swiss-qr-invoice') . '</a></p>'
+            : '';
+
+        $body = '<p style="font-family:sans-serif;font-size:14px;">' . esc_html(self::warning_message($w)) . '</p>' . $link;
+
+        $to = apply_filters('sqrip_avis_notify_recipient', get_option('admin_email'));
+
+        wp_mail(
+            $to,
+            __('sqrip: a payment needs your attention', 'sqrip-swiss-qr-invoice'),
+            $body,
+            array('Content-Type: text/html; charset=UTF-8')
+        );
+    }
+
+    /**
+     * E-mail the admin a one-click release for a clean match that was held (above the
+     * release limit, or an overpayment the shop chose to confirm by hand). Reuses the
+     * signed confirm/reject/open links of the suggestion e-mail with a single candidate.
+     *
+     * @param array  $entry
+     * @param array  $paid_slip
+     * @param float  $amount
+     * @param string $currency
+     * @param string $reason 'over_threshold' | 'overpayment'
+     * @return void
+     */
+    private static function send_approval_email($entry, $paid_slip, $amount, $currency, $reason)
+    {
+        $ref_norm = self::normalize($paid_slip['reference']);
+
+        $candidates = array($ref_norm => array(
+            'order_id'          => $entry['order_id'],
+            'order_number'      => $entry['order_number'],
+            'currency'          => $entry['currency'],
+            'expected'          => isset($entry['total']) ? $entry['total'] : null,
+            'reference_display' => (string) $paid_slip['reference'],
+        ));
+
+        self::send_suggestion_email(array('amount' => $amount, 'currency' => $currency), $candidates, $reason);
+    }
+
+    // --- recognised-payments log (shown under "Reconcile") -----------------
+
+    /**
+     * Append one recognised payment to the rolling log. The timestamp is stamped now, in
+     * the server's own time (not the notification's UTC field), and rendered in the
+     * site's timezone — so the "Date / time" column is never off by the UTC offset.
+     *
+     * @return void
+     */
+    private static function log_add($ref_norm, $ref_display, $amount, $currency, $score, $aspects, $consequence)
+    {
+        $log = get_option(self::LOG_OPTION, array());
+
+        if (!is_array($log)) {
+            $log = array();
+        }
+
+        array_unshift($log, array(
+            'ts'          => time(),
+            'reference'   => (string) ($ref_display !== '' ? $ref_display : $ref_norm),
+            'amount'      => ($amount === null || $amount === '') ? null : (float) $amount,
+            'currency'    => (string) $currency,
+            'score'       => ($score === null) ? null : (int) $score,
+            'aspects'     => is_array($aspects) ? array_values($aspects) : array(),
+            'consequence' => (string) $consequence,
+        ));
+
+        update_option(self::LOG_OPTION, array_slice($log, 0, self::LOG_MAX), false);
+    }
+
+    /**
+     * The recognised-payments table, newest first. Escaped markup, safe to echo.
+     *
+     * @return string
+     */
+    public static function render_log()
+    {
+        $log = get_option(self::LOG_OPTION, array());
+
+        if (!is_array($log) || !$log) {
+            return '';
+        }
+
+        ob_start();
+        ?>
+        <p style="margin-top:16px;"><strong><?php esc_html_e('Recently recognised payments', 'sqrip-swiss-qr-invoice'); ?></strong></p>
+        <table class="widefat striped" style="margin-top:4px;">
+            <thead>
+                <tr>
+                    <th><?php esc_html_e('Date / time', 'sqrip-swiss-qr-invoice'); ?></th>
+                    <th><?php esc_html_e('QR reference / SCOR', 'sqrip-swiss-qr-invoice'); ?></th>
+                    <th><?php esc_html_e('Amount', 'sqrip-swiss-qr-invoice'); ?></th>
+                    <th><?php esc_html_e('Score', 'sqrip-swiss-qr-invoice'); ?></th>
+                    <th><?php esc_html_e('Findings', 'sqrip-swiss-qr-invoice'); ?></th>
+                    <th><?php esc_html_e('Consequence', 'sqrip-swiss-qr-invoice'); ?></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($log as $row) : ?>
+                    <tr>
+                        <td><?php echo esc_html(self::log_time($row)); ?></td>
+                        <td><code><?php echo esc_html(isset($row['reference']) ? $row['reference'] : ''); ?></code></td>
+                        <td><?php echo esc_html(self::log_amount($row)); ?></td>
+                        <td><?php echo esc_html(self::log_score($row)); ?></td>
+                        <td><?php echo esc_html(self::aspects_label(isset($row['aspects']) ? $row['aspects'] : array())); ?></td>
+                        <td><?php echo esc_html(isset($row['consequence']) ? $row['consequence'] : ''); ?></td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+        <?php
+
+        return ob_get_clean();
+    }
+
+    /**
+     * @param array $row
+     * @return string Local date and time of a log row.
+     */
+    private static function log_time($row)
+    {
+        $ts = isset($row['ts']) ? (int) $row['ts'] : 0;
+
+        if (!$ts) {
+            return '';
+        }
+
+        return wp_date(get_option('date_format') . ' ' . get_option('time_format'), $ts);
+    }
+
+    /**
+     * @param array $row
+     * @return string
+     */
+    private static function log_amount($row)
+    {
+        if (!isset($row['amount']) || $row['amount'] === null) {
+            return '—';
+        }
+
+        return trim((string) (isset($row['currency']) ? $row['currency'] : '') . ' ' . number_format((float) $row['amount'], 2, '.', ''));
+    }
+
+    /**
+     * @param array $row
+     * @return string Score out of 10, or a dash when the row carries none.
+     */
+    private static function log_score($row)
+    {
+        if (!isset($row['score']) || $row['score'] === null) {
+            return '—';
+        }
+
+        /* translators: %d: score from 0 to 10 */
+        return sprintf(__('%d/10', 'sqrip-swiss-qr-invoice'), (int) $row['score']);
+    }
+
+    /**
+     * Turn the service's matched aspects into readable findings.
+     *
+     * @param array $aspects
+     * @return string
+     */
+    private static function aspects_label($aspects)
+    {
+        if (!is_array($aspects) || !$aspects) {
+            return '—';
+        }
+
+        $labels = array(
+            'reference'    => __('Reference', 'sqrip-swiss-qr-invoice'),
+            'order_number' => __('Order number', 'sqrip-swiss-qr-invoice'),
+            'payer'        => __('Payer', 'sqrip-swiss-qr-invoice'),
+            'amount'       => __('Amount', 'sqrip-swiss-qr-invoice'),
+        );
+
+        $out = array();
+
+        foreach ($aspects as $a) {
+            $out[] = isset($labels[$a]) ? $labels[$a] : (string) $a;
+        }
+
+        return implode(', ', $out);
+    }
+
+    // --- one-time processing guard (single delivery) ----------------------
+
+    /**
+     * @param array $parts
+     * @return string A stable key for one match or warning.
+     */
+    private static function dedup_key(array $parts)
+    {
+        return md5((string) wp_json_encode($parts));
+    }
+
+    /**
+     * @param string $key
+     * @return bool
+     */
+    private static function already_processed($key)
+    {
+        $seen = get_option(self::SEEN_OPTION, array());
+
+        return is_array($seen) && isset($seen[$key]);
+    }
+
+    /**
+     * @param string $key
+     * @return void
+     */
+    private static function mark_processed($key)
+    {
+        $seen = get_option(self::SEEN_OPTION, array());
+
+        if (!is_array($seen)) {
+            $seen = array();
+        }
+
+        $seen[$key] = time();
+
+        // Keep the set bounded; drop the oldest keys well above any single claim's size.
+        if (count($seen) > 500) {
+            asort($seen);
+            $seen = array_slice($seen, -500, null, true);
+        }
+
+        update_option(self::SEEN_OPTION, $seen, false);
     }
 
     // --- Stufe 3: probable payments, confirmed by the admin via signed links ----
@@ -525,7 +1158,7 @@ class Sqrip_Avis
      * @param array $candidates normalized reference => {order_id, order_number, currency, expected}.
      * @return void
      */
-    private static function send_suggestion_email(array $sug, array $candidates)
+    private static function send_suggestion_email(array $sug, array $candidates, $reason = 'candidate')
     {
         $amount   = isset($sug['amount']) ? number_format((float) $sug['amount'], 2, '.', '') : '';
         $currency = isset($sug['currency']) ? (string) $sug['currency'] : '';
@@ -586,7 +1219,16 @@ class Sqrip_Avis
             . '<th style="text-align:left;padding:8px 14px;border-bottom:2px solid #333;">' . esc_html__('Action', 'sqrip-swiss-qr-invoice') . '</th>'
             . '</tr>';
 
-        $intro = __('The sqrip payment notification service found a probable payment that could not be assigned automatically. Please check it against the order, then confirm, reject, or open the order for details. The links are valid for 24 hours and work once.', 'sqrip-swiss-qr-invoice');
+        switch ($reason) {
+            case 'over_threshold':
+                $intro = __('This payment is above your release limit. Please check it, then confirm to mark the order paid, reject to leave it open, or open the order for details. The links are valid for 24 hours and work once.', 'sqrip-swiss-qr-invoice');
+                break;
+            case 'overpayment':
+                $intro = __('The customer paid more than the order total. Please check it, then confirm to mark the order paid, reject to leave it open, or open the order for details. The links are valid for 24 hours and work once.', 'sqrip-swiss-qr-invoice');
+                break;
+            default:
+                $intro = __('The sqrip payment notification service found a probable payment that could not be assigned automatically. Please check it against the order, then confirm, reject, or open the order for details. The links are valid for 24 hours and work once.', 'sqrip-swiss-qr-invoice');
+        }
 
         // Two clearly labelled sources: what the bank reported (via the notification
         // service) vs. what your shop holds. Sender / value date only exist on some
@@ -604,7 +1246,9 @@ class Sqrip_Avis
             . '<tbody>' . $rows . '</tbody>'
             . '</table>';
 
-        $subject = __('sqrip: probable payment — please check', 'sqrip-swiss-qr-invoice');
+        $subject = ($reason === 'candidate')
+            ? __('sqrip: probable payment — please check', 'sqrip-swiss-qr-invoice')
+            : __('sqrip: payment held — please release', 'sqrip-swiss-qr-invoice');
         $to      = apply_filters('sqrip_avis_suggestion_recipient', get_option('admin_email'));
 
         wp_mail($to, $subject, $body, array('Content-Type: text/html; charset=UTF-8'));
@@ -773,10 +1417,10 @@ class Sqrip_Avis
             wp_send_json_error(array('message' => $report));
         }
 
-        // A human pressed the button, so the threshold guard does not apply here.
-        $applied = self::apply($report, true);
+        // A human pressed the button: the release limit does not apply here.
+        self::process($report, true);
 
-        wp_send_json_success(array('html' => self::render_check($report, $applied)));
+        wp_send_json_success(array('html' => self::render_check($report)));
     }
 
     /**
@@ -785,29 +1429,14 @@ class Sqrip_Avis
      * arriving and being recognised.
      *
      * @param array $report
-     * @param array $applied order_id => order_number that were booked just now
      * @return string
      */
-    private static function render_check(array $report, array $applied)
+    private static function render_check(array $report)
     {
         $orders = $report['orders'];
 
         ob_start();
         ?>
-        <p>
-            <?php
-            printf(
-                esc_html(_n(
-                    '%d order waiting for payment checked.',
-                    '%d orders waiting for payment checked.',
-                    (int) $report['orders_scanned'],
-                    'sqrip-swiss-qr-invoice'
-                )),
-                (int) $report['orders_scanned']
-            );
-            ?>
-        </p>
-
         <?php
         if (!empty($report['last_seen'])) :
             $ls  = $report['last_seen'];
@@ -824,7 +1453,8 @@ class Sqrip_Avis
             }
 
             $when = isset($ls['seen_at']) ? strtotime((string) $ls['seen_at']) : 0;
-            $when = $when ? date_i18n(get_option('date_format') . ' ' . get_option('time_format'), $when) : '';
+            // seen_at is UTC; render it in the site's timezone so the time is not off.
+            $when = $when ? wp_date(get_option('date_format') . ' ' . get_option('time_format'), $when) : '';
             ?>
             <p class="description">
                 <?php
@@ -841,17 +1471,18 @@ class Sqrip_Avis
             </p>
         <?php endif; ?>
 
+        <p style="margin-top:12px;"><strong><?php esc_html_e('Orders still waiting for payment', 'sqrip-swiss-qr-invoice'); ?></strong></p>
+
         <?php if (!$orders) : ?>
-            <p><?php esc_html_e('There are no orders waiting for payment right now.', 'sqrip-swiss-qr-invoice'); ?></p>
+            <p class="description"><?php esc_html_e('There are no orders waiting for payment right now.', 'sqrip-swiss-qr-invoice'); ?></p>
         <?php else : ?>
-            <table class="widefat striped">
+            <table class="widefat striped" style="margin-top:4px;">
                 <thead>
                     <tr>
                         <th><?php esc_html_e('Order number', 'sqrip-swiss-qr-invoice'); ?></th>
                         <th><?php esc_html_e('Amount', 'sqrip-swiss-qr-invoice'); ?></th>
                         <th><?php esc_html_e('QR reference / SCOR', 'sqrip-swiss-qr-invoice'); ?></th>
                         <th><?php esc_html_e('Name', 'sqrip-swiss-qr-invoice'); ?></th>
-                        <th><?php esc_html_e('Status', 'sqrip-swiss-qr-invoice'); ?></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -870,44 +1501,25 @@ class Sqrip_Avis
                             <td><?php echo esc_html($entry['currency'] . ' ' . number_format((float) $entry['total'], 2, '.', '')); ?></td>
                             <td><code><?php echo esc_html(implode(', ', $refs)); ?></code></td>
                             <td><?php echo esc_html($name); ?></td>
-                            <td><?php echo esc_html(self::status_label($entry, isset($applied[$entry['order_id']]))); ?></td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>
             </table>
         <?php endif; ?>
 
-        <?php foreach ($report['warnings'] as $warning) : ?>
-            <p class="description"><?php echo esc_html($warning); ?></p>
+        <?php
+        foreach ($report['warnings'] as $warning) :
+            if (!is_array($warning)) {
+                continue;
+            }
+            ?>
+            <p class="description"><?php echo esc_html(self::warning_message($warning)); ?></p>
         <?php endforeach; ?>
+
+        <?php echo self::render_log(); // escaped markup ?>
         <?php
 
         return ob_get_clean();
-    }
-
-    /**
-     * @param array $entry
-     * @param bool  $booked
-     * @return string
-     */
-    private static function status_label($entry, $booked)
-    {
-        switch ($entry['category']) {
-            case Sqrip_Camt_Reconciler::PAID:
-                return $booked
-                    ? __('Paid — status updated', 'sqrip-swiss-qr-invoice')
-                    : __('Paid — waiting for your confirmation', 'sqrip-swiss-qr-invoice');
-            case Sqrip_Camt_Reconciler::PARTLY_PAID:
-                return __('Partly paid', 'sqrip-swiss-qr-invoice');
-            case Sqrip_Camt_Reconciler::AMOUNT_MISMATCH:
-                return __('Amount differs — please check', 'sqrip-swiss-qr-invoice');
-            case Sqrip_Camt_Reconciler::DUPLICATE:
-                return __('Paid more than once — please check', 'sqrip-swiss-qr-invoice');
-            case Sqrip_Camt_Reconciler::OUT_OF_SEQUENCE:
-                return __('An earlier instalment is still unpaid', 'sqrip-swiss-qr-invoice');
-        }
-
-        return __('Still waiting for payment', 'sqrip-swiss-qr-invoice');
     }
 
     /**

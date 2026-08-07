@@ -965,21 +965,35 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'description' => __('We use information that banks already send out today: e-mail notifications about account credits. These e-mails carry enough to guarantee a unique match to your orders. The banks expressly permit the further use of these notifications; it is the responsibility of their customer — that is, YOU — how these e-mails are handled. For every successful reconciliation we charge you 1 credit.', 'sqrip-swiss-qr-invoice'),
                 'class' => 'comparison-tab sqrip-avis-detail'
             ),
-            'avis_wizard' => array(
-                'title' => __('Setup', 'sqrip-swiss-qr-invoice'),
-                'type' => 'avis_wizard',
+            'avis_setup' => array(
+                'title' => __('Set up', 'sqrip-swiss-qr-invoice'),
+                'type' => 'avis_setup',
+                'description' => __('Forward your shop account\'s credit notifications to our notification service. The service reads them, compares the payment details, and tells the plugin which order was paid. The plugin updates the order status according to your "Status of completed orders" setting.', 'sqrip-swiss-qr-invoice'),
                 'class' => 'comparison-tab sqrip-avis-detail'
             ),
             'avis_threshold' => array(
-                'title' => sprintf(
-                    /* translators: %s: the shop currency, e.g. CHF */
-                    __('Confirm by hand from (%s)', 'sqrip-swiss-qr-invoice'),
-                    get_woocommerce_currency()
+                'title' => __('Configure', 'sqrip-swiss-qr-invoice'),
+                'type' => 'avis_threshold',
+                'description' => __('Want to release larger amounts yourself, for safety? Set the limit above which sqrip e-mails you the reconciled data for release. At 0, every payment needs your release. To accept all payments automatically, set the value very high, e.g. above 1,000,000.', 'sqrip-swiss-qr-invoice'),
+                'default' => '1000000',
+                'class' => 'comparison-tab sqrip-avis-detail'
+            ),
+            'avis_overpayment' => array(
+                'title' => __('Overpayment', 'sqrip-swiss-qr-invoice'),
+                'type' => 'select',
+                'default' => 'hold',
+                'options' => array(
+                    'hold' => __('Hold the order and e-mail me', 'sqrip-swiss-qr-invoice'),
+                    'pay'  => __('Mark as paid and e-mail me', 'sqrip-swiss-qr-invoice'),
                 ),
-                'type' => 'number',
-                'custom_attributes' => array('step' => '0.01', 'min' => '0'),
-                'description' => __('Payments of this amount or more are not booked automatically — you confirm them by hand. Leave at 0 to book every match automatically.', 'sqrip-swiss-qr-invoice'),
-                'default' => '0',
+                'description' => __('What to do when a customer pays more than the order total.', 'sqrip-swiss-qr-invoice'),
+                'desc_tip' => true,
+                'class' => 'comparison-tab sqrip-avis-detail'
+            ),
+            'avis_reconcile' => array(
+                'title' => __('Reconcile', 'sqrip-swiss-qr-invoice'),
+                'type' => 'avis_reconcile',
+                'description' => __('Reconciliation runs regularly every minute, without display. Trigger a reconciliation by hand to see the currently available data here.', 'sqrip-swiss-qr-invoice'),
                 'class' => 'comparison-tab sqrip-avis-detail'
             ),
             'return_token' => array(
@@ -1307,40 +1321,38 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
     }
 
     /**
-     * The setup assistant for the email payment notification service: shows the
-     * shop's address, drives the verification-code exchange, and offers a manual
-     * "check now". Everything is driven by js/sqrip-avis.js against Sqrip_Avis.
+     * "Set up" section: the shop's address plus the three numbered steps that wire the
+     * e-banking to the notification service (create the notification, optional one-time
+     * code, verify by forwarding an earlier e-mail). Driven by js/sqrip-avis.js.
      *
      * @since 1.11
      * @return string
      */
-    public function generate_avis_wizard_html($key, $data)
+    public function generate_avis_setup_html($key, $data)
     {
-        $data = wp_parse_args($data, array('title' => '', 'class' => ''));
+        $data = wp_parse_args($data, array('title' => '', 'description' => '', 'class' => ''));
 
         $localpart = class_exists('Sqrip_Avis') ? Sqrip_Avis::localpart() : '';
         $address   = $localpart ? $localpart . '@avis.sqrip.ch' : '';
+        $addr_html = '<code class="sqrip-avis-address">' . ($address ? esc_html($address) : '') . '</code>'
+            . '<button type="button" class="sqrip-avis-copy" title="' . esc_attr__('Copy', 'sqrip-swiss-qr-invoice') . '" style="border:0; background:none; cursor:pointer; padding:0 2px; vertical-align:middle;' . ($address ? '' : ' display:none;') . '"><span class="dashicons dashicons-admin-page"></span></button>'
+            . '<span class="sqrip-avis-copied" style="display:none; color:#00794d;">' . esc_html__('Copied', 'sqrip-swiss-qr-invoice') . '</span>';
 
         ob_start();
         ?>
         <tr valign="top">
             <th scope="row" class="titledesc <?php echo esc_attr($data['class']); ?>">
-                <label><?php echo wp_kses_post($data['title']); ?></label>
+                <label><?php echo esc_html($data['title']); ?></label>
+                <?php if ($data['description']) : ?>
+                    <p class="description" style="font-weight:400;"><?php echo wp_kses_post($data['description']); ?></p>
+                <?php endif; ?>
             </th>
             <td class="forminp">
                 <fieldset class="sqrip-avis-panel <?php echo esc_attr($data['class']); ?>">
                     <ol class="sqrip-avis-steps">
                         <li>
-                            <?php esc_html_e('Enter this address in your e-banking as the destination for credit notifications:', 'sqrip-swiss-qr-invoice'); ?>
-                            <p>
-                                <code class="sqrip-avis-address"><?php echo $address ? esc_html($address) : ''; ?></code>
-                                <button type="button" class="sqrip-avis-copy" title="<?php esc_attr_e('Copy', 'sqrip-swiss-qr-invoice'); ?>" style="border:0; background:none; cursor:pointer; padding:0 2px; vertical-align:middle;<?php echo $address ? '' : ' display:none;'; ?>">
-                                    <span class="dashicons dashicons-admin-page"></span>
-                                </button>
-                                <span class="sqrip-avis-copied" style="display:none; color:#00794d;">
-                                    <?php esc_html_e('Copied', 'sqrip-swiss-qr-invoice'); ?>
-                                </span>
-                            </p>
+                            <?php esc_html_e('In your online banking, create a new notification for credits to your shop account. Allow as much information as possible. Enter this address in your e-banking as the destination for credit notifications:', 'sqrip-swiss-qr-invoice'); ?>
+                            <p><?php echo $addr_html; // built with esc_html above ?></p>
                         </li>
                         <li>
                             <?php esc_html_e('Some banks send a one-time confirmation code to that address. If yours does, start the verification window — sqrip catches the code and shows it here, so you can enter it back in your e-banking:', 'sqrip-swiss-qr-invoice'); ?>
@@ -1353,26 +1365,17 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                                 </button>
                             </p>
                             <div class="sqrip-avis-code"></div>
-                            <p class="description">
-                                <?php esc_html_e('No code? Some banks (for example AKB) send none. Then just skip this step — the service is active as soon as your settings are saved and the first notification arrives.', 'sqrip-swiss-qr-invoice'); ?>
-                            </p>
                         </li>
                         <li>
-                            <?php esc_html_e('Done — incoming payments are now detected automatically. Use "Check now" below any time.', 'sqrip-swiss-qr-invoice'); ?>
+                            <?php
+                            /* translators: %s: the shop's notification e-mail address */
+                            printf(
+                                esc_html__('To verify, forward an earlier notification e-mail or an e-mail with a bank document (PDF) to %s, then click "Reconcile now" below. You will get the current list of unpaid orders and the information read from the e-mail. If both are shown correctly, the service is ready.', 'sqrip-swiss-qr-invoice'),
+                                $address ? '<code>' . esc_html($address) . '</code>' : esc_html__('your address above', 'sqrip-swiss-qr-invoice')
+                            );
+                            ?>
                         </li>
                     </ol>
-
-                    <hr />
-
-                    <p class="description">
-                        <?php esc_html_e('Check at any time whether open orders have been paid:', 'sqrip-swiss-qr-invoice'); ?>
-                    </p>
-                    <p>
-                        <button type="button" class="button-secondary sqrip-avis-reconcile">
-                            <?php esc_html_e('Check now', 'sqrip-swiss-qr-invoice'); ?>
-                        </button>
-                    </p>
-                    <div class="sqrip-avis-result"></div>
                 </fieldset>
             </td>
         </tr>
@@ -1382,12 +1385,107 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
     }
 
     /**
-     * Nothing is stored for the wizard field.
+     * "Configure" section: the release limit, with the shop currency shown in front of
+     * the field. Stored under avis_threshold like a normal setting.
      *
      * @since 1.11
      * @return string
      */
-    public function validate_avis_wizard_field($key, $value)
+    public function generate_avis_threshold_html($key, $data)
+    {
+        $field_key = $this->get_field_key($key);
+        $data      = wp_parse_args($data, array('title' => '', 'description' => '', 'class' => '', 'default' => '1000000'));
+        $value     = $this->get_option($key);
+        $currency  = get_woocommerce_currency();
+
+        ob_start();
+        ?>
+        <tr valign="top">
+            <th scope="row" class="titledesc <?php echo esc_attr($data['class']); ?>">
+                <label for="<?php echo esc_attr($field_key); ?>"><?php echo esc_html($data['title']); ?></label>
+                <?php if ($data['description']) : ?>
+                    <p class="description" style="font-weight:400;"><?php echo wp_kses_post($data['description']); ?></p>
+                <?php endif; ?>
+            </th>
+            <td class="forminp">
+                <span style="display:inline-block; padding-right:6px; color:#555;"><?php echo esc_html($currency); ?></span>
+                <input type="number" step="0.01" min="0" name="<?php echo esc_attr($field_key); ?>" id="<?php echo esc_attr($field_key); ?>" value="<?php echo esc_attr($value); ?>" style="width:12em;" />
+            </td>
+        </tr>
+        <?php
+
+        return ob_get_clean();
+    }
+
+    /**
+     * Keep a clean float string for the release limit. Empty falls back to "book all
+     * automatically" (a very high limit) so a blank field never means "confirm every
+     * payment by hand".
+     *
+     * @since 1.11
+     * @return string
+     */
+    public function validate_avis_threshold_field($key, $value)
+    {
+        $value = is_null($value) ? '' : trim(wp_unslash((string) $value));
+
+        if ($value === '') {
+            return '1000000';
+        }
+
+        $value = str_replace(array("'", ' '), '', $value);
+
+        return (string) (float) $value;
+    }
+
+    /**
+     * "Reconcile" section: the manual trigger plus the result/log area. On page load it
+     * shows the recently recognised payments; a click replaces it with a fresh check.
+     * Driven by js/sqrip-avis.js.
+     *
+     * @since 1.11
+     * @return string
+     */
+    public function generate_avis_reconcile_html($key, $data)
+    {
+        $data     = wp_parse_args($data, array('title' => '', 'description' => '', 'class' => ''));
+        $log_html = class_exists('Sqrip_Avis') ? Sqrip_Avis::render_log() : '';
+
+        ob_start();
+        ?>
+        <tr valign="top">
+            <th scope="row" class="titledesc <?php echo esc_attr($data['class']); ?>">
+                <label><?php echo esc_html($data['title']); ?></label>
+                <?php if ($data['description']) : ?>
+                    <p class="description" style="font-weight:400;"><?php echo wp_kses_post($data['description']); ?></p>
+                <?php endif; ?>
+            </th>
+            <td class="forminp">
+                <p>
+                    <button type="button" class="button-secondary sqrip-avis-reconcile">
+                        <?php esc_html_e('Reconcile now', 'sqrip-swiss-qr-invoice'); ?>
+                    </button>
+                </p>
+                <div class="sqrip-avis-result"><?php echo $log_html; // escaped in Sqrip_Avis::render_log() ?></div>
+            </td>
+        </tr>
+        <?php
+
+        return ob_get_clean();
+    }
+
+    /**
+     * Nothing is stored for the setup or reconcile display fields.
+     *
+     * @since 1.11
+     * @return string
+     */
+    public function validate_avis_setup_field($key, $value)
+    {
+        return '';
+    }
+
+    public function validate_avis_reconcile_field($key, $value)
     {
         return '';
     }

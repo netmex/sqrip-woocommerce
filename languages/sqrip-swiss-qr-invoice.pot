@@ -1,928 +1,1994 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: sqrip.ch 1.9\n"
+"Project-Id-Version: sqrip-swiss-qr-invoice 1.11\n"
 "Report-Msgid-Bugs-To: https://sqrip.ch/\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Domain: sqrip-swiss-qr-invoice\n"
 
-#: inc/class-wc-sqrip-payment-gateway.php:532
-msgid "% of total amount in 1st qr-invoice"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:569
-msgid "% of total amount in 2nd qr-invoice"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:613
-msgid "% of total amount in 3rd qr-invoice"
-msgstr ""
-
-#: sqrip-woocommerce.php:899
-msgid "%s %s <p>%s</p>"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:274
-msgid "(QR-)IBAN of Payee"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:276
-msgid "(QR-)IBAN of the account to which the transfer is to be made"
-msgstr ""
-
-#: sqrip-woocommerce.php:891
-msgid "<b>%s</b> %s</br>%s"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:1290
-msgid "<span id=\"test-email-status\">Test email has been sent! <a href=\"%s\" target=\"_blank\">Click here</a> to view the invoice.</span>"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:371
-msgid "[order_date]_[shop_name]_invoice-order_[order_number]"
-msgstr ""
-
-#: inc/sqrip-ajax.php:134
+#: inc/functions.php:150
+#, php-format
 msgid ""
-"Action required:\\n"
-"Please confirm change of IBAN on <a href='https://api.sqrip.ch/login' target='_blank'>sqrip.ch</a> in order to continue the service."
+"No sqrip QR invoice was created: the invoice address is in %s, which is not "
+"among the countries selected in the sqrip settings."
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:235
-msgid "Activate Multiple QR-slips per order"
+#: inc/functions.php:223
+#, php-format
+msgid "Paid. No longer payable: %s."
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:192
-msgid "Activate sqrip"
+#: inc/functions.php:253
+msgid "the ordinary QR invoice"
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:227
-msgid "Activate sqrip for Payment Comparison"
+#: inc/functions.php:254
+msgid "the QR invoice with Skonto"
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:243
-msgid "Activate sqrip for Refunds"
+#: inc/functions.php:255
+msgid "the payment reminder"
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:234
-msgid "Activate/Deactivate Multiple QR-slips"
+#: inc/functions.php:371
+msgid "Use the QR invoice below to pay the outstanding balance."
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:226
-msgid "Activate/Deactivate Payment Comparison"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:242
-msgid "Activate/Deactivate Refunds"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:187
-msgid "Activation & Status"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:359
-msgid "Additional Information"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:280
-msgid "Address"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:462
-msgid "Also send the order-confirmation e-mails (to the customer and to the shop admin) when a new sqrip order is placed"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:181
-msgid "API key"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:754
-msgid "API key for Refunds"
-msgstr ""
-
-#: sqrip-woocommerce.php:255
-msgid "As from November 2025 on, the QR invoice is only accepted when addresses consist of separate fields for street and building number."
-msgstr ""
-
-#: sqrip-woocommerce.php:258
-msgid "as your third address;"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:606
-msgid "Attach 2nd QR-Invoice to E-Mail template"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:650
-msgid "Attach 3rd QR-Invoice to E-Mail template"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:509
-msgid "Attach QR-Invoice to E-Mail template"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:213
-msgid "Auto turn off"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:214
-msgid "Auto turn off sqrip services if error occurs"
-msgstr ""
-
-#: sqrip-woocommerce.php:504
-msgid "Automatic QR-invoice generation by sqrip is disabled."
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:702
-msgid "Awaiting payment"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:342
-msgid "Basis of the (QR-)Ref#"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:328
-msgid "Both Company Name and First/Last name "
-msgstr ""
-
-#: sqrip-woocommerce.php:921
-#: sqrip-woocommerce.php:922
-msgid "Building Number"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:297
-msgid "Building Number*"
-msgstr ""
-
-#: sqrip-woocommerce.php:1604
-#: sqrip-woocommerce.php:1607
-#: sqrip-woocommerce.php:1610
-#: sqrip-woocommerce.php:1613
-msgid "Change status to %s"
-msgstr ""
-
-#: sqrip-woocommerce.php:237
-msgid "Check"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:375
-msgid "Checkout Page Remarks"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:307
-msgid "City*"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:485
-msgid "Combine QR-Slip with Invoice into one document"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:722
-msgid "Completed Orders Status"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:734
-msgid "Completed, Paid"
-msgstr ""
-
-#: sqrip-woocommerce.php:411
-#: sqrip-woocommerce.php:490
-msgid "Confirm payment"
-msgstr ""
-
-#: sqrip-woocommerce.php:1469
-msgid "Confirm Payment"
-msgstr ""
-
-#: sqrip-woocommerce.php:1456
-msgid "Confirm receipt of payment"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:176
-msgid "Connection"
-msgstr ""
-
-#: sqrip-woocommerce.php:236
-msgid "Connection test"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:312
-msgid "Country*"
-msgstr ""
-
-#: sqrip-woocommerce.php:238
-#: sqrip-woocommerce.php:239
-#: sqrip-woocommerce.php:240
-#: sqrip-woocommerce.php:241
-#: sqrip-woocommerce.php:242
-#: sqrip-woocommerce.php:243
-#: sqrip-woocommerce.php:244
-msgid "Create"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:206
-msgid "Current sqrip status"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:673
-msgid "days."
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:417
-msgid "Define Status when QR-Invoice is suppressed"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:672
-msgid "Delete any generated QR-invoice after "
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:665
-msgid "Delete QR-invoice once status has been changed to"
-msgstr ""
-
-#: sqrip-woocommerce.php:416
-#: sqrip-woocommerce.php:420
-#: sqrip-woocommerce.php:430
-#: sqrip-woocommerce.php:433
-#: sqrip-woocommerce.php:1449
-msgid "Deleted"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:262
-msgid "Description"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:264
-msgid "Description of what the customer can expect from this payment option."
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:250
-msgid "Display"
-msgstr ""
-
-#: inc/functions.php:449
-msgid "Do not attach to any e-mail"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:126
-msgid "Do not set this too low! Remove input to disable the setting."
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:410
-msgid "Don't generate QR-invoice at checkout but manually"
-msgstr ""
-
-#: sqrip-woocommerce.php:666
-#: sqrip-woocommerce.php:673
-msgid "Download Invoice"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:362
+#: inc/functions.php:378
 msgid ""
-"Due date: [due_date format=\"y-MM-dd\"]\\n"
-"Order: [order_number]\\n"
-"Thank you for your purchase!"
+"It seems we couldn't provide you with a QR-invoice at this time. Please try "
+"later, contact the shop or use a different payment method."
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:1292
-msgid "E-Mail can not be sent, please check WP MAIL SMTP"
+#: inc/functions.php:385
+msgid ""
+"The QR invoice is not available for your invoice address. Please choose a "
+"different payment method."
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:327
-msgid "Either Company Name(priority) or First/Last name"
+#: inc/functions.php:520
+msgid ""
+"Please add IBAN in the settings of your webshop or on the sqrip dashboard."
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:193
-msgid "Enable QR invoices with sqrip API"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:466
-msgid "Enable this if you keep orders in a status (such as 'Pending payment') that does not itself trigger WooCommerce e-mails. sqrip then sends the 'New order' (admin) and 'Order on-hold' (customer) e-mails directly at checkout, so confirmations go out without changing your chosen status. Leave off to keep the standard WooCommerce behaviour."
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:398
-msgid "English"
-msgstr ""
-
-#: sqrip-woocommerce.php:800
-#: inc/functions.php:984
-#: inc/functions.php:993
-#: inc/class-wc-sqrip-payment-gateway.php:1420
-#: inc/class-wc-sqrip-payment-gateway.php:1437
-#: inc/class-wc-sqrip-payment-gateway.php:1473
-#: inc/class-wc-sqrip-payment-gateway.php:1722
-#: inc/class-wc-sqrip-payment-gateway.php:1731
-msgid "Error: %s"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:1407
-msgid "Error: Es wurde kein API Schlüssel für die Rückerstattungen angegeben. Bitte ergänze dies in den sqrip Plugin Einstellungen."
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:221
-msgid "Features"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:367
-msgid "File Name"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:756
-msgid "For security reasons, a separate API key with <strong>deactived</strong> confirmation is needed for the Refund function."
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:382
-msgid "Format"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:396
-msgid "French"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:115
-msgid "from sqrip account: %s"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:119
-msgid "from WooCommerce: %s"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:687
-msgid "General Settings"
-msgstr ""
-
-#: sqrip-woocommerce.php:710
-msgid "Generate new QR code"
-msgstr ""
-
-#: sqrip-woocommerce.php:452
-#: sqrip-woocommerce.php:505
-msgid "Generate QR Invoice"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:395
-msgid "German"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:404
-msgid "Handling"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:428
-#: inc/class-wc-sqrip-payment-gateway.php:458
-#: inc/class-wc-sqrip-payment-gateway.php:550
-#: inc/class-wc-sqrip-payment-gateway.php:587
-#: inc/class-wc-sqrip-payment-gateway.php:631
-#: inc/class-wc-sqrip-payment-gateway.php:703
-#: inc/class-wc-sqrip-payment-gateway.php:735
-msgid "here"
-msgstr ""
-
-#: sqrip-woocommerce.php:951
-msgid "Hide QR Code"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:1037
-msgid "IBAN changes: Active confirmation (see API key in sqrip.ch account)."
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:1041
-msgid "IBAN changes: Passive confirmation (see API key in sqrip.ch account)"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:1378
-msgid "IBAN des Kunden wurde nicht gefunden. Stelle sicher, dass sie im Meta-Feld 'iban_num' hinterlegt ist."
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:237
-msgid "If activated, sqrip generates multiple QR-slips per order based on specified percentages of total amount."
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:245
-msgid "If activated, sqrip makes refunding easier by creating a QR-code that can be scanned with the banking app to initiate a bank transfer to the client."
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:229
-msgid "If activated, sqrip will add an action for orders with the status specified in setting 1 (Awaiting payment), to change the status to the one specified in setting 2 (Confirmed)."
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:703
-#: inc/class-wc-sqrip-payment-gateway.php:735
-msgid "If there is no suitable status available, you can create one right %s"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:412
-msgid "If you enable this, the order status for orders with sqrip will change to 'Payment pending', a confirmation e-mail will be sent and the order will wait for you to generate qr-invoices manually. This is helpful if you may need to adjust pricing or quantity after an order has been placed"
-msgstr ""
-
-#: sqrip-woocommerce.php:259
-msgid "in your checkout process when clients enter their billing address."
-msgstr ""
-
-#: sqrip-woocommerce.php:257
-msgid "in your sqrip account;"
-msgstr ""
-
-#: inc/sqrip-ajax.php:126
-#: inc/sqrip-ajax.php:133
-msgid "incorrect"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:335
-msgid "Initiate QR-Ref# with these 6 digits"
-msgstr ""
-
-#: sqrip-woocommerce.php:811
-msgid "Initiate sqrip payment error:"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:319
-msgid "Invoice Details"
-msgstr ""
-
-#: inc/sqrip-ajax.php:127
-msgid "It seems that an invalid (QR-)IBAN has been submitted. Please check the designated transfers-receiving IBAN you submitted."
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:397
-msgid "Italian"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:674
-msgid "Keep the size of your media library small. sqrip deletes all qr-invoice files that are not needed anymore"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:392
-msgid "Language"
-msgstr ""
-
-#: sqrip-woocommerce.php:953
-msgid "Mark as paid"
-msgstr ""
-
-#: sqrip-woocommerce.php:954
-msgid "Mark as unpaid"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:352
-msgid "Maturity (Today in x days)"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:159
-msgid "Multiple QR-Slips"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:287
-msgid "Name*"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:516
-msgid "Number of qr-invoices to deliver"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:494
-msgid "Offer QR invoice for download"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:386
-msgid "on a blank A4 PDF"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:387
-msgid "only the A6 payment part as PDF"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:183
-msgid "Open an account at <a href=\"https://sqrip.ch\" target=\"_blank\">https://sqrip.ch</a>, create an API key, copy and paste it here. Done!"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:346
-msgid "Order number"
-msgstr ""
-
-#: sqrip-woocommerce.php:408
-msgid "Paid"
-msgstr ""
-
-#: sqrip-woocommerce.php:956
-msgid "paid on"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:524
-msgid "Partial Invoice Information"
-msgstr ""
-
-#: sqrip-woocommerce.php:398
-msgid "Partial Payment"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:527
-msgid "Partial payment [invoice] of [max_invoice]"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:549
-#: inc/class-wc-sqrip-payment-gateway.php:586
-#: inc/class-wc-sqrip-payment-gateway.php:630
-msgid "Partially paid"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:269
-msgid "Payee"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:324
-msgid "Payer"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:164
-msgid "Payment Comparison"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:255
-msgid "Payment method name"
-msgstr ""
-
-#: inc/functions.php:159
-msgid "Please add IBAN in the settings of your webshop or on the sqrip dashboard."
-msgstr ""
-
-#: sqrip-woocommerce.php:256
-msgid "Please make sure you have this defined correctly:"
-msgstr ""
-
-#: sqrip-woocommerce.php:502
-msgid "Please note that the sqrip payment method is disabled in the sqrip plugin settings."
-msgstr ""
-
-#: inc/functions.php:165
+#: inc/functions.php:526
 msgid "Please select a product in the settings."
 msgstr ""
 
-#: sqrip-woocommerce.php:885
-msgid "Please submit at least either Name / Last name or Company name to generate the qr-invoice"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:486
-msgid "Plugin <a href='https://wordpress.org/plugins/woocommerce-pdf-invoices-packing-slips'> 'PDF Invoices & Packing Slips for WooCommerce' </a> "
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:502
-msgid "Position:"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:457
-msgid "QR order status"
-msgstr ""
-
-#: sqrip-woocommerce.php:478
-msgid "QR-Code PDF"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:154
-msgid "QR-Invoice"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:345
-msgid "Random number"
-msgstr ""
-
-#: sqrip-woocommerce.php:471
-msgid "Reference number"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:170
-msgid "Refunds"
-msgstr ""
-
-#: sqrip-woocommerce.php:1028
-msgid "Refunds with sqrip"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:200
-msgid "Remaining Credits"
-msgstr ""
-
-#: sqrip-woocommerce.php:450
-msgid "Renew QR Invoice"
-msgstr ""
-
-#: sqrip-woocommerce.php:809
-msgid "Renew QR Invoice error:"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:510
-#: inc/class-wc-sqrip-payment-gateway.php:607
-#: inc/class-wc-sqrip-payment-gateway.php:651
-msgid "Select email templates to which the QR-invoice are attached"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:517
-msgid "Select number of qr-invoices to send to customer"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:658
-msgid "Send a copy of the Email with PDF invoice to Admin"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:657
-msgid "Send a copy to the shop admin"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:461
-msgid "Send order-confirmation e-mails for this status"
-msgstr ""
-
-#: sqrip-woocommerce.php:246
-msgid "Send test to %s"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:149
-msgid "Services"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:458
-msgid "Set the status of a newly placed order with payment method 'sqrip' so it matches your shop process. Should no status be suitable, please create one for your own %s."
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:550
-msgid "Set the status of the 1st partial invoice so it matches your shop process. Should no status be suitable, please create one for your own %s."
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:587
-msgid "Set the status of the 2nd partial invoice so it matches your shop process. Should no status be suitable, please create one for your own %s."
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:631
-msgid "Set the status of the 3rd partial invoice so it matches your shop process. Should no status be suitable, please create one for your own %s."
-msgstr ""
-
-#: sqrip-woocommerce.php:85
-msgid "Settings"
-msgstr ""
-
-#: sqrip-woocommerce.php:950
-msgid "Show QR Code"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:493
-msgid "Show QR-invoice on confirmation page"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:1302
-msgid "sqrip Error: %s"
-msgstr ""
-
-#: sqrip-woocommerce.php:353
-#: sqrip-woocommerce.php:359
-msgid "sqrip Payment"
-msgstr ""
-
-#: inc/functions.php:839
-#: inc/functions.php:863
-#: inc/functions.php:871
-#: inc/class-wc-sqrip-payment-gateway.php:1540
-#: inc/class-wc-sqrip-payment-gateway.php:1565
-#: inc/class-wc-sqrip-payment-gateway.php:1573
+#: inc/functions.php:1275 inc/functions.php:1299 inc/functions.php:1307
+#: inc/class-wc-sqrip-payment-gateway.php:2262
+#: inc/class-wc-sqrip-payment-gateway.php:2287
+#: inc/class-wc-sqrip-payment-gateway.php:2295
+#, php-format
 msgid "sqrip Payment Error: %s"
 msgstr ""
 
-#: sqrip-woocommerce.php:812
-msgid "sqrip payment initiation was successful"
-msgstr ""
-
-#: sqrip-woocommerce.php:808
-msgid "sqrip payment QR code was successfully regenerated"
-msgstr ""
-
-#: inc/functions.php:947
-#: inc/class-wc-sqrip-payment-gateway.php:1649
-msgid "sqrip QR Invoice created."
-msgstr ""
-
-#: inc/functions.php:912
-#: inc/class-wc-sqrip-payment-gateway.php:1614
+#: inc/functions.php:1354 inc/class-wc-sqrip-payment-gateway.php:2341
 msgid "sqrip QR Invoices created."
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:1458
-msgid "sqrip QR-Code für Rückerstattung erstellt."
+#: inc/functions.php:1389 inc/class-wc-sqrip-payment-gateway.php:2376
+msgid "sqrip QR Invoice created."
 msgstr ""
 
-#: inc/sqrip-ajax.php:253
-msgid "sqrip refund was marked as 'paid'"
-msgstr ""
-
-#: inc/sqrip-ajax.php:287
-msgid "sqrip refund was marked as 'unbezahlt'"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:1706
-msgid "sqrip sent the order-confirmation e-mail(s): %s."
-msgstr ""
-
-#: sqrip-woocommerce.php:878
-#: sqrip-woocommerce.php:878
-msgid "sqrip settings"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:66
-msgid "sqrip – Modern and clever WooCommerce tools for the most widely used payment method in Switzerland: the bank transfer."
+#: inc/functions.php:1431 inc/functions.php:1440
+#: inc/class-wc-sqrip-payment-gateway.php:2090
+#: inc/class-wc-sqrip-payment-gateway.php:2107
+#: inc/class-wc-sqrip-payment-gateway.php:2167
+#: inc/class-wc-sqrip-payment-gateway.php:2454
+#: inc/class-wc-sqrip-payment-gateway.php:2463 sqrip-woocommerce.php:1056
+#: sqrip-woocommerce.php:1079
+#, php-format
+msgid "Error: %s"
 msgstr ""
 
 #: inc/class-wc-sqrip-payment-gateway.php:65
 msgid "sqrip – Swiss QR-Invoice API"
 msgstr ""
 
-#: sqrip-woocommerce.php:403
-#: sqrip-woocommerce.php:1472
-msgid "Status changing to"
+#: inc/class-wc-sqrip-payment-gateway.php:66
+msgid ""
+"sqrip – Modern and clever WooCommerce tools for the most widely used payment "
+"method in Switzerland: the bank transfer."
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:692
-msgid "Status of awaiting payment orders"
+#: inc/class-wc-sqrip-payment-gateway.php:110
+msgid "Loading..."
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:539
-msgid "Status of Orders after 1st partial payment"
+#: inc/class-wc-sqrip-payment-gateway.php:115
+#, php-format
+msgid "from sqrip account: %s"
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:576
-msgid "Status of Orders after 2nd partial payment"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:620
-msgid "Status of Orders after 3rd partial payment"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:447
-msgid "Status of Orders made with payment method 'sqrip':"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:292
-msgid "Street*"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:409
-msgid "Suppress QR-Invoice generation at checkout"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:427
-msgid "Suppressed status"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:257
-msgid "Swiss QR invoices with sqrip"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:1003
-msgid "The (QR-)IBAN has been changed. Please confirm the new (QR-)IBAN in your sqrip.ch account."
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:282
-msgid "The address to appear on the QR invoice"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:372
-msgid "The only characters allowed are A-Z, dashes (-) and underscores (_). Any spaces will be replaced with underscores (_). You can also use the following variables:<br>[order_number] — your full order number;<br>[order_date] — in yymmdd format, e.g. 230210 for Feb. 10 2023;<br>[shop_name] — can only be used if the shop name conforms with the \"characters allowed\" rule, otherwise the setting will be highlighted in red."
-msgstr ""
-
-#: sqrip-woocommerce.php:1536
-#: inc/class-sqrip-media-cleaner.php:105
-msgid "The PDF file for order #%s has been deleted from the media library"
-msgstr ""
-
-#: sqrip-woocommerce.php:175
-msgid "The sqrip plugin only supports EUR and CHF currencies!"
+#: inc/class-wc-sqrip-payment-gateway.php:119
+#, php-format
+msgid "from WooCommerce: %s"
 msgstr ""
 
 #: inc/class-wc-sqrip-payment-gateway.php:122
 msgid "Third address"
 msgstr ""
 
-#: sqrip-woocommerce.php:252
-#: sqrip-woocommerce.php:290
-msgid "This field is required"
-msgstr ""
-
-#: inc/sqrip-ajax.php:111
-msgid "This is a normal IBAN. The customer can make deposits without noting the reference number (RF...). Therefore, automatic matching with orders is not guaranteed throughout. Manual processing may be necessary. A QR-IBAN is required for automatic matching. This is available for the same bank account. Information about this is available from your bank."
-msgstr ""
-
-#: inc/sqrip-ajax.php:119
-msgid "This is a QR IBAN. The customer can make payments only by specifying a QR reference (number). You can uniquely assign the deposit to a customer / order. This enables automatic matching of payments received with orders. Want to automate this step? Contact us <a href=\"mailto:info@sqrip.ch\">info@sqrip.ch</a>."
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:428
-msgid "This selects the status with which new orders are created if the QR-Invoice generation suppression is active. If there is no suitable status available, you can create one right %s"
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:735
-msgid "To what order status should we change your order, once the payment has been confirmed?"
-msgstr ""
-
-#: sqrip-woocommerce.php:957
-msgid "unpaid"
-msgstr ""
-
-#: sqrip-woocommerce.php:238
-#: sqrip-woocommerce.php:239
-#: sqrip-woocommerce.php:240
-#: sqrip-woocommerce.php:241
-#: sqrip-woocommerce.php:242
-#: sqrip-woocommerce.php:243
-#: sqrip-woocommerce.php:244
-msgid "Update"
-msgstr ""
-
-#: sqrip-woocommerce.php:544
-#: sqrip-woocommerce.php:693
-#: sqrip-woocommerce.php:696
-msgid "Use the QR invoice below to pay the outstanding balance."
-msgstr ""
-
-#: inc/sqrip-ajax.php:189
-msgid "Valid, active API Key"
-msgstr ""
-
-#: inc/sqrip-ajax.php:110
-#: inc/sqrip-ajax.php:118
-msgid "validated"
-msgstr ""
-
-#: sqrip-woocommerce.php:85
-msgid "View sqrip settings"
-msgstr ""
-
-#: inc/sqrip-ajax.php:215
-msgid "We can't seem to find the API key you're using in our database. Please check your API key, your sqrip settings, then contact our support."
-msgstr ""
-
-#: inc/class-wc-sqrip-payment-gateway.php:332
-msgid "What information about the client should sqrip use in QR-invoices"
-msgstr ""
-
 #: inc/class-wc-sqrip-payment-gateway.php:124
-#: inc/class-wc-sqrip-payment-gateway.php:428
-msgid "What is the order status that waits for confirmation of made payment to your bank account?"
+#: inc/class-wc-sqrip-payment-gateway.php:603
+msgid ""
+"What is the order status that waits for confirmation of made payment to your "
+"bank account?"
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:378
-msgid "Will be displayed in the Checkout page above the Payment Methods section."
+#: inc/class-wc-sqrip-payment-gateway.php:126
+msgid "Do not set this too low! Remove input to disable the setting."
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:363
-msgid "Will be displayed on the QR invoice in the section “Additional information”. The result shown in invoices cannot exceed 140 symbols and 5 rows.<br>The following short codes are available:<br>[order_number] the order number.<br>[due_date format=\"y-MM-dd\"] to insert the due date of the invoice.<br><a href=\"https://www.php.net/strftime\" target=\"_blank\">Supported formats</a> are:<br>y-MM-dd -> 2022-04-06<br>dd.MM.yy -> 04.06.22<br>dd. MMMM y -> 06. April 2022<br>d. MMM y -> 6. Apr 2022"
+#: inc/class-wc-sqrip-payment-gateway.php:129
+msgid "Please select an option"
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:528
-msgid "Will be displayed on the QR invoice under the section “Additional information”."
+#: inc/class-wc-sqrip-payment-gateway.php:156
+msgid "Services"
 msgstr ""
 
-#: sqrip-woocommerce.php:250
-msgid "You have no credits left"
+#: inc/class-wc-sqrip-payment-gateway.php:161
+msgid "QR-Invoice"
 msgstr ""
 
-#: sqrip-woocommerce.php:249
-msgid "You have no free credits anymore, a paid credit will be charged"
+#: inc/class-wc-sqrip-payment-gateway.php:166
+msgid "Multiple QR-Slips"
 msgstr ""
 
-#: inc/sqrip-ajax.php:177
-msgid "Your API key appears to be inactive. Please check that your API key is set to active in the sqrip settings."
+#: inc/class-wc-sqrip-payment-gateway.php:171
+msgid "Payment Comparison"
 msgstr ""
 
-#: sqrip-woocommerce.php:185
-msgid "Your website is currently unable to upload a PDF."
+#: inc/class-wc-sqrip-payment-gateway.php:177
+msgid "Refunds"
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:302
-msgid "ZIP*"
+#: inc/class-wc-sqrip-payment-gateway.php:183
+msgid "Connection"
 msgstr ""
 
+#: inc/class-wc-sqrip-payment-gateway.php:188
+msgid "API key"
+msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php inc/functions.php
+#: inc/class-wc-sqrip-payment-gateway.php:190
+msgid ""
+"Open an account at <a href=\"https://sqrip.ch\" target=\"_blank\">https://"
+"sqrip.ch</a>, create an API key, copy and paste it here. Done!"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:194
+msgid "Activation & Status"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:199
+msgid "Activate sqrip"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:200
+msgid "Enable QR invoices with sqrip API"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:207
+msgid "Remaining Credits"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:213
+msgid "Current sqrip status"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:220
+msgid "Auto turn off"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:221
+msgid "Auto turn off sqrip services if error occurs"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:228
+msgid "Features"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:233
+msgid "Activate/Deactivate Payment Comparison"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:234
+msgid "Activate sqrip for Payment Comparison"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:244
+msgid "Activate manual camt reconciliation"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:246
+msgid ""
+"Upload the camt file from your e-banking and let sqrip set the status of the "
+"paid orders. Runs entirely in your shop: the file is read once, only "
+"payments belonging to an open order are used, and the file is discarded "
+"straight afterwards."
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:254
+msgid "Activate automatic payment reconciliation"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:256
+msgid ""
+"Detect incoming payments from the credit-notification emails your bank "
+"sends. Order-driven: only credits that match one of your open orders are "
+"used, and nothing about your banking is stored."
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:262
+msgid "Activate/Deactivate Multiple QR-slips"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:263
+msgid "Activate Multiple QR-slips per order"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:265
+msgid ""
+"If activated, sqrip generates multiple QR-slips per order based on specified "
+"percentages of total amount."
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:270
+msgid "Activate/Deactivate Refunds"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:271
+msgid "Activate sqrip for Refunds"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:273
+msgid ""
+"If activated, sqrip makes refunding easier by creating a QR-code that can be "
+"scanned with the banking app to initiate a bank transfer to the client."
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:278
+msgid "Display"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:283
+msgid "Payment method name"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:285
+msgid "Swiss QR invoices with sqrip"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:290
+msgid "Description"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:292
+msgid "Description of what the customer can expect from this payment option."
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:299
 msgid "Restrict QR-invoice by country"
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php inc/functions.php
+#: inc/class-wc-sqrip-payment-gateway.php:300
 msgid "Offer sqrip only for the invoice countries selected below"
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php inc/functions.php
-msgid "A QR-invoice is always in Swiss francs. For customers abroad this causes confusion, bank charges for paying in the wrong currency, and manual work. With this enabled, sqrip is hidden at the checkout for every other invoice country and no QR-invoice is created for such orders. Leave it off to keep offering sqrip to everyone."
+#: inc/class-wc-sqrip-payment-gateway.php:302
+msgid ""
+"A QR-invoice is always in Swiss francs. For customers abroad this causes "
+"confusion, bank charges for paying in the wrong currency, and manual work. "
+"With this enabled, sqrip is hidden at the checkout for every other invoice "
+"country and no QR-invoice is created for such orders. Leave it off to keep "
+"offering sqrip to everyone."
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php inc/functions.php
+#: inc/class-wc-sqrip-payment-gateway.php:307
 msgid "Countries that get a QR-invoice"
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php inc/functions.php
-msgid "Judged by the invoice address, which is the address printed on the QR-invoice. An empty list switches the restriction off rather than blocking every order."
+#: inc/class-wc-sqrip-payment-gateway.php:311
+msgid ""
+"Judged by the invoice address, which is the address printed on the QR-"
+"invoice. An empty list switches the restriction off rather than blocking "
+"every order."
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php inc/functions.php
-msgid "No sqrip QR invoice was created: the invoice address is in %s, which is not among the countries selected in the sqrip settings."
+#: inc/class-wc-sqrip-payment-gateway.php:318
+msgid "Payee"
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php inc/functions.php
-msgid "The QR invoice is not available for your invoice address. Please choose a different payment method."
+#: inc/class-wc-sqrip-payment-gateway.php:323
+msgid "(QR-)IBAN of Payee"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:325
+msgid "(QR-)IBAN of the account to which the transfer is to be made"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:329
+msgid "Address"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:331
+msgid "The address to appear on the QR invoice"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:336
+msgid "Name*"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:341
+msgid "Street*"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:346
+msgid "Building Number*"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:351
+msgid "ZIP*"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:356
+msgid "City*"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:361
+msgid "Country*"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:368
+msgid "Invoice Details"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:373 inc/class-sqrip-avis.php:1003
+msgid "Payer"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:376
+msgid "Either Company Name(priority) or First/Last name"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:377
+msgid "Both Company Name and First/Last name "
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:381
+msgid "What information about the client should sqrip use in QR-invoices"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:384
+msgid "Initiate QR-Ref# with these 6 digits"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:391
+msgid "Basis of the (QR-)Ref#"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:394
+msgid "Random number"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:395 inc/class-sqrip-avis.php:1002
+#: inc/class-sqrip-avis.php:1187 inc/class-sqrip-avis.php:1454
+msgid "Order number"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:401
+msgid "Maturity (Today in x days)"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:408
+msgid "Additional Information"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:411
+msgid ""
+"Due date: [due_date format=\"y-MM-dd\"]\n"
+"Order: [order_number]\n"
+"Thank you for your purchase!"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:412
+msgid ""
+"Will be displayed on the QR invoice in the section “Additional information”. "
+"The result shown in invoices cannot exceed 140 symbols and 5 rows.<br>The "
+"following short codes are available:<br>[order_number] the order number."
+"<br>[due_date format=\"y-MM-dd\"] to insert the due date of the invoice."
+"<br><a href=\"https://www.php.net/strftime\" target=\"_blank\">Supported "
+"formats</a> are:<br>y-MM-dd -> 2022-04-06<br>dd.MM.yy -> 04.06.22<br>dd. "
+"MMMM y -> 06. April 2022<br>d. MMM y -> 6. Apr 2022"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:416
+msgid "File Name"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:420
+msgid "[order_date]_[shop_name]_invoice-order_[order_number]"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:421
+msgid ""
+"The only characters allowed are A-Z, dashes (-) and underscores (_). Any "
+"spaces will be replaced with underscores (_). You can also use the following "
+"variables:<br>[order_number] — your full order number;<br>[order_date] — in "
+"yymmdd format, e.g. 230210 for Feb. 10 2023;<br>[shop_name] — can only be "
+"used if the shop name conforms with the \"characters allowed\" rule, "
+"otherwise the setting will be highlighted in red."
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:424
+msgid "Checkout Page Remarks"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:427
+msgid ""
+"Will be displayed in the Checkout page above the Payment Methods section."
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:431
+msgid "Format"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:435
+msgid "on a blank A4 PDF"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:436
+msgid "only the A6 payment part as PDF"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:441
+msgid "Language"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:444
+msgid "German"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:445
+msgid "French"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:446
+msgid "Italian"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:447
+msgid "English"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:579
+msgid "Handling"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:584
+msgid "Suppress QR-Invoice generation at checkout"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:585
+msgid "Don't generate QR-invoice at checkout but manually"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:587
+msgid ""
+"If you enable this, the order status for orders with sqrip will change to "
+"'Payment pending', a confirmation e-mail will be sent and the order will "
+"wait for you to generate qr-invoices manually. This is helpful if you may "
+"need to adjust pricing or quantity after an order has been placed"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:592
+msgid "Define Status when QR-Invoice is suppressed"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:602
+msgid "Suppressed status"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:603
+#, php-format
+msgid ""
+"This selects the status with which new orders are created if the QR-Invoice "
+"generation suppression is active. If there is no suitable status available, "
+"you can create one right %s"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:603
+#: inc/class-wc-sqrip-payment-gateway.php:633
+#: inc/class-wc-sqrip-payment-gateway.php:745
+#: inc/class-wc-sqrip-payment-gateway.php:782
+#: inc/class-wc-sqrip-payment-gateway.php:826
+#: inc/class-wc-sqrip-payment-gateway.php:898
+#: inc/class-wc-sqrip-payment-gateway.php:930
+msgid "here"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:622
+msgid "Status of Orders made with payment method 'sqrip':"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:632
+msgid "QR order status"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:633
+#, php-format
+msgid ""
+"Set the status of a newly placed order with payment method 'sqrip' so it "
+"matches your shop process. Should no status be suitable, please create one "
+"for your own %s."
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:636
+msgid "Send order-confirmation e-mails for this status"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:637
+msgid ""
+"Also send the order-confirmation e-mails (to the customer and to the shop "
+"admin) when a new sqrip order is placed"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:641
+msgid ""
+"Enable this if you keep orders in a status (such as 'Pending payment') that "
+"does not itself trigger WooCommerce e-mails. sqrip then sends the 'New "
+"order' (admin) and 'Order on-hold' (customer) e-mails directly at checkout, "
+"so confirmations go out without changing your chosen status. Leave off to "
+"keep the standard WooCommerce behaviour."
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:660
+msgid "Combine QR-Slip with Invoice into one document"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:661
+msgid ""
+"Plugin <a href='https://wordpress.org/plugins/woocommerce-pdf-invoices-"
+"packing-slips'> 'PDF Invoices & Packing Slips for WooCommerce' </a> "
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:668
+msgid "Show QR-invoice on confirmation page"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:669
+msgid "Offer QR invoice for download"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:676
+msgid "Logo height at the checkout (pixels)"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:679
+msgid ""
+"Height of the sqrip logo next to the payment method at the checkout. Enter 0 "
+"to hide the logo."
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:684
+msgid "Form of address in the shop front end"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:687
+msgid "Formal (default)"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:688
+msgid "Informal"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:691
+msgid ""
+"Applies to the texts your customers see on the order confirmation page. The "
+"informal wording is currently available for German shops; other languages "
+"keep the regular wording."
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:696
+msgid "Position:"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:703
+msgid "Attach QR-Invoice to E-Mail template"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:704
+#: inc/class-wc-sqrip-payment-gateway.php:802
+#: inc/class-wc-sqrip-payment-gateway.php:846
+msgid "Select email templates to which the QR-invoice are attached"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:705
+msgid ""
+"Note: this attaches the QR invoice as a separate PDF. If you also combine "
+"the QR slip with the invoice of the 'PDF Invoices & Packing Slips' plugin, "
+"the e-mail will contain both documents — leave this selection empty if you "
+"only want the combined invoice."
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:711
+msgid "Number of qr-invoices to deliver"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:712
+msgid "Select number of qr-invoices to send to customer"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:719
+msgid "Partial Invoice Information"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:722
+msgid "Partial payment [invoice] of [max_invoice]"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:723
+msgid ""
+"Will be displayed on the QR invoice under the section “Additional "
+"information”.<br>The following variables are available:<br>[invoice] — the "
+"number of this instalment (1, 2, 3 …);<br>[max_invoice] — the total number "
+"of instalments."
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:727
+msgid "% of total amount in 1st qr-invoice"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:734
+msgid "Status of Orders after 1st partial payment"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:744
+#: inc/class-wc-sqrip-payment-gateway.php:781
+#: inc/class-wc-sqrip-payment-gateway.php:825
+msgid "Partially paid"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:745
+#, php-format
+msgid ""
+"Set the status of the 1st partial invoice so it matches your shop process. "
+"Should no status be suitable, please create one for your own %s."
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:764
+msgid "% of total amount in 2nd qr-invoice"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:771
+msgid "Status of Orders after 2nd partial payment"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:782
+#, php-format
+msgid ""
+"Set the status of the 2nd partial invoice so it matches your shop process. "
+"Should no status be suitable, please create one for your own %s."
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:801
+msgid "Attach 2nd QR-Invoice to E-Mail template"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:808
+msgid "% of total amount in 3rd qr-invoice"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:815
+msgid "Status of Orders after 3rd partial payment"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:826
+#, php-format
+msgid ""
+"Set the status of the 3rd partial invoice so it matches your shop process. "
+"Should no status be suitable, please create one for your own %s."
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:845
+msgid "Attach 3rd QR-Invoice to E-Mail template"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:852
+msgid "Send a copy to the shop admin"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:853
+msgid "Send a copy of the Email with PDF invoice to Admin"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:860
+msgid "Delete QR-invoice once status has been changed to"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:867
+msgid "Delete any generated QR-invoice after "
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:868
+msgid "days."
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:869
+msgid ""
+"Keep the size of your media library small. sqrip deletes all qr-invoice "
+"files that are not needed anymore"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:882
+msgid "General Settings"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:887
+msgid "Status of awaiting payment orders"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:897
+msgid "Awaiting payment"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:898
+#: inc/class-wc-sqrip-payment-gateway.php:930
+#, php-format
+msgid "If there is no suitable status available, you can create one right %s"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:917
+msgid "Completed Orders Status"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:920
+msgid "Select Status"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:929
+msgid "Completed, Paid"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:930
+msgid ""
+"To what order status should we change your order, once the payment has been "
+"confirmed?"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:953 inc/class-sqrip-camt-admin.php:68
+msgid "camt Reconciliation"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:958
+msgid "Bank file"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:963
+msgid "Payment notification service"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:965
+msgid ""
+"We use information that banks already send out today: e-mail notifications "
+"about account credits. These e-mails carry enough to guarantee a unique "
+"match to your orders. The banks expressly permit the further use of these "
+"notifications; it is the responsibility of their customer — that is, YOU — "
+"how these e-mails are handled. For every successful reconciliation we charge "
+"you 1 credit."
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:969
+msgid "Set up"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:971
+msgid ""
+"Forward your shop account's credit notifications to our notification "
+"service. The service reads them, compares the payment details, and tells the "
+"plugin which order was paid. The plugin updates the order status according "
+"to your \"Status of completed orders\" setting."
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:975
+msgid "Configure"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:977
+msgid ""
+"Want to release larger amounts yourself, for safety? Set the limit above "
+"which sqrip e-mails you the reconciled data for release. At 0, every payment "
+"needs your release. To accept all payments automatically, set the value very "
+"high, e.g. above 1,000,000."
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:982
+msgid "Overpayment"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:986
+msgid "Hold the order and e-mail me"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:987
+msgid "Mark as paid and e-mail me"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:989
+msgid "What to do when a customer pays more than the order total."
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:994
+msgid "Reconcile"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:996
+msgid ""
+"Reconciliation runs regularly every minute, without display. Trigger a "
+"reconciliation by hand to see the currently available data here."
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:1000
+msgid "API key for Refunds"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:1002
+msgid ""
+"For security reasons, a separate API key with <strong>deactived</strong> "
+"confirmation is needed for the Refund function."
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:1271
+msgid ""
+"Download the camt.053 or camt.054 file of the account that receives your "
+"customers' payments from your e-banking, then choose it here. \"Preview\" "
+"only shows what would happen and changes nothing."
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:1288
+#, php-format
+msgid "XML file, at most %s."
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:1296
+msgid "Preview"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:1299
+msgid "Apply"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:1338
+msgid "Copy"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:1339
+msgid "Copied"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:1354
+msgid ""
+"In your online banking, create a new notification for credits to your shop "
+"account. Allow as much information as possible. Enter this address in your e-"
+"banking as the destination for credit notifications:"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:1358
+msgid ""
+"Some banks send a one-time confirmation code to that address. If yours does, "
+"start the verification window — sqrip catches the code and shows it here, so "
+"you can enter it back in your e-banking:"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:1361
+msgid "Start verification"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:1364
+msgid "Finish verification"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:1373
+#, php-format
+msgid ""
+"To verify, forward an earlier notification e-mail or an e-mail with a bank "
+"document (PDF) to %s, then click \"Reconcile now\" below. You will get the "
+"current list of unpaid orders and the information read from the e-mail. If "
+"both are shown correctly, the service is ready."
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:1374
+msgid "your address above"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:1466
+msgid "Reconcile now"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:1557
+msgid ""
+"The (QR-)IBAN is not active. Please confirm the (QR-)IBAN in your sqrip.ch "
+"account before activating sqrip."
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:1591
+msgid "IBAN changes: Active confirmation (see API key in sqrip.ch account)."
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:1595
+msgid "IBAN changes: Passive confirmation (see API key in sqrip.ch account)"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:1837
+msgid ""
+"The QR invoice PDF could not be saved, so the test e-mail is sent without an "
+"attachment. Please check that the PHP setting allow_url_fopen is enabled and "
+"that the WordPress uploads folder is writable."
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:1879
+#, php-format
+msgid ""
+"<span id=\"test-email-status\">Test email has been sent to %1$s! <a "
+"href=\"%2$s\" target=\"_blank\">Click here</a> to view the invoice.</span>"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:1891
+#, php-format
+msgid "The test e-mail could not be sent. Your e-mail service reported: %s"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:1895
+msgid ""
+"The test e-mail could not be sent by WordPress. Please check your e-mail "
+"configuration (for example the WP Mail SMTP plugin) and its e-mail log."
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:1910
+#, php-format
+msgid "sqrip Error: %s"
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:2024
+msgid ""
+"Error: the sqrip settings are incomplete (IBAN or format missing), so no "
+"refund QR code could be created."
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:2048
+msgid ""
+"IBAN des Kunden wurde nicht gefunden. Stelle sicher, dass sie im Meta-Feld "
+"'iban_num' hinterlegt ist."
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:2077
+msgid ""
+"Error: Es wurde kein API Schlüssel für die Rückerstattungen angegeben. Bitte "
+"ergänze dies in den sqrip Plugin Einstellungen."
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:2131
+msgid ""
+"Error: sqrip did not return a QR code for this refund. No refund QR code was "
+"created."
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:2146
+msgid ""
+"Error: the sqrip refund QR code could not be saved to the media library. No "
+"refund QR code was created."
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:2152
+msgid "sqrip QR-Code für Rückerstattung erstellt."
+msgstr ""
+
+#: inc/class-wc-sqrip-payment-gateway.php:2438
+#, php-format
+msgid "sqrip sent the order-confirmation e-mail(s): %s."
+msgstr ""
+
+#: inc/sqrip-ajax.php:139 inc/sqrip-ajax.php:147
+msgid "validated"
+msgstr ""
+
+#: inc/sqrip-ajax.php:140
+msgid ""
+"This is a normal IBAN. The customer can make deposits without noting the "
+"reference number (RF...). Therefore, automatic matching with orders is not "
+"guaranteed throughout. Manual processing may be necessary. A QR-IBAN is "
+"required for automatic matching. This is available for the same bank "
+"account. Information about this is available from your bank."
+msgstr ""
+
+#: inc/sqrip-ajax.php:148
+msgid ""
+"This is a QR IBAN. The customer can make payments only by specifying a QR "
+"reference (number). You can uniquely assign the deposit to a customer / "
+"order. This enables automatic matching of payments received with orders. "
+"Want to automate this step? Contact us <a "
+"href=\"mailto:info@sqrip.ch\">info@sqrip.ch</a>."
+msgstr ""
+
+#: inc/sqrip-ajax.php:155 inc/sqrip-ajax.php:162
+msgid "incorrect"
+msgstr ""
+
+#: inc/sqrip-ajax.php:156
+msgid ""
+"It seems that an invalid (QR-)IBAN has been submitted. Please check the "
+"designated transfers-receiving IBAN you submitted."
+msgstr ""
+
+#: inc/sqrip-ajax.php:163
+msgid ""
+"Action required:\n"
+"Please confirm change of IBAN on <a href='https://api.sqrip.ch/login' "
+"target='_blank'>sqrip.ch</a> in order to continue the service."
+msgstr ""
+
+#: inc/sqrip-ajax.php:206
+msgid ""
+"Your API key appears to be inactive. Please check that your API key is set "
+"to active in the sqrip settings."
+msgstr ""
+
+#: inc/sqrip-ajax.php:244
+msgid ""
+"We can't seem to find the API key you're using in our database. Please check "
+"your API key, your sqrip settings, then contact our support."
+msgstr ""
+
+#: inc/sqrip-ajax.php:282
+msgid "sqrip refund was marked as 'paid'"
+msgstr ""
+
+#: inc/sqrip-ajax.php:316
+msgid "sqrip refund was marked as 'unbezahlt'"
+msgstr ""
+
+#: inc/sqrip-ajax.php:457
+msgid "The clean-up could not be started."
+msgstr ""
+
+#: inc/sqrip-ajax.php:470
+#, php-format
+msgid "Clean-up finished. %d file that was no longer needed has been deleted."
+msgid_plural ""
+"Clean-up finished. %d files that were no longer needed have been deleted."
+msgstr[0] ""
+msgstr[1] ""
+
+#: inc/sqrip-ajax.php:478
+msgid "Clean-up finished. There was nothing to delete."
+msgstr ""
+
+#: inc/class-sqrip-avis.php:83
+msgid ""
+"That mailbox name is already in use by another shop. Please choose a "
+"different one."
+msgstr ""
+
+#: inc/class-sqrip-avis.php:301
+msgid "The payment notification service is switched off."
+msgstr ""
+
+#: inc/class-sqrip-avis.php:305
+msgid ""
+"Please set the mailbox name under \"camt Reconciliation\" and save first."
+msgstr ""
+
+#: inc/class-sqrip-avis.php:318
+msgid "No order status for \"waiting for payment\" is configured yet."
+msgstr ""
+
+#: inc/class-sqrip-avis.php:465
+msgid "Booked as paid (overpaid)."
+msgstr ""
+
+#: inc/class-sqrip-avis.php:468
+msgid "Booked as paid."
+msgstr ""
+
+#: inc/class-sqrip-avis.php:476
+msgid "Held — overpaid, e-mailed for your release."
+msgstr ""
+
+#: inc/class-sqrip-avis.php:477
+msgid "Held — above your limit, e-mailed for your release."
+msgstr ""
+
+#: inc/class-sqrip-avis.php:484
+msgid "Held — batch total mismatch, please check."
+msgstr ""
+
+#: inc/class-sqrip-avis.php:694
+#, php-format
+msgid ""
+"Payment received: %1$s %2$s, reference %3$s. Confirmed by the sqrip payment "
+"notification service."
+msgstr ""
+
+#: inc/class-sqrip-avis.php:712
+msgid ""
+"Payment received but held: the amount is higher than the order. Waiting for "
+"your release."
+msgstr ""
+
+#: inc/class-sqrip-avis.php:715
+msgid "Payment received but held: a batch total did not add up. Please check."
+msgstr ""
+
+#: inc/class-sqrip-avis.php:718
+msgid ""
+"Payment received but held: above your release limit. Waiting for your "
+"release."
+msgstr ""
+
+#: inc/class-sqrip-avis.php:723
+#, php-format
+msgid "Reference %s. sqrip payment notification service."
+msgstr ""
+
+#: inc/class-sqrip-avis.php:742
+#, php-format
+msgid ""
+"Customer paid too little: received %1$s, expected %2$s (reference %3$s). The "
+"order is held."
+msgstr ""
+
+#: inc/class-sqrip-avis.php:749
+#, php-format
+msgid ""
+"Customer paid more than the order: received %1$s, expected %2$s (reference "
+"%3$s)."
+msgstr ""
+
+#: inc/class-sqrip-avis.php:756
+#, php-format
+msgid ""
+"A payment matched order %s by its number, but the order has no QR reference "
+"— please add one so it can be assigned."
+msgstr ""
+
+#: inc/class-sqrip-avis.php:760
+msgid ""
+"A batch payment was received, but the total of the assigned orders does not "
+"match the sum in the notification. The affected order is held — please check."
+msgstr ""
+
+#: inc/class-sqrip-avis.php:764
+#, php-format
+msgid ""
+"A payment could not be assigned with confidence (score %1$d of 10, reference "
+"%2$s). Please check by hand."
+msgstr ""
+
+#: inc/class-sqrip-avis.php:770
+msgid "The payment currency does not match the order."
+msgstr ""
+
+#: inc/class-sqrip-avis.php:776
+msgid "A payment needs your attention."
+msgstr ""
+
+#: inc/class-sqrip-avis.php:789
+msgid "Held — underpaid."
+msgstr ""
+
+#: inc/class-sqrip-avis.php:791
+msgid "Flagged — please check."
+msgstr ""
+
+#: inc/class-sqrip-avis.php:793
+msgid "Flagged — order needs a reference."
+msgstr ""
+
+#: inc/class-sqrip-avis.php:796
+msgid "E-mailed for your assignment."
+msgstr ""
+
+#: inc/class-sqrip-avis.php:799
+msgid "Flagged."
+msgstr ""
+
+#: inc/class-sqrip-avis.php:829 inc/class-sqrip-avis.php:1175
+msgid "Open order"
+msgstr ""
+
+#: inc/class-sqrip-avis.php:838
+msgid "sqrip: a payment needs your attention"
+msgstr ""
+
+#: inc/class-sqrip-avis.php:916
+msgid "Recently recognised payments"
+msgstr ""
+
+#: inc/class-sqrip-avis.php:920
+msgid "Date / time"
+msgstr ""
+
+#: inc/class-sqrip-avis.php:921 inc/class-sqrip-avis.php:1189
+#: inc/class-sqrip-avis.php:1456
+msgid "QR reference / SCOR"
+msgstr ""
+
+#: inc/class-sqrip-avis.php:922 inc/class-sqrip-avis.php:1004
+#: inc/class-sqrip-avis.php:1188 inc/class-sqrip-avis.php:1455
+msgid "Amount"
+msgstr ""
+
+#: inc/class-sqrip-avis.php:923
+msgid "Score"
+msgstr ""
+
+#: inc/class-sqrip-avis.php:924
+msgid "Findings"
+msgstr ""
+
+#: inc/class-sqrip-avis.php:925
+msgid "Consequence"
+msgstr ""
+
+#: inc/class-sqrip-avis.php:985
+#, php-format
+msgid "%d/10"
+msgstr ""
+
+#: inc/class-sqrip-avis.php:1001 inc/class-sqrip-camt-admin.php:583
+msgid "Reference"
+msgstr ""
+
+#: inc/class-sqrip-avis.php:1173
+msgid "Confirm"
+msgstr ""
+
+#: inc/class-sqrip-avis.php:1174
+msgid "Reject"
+msgstr ""
+
+#: inc/class-sqrip-avis.php:1190 inc/class-sqrip-avis.php:1457
+msgid "Name"
+msgstr ""
+
+#: inc/class-sqrip-avis.php:1191
+msgid "Action"
+msgstr ""
+
+#: inc/class-sqrip-avis.php:1196
+msgid ""
+"This payment is above your release limit. Please check it, then confirm to "
+"mark the order paid, reject to leave it open, or open the order for details. "
+"The links are valid for 24 hours and work once."
+msgstr ""
+
+#: inc/class-sqrip-avis.php:1199
+msgid ""
+"The customer paid more than the order total. Please check it, then confirm "
+"to mark the order paid, reject to leave it open, or open the order for "
+"details. The links are valid for 24 hours and work once."
+msgstr ""
+
+#: inc/class-sqrip-avis.php:1202
+msgid ""
+"The sqrip payment notification service found a probable payment that could "
+"not be assigned automatically. Please check it against the order, then "
+"confirm, reject, or open the order for details. The links are valid for 24 "
+"hours and work once."
+msgstr ""
+
+#: inc/class-sqrip-avis.php:1213
+msgid "Received via the bank notification"
+msgstr ""
+
+#: inc/class-sqrip-avis.php:1215
+msgid "From your shop"
+msgstr ""
+
+#: inc/class-sqrip-avis.php:1222
+msgid "sqrip: probable payment — please check"
+msgstr ""
+
+#: inc/class-sqrip-avis.php:1223
+msgid "sqrip: payment held — please release"
+msgstr ""
+
+#: inc/class-sqrip-avis.php:1262 inc/class-sqrip-avis.php:1268
+msgid "This link is not valid."
+msgstr ""
+
+#: inc/class-sqrip-avis.php:1274
+msgid "This link has expired or was already used."
+msgstr ""
+
+#: inc/class-sqrip-avis.php:1287
+msgid "The suggested payment was rejected. Nothing was changed."
+msgstr ""
+
+#: inc/class-sqrip-avis.php:1293
+msgid "The order could not be found, so nothing was changed."
+msgstr ""
+
+#: inc/class-sqrip-avis.php:1298
+#, php-format
+msgid ""
+"Payment confirmed by hand from an e-mail suggestion: %1$s %2$s, reference "
+"%3$s (probable match from the sqrip payment notification service)."
+msgstr ""
+
+#: inc/class-sqrip-avis.php:1314
+#, php-format
+msgid "Order %s was marked as paid."
+msgstr ""
+
+#: inc/class-sqrip-avis.php:1329
+msgid "sqrip payment notification"
+msgstr ""
+
+#: inc/class-sqrip-avis.php:1348 inc/class-sqrip-avis.php:1379
+#: inc/class-sqrip-avis.php:1527 inc/class-sqrip-camt-admin.php:137
+msgid "You are not allowed to do this."
+msgstr ""
+
+#: inc/class-sqrip-avis.php:1383
+msgid "Please switch on the automatic payment reconciliation first."
+msgstr ""
+
+#: inc/class-sqrip-avis.php:1435
+#, php-format
+msgid "Last recognised: %1$s %2$s, reference %3$s, on %4$s"
+msgstr ""
+
+#: inc/class-sqrip-avis.php:1446
+msgid "Orders still waiting for payment"
+msgstr ""
+
+#: inc/class-sqrip-avis.php:1449
+msgid "There are no orders waiting for payment right now."
+msgstr ""
+
+#: inc/class-sqrip-avis.php:1534
+msgid "Unknown step."
+msgstr ""
+
+#: inc/class-sqrip-avis.php:1538
+msgid "Please set the mailbox name and save the settings first."
+msgstr ""
+
+#: inc/class-sqrip-avis.php:1629
+msgid ""
+"No sqrip credits left — please top up your sqrip account to use the payment "
+"reconciliation."
+msgstr ""
+
+#: inc/class-sqrip-avis.php:1631
+msgid ""
+"Your sqrip account is not active. Please confirm it at sqrip.ch before using "
+"the payment reconciliation."
+msgstr ""
+
+#: inc/class-sqrip-avis.php:1634
+msgid ""
+"Please save the sqrip settings again to register this shop for the service."
+msgstr ""
+
+#: inc/class-sqrip-avis.php:1683
+msgid "The payment notification service could not be reached."
+msgstr ""
+
+#: inc/class-sqrip-reminder.php:195
+msgid "Reminder fee"
+msgstr ""
+
+#: inc/class-sqrip-reminder.php:316
+msgid ""
+"The payment reminder could not be created: the sqrip settings are "
+"incomplete. The late fee was not charged."
+msgstr ""
+
+#: inc/class-sqrip-reminder.php:346 inc/class-sqrip-reminder.php:360
+#, php-format
+msgid ""
+"The payment reminder could not be created: %s The late fee was not charged."
+msgstr ""
+
+#: inc/class-sqrip-reminder.php:388
+msgid "The QR invoice with Skonto has been voided: the payment is overdue."
+msgstr ""
+
+#: inc/class-sqrip-reminder.php:393
+#, php-format
+msgid ""
+"Payment reminder created: late fee %1$s %2$s added, new QR invoice over %1$s "
+"%3$s. The original invoice stays valid until one of the two is paid."
+msgstr ""
+
+#: inc/class-sqrip-reminder.php:485
+msgid "Payment reminder e-mailed to the customer."
+msgstr ""
+
+#: inc/countries-array.php:5
+msgid "Austria"
+msgstr ""
+
+#: inc/countries-array.php:6
+msgid "France"
+msgstr ""
+
+#: inc/countries-array.php:7
+msgid "Germany"
+msgstr ""
+
+#: inc/countries-array.php:8
+msgid "Italy"
+msgstr ""
+
+#: inc/countries-array.php:9
+msgid "Liechtenstein"
+msgstr ""
+
+#: inc/countries-array.php:10
+msgid "Switzerland"
+msgstr ""
+
+#: inc/class-sqrip-camt-admin.php:67
+msgid "sqrip camt Reconciliation"
+msgstr ""
+
+#: inc/class-sqrip-camt-admin.php:144
+msgid "The camt reconciliation is switched off."
+msgstr ""
+
+#: inc/class-sqrip-camt-admin.php:158 sqrip-woocommerce.php:324
+msgid "Please choose a file first."
+msgstr ""
+
+#: inc/class-sqrip-camt-admin.php:166
+msgid "The file is larger than this server accepts for uploads."
+msgstr ""
+
+#: inc/class-sqrip-camt-admin.php:171 inc/class-sqrip-camt-admin.php:179
+msgid "The file could not be uploaded."
+msgstr ""
+
+#: inc/class-sqrip-camt-admin.php:188
+msgid "Only the XML file from your e-banking can be read here."
+msgstr ""
+
+#: inc/class-sqrip-camt-admin.php:200
+#, php-format
+msgid "The file is larger than %s."
+msgstr ""
+
+#: inc/class-sqrip-camt-admin.php:251
+msgid ""
+"No order status for \"waiting for payment\" is configured yet. Please set it "
+"under Payment Comparison first."
+msgstr ""
+
+#: inc/class-sqrip-camt-admin.php:253
+msgid "The file is empty."
+msgstr ""
+
+#: inc/class-sqrip-camt-admin.php:255
+msgid "The file is too large."
+msgstr ""
+
+#: inc/class-sqrip-camt-admin.php:258
+msgid ""
+"This file could not be read. Please download the camt file from your e-"
+"banking again."
+msgstr ""
+
+#: inc/class-sqrip-camt-admin.php:260
+msgid ""
+"There are no bookings in this file. Please check whether you downloaded the "
+"right period."
+msgstr ""
+
+#: inc/class-sqrip-camt-admin.php:263 sqrip-woocommerce.php:327
+msgid "The file could not be processed."
+msgstr ""
+
+#: inc/class-sqrip-camt-admin.php:414
+#, php-format
+msgid "Instalment %1$d of %2$d paid"
+msgstr ""
+
+#: inc/class-sqrip-camt-admin.php:418
+msgid "Payment received"
+msgstr ""
+
+#: inc/class-sqrip-camt-admin.php:422
+#, php-format
+msgid ""
+"%1$s: %2$s %3$s, reference %4$s, value date %5$s. Reconciled from the bank "
+"file %6$s."
+msgstr ""
+
+#: inc/class-sqrip-camt-admin.php:451
+#, php-format
+msgid ""
+"File %1$s: %2$d incoming payments, checked against %3$d orders waiting for "
+"payment."
+msgstr ""
+
+#: inc/class-sqrip-camt-admin.php:466
+#, php-format
+msgid ""
+"%d further incoming payment in this file belongs to no order waiting for "
+"payment. It was counted and otherwise ignored."
+msgid_plural ""
+"%d further incoming payments in this file belong to no order waiting for "
+"payment. They were counted and otherwise ignored."
+msgstr[0] ""
+msgstr[1] ""
+
+#: inc/class-sqrip-camt-admin.php:480
+msgid ""
+"There are more orders waiting for payment than can be checked in one go. "
+"Please reconcile again after applying this run."
+msgstr ""
+
+#: inc/class-sqrip-camt-admin.php:493
+msgid "Will be marked as paid"
+msgstr ""
+
+#: inc/class-sqrip-camt-admin.php:498
+msgid "There is no payment that can be booked without checking."
+msgstr ""
+
+#: inc/class-sqrip-camt-admin.php:503
+msgid "Please check these yourself"
+msgstr ""
+
+#: inc/class-sqrip-camt-admin.php:505
+msgid "sqrip changes nothing here."
+msgstr ""
+
+#: inc/class-sqrip-camt-admin.php:517
+#, php-format
+msgid ""
+"%d order is still waiting for payment; there is nothing for it in this file."
+msgid_plural ""
+"%d orders are still waiting for payment; there is nothing for them in this "
+"file."
+msgstr[0] ""
+msgstr[1] ""
+
+#: inc/class-sqrip-camt-admin.php:541
+msgid "Nothing was changed."
+msgstr ""
+
+#: inc/class-sqrip-camt-admin.php:546
+msgid "Marked as paid"
+msgstr ""
+
+#: inc/class-sqrip-camt-admin.php:580
+msgid "Order"
+msgstr ""
+
+#: inc/class-sqrip-camt-admin.php:581
+msgid "Expected"
+msgstr ""
+
+#: inc/class-sqrip-camt-admin.php:582
+msgid "Received"
+msgstr ""
+
+#: inc/class-sqrip-camt-admin.php:584
+msgid "Note"
+msgstr ""
+
+#: inc/class-sqrip-camt-admin.php:624
+msgid "Amount agrees"
+msgstr ""
+
+#: inc/class-sqrip-camt-admin.php:627
+msgid "Paid more than once"
+msgstr ""
+
+#: inc/class-sqrip-camt-admin.php:628
+msgid "Was already confirmed"
+msgstr ""
+
+#: inc/class-sqrip-camt-admin.php:631
+msgid "No amount stored for this instalment"
+msgstr ""
+
+#: inc/class-sqrip-camt-admin.php:637
+msgid "Skonto taken after the deadline"
+msgstr ""
+
+#: inc/class-sqrip-camt-admin.php:641
+msgid "Amount agrees, but the late fee is unpaid"
+msgstr ""
+
+#: inc/class-sqrip-camt-admin.php:644
+msgid "Amount differs"
+msgstr ""
+
+#: inc/class-sqrip-camt-admin.php:646
+msgid "An earlier instalment is still unpaid"
+msgstr ""
+
+#: inc/class-sqrip-media-cleaner.php:284 sqrip-woocommerce.php:1896
+#, php-format
+msgid "The PDF file for order #%s has been deleted from the media library"
+msgstr ""
+
+#: inc/class-sqrip-skonto.php:284
+#, php-format
+msgid "Second QR invoice with %1$s%% Skonto created, amount %2$s."
+msgstr ""
+
+#: inc/class-sqrip-skonto.php:336
+#, php-format
+msgid ""
+"The second QR invoice with Skonto could not be created: %s The ordinary QR "
+"invoice is unaffected."
+msgstr ""
+
+#: sqrip-woocommerce.php:132
+msgid "View sqrip settings"
+msgstr ""
+
+#: sqrip-woocommerce.php:132
+msgid "Settings"
+msgstr ""
+
+#: sqrip-woocommerce.php:213
+msgid "Once every week"
+msgstr ""
+
+#: sqrip-woocommerce.php:234
+msgid "The sqrip plugin only supports EUR and CHF currencies!"
+msgstr ""
+
+#: sqrip-woocommerce.php:244
+msgid "Your website is currently unable to upload a PDF."
+msgstr ""
+
+#: sqrip-woocommerce.php:262
+msgid ""
+"Damit sqrip die QR-Rechnungen in der Mediathek speichern kann muss "
+"\"allow_url_open\" in der php.ini oder htaccess-Datei zugelassen werden."
+msgstr ""
+
+#: sqrip-woocommerce.php:297
+msgid "Connection test"
+msgstr ""
+
+#: sqrip-woocommerce.php:298
+msgid "Check"
+msgstr ""
+
+#: sqrip-woocommerce.php:299 sqrip-woocommerce.php:300
+#: sqrip-woocommerce.php:301 sqrip-woocommerce.php:302
+#: sqrip-woocommerce.php:303 sqrip-woocommerce.php:304
+#: sqrip-woocommerce.php:305
+msgid "Update"
+msgstr ""
+
+#: sqrip-woocommerce.php:299 sqrip-woocommerce.php:300
+#: sqrip-woocommerce.php:301 sqrip-woocommerce.php:302
+#: sqrip-woocommerce.php:303 sqrip-woocommerce.php:304
+#: sqrip-woocommerce.php:305
+msgid "Create"
+msgstr ""
+
+#: sqrip-woocommerce.php:307
+#, php-format
+msgid "Send test to %s"
+msgstr ""
+
+#: sqrip-woocommerce.php:310
+msgid "You have no free credits anymore, a paid credit will be charged"
+msgstr ""
+
+#: sqrip-woocommerce.php:311
+msgid "You have no credits left"
+msgstr ""
+
+#: sqrip-woocommerce.php:313 sqrip-woocommerce.php:389
+msgid "This field is required"
+msgstr ""
+
+#: sqrip-woocommerce.php:317
+msgid "Waiting for the code from your bank…"
+msgstr ""
+
+#: sqrip-woocommerce.php:318
+msgid "Your confirmation code:"
+msgstr ""
+
+#: sqrip-woocommerce.php:319
+msgid ""
+"No code arrived yet. Check the address is entered correctly and try again."
+msgstr ""
+
+#: sqrip-woocommerce.php:320
+msgid ""
+"Verification complete. Incoming payments are now detected automatically."
+msgstr ""
+
+#: sqrip-woocommerce.php:321
+msgid "Checking…"
+msgstr ""
+
+#: sqrip-woocommerce.php:322
+msgid "order(s) marked as paid."
+msgstr ""
+
+#: sqrip-woocommerce.php:323
+msgid "Could not reach the payment notification service."
+msgstr ""
+
+#: sqrip-woocommerce.php:325
+msgid "Reading…"
+msgstr ""
+
+#: sqrip-woocommerce.php:326
+msgid "Applying…"
+msgstr ""
+
+#: sqrip-woocommerce.php:328
+msgid "Mark the listed orders as paid?"
+msgstr ""
+
+#: sqrip-woocommerce.php:329
+msgid "sqrip is turned on."
+msgstr ""
+
+#: sqrip-woocommerce.php:330
+msgid "sqrip is turned off."
+msgstr ""
+
+#: sqrip-woocommerce.php:331
+msgid "Not enough credits available. Please purchase credits here:"
+msgstr ""
+
+#: sqrip-woocommerce.php:332
+#, php-format
+msgid "Enough credits (%s) available."
+msgstr ""
+
+#: sqrip-woocommerce.php:333
+msgid "Unable to fetch the available credits."
+msgstr ""
+
+#: sqrip-woocommerce.php:334
+msgid "(QR-)IBAN confirmed."
+msgstr ""
+
+#: sqrip-woocommerce.php:335
+msgid "(QR-)IBAN not confirmed."
+msgstr ""
+
+#: sqrip-woocommerce.php:336
+msgid "API key is correct and active."
+msgstr ""
+
+#: sqrip-woocommerce.php:337
+msgid "Connected to the sqrip server."
+msgstr ""
+
+#: sqrip-woocommerce.php:338
+msgid "sqrip server not reachable."
+msgstr ""
+
+#: sqrip-woocommerce.php:339
+msgid "An error occurred. Could not request the status details."
+msgstr ""
+
+#: sqrip-woocommerce.php:340
+msgid "Payment reconciliation via bank notifications checks every minute."
+msgstr ""
+
+#: sqrip-woocommerce.php:341
+msgid ""
+"Payment reconciliation via bank notifications: the service is not reachable."
+msgstr ""
+
+#: sqrip-woocommerce.php:342
+msgid "Payment reconciliation via bank notifications:"
+msgstr ""
+
+#: sqrip-woocommerce.php:344
+msgid "Delete all unneeded QR-invoice PDFs now"
+msgstr ""
+
+#: sqrip-woocommerce.php:345
+msgid "Deleting…"
+msgstr ""
+
+#: sqrip-woocommerce.php:346
+msgid "The clean-up could not be completed."
+msgstr ""
+
+#: sqrip-woocommerce.php:347
+msgid ""
+"Deletes all QR invoices created up to today. Invoices of orders that are "
+"still waiting for payment are kept."
+msgstr ""
+
+#: sqrip-woocommerce.php:350
+msgid ""
+"As from November 2025 on, the QR invoice is only accepted when addresses "
+"consist of separate fields for street and building number."
+msgstr ""
+
+#: sqrip-woocommerce.php:351
+msgid "Please make sure you have this defined correctly:"
+msgstr ""
+
+#: sqrip-woocommerce.php:352
+msgid "in your sqrip account;"
+msgstr ""
+
+#: sqrip-woocommerce.php:353
+msgid "as your third address;"
+msgstr ""
+
+#: sqrip-woocommerce.php:354
+msgid "in your checkout process when clients enter their billing address."
+msgstr ""
+
+#: sqrip-woocommerce.php:455
+msgid "sqrip Payment"
+msgstr ""
+
+#: sqrip-woocommerce.php:500 sqrip-woocommerce.php:1824
+msgid "Partial Payment"
+msgstr ""
+
+#: sqrip-woocommerce.php:505 sqrip-woocommerce.php:1827
+msgid "Status changing to"
+msgstr ""
+
+#: sqrip-woocommerce.php:510
+msgid "Paid"
+msgstr ""
+
+#: sqrip-woocommerce.php:513 sqrip-woocommerce.php:627
+msgid "Confirm payment"
+msgstr ""
+
+#: sqrip-woocommerce.php:518 sqrip-woocommerce.php:522
+#: sqrip-woocommerce.php:534 sqrip-woocommerce.php:537
+msgid "Deleted"
+msgstr ""
+
+#: sqrip-woocommerce.php:557
+msgid "Renew QR Invoice"
+msgstr ""
+
+#: sqrip-woocommerce.php:559 sqrip-woocommerce.php:642
+msgid "Generate QR Invoice"
+msgstr ""
+
+#: sqrip-woocommerce.php:578
+msgid "Reference number"
+msgstr ""
+
+#: sqrip-woocommerce.php:585
+msgid "QR-Code PDF"
+msgstr ""
+
+#: sqrip-woocommerce.php:604
+#, php-format
+msgid "With %s%% Skonto"
+msgstr ""
+
+#: sqrip-woocommerce.php:609
+msgid "Voided"
+msgstr ""
+
+#: sqrip-woocommerce.php:639
+msgid ""
+"Please note that the sqrip payment method is disabled in the sqrip plugin "
+"settings."
+msgstr ""
+
+#: sqrip-woocommerce.php:641
+msgid "Automatic QR-invoice generation by sqrip is disabled."
+msgstr ""
+
+#: sqrip-woocommerce.php:827 sqrip-woocommerce.php:835
+msgid "Download Invoice"
+msgstr ""
+
+#: sqrip-woocommerce.php:848
+#, php-format
+msgid "Download Invoice with %s%% Skonto"
+msgstr ""
+
+#: sqrip-woocommerce.php:1075
+msgid "Connection error!"
+msgstr ""
+
+#: sqrip-woocommerce.php:1092
+msgid "sqrip payment QR code was successfully regenerated"
+msgstr ""
+
+#: sqrip-woocommerce.php:1093
+msgid "Renew QR Invoice error:"
+msgstr ""
+
+#: sqrip-woocommerce.php:1095
+msgid "Initiate sqrip payment error:"
+msgstr ""
+
+#: sqrip-woocommerce.php:1096
+msgid "sqrip payment initiation was successful"
+msgstr ""
+
+#: sqrip-woocommerce.php:1196
+msgid ""
+"Please submit at least either Name / Last name or Company name to generate "
+"the qr-invoice"
+msgstr ""
+
+#: sqrip-woocommerce.php:1202
+#, php-format
+msgid "<b>%s</b> %s</br>%s"
+msgstr ""
+
+#: sqrip-woocommerce.php:1210
+#, php-format
+msgid "%s %s <p>%s</p>"
+msgstr ""
+
+#: sqrip-woocommerce.php:1232 sqrip-woocommerce.php:1233
+msgid "Building Number"
+msgstr ""
+
+#: sqrip-woocommerce.php:1261
+msgid "Show QR Code"
+msgstr ""
+
+#: sqrip-woocommerce.php:1262
+msgid "Hide QR Code"
+msgstr ""
+
+#: sqrip-woocommerce.php:1264
+msgid "Mark as paid"
+msgstr ""
+
+#: sqrip-woocommerce.php:1265
+msgid "Mark as unpaid"
+msgstr ""
+
+#: sqrip-woocommerce.php:1267
+msgid "paid on"
+msgstr ""
+
+#: sqrip-woocommerce.php:1268
+msgid "unpaid"
+msgstr ""
+
+#: sqrip-woocommerce.php:1348
+msgid "Refunds with sqrip"
+msgstr ""
+
+#: sqrip-woocommerce.php:1351
+msgid "IBAN"
+msgstr ""
+
+#: sqrip-woocommerce.php:1356
+msgid "This iban will be used to generate a sqrip qr code in case of a refund."
+msgstr ""
+
+#: sqrip-woocommerce.php:1810
+msgid "Confirm receipt of payment"
+msgstr ""
+
+#: sqrip-woocommerce.php:1984 sqrip-woocommerce.php:1987
+#: sqrip-woocommerce.php:1990 sqrip-woocommerce.php:1993
+#, php-format
+msgid "Change status to %s"
 msgstr ""
