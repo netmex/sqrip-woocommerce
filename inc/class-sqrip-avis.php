@@ -425,22 +425,25 @@ class Sqrip_Avis
 
         // Overpayment carries both a match and a warning; checksum flags a whole batch.
         // Read them first so the booking step can react.
-        $overpaid     = array();
-        $has_checksum = false;
+        $overpaid       = array();
+        $has_checksum   = false;
+        $checksum_total = 0.0;
 
         foreach ($warnings as $w) {
             $type = isset($w['type']) ? $w['type'] : '';
             if ($type === 'overpayment' && isset($w['reference'])) {
                 $overpaid[self::normalize($w['reference'])] = $w;
             } elseif ($type === 'checksum') {
-                $has_checksum = true;
+                $has_checksum    = true;
+                $checksum_total += isset($w['batch_total']) ? (float) $w['batch_total'] : 0.0;
             }
         }
 
-        $threshold    = self::threshold();
-        $overpay_mode = self::overpayment_mode();
-        $applied      = array();
-        $held         = array();
+        $threshold      = self::threshold();
+        $overpay_mode   = self::overpayment_mode();
+        $applied        = array();
+        $held           = array();
+        $checksum_held  = array(); // one aggregated e-mail lists every affected order
 
         foreach ($orders as $entry) {
             $is_paid = ($entry['category'] === Sqrip_Camt_Reconciler::PAID)
@@ -483,12 +486,15 @@ class Sqrip_Avis
 
             self::mark_processed($dedup);
 
+            $expected = ($entry['total'] !== null && $entry['total'] !== '') ? (float) $entry['total'] : null;
+
             if ($decision === 'book') {
                 self::book_order($order, $entry, $paid_slip);
                 $applied[] = $entry['order_number'];
 
                 if ($is_overpaid) {
-                    self::send_warning_email($overpaid[$ref_norm], $order);
+                    // Booked despite the overpayment (shop setting "pay") — inform the admin.
+                    self::send_overpayment_paid_email($order, $paid_slip['reference'], $expected, $overpaid[$ref_norm], $currency);
                     self::log_add($ref_norm, $paid_slip['reference'], $amount, $currency, $score, $aspects,
                         __('Booked as paid (overpaid).', 'sqrip-swiss-qr-invoice'));
                 } else {
@@ -497,24 +503,34 @@ class Sqrip_Avis
                 }
             } elseif ($decision === 'hold_approval') {
                 $reason = $is_overpaid ? 'overpayment' : 'over_threshold';
-                self::send_approval_email($entry, $paid_slip, $amount, $currency, $reason);
+                self::send_approval_email($order, $entry, $paid_slip, $amount, $expected, $currency, $reason);
                 $order->add_order_note(self::hold_note($paid_slip, $reason));
                 $held[] = $entry['order_number'];
                 $consequence = ($reason === 'overpayment')
                     ? __('Held — overpaid, e-mailed for your release.', 'sqrip-swiss-qr-invoice')
                     : __('Held — above your limit, e-mailed for your release.', 'sqrip-swiss-qr-invoice');
                 self::log_add($ref_norm, $paid_slip['reference'], $amount, $currency, $score, $aspects, $consequence);
-            } else { // hold_notify (checksum)
-                self::send_warning_email(array('type' => 'checksum', 'reference' => $paid_slip['reference']), $order);
+            } else { // hold_notify (checksum) — collect for one aggregated e-mail
                 $order->add_order_note(self::hold_note($paid_slip, 'checksum'));
                 $held[] = $entry['order_number'];
+                $checksum_held[] = array(
+                    'order'     => $order,
+                    'reference' => $paid_slip['reference'],
+                    'expected'  => $expected,
+                    'currency'  => $currency,
+                );
                 self::log_add($ref_norm, $paid_slip['reference'], $amount, $currency, $score, $aspects,
                     __('Held — batch total mismatch, please check.', 'sqrip-swiss-qr-invoice'));
             }
         }
 
-        // Warnings not tied to a booked match: underpayment / low_confidence /
-        // no_reference_key (notify), and no_reference / bulk_payment (candidate e-mail).
+        // One e-mail per batch mismatch, listing every affected order.
+        if ($checksum_held) {
+            self::send_checksum_email($checksum_held, $checksum_total);
+        }
+
+        // Warnings not tied to a booked match: underpayment / low_confidence (notify),
+        // and no_reference / bulk_payment (candidate e-mail).
         self::process_warnings($warnings, $expectations);
 
         return array('applied' => $applied, 'held' => $held);
@@ -569,7 +585,9 @@ class Sqrip_Avis
             $type = isset($w['type']) ? $w['type'] : '';
 
             // Overpayment and checksum are handled next to the match in process().
-            if ($type === 'overpayment' || $type === 'checksum' || $type === '') {
+            // no_reference_key cannot occur for us (we never issue a QR bill without a
+            // reference), so it is intentionally dropped.
+            if ($type === 'overpayment' || $type === 'checksum' || $type === 'no_reference_key' || $type === '') {
                 continue;
             }
 
@@ -615,23 +633,33 @@ class Sqrip_Avis
     {
         $type     = $w['type'];
         $ref_norm = isset($w['reference']) ? self::normalize($w['reference']) : '';
-        $order    = ($ref_norm !== '' && isset($by_ref[$ref_norm])) ? wc_get_order($by_ref[$ref_norm]['order_id']) : null;
+        $info     = ($ref_norm !== '' && isset($by_ref[$ref_norm])) ? $by_ref[$ref_norm] : null;
+        $order    = $info ? wc_get_order($info['order_id']) : null;
 
-        if ($order && $order->get_payment_method() === 'sqrip') {
-            $order->add_order_note(self::warning_message($w));
-        } else {
+        if (!$order || $order->get_payment_method() !== 'sqrip') {
             $order = null;
         }
 
-        self::send_warning_email($w, $order);
+        $ref_display = $info ? $info['reference_display'] : $ref_norm;
+        $currency    = $info ? (string) $info['currency'] : (isset($w['currency']) ? (string) $w['currency'] : '');
+        $expected    = $info ? $info['expected'] : (isset($w['expected']) ? $w['expected'] : null);
 
-        $ref_display = ($ref_norm !== '' && isset($by_ref[$ref_norm]['reference_display']))
-            ? $by_ref[$ref_norm]['reference_display'] : $ref_norm;
-        $amount   = isset($w['received']) ? (float) $w['received'] : (isset($w['amount']) ? (float) $w['amount'] : null);
-        $currency = isset($w['currency']) ? (string) $w['currency']
-            : (($ref_norm !== '' && isset($by_ref[$ref_norm]['currency'])) ? $by_ref[$ref_norm]['currency'] : '');
-        $score    = isset($w['score']) ? (int) $w['score'] : null;
-        $aspects  = isset($w['matched_aspects']) && is_array($w['matched_aspects']) ? $w['matched_aspects'] : array();
+        // Order note (plain) + a detailed e-mail (HTML with the order link).
+        if ($order) {
+            $order->add_order_note(self::warning_message($w));
+        }
+
+        if ($type === 'underpayment' && $order) {
+            self::send_underpayment_email($order, $ref_display, $expected, $w, $currency);
+        } elseif ($type === 'low_confidence' && $order) {
+            self::send_lowconfidence_email($order, $ref_display, $w, $currency);
+        } else {
+            self::send_fallback_email($order, $w, $currency);
+        }
+
+        $amount  = isset($w['received']) ? (float) $w['received'] : (isset($w['amount']) ? (float) $w['amount'] : null);
+        $score   = isset($w['score']) ? (int) $w['score'] : null;
+        $aspects = isset($w['matched_aspects']) && is_array($w['matched_aspects']) ? $w['matched_aspects'] : array();
 
         self::log_add($ref_norm, $ref_display, $amount, $currency, $score, $aspects, self::warning_consequence($type));
     }
@@ -754,7 +782,8 @@ class Sqrip_Avis
     }
 
     /**
-     * A human-readable sentence for one warning (order note and e-mail body).
+     * A short plain-text sentence for one warning — used for the order note. The e-mail
+     * bodies are built separately (richer, with the order link).
      *
      * @param array $w
      * @return string
@@ -762,36 +791,26 @@ class Sqrip_Avis
     private static function warning_message(array $w)
     {
         $type = isset($w['type']) ? $w['type'] : '';
+        $ref  = isset($w['reference']) ? $w['reference'] : '';
 
         switch ($type) {
             case 'underpayment':
                 return sprintf(
                     /* translators: 1: received amount, 2: expected amount, 3: reference */
-                    __('Customer paid too little: received %1$s, expected %2$s (reference %3$s). The order is held.', 'sqrip-swiss-qr-invoice'),
-                    self::money($w, 'received'), self::money($w, 'expected'),
-                    isset($w['reference']) ? $w['reference'] : ''
+                    __('Underpaid: received %1$s, expected %2$s (reference %3$s). The order is held.', 'sqrip-swiss-qr-invoice'),
+                    self::money($w, 'received'), self::money($w, 'expected'), $ref
                 );
             case 'overpayment':
                 return sprintf(
                     /* translators: 1: received amount, 2: expected amount, 3: reference */
-                    __('Customer paid more than the order: received %1$s, expected %2$s (reference %3$s).', 'sqrip-swiss-qr-invoice'),
-                    self::money($w, 'received'), self::money($w, 'expected'),
-                    isset($w['reference']) ? $w['reference'] : ''
+                    __('Overpaid: received %1$s, expected %2$s (reference %3$s).', 'sqrip-swiss-qr-invoice'),
+                    self::money($w, 'received'), self::money($w, 'expected'), $ref
                 );
-            case 'no_reference_key':
-                return sprintf(
-                    /* translators: %s: order number */
-                    __('A payment matched order %s by its number, but the order has no QR reference — please add one so it can be assigned.', 'sqrip-swiss-qr-invoice'),
-                    isset($w['order_number']) ? $w['order_number'] : ''
-                );
-            case 'checksum':
-                return __('A batch payment was received, but the total of the assigned orders does not match the sum in the notification. The affected order is held — please check.', 'sqrip-swiss-qr-invoice');
             case 'low_confidence':
                 $base = sprintf(
                     /* translators: 1: score (0-10), 2: reference */
-                    __('A payment could not be assigned with confidence (score %1$d of 10, reference %2$s). Please check by hand.', 'sqrip-swiss-qr-invoice'),
-                    isset($w['score']) ? (int) $w['score'] : 0,
-                    isset($w['reference']) ? $w['reference'] : ''
+                    __('Assigned with low confidence (score %1$d of 10, reference %2$s). Please check.', 'sqrip-swiss-qr-invoice'),
+                    isset($w['score']) ? (int) $w['score'] : 0, $ref
                 );
 
                 if (!empty($w['currency_mismatch'])) {
@@ -817,8 +836,6 @@ class Sqrip_Avis
                 return __('Held — underpaid.', 'sqrip-swiss-qr-invoice');
             case 'low_confidence':
                 return __('Flagged — please check.', 'sqrip-swiss-qr-invoice');
-            case 'no_reference_key':
-                return __('Flagged — order needs a reference.', 'sqrip-swiss-qr-invoice');
             case 'no_reference':
             case 'bulk_payment':
                 return __('E-mailed for your assignment.', 'sqrip-swiss-qr-invoice');
@@ -843,45 +860,279 @@ class Sqrip_Avis
         return $ccy . number_format((float) $w[$key], 2, '.', '');
     }
 
+    // --- warning e-mails to the shop admin ---------------------------------
+
     /**
-     * E-mail the admin about a warning that needs a look but is not a one-click release.
+     * @param string $subject
+     * @param string $body_html
+     * @return void
+     */
+    private static function mail_admin($subject, $body_html)
+    {
+        $to = apply_filters('sqrip_avis_notify_recipient', get_option('admin_email'));
+        wp_mail($to, $subject, $body_html, array('Content-Type: text/html; charset=UTF-8'));
+    }
+
+    /**
+     * @return string Subject of the "please check" e-mails.
+     */
+    private static function subject_check()
+    {
+        return __('sqrip: action needed — please check a payment', 'sqrip-swiss-qr-invoice');
+    }
+
+    /**
+     * @param string     $currency
+     * @param float|null $amount
+     * @return string Currency + amount, or '' when unknown.
+     */
+    private static function amount_str($currency, $amount)
+    {
+        if ($amount === null || $amount === '') {
+            return '';
+        }
+
+        $ccy = ($currency !== null && $currency !== '') ? trim((string) $currency) . ' ' : '';
+
+        return $ccy . number_format((float) $amount, 2, '.', '');
+    }
+
+    /**
+     * @param \WC_Order $order
+     * @return string Escaped "#number" link to the order.
+     */
+    private static function order_link_html($order)
+    {
+        return '<a href="' . esc_url($order->get_edit_order_url()) . '">#' . esc_html($order->get_order_number()) . '</a>';
+    }
+
+    /**
+     * @param \WC_Order $order
+     * @return string The order's current status label.
+     */
+    private static function status_name($order)
+    {
+        return function_exists('wc_get_order_status_name')
+            ? wc_get_order_status_name($order->get_status())
+            : $order->get_status();
+    }
+
+    /**
+     * "Order #123, outstanding amount CHF 50.00, reference RF…." (escaped markup).
      *
-     * @param array          $w
+     * @param \WC_Order  $order
+     * @param string     $reference
+     * @param float|null $expected
+     * @param string     $currency
+     * @return string
+     */
+    private static function order_ref_line($order, $reference, $expected, $currency)
+    {
+        $amt = self::amount_str($currency, $expected);
+
+        return sprintf(
+            /* translators: 1: order link like #123, 2: outstanding amount, 3: reference */
+            esc_html__('Order %1$s, outstanding amount %2$s, reference %3$s.', 'sqrip-swiss-qr-invoice'),
+            self::order_link_html($order),
+            $amt !== '' ? esc_html($amt) : '&mdash;',
+            esc_html((string) $reference)
+        );
+    }
+
+    /**
+     * @param \WC_Order $order
+     * @return string "Please check the order: #123" (escaped markup).
+     */
+    private static function check_order_link($order)
+    {
+        return sprintf(
+            /* translators: %s: link to the order */
+            esc_html__('Please check the order: %s', 'sqrip-swiss-qr-invoice'),
+            self::order_link_html($order)
+        );
+    }
+
+    /**
+     * Customer paid too little: order stays open, admin informed.
+     *
+     * @return void
+     */
+    private static function send_underpayment_email($order, $reference, $expected, array $w, $currency)
+    {
+        $received = self::amount_str($currency, isset($w['received']) ? $w['received'] : null);
+
+        $body =
+            '<p style="font-family:sans-serif;font-size:14px;">'
+            . self::order_ref_line($order, $reference, $expected, $currency) . ' '
+            . sprintf(
+                /* translators: %s: received amount */
+                esc_html__('The customer paid too little (%s).', 'sqrip-swiss-qr-invoice'),
+                $received !== '' ? esc_html($received) : '&mdash;'
+            )
+            . '</p>'
+            . '<p style="font-family:sans-serif;font-size:14px;">&rarr; '
+            . sprintf(
+                /* translators: %s: order status */
+                esc_html__('The order stays on "%s".', 'sqrip-swiss-qr-invoice'),
+                esc_html(self::status_name($order))
+            )
+            . '<br>&rarr; ' . self::check_order_link($order)
+            . '</p>';
+
+        self::mail_admin(self::subject_check(), $body);
+    }
+
+    /**
+     * Customer paid too much and the shop books it anyway ("pay" setting): admin informed.
+     * Read the status AFTER booking, so it shows the status the order actually landed on.
+     *
+     * @return void
+     */
+    private static function send_overpayment_paid_email($order, $reference, $expected, array $w, $currency)
+    {
+        $received = self::amount_str($currency, isset($w['received']) ? $w['received'] : null);
+
+        $body =
+            '<p style="font-family:sans-serif;font-size:14px;">'
+            . self::order_ref_line($order, $reference, $expected, $currency) . ' '
+            . sprintf(
+                /* translators: %s: received amount */
+                esc_html__('The customer paid too much (%s).', 'sqrip-swiss-qr-invoice'),
+                $received !== '' ? esc_html($received) : '&mdash;'
+            )
+            . '</p>'
+            . '<p style="font-family:sans-serif;font-size:14px;">&rarr; '
+            . sprintf(
+                /* translators: %s: new order status */
+                esc_html__('The order was set to "%s".', 'sqrip-swiss-qr-invoice'),
+                esc_html(self::status_name($order))
+            )
+            . '<br>&rarr; ' . self::check_order_link($order)
+            . '</p>';
+
+        self::mail_admin(self::subject_check(), $body);
+    }
+
+    /**
+     * A payment was tied to one order but only with low confidence.
+     *
+     * @return void
+     */
+    private static function send_lowconfidence_email($order, $reference, array $w, $currency)
+    {
+        $score = isset($w['score']) ? (int) $w['score'] : 0;
+
+        $body =
+            '<p style="font-family:sans-serif;font-size:14px;">'
+            . sprintf(
+                /* translators: 1: order link, 2: reference, 3: score 0-10 */
+                esc_html__('A payment was assigned to order %1$s (reference %2$s), but only with low confidence (score %3$d/10).', 'sqrip-swiss-qr-invoice'),
+                self::order_link_html($order), esc_html((string) $reference), $score
+            )
+            . '</p>';
+
+        if (!empty($w['currency_mismatch'])) {
+            $body .= '<p style="font-family:sans-serif;font-size:14px;">'
+                . sprintf(
+                    /* translators: %s: the order's currency */
+                    esc_html__('The payment currency does not match the order\'s currency (%s).', 'sqrip-swiss-qr-invoice'),
+                    esc_html($currency)
+                )
+                . '</p>';
+        }
+
+        $body .= '<p style="font-family:sans-serif;font-size:14px;">&rarr; ' . self::check_order_link($order) . '</p>';
+
+        self::mail_admin(self::subject_check(), $body);
+    }
+
+    /**
+     * An unclassified warning — best effort with whatever the service sent.
+     *
      * @param \WC_Order|null $order
      * @return void
      */
-    private static function send_warning_email(array $w, $order = null)
+    private static function send_fallback_email($order, array $w, $currency)
     {
-        $link = ($order && is_a($order, 'WC_Order'))
-            ? '<p style="font-family:sans-serif;font-size:14px;"><a href="' . esc_url($order->get_edit_order_url()) . '">'
-                . esc_html__('Open order', 'sqrip-swiss-qr-invoice') . '</a></p>'
-            : '';
+        $amount = isset($w['amount']) ? $w['amount'] : (isset($w['received']) ? $w['received'] : null);
+        $desc   = self::amount_str($currency, $amount);
 
-        $body = '<p style="font-family:sans-serif;font-size:14px;">' . esc_html(self::warning_message($w)) . '</p>' . $link;
+        $body = '<p style="font-family:sans-serif;font-size:14px;">'
+            . ($desc !== ''
+                ? sprintf(
+                    /* translators: %s: amount */
+                    esc_html__('A payment (%s) needs your attention.', 'sqrip-swiss-qr-invoice'),
+                    esc_html($desc))
+                : esc_html__('A payment needs your attention.', 'sqrip-swiss-qr-invoice'))
+            . '</p>';
 
-        $to = apply_filters('sqrip_avis_notify_recipient', get_option('admin_email'));
+        if ($order && is_a($order, 'WC_Order')) {
+            $body .= '<p style="font-family:sans-serif;font-size:14px;">&rarr; ' . self::check_order_link($order) . '</p>';
+        }
 
-        wp_mail(
-            $to,
-            __('sqrip: a payment needs your attention', 'sqrip-swiss-qr-invoice'),
-            $body,
-            array('Content-Type: text/html; charset=UTF-8')
-        );
+        self::mail_admin(self::subject_check(), $body);
+    }
+
+    /**
+     * One e-mail for a batch payment whose total does not add up: lists every affected
+     * order, states whether the batch is short or over, and that all are held.
+     *
+     * @param array      $held        [ {order, reference, expected, currency}, … ]
+     * @param float|null $batch_total
+     * @return void
+     */
+    private static function send_checksum_email(array $held, $batch_total)
+    {
+        $sum      = 0.0;
+        $currency = '';
+        $items    = '';
+
+        foreach ($held as $h) {
+            if ($currency === '') {
+                $currency = (string) $h['currency'];
+            }
+            if ($h['expected'] !== null) {
+                $sum += (float) $h['expected'];
+            }
+            $items .= '<li style="margin:2px 0;">' . self::order_ref_line($h['order'], $h['reference'], $h['expected'], $h['currency']) . '</li>';
+        }
+
+        $cmp = ((float) $batch_total < $sum)
+            ? sprintf(
+                /* translators: 1: batch total, 2: sum of outstanding amounts */
+                esc_html__('The batch total (%1$s) is smaller than the sum of the outstanding amounts (%2$s).', 'sqrip-swiss-qr-invoice'),
+                esc_html(self::amount_str($currency, $batch_total)), esc_html(self::amount_str($currency, $sum)))
+            : sprintf(
+                /* translators: 1: batch total, 2: sum of outstanding amounts */
+                esc_html__('The batch total (%1$s) is larger than the sum of the outstanding amounts (%2$s).', 'sqrip-swiss-qr-invoice'),
+                esc_html(self::amount_str($currency, $batch_total)), esc_html(self::amount_str($currency, $sum)));
+
+        $body =
+            '<p style="font-family:sans-serif;font-size:14px;">' . esc_html__('This concerns:', 'sqrip-swiss-qr-invoice') . '</p>'
+            . '<ul style="font-family:sans-serif;font-size:14px;">' . $items . '</ul>'
+            . '<p style="font-family:sans-serif;font-size:14px;">' . $cmp . '</p>'
+            . '<p style="font-family:sans-serif;font-size:14px;">&rarr; ' . esc_html__('All orders stay on their current status.', 'sqrip-swiss-qr-invoice')
+            . '<br>&rarr; ' . esc_html__('Please check the orders.', 'sqrip-swiss-qr-invoice') . '</p>';
+
+        self::mail_admin(self::subject_check(), $body);
     }
 
     /**
      * E-mail the admin a one-click release for a clean match that was held (above the
      * release limit, or an overpayment the shop chose to confirm by hand). Reuses the
-     * signed confirm/reject/open links of the suggestion e-mail with a single candidate.
+     * signed confirm/reject/open links of the suggestion e-mail with a single candidate,
+     * and leads with the concrete order details.
      *
-     * @param array  $entry
-     * @param array  $paid_slip
-     * @param float  $amount
-     * @param string $currency
-     * @param string $reason 'over_threshold' | 'overpayment'
+     * @param \WC_Order $order
+     * @param array     $entry
+     * @param array     $paid_slip
+     * @param float     $amount    Received amount.
+     * @param float|null $expected Order's outstanding amount.
+     * @param string    $currency
+     * @param string    $reason    'over_threshold' | 'overpayment'
      * @return void
      */
-    private static function send_approval_email($entry, $paid_slip, $amount, $currency, $reason)
+    private static function send_approval_email($order, $entry, $paid_slip, $amount, $expected, $currency, $reason)
     {
         $ref_norm = self::normalize($paid_slip['reference']);
 
@@ -893,7 +1144,20 @@ class Sqrip_Avis
             'reference_display' => (string) $paid_slip['reference'],
         ));
 
-        self::send_suggestion_email(array('amount' => $amount, 'currency' => $currency), $candidates, $reason);
+        $line   = self::order_ref_line($order, $paid_slip['reference'], $expected, $currency);
+        $status = esc_html(self::status_name($order));
+        /* translators: %s: order status */
+        $stays  = sprintf(esc_html__('The order stays on "%s" until you release it.', 'sqrip-swiss-qr-invoice'), $status);
+
+        if ($reason === 'overpayment') {
+            /* translators: %s: received amount */
+            $detail = $line . ' ' . sprintf(esc_html__('The customer paid too much (%s).', 'sqrip-swiss-qr-invoice'), esc_html(self::amount_str($currency, $amount))) . ' ' . $stays;
+        } else {
+            /* translators: %s: received amount */
+            $detail = $line . ' ' . sprintf(esc_html__('The amount %s is above your release limit.', 'sqrip-swiss-qr-invoice'), esc_html(self::amount_str($currency, $amount))) . ' ' . $stays;
+        }
+
+        self::send_suggestion_email(array('amount' => $amount, 'currency' => $currency), $candidates, $reason, $detail);
     }
 
     // --- recognised-payments log (shown under "Reconcile") -----------------
@@ -1158,7 +1422,7 @@ class Sqrip_Avis
      * @param array $candidates normalized reference => {order_id, order_number, currency, expected}.
      * @return void
      */
-    private static function send_suggestion_email(array $sug, array $candidates, $reason = 'candidate')
+    private static function send_suggestion_email(array $sug, array $candidates, $reason = 'candidate', $detail = '')
     {
         $amount   = isset($sug['amount']) ? number_format((float) $sug['amount'], 2, '.', '') : '';
         $currency = isset($sug['currency']) ? (string) $sug['currency'] : '';
@@ -1219,15 +1483,13 @@ class Sqrip_Avis
             . '<th style="text-align:left;padding:8px 14px;border-bottom:2px solid #333;">' . esc_html__('Action', 'sqrip-swiss-qr-invoice') . '</th>'
             . '</tr>';
 
-        switch ($reason) {
-            case 'over_threshold':
-                $intro = __('This payment is above your release limit. Please check it, then confirm to mark the order paid, reject to leave it open, or open the order for details. The links are valid for 24 hours and work once.', 'sqrip-swiss-qr-invoice');
-                break;
-            case 'overpayment':
-                $intro = __('The customer paid more than the order total. Please check it, then confirm to mark the order paid, reject to leave it open, or open the order for details. The links are valid for 24 hours and work once.', 'sqrip-swiss-qr-invoice');
-                break;
-            default:
-                $intro = __('The sqrip payment notification service found a probable payment that could not be assigned automatically. Please check it against the order, then confirm, reject, or open the order for details. The links are valid for 24 hours and work once.', 'sqrip-swiss-qr-invoice');
+        // Approval e-mails (over_threshold / overpayment) lead with the concrete order
+        // details ($detail, already safe HTML with the order link); the candidate e-mail
+        // uses a plain intro. Both are emitted without further escaping below.
+        if ($detail !== '') {
+            $intro_html = $detail . ' ' . esc_html__('The links are valid for 24 hours and work once.', 'sqrip-swiss-qr-invoice');
+        } else {
+            $intro_html = esc_html__('The sqrip payment notification service found a probable payment that could not be assigned automatically. Please check it against the order, then confirm, reject, or open the order for details. The links are valid for 24 hours and work once.', 'sqrip-swiss-qr-invoice');
         }
 
         // Two clearly labelled sources: what the bank reported (via the notification
@@ -1237,7 +1499,7 @@ class Sqrip_Avis
 
         $lbl = 'font-family:sans-serif;font-size:13px;color:#555;text-transform:uppercase;letter-spacing:.04em;margin:0 0 3px;';
 
-        $body = '<p style="font-family:sans-serif;font-size:14px;">' . esc_html($intro) . '</p>'
+        $body = '<p style="font-family:sans-serif;font-size:14px;">' . $intro_html . '</p>'
             . '<p style="' . $lbl . '">' . esc_html__('Received via the bank notification', 'sqrip-swiss-qr-invoice') . '</p>'
             . '<p style="font-family:sans-serif;font-size:15px;margin:0 0 18px;"><strong>' . esc_html(implode('  ·  ', $parts)) . '</strong></p>'
             . '<p style="' . $lbl . '">' . esc_html__('From your shop', 'sqrip-swiss-qr-invoice') . '</p>'
@@ -1246,10 +1508,18 @@ class Sqrip_Avis
             . '<tbody>' . $rows . '</tbody>'
             . '</table>';
 
-        $subject = ($reason === 'candidate')
-            ? __('sqrip: probable payment — please check', 'sqrip-swiss-qr-invoice')
-            : __('sqrip: payment held — please release', 'sqrip-swiss-qr-invoice');
-        $to      = apply_filters('sqrip_avis_suggestion_recipient', get_option('admin_email'));
+        switch ($reason) {
+            case 'over_threshold':
+                $subject = __('sqrip: payment above your limit — please release', 'sqrip-swiss-qr-invoice');
+                break;
+            case 'overpayment':
+                $subject = __('sqrip: payment above the amount due — please release', 'sqrip-swiss-qr-invoice');
+                break;
+            default:
+                $subject = __('sqrip: probable payment — please check', 'sqrip-swiss-qr-invoice');
+        }
+
+        $to = apply_filters('sqrip_avis_suggestion_recipient', get_option('admin_email'));
 
         wp_mail($to, $subject, $body, array('Content-Type: text/html; charset=UTF-8'));
     }

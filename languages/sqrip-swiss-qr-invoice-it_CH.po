@@ -1782,3 +1782,69 @@ msgstr "Questo pagamento supera il suo limite di approvazione. Si prega di verif
 
 msgid "The customer paid more than the order total. Please check it, then confirm to mark the order paid, reject to leave it open, or open the order for details. The links are valid for 24 hours and work once."
 msgstr "Il cliente ha pagato più del totale dell'ordine. Si prega di verificarlo, poi confermare per contrassegnare l'ordine come pagato, rifiutare per lasciarlo aperto, o aprire l'ordine per i dettagli. I link sono validi 24 ore e funzionano una sola volta."
+
+msgid "sqrip: action needed — please check a payment"
+msgstr "sqrip: intervento necessario – verificare un pagamento"
+
+msgid "sqrip: payment above your limit — please release"
+msgstr "sqrip: importo superiore al suo limite – si prega di approvare"
+
+msgid "sqrip: payment above the amount due — please release"
+msgstr "sqrip: importo superiore all'importo dovuto – si prega di approvare"
+
+msgid "Order %1$s, outstanding amount %2$s, reference %3$s."
+msgstr "Ordine %1$s, importo aperto %2$s, riferimento %3$s."
+
+msgid "Please check the order: %s"
+msgstr "Si prega di verificare l'ordine: %s"
+
+msgid "The order stays on \"%s\"."
+msgstr "L'ordine rimane su «%s»."
+
+msgid "The order was set to \"%s\"."
+msgstr "L'ordine è stato impostato su «%s»."
+
+msgid "The order stays on \"%s\" until you release it."
+msgstr "L'ordine rimane su «%s» fino alla sua approvazione."
+
+msgid "The customer paid too little (%s)."
+msgstr "Il cliente ha pagato troppo poco (%s)."
+
+msgid "The customer paid too much (%s)."
+msgstr "Il cliente ha pagato troppo (%s)."
+
+msgid "The amount %s is above your release limit."
+msgstr "L'importo %s supera il suo limite di approvazione."
+
+msgid "A payment was assigned to order %1$s (reference %2$s), but only with low confidence (score %3$d/10)."
+msgstr "Un pagamento è stato assegnato all'ordine %1$s (riferimento %2$s), ma solo con bassa certezza (punteggio %3$d/10)."
+
+msgid "The payment currency does not match the order's currency (%s)."
+msgstr "La valuta del pagamento non corrisponde alla valuta dell'ordine (%s)."
+
+msgid "A payment (%s) needs your attention."
+msgstr "Un pagamento (%s) richiede la sua attenzione."
+
+msgid "This concerns:"
+msgstr "Riguarda:"
+
+msgid "The batch total (%1$s) is smaller than the sum of the outstanding amounts (%2$s)."
+msgstr "Il totale del lotto (%1$s) è inferiore alla somma degli importi aperti (%2$s)."
+
+msgid "The batch total (%1$s) is larger than the sum of the outstanding amounts (%2$s)."
+msgstr "Il totale del lotto (%1$s) è superiore alla somma degli importi aperti (%2$s)."
+
+msgid "All orders stay on their current status."
+msgstr "Tutti gli ordini rimangono sul loro stato attuale."
+
+msgid "Please check the orders."
+msgstr "Si prega di verificare gli ordini."
+
+msgid "Underpaid: received %1$s, expected %2$s (reference %3$s). The order is held."
+msgstr "Pagato in difetto: ricevuto %1$s, previsto %2$s (riferimento %3$s). L'ordine viene trattenuto."
+
+msgid "Overpaid: received %1$s, expected %2$s (reference %3$s)."
+msgstr "Pagato in eccesso: ricevuto %1$s, previsto %2$s (riferimento %3$s)."
+
+msgid "Assigned with low confidence (score %1$d of 10, reference %2$s). Please check."
+msgstr "Assegnato con bassa certezza (punteggio %1$d su 10, riferimento %2$s). Si prega di verificare."

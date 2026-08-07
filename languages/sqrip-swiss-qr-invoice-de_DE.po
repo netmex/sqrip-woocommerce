@@ -1790,3 +1790,69 @@ msgstr "Diese Zahlung liegt über Ihrer Freigabe-Grenze. Bitte prüfen Sie sie u
 
 msgid "The customer paid more than the order total. Please check it, then confirm to mark the order paid, reject to leave it open, or open the order for details. The links are valid for 24 hours and work once."
 msgstr "Der Kunde hat mehr als den Bestellbetrag bezahlt. Bitte prüfen Sie es und bestätigen Sie, um die Bestellung als bezahlt zu markieren, lehnen Sie ab, um sie offen zu lassen, oder öffnen Sie die Bestellung für Details. Die Links sind 24 Stunden gültig und funktionieren einmal."
+
+msgid "sqrip: action needed — please check a payment"
+msgstr "sqrip: Handlungsbedarf – Zahlung prüfen"
+
+msgid "sqrip: payment above your limit — please release"
+msgstr "sqrip: Zahlungsbetrag über Limite – bitte freigeben"
+
+msgid "sqrip: payment above the amount due — please release"
+msgstr "sqrip: Zahlungsbetrag über geschuldetem Betrag – bitte freigeben"
+
+msgid "Order %1$s, outstanding amount %2$s, reference %3$s."
+msgstr "Bestellung %1$s, offener Betrag %2$s, Referenz %3$s."
+
+msgid "Please check the order: %s"
+msgstr "Bitte Bestellung prüfen: %s"
+
+msgid "The order stays on \"%s\"."
+msgstr "Die Bestellung bleibt auf „%s\"."
+
+msgid "The order was set to \"%s\"."
+msgstr "Die Bestellung wurde auf „%s\" gesetzt."
+
+msgid "The order stays on \"%s\" until you release it."
+msgstr "Die Bestellung bleibt auf „%s\", bis Sie freigeben."
+
+msgid "The customer paid too little (%s)."
+msgstr "Kunde hat zu wenig bezahlt (%s)."
+
+msgid "The customer paid too much (%s)."
+msgstr "Kunde hat zu viel bezahlt (%s)."
+
+msgid "The amount %s is above your release limit."
+msgstr "Der Betrag %s liegt über Ihrer Freigabe-Grenze."
+
+msgid "A payment was assigned to order %1$s (reference %2$s), but only with low confidence (score %3$d/10)."
+msgstr "Eine Zahlung wurde Bestellung %1$s (Referenz %2$s) zugeordnet, aber nur mit geringer Sicherheit (Score %3$d/10)."
+
+msgid "The payment currency does not match the order's currency (%s)."
+msgstr "Die Währung der Zahlung passt nicht zur Währung der Bestellung (%s)."
+
+msgid "A payment (%s) needs your attention."
+msgstr "Eine Zahlung (%s) erfordert Ihre Aufmerksamkeit."
+
+msgid "This concerns:"
+msgstr "Betrifft:"
+
+msgid "The batch total (%1$s) is smaller than the sum of the outstanding amounts (%2$s)."
+msgstr "Die Summe der Sammelbuchung (%1$s) ist kleiner als die Summe der ausstehenden Beträge (%2$s)."
+
+msgid "The batch total (%1$s) is larger than the sum of the outstanding amounts (%2$s)."
+msgstr "Die Summe der Sammelbuchung (%1$s) ist grösser als die Summe der ausstehenden Beträge (%2$s)."
+
+msgid "All orders stay on their current status."
+msgstr "Alle Bestellungen bleiben auf ihrem aktuellen Status."
+
+msgid "Please check the orders."
+msgstr "Bitte Bestellungen prüfen."
+
+msgid "Underpaid: received %1$s, expected %2$s (reference %3$s). The order is held."
+msgstr "Unterbezahlt: erhalten %1$s, erwartet %2$s (Referenz %3$s). Die Bestellung wird zurückgehalten."
+
+msgid "Overpaid: received %1$s, expected %2$s (reference %3$s)."
+msgstr "Überbezahlt: erhalten %1$s, erwartet %2$s (Referenz %3$s)."
+
+msgid "Assigned with low confidence (score %1$d of 10, reference %2$s). Please check."
+msgstr "Mit geringer Sicherheit zugeordnet (Score %1$d von 10, Referenz %2$s). Bitte prüfen."
