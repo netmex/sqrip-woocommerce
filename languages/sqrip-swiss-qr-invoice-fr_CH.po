@@ -1868,3 +1868,6 @@ msgstr "Surpayé : reçu %1$s, attendu %2$s (référence %3$s)."
 
 msgid "Assigned with low confidence (score %1$d of 10, reference %2$s). Please check."
 msgstr "Attribué avec une faible certitude (score %1$d sur 10, référence %2$s). Veuillez vérifier."
+
+msgid "The payment currency (%1$s) does not match the order's currency (%2$s)."
+msgstr "La devise du paiement (%1$s) ne correspond pas à la devise de la commande (%2$s)."

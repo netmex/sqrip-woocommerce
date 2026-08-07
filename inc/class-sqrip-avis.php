@@ -1032,13 +1032,19 @@ class Sqrip_Avis
             . '</p>';
 
         if (!empty($w['currency_mismatch'])) {
-            $body .= '<p style="font-family:sans-serif;font-size:14px;">'
-                . sprintf(
+            // The service now sends the credit's own currency; if present, name both.
+            $pay_ccy  = isset($w['payment_currency']) ? (string) $w['payment_currency'] : '';
+            $mismatch = ($pay_ccy !== '')
+                ? sprintf(
+                    /* translators: 1: payment currency, 2: order currency */
+                    esc_html__('The payment currency (%1$s) does not match the order\'s currency (%2$s).', 'sqrip-swiss-qr-invoice'),
+                    esc_html($pay_ccy), esc_html($currency))
+                : sprintf(
                     /* translators: %s: the order's currency */
                     esc_html__('The payment currency does not match the order\'s currency (%s).', 'sqrip-swiss-qr-invoice'),
-                    esc_html($currency)
-                )
-                . '</p>';
+                    esc_html($currency));
+
+            $body .= '<p style="font-family:sans-serif;font-size:14px;">' . $mismatch . '</p>';
         }
 
         $body .= '<p style="font-family:sans-serif;font-size:14px;">&rarr; ' . self::check_order_link($order) . '</p>';
@@ -1054,8 +1060,12 @@ class Sqrip_Avis
      */
     private static function send_fallback_email($order, array $w, $currency)
     {
-        $amount = isset($w['amount']) ? $w['amount'] : (isset($w['received']) ? $w['received'] : null);
-        $desc   = self::amount_str($currency, $amount);
+        $amount = isset($w['amount']) ? $w['amount']
+            : (isset($w['received']) ? $w['received']
+            : (isset($w['payment_amount']) ? $w['payment_amount'] : null));
+        $ccy    = ($currency !== '' && $currency !== null) ? $currency
+            : (isset($w['payment_currency']) ? (string) $w['payment_currency'] : '');
+        $desc   = self::amount_str($ccy, $amount);
 
         $body = '<p style="font-family:sans-serif;font-size:14px;">'
             . ($desc !== ''

@@ -1856,3 +1856,6 @@ msgstr "Überbezahlt: erhalten %1$s, erwartet %2$s (Referenz %3$s)."
 
 msgid "Assigned with low confidence (score %1$d of 10, reference %2$s). Please check."
 msgstr "Mit geringer Sicherheit zugeordnet (Score %1$d von 10, Referenz %2$s). Bitte prüfen."
+
+msgid "The payment currency (%1$s) does not match the order's currency (%2$s)."
+msgstr "Die Währung der Zahlung (%1$s) passt nicht zur Währung der Bestellung (%2$s)."
