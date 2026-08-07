@@ -18,3 +18,4 @@ composer.lock
 .distignore
 .gitignore
 WORDPRESS-ORG-TRANSLATION-IMPORT.md
+CLAUDE.md
