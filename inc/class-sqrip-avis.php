@@ -1731,40 +1731,6 @@ class Sqrip_Avis
 
         ob_start();
         ?>
-        <?php
-        if (!empty($report['last_seen'])) :
-            $ls  = $report['last_seen'];
-            $ref = isset($ls['reference']) ? (string) $ls['reference'] : '';
-
-            $link = '';
-            foreach ($orders as $entry) {
-                foreach ($entry['slips'] as $slip) {
-                    if ($slip['reference'] === $ref) {
-                        $link = ' ' . self::order_link($entry['order_id'], $entry['order_number']);
-                        break 2;
-                    }
-                }
-            }
-
-            $when = isset($ls['seen_at']) ? strtotime((string) $ls['seen_at']) : 0;
-            // seen_at is UTC; render it in the site's timezone so the time is not off.
-            $when = $when ? wp_date(get_option('date_format') . ' ' . get_option('time_format'), $when) : '';
-            ?>
-            <p class="description">
-                <?php
-                printf(
-                    /* translators: 1: currency, 2: amount, 3: reference, 4: date/time */
-                    esc_html__('Last recognised: %1$s %2$s, reference %3$s, on %4$s', 'sqrip-swiss-qr-invoice'),
-                    esc_html(isset($ls['currency']) ? $ls['currency'] : ''),
-                    esc_html(isset($ls['amount']) ? number_format((float) $ls['amount'], 2, '.', '') : ''),
-                    esc_html($ref),
-                    esc_html($when)
-                );
-                echo $link; // already-escaped markup from order_link()
-                ?>
-            </p>
-        <?php endif; ?>
-
         <p style="margin-top:12px;"><strong><?php esc_html_e('Orders still waiting for payment', 'sqrip-swiss-qr-invoice'); ?></strong></p>
 
         <?php if (!$orders) : ?>
@@ -1788,17 +1754,21 @@ class Sqrip_Avis
                             }
                         }
                         $order = wc_get_order($entry['order_id']);
-                        $name  = $order ? $order->get_formatted_billing_full_name() : '';
                         ?>
                         <tr>
                             <td><?php echo self::order_link($entry['order_id'], $entry['order_number']); ?></td>
                             <td><?php echo esc_html($entry['currency'] . ' ' . number_format((float) $entry['total'], 2, '.', '')); ?></td>
                             <td><code><?php echo esc_html(implode(', ', $refs)); ?></code></td>
-                            <td><?php echo esc_html($name); ?></td>
+                            <td><?php echo esc_html(self::contact_label($order)); ?></td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>
             </table>
+            <p style="margin-top:6px;">
+                <a class="button-secondary" download="sqrip-unpaid-orders-<?php echo esc_attr(wp_date('Y-m-d')); ?>.csv" href="<?php echo esc_attr(self::orders_csv_href($orders)); ?>">
+                    <?php esc_html_e('Download CSV', 'sqrip-swiss-qr-invoice'); ?>
+                </a>
+            </p>
         <?php endif; ?>
 
         <?php
@@ -1814,6 +1784,126 @@ class Sqrip_Avis
         <?php
 
         return ob_get_clean();
+    }
+
+    /**
+     * The contact for the order's "Name" column: person, company, or both. If the order
+     * carries a billing company it is shown, together with the person's name when present.
+     *
+     * @param \WC_Order|null $order
+     * @return string
+     */
+    private static function contact_label($order)
+    {
+        if (!$order) {
+            return '';
+        }
+
+        $company = trim((string) $order->get_billing_company());
+        $person  = trim((string) $order->get_formatted_billing_full_name());
+
+        if ($company !== '' && $person !== '') {
+            return $company . ' (' . $person . ')';
+        }
+
+        return $company !== '' ? $company : $person;
+    }
+
+    /**
+     * The order's payment deadline: its creation date plus the shop's due-date days. The
+     * exact deadline is not stored per order — it is derived the same way the QR bill
+     * computes it, which matches the normal case (bill generated at checkout).
+     *
+     * @param \WC_Order|null $order
+     * @return string Y-m-d, or '' when unknown.
+     */
+    private static function due_date_for($order)
+    {
+        if (!$order || !$order->get_date_created()) {
+            return '';
+        }
+
+        $days = sqrip_get_plugin_option('due_date');
+        $days = is_numeric($days) ? (int) $days : 30;
+
+        $due = clone $order->get_date_created();
+        $due->modify('+' . $days . ' days');
+
+        return $due->date('Y-m-d');
+    }
+
+    /**
+     * A downloadable CSV of the waiting orders, with the order date and payment deadline
+     * added. Returned as a base64 data: URI so the download needs no extra endpoint. The
+     * UTF-8 BOM lets spreadsheets read the umlauts; the delimiter is a semicolon (what
+     * European spreadsheets expect).
+     *
+     * @param array $orders
+     * @return string
+     */
+    private static function orders_csv_href(array $orders)
+    {
+        $rows = array(array(
+            __('Order number', 'sqrip-swiss-qr-invoice'),
+            __('Order date', 'sqrip-swiss-qr-invoice'),
+            __('Due date', 'sqrip-swiss-qr-invoice'),
+            __('Currency', 'sqrip-swiss-qr-invoice'),
+            __('Amount', 'sqrip-swiss-qr-invoice'),
+            __('QR reference / SCOR', 'sqrip-swiss-qr-invoice'),
+            __('Name', 'sqrip-swiss-qr-invoice'),
+        ));
+
+        foreach ($orders as $entry) {
+            $order = wc_get_order($entry['order_id']);
+
+            $refs = array();
+            foreach ($entry['slips'] as $slip) {
+                if (!empty($slip['reference'])) {
+                    $refs[] = $slip['reference'];
+                }
+            }
+
+            $created = ($order && $order->get_date_created()) ? $order->get_date_created()->date('Y-m-d') : '';
+
+            $rows[] = array(
+                $entry['order_number'],
+                $created,
+                self::due_date_for($order),
+                $entry['currency'],
+                number_format((float) $entry['total'], 2, '.', ''),
+                implode(', ', $refs),
+                self::contact_label($order),
+            );
+        }
+
+        return 'data:text/csv;charset=utf-8;base64,' . base64_encode("\xEF\xBB\xBF" . self::to_csv($rows));
+    }
+
+    /**
+     * @param array $rows Rows of cells.
+     * @return string Semicolon-separated CSV, fields quoted where needed, CRLF line ends.
+     */
+    private static function to_csv(array $rows)
+    {
+        $lines = array();
+
+        foreach ($rows as $row) {
+            $cells = array();
+
+            foreach ($row as $cell) {
+                $cell = (string) $cell;
+
+                if (preg_match('/[";\r\n]/', $cell)) {
+                    $cell = '"' . str_replace('"', '""', $cell) . '"';
+                }
+
+                $cells[] = $cell;
+            }
+
+            $lines[] = implode(';', $cells);
+        }
+
+        return implode("\r\n", $lines) . "\r\n";
     }
 
     /**

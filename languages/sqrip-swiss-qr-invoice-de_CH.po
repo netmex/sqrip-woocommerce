@@ -1859,3 +1859,15 @@ msgstr "Mit geringer Sicherheit zugeordnet (Score %1$d von 10, Referenz %2$s). B
 
 msgid "The payment currency (%1$s) does not match the order's currency (%2$s)."
 msgstr "Die Währung der Zahlung (%1$s) passt nicht zur Währung der Bestellung (%2$s)."
+
+msgid "Download CSV"
+msgstr "CSV herunterladen"
+
+msgid "Order date"
+msgstr "Bestelldatum"
+
+msgid "Due date"
+msgstr "Zahlungsfrist"
+
+msgid "Currency"
+msgstr "Währung"

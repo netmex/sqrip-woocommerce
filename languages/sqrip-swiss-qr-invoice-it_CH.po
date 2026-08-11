@@ -1851,3 +1851,15 @@ msgstr "Assegnato con bassa certezza (punteggio %1$d su 10, riferimento %2$s). S
 
 msgid "The payment currency (%1$s) does not match the order's currency (%2$s)."
 msgstr "La valuta del pagamento (%1$s) non corrisponde alla valuta dell'ordine (%2$s)."
+
+msgid "Download CSV"
+msgstr "Scarica CSV"
+
+msgid "Order date"
+msgstr "Data dell'ordine"
+
+msgid "Due date"
+msgstr "Scadenza"
+
+msgid "Currency"
+msgstr "Valuta"

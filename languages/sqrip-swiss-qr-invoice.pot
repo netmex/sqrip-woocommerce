@@ -347,7 +347,7 @@ msgstr ""
 msgid "Invoice Details"
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:373 inc/class-sqrip-avis.php:1305
+#: inc/class-wc-sqrip-payment-gateway.php:373 inc/class-sqrip-avis.php:1318
 msgid "Payer"
 msgstr ""
 
@@ -375,8 +375,9 @@ msgstr ""
 msgid "Random number"
 msgstr ""
 
-#: inc/class-wc-sqrip-payment-gateway.php:395 inc/class-sqrip-avis.php:1304
-#: inc/class-sqrip-avis.php:1489 inc/class-sqrip-avis.php:1762
+#: inc/class-wc-sqrip-payment-gateway.php:395 inc/class-sqrip-avis.php:1317
+#: inc/class-sqrip-avis.php:1502 inc/class-sqrip-avis.php:1742
+#: inc/class-sqrip-avis.php:1847
 msgid "Order number"
 msgstr ""
 
@@ -1073,265 +1074,267 @@ msgid ""
 "different one."
 msgstr ""
 
-#: inc/class-sqrip-avis.php:329
+#: inc/class-sqrip-avis.php:332
 msgid "The payment notification service is switched off."
 msgstr ""
 
-#: inc/class-sqrip-avis.php:333
+#: inc/class-sqrip-avis.php:336
 msgid ""
 "Please set the mailbox name under \"camt Reconciliation\" and save first."
 msgstr ""
 
-#: inc/class-sqrip-avis.php:346
+#: inc/class-sqrip-avis.php:349
 msgid "No order status for \"waiting for payment\" is configured yet."
 msgstr ""
 
-#: inc/class-sqrip-avis.php:499
+#: inc/class-sqrip-avis.php:512
 msgid "Booked as paid (overpaid)."
 msgstr ""
 
-#: inc/class-sqrip-avis.php:502
+#: inc/class-sqrip-avis.php:515
 msgid "Booked as paid."
 msgstr ""
 
-#: inc/class-sqrip-avis.php:510
+#: inc/class-sqrip-avis.php:523
 msgid "Held — overpaid, e-mailed for your release."
 msgstr ""
 
-#: inc/class-sqrip-avis.php:511
+#: inc/class-sqrip-avis.php:524
 msgid "Held — above your limit, e-mailed for your release."
 msgstr ""
 
-#: inc/class-sqrip-avis.php:523
+#: inc/class-sqrip-avis.php:536
 msgid "Held — batch total mismatch, please check."
 msgstr ""
 
-#: inc/class-sqrip-avis.php:750
+#: inc/class-sqrip-avis.php:763
 #, php-format
 msgid ""
 "Payment received: %1$s %2$s, reference %3$s. Confirmed by the sqrip payment "
 "notification service."
 msgstr ""
 
-#: inc/class-sqrip-avis.php:768
+#: inc/class-sqrip-avis.php:781
 msgid ""
 "Payment received but held: the amount is higher than the order. Waiting for "
 "your release."
 msgstr ""
 
-#: inc/class-sqrip-avis.php:771
+#: inc/class-sqrip-avis.php:784
 msgid "Payment received but held: a batch total did not add up. Please check."
 msgstr ""
 
-#: inc/class-sqrip-avis.php:774
+#: inc/class-sqrip-avis.php:787
 msgid ""
 "Payment received but held: above your release limit. Waiting for your "
 "release."
 msgstr ""
 
-#: inc/class-sqrip-avis.php:779
+#: inc/class-sqrip-avis.php:792
 #, php-format
 msgid "Reference %s. sqrip payment notification service."
 msgstr ""
 
-#: inc/class-sqrip-avis.php:800
+#: inc/class-sqrip-avis.php:813
 #, php-format
 msgid ""
 "Underpaid: received %1$s, expected %2$s (reference %3$s). The order is held."
 msgstr ""
 
-#: inc/class-sqrip-avis.php:806
+#: inc/class-sqrip-avis.php:819
 #, php-format
 msgid "Overpaid: received %1$s, expected %2$s (reference %3$s)."
 msgstr ""
 
-#: inc/class-sqrip-avis.php:812
+#: inc/class-sqrip-avis.php:825
 #, php-format
 msgid ""
 "Assigned with low confidence (score %1$d of 10, reference %2$s). Please "
 "check."
 msgstr ""
 
-#: inc/class-sqrip-avis.php:817
+#: inc/class-sqrip-avis.php:830
 msgid "The payment currency does not match the order."
 msgstr ""
 
-#: inc/class-sqrip-avis.php:823 inc/class-sqrip-avis.php:1076
+#: inc/class-sqrip-avis.php:836 inc/class-sqrip-avis.php:1089
 msgid "A payment needs your attention."
 msgstr ""
 
-#: inc/class-sqrip-avis.php:836
+#: inc/class-sqrip-avis.php:849
 msgid "Held — underpaid."
 msgstr ""
 
-#: inc/class-sqrip-avis.php:838
+#: inc/class-sqrip-avis.php:851
 msgid "Flagged — please check."
 msgstr ""
 
-#: inc/class-sqrip-avis.php:841
+#: inc/class-sqrip-avis.php:854
 msgid "E-mailed for your assignment."
 msgstr ""
 
-#: inc/class-sqrip-avis.php:844
+#: inc/class-sqrip-avis.php:857
 msgid "Flagged."
 msgstr ""
 
-#: inc/class-sqrip-avis.php:881
+#: inc/class-sqrip-avis.php:894
 msgid "sqrip: action needed — please check a payment"
 msgstr ""
 
-#: inc/class-sqrip-avis.php:935
+#: inc/class-sqrip-avis.php:948
 #, php-format
 msgid "Order %1$s, outstanding amount %2$s, reference %3$s."
 msgstr ""
 
-#: inc/class-sqrip-avis.php:950
+#: inc/class-sqrip-avis.php:963
 #, php-format
 msgid "Please check the order: %s"
 msgstr ""
 
-#: inc/class-sqrip-avis.php:969
+#: inc/class-sqrip-avis.php:982
 #, php-format
 msgid "The customer paid too little (%s)."
 msgstr ""
 
-#: inc/class-sqrip-avis.php:976
+#: inc/class-sqrip-avis.php:989
 #, php-format
 msgid "The order stays on \"%s\"."
 msgstr ""
 
-#: inc/class-sqrip-avis.php:1000 inc/class-sqrip-avis.php:1164
+#: inc/class-sqrip-avis.php:1013 inc/class-sqrip-avis.php:1177
 #, php-format
 msgid "The customer paid too much (%s)."
 msgstr ""
 
-#: inc/class-sqrip-avis.php:1007
+#: inc/class-sqrip-avis.php:1020
 #, php-format
 msgid "The order was set to \"%s\"."
 msgstr ""
 
-#: inc/class-sqrip-avis.php:1029
+#: inc/class-sqrip-avis.php:1042
 #, php-format
 msgid ""
 "A payment was assigned to order %1$s (reference %2$s), but only with low "
 "confidence (score %3$d/10)."
 msgstr ""
 
-#: inc/class-sqrip-avis.php:1040
+#: inc/class-sqrip-avis.php:1053
 #, php-format
 msgid "The payment currency (%1$s) does not match the order's currency (%2$s)."
 msgstr ""
 
-#: inc/class-sqrip-avis.php:1044
+#: inc/class-sqrip-avis.php:1057
 #, php-format
 msgid "The payment currency does not match the order's currency (%s)."
 msgstr ""
 
-#: inc/class-sqrip-avis.php:1074
+#: inc/class-sqrip-avis.php:1087
 #, php-format
 msgid "A payment (%s) needs your attention."
 msgstr ""
 
-#: inc/class-sqrip-avis.php:1113
+#: inc/class-sqrip-avis.php:1126
 #, php-format
 msgid ""
 "The batch total (%1$s) is smaller than the sum of the outstanding amounts "
 "(%2$s)."
 msgstr ""
 
-#: inc/class-sqrip-avis.php:1117
+#: inc/class-sqrip-avis.php:1130
 #, php-format
 msgid ""
 "The batch total (%1$s) is larger than the sum of the outstanding amounts "
 "(%2$s)."
 msgstr ""
 
-#: inc/class-sqrip-avis.php:1121
+#: inc/class-sqrip-avis.php:1134
 msgid "This concerns:"
 msgstr ""
 
-#: inc/class-sqrip-avis.php:1124
+#: inc/class-sqrip-avis.php:1137
 msgid "All orders stay on their current status."
 msgstr ""
 
-#: inc/class-sqrip-avis.php:1125
+#: inc/class-sqrip-avis.php:1138
 msgid "Please check the orders."
 msgstr ""
 
-#: inc/class-sqrip-avis.php:1160
+#: inc/class-sqrip-avis.php:1173
 #, php-format
 msgid "The order stays on \"%s\" until you release it."
 msgstr ""
 
-#: inc/class-sqrip-avis.php:1167
+#: inc/class-sqrip-avis.php:1180
 #, php-format
 msgid "The amount %s is above your release limit."
 msgstr ""
 
-#: inc/class-sqrip-avis.php:1218
+#: inc/class-sqrip-avis.php:1231
 msgid "Recently recognised payments"
 msgstr ""
 
-#: inc/class-sqrip-avis.php:1222
+#: inc/class-sqrip-avis.php:1235
 msgid "Date / time"
 msgstr ""
 
-#: inc/class-sqrip-avis.php:1223 inc/class-sqrip-avis.php:1491
-#: inc/class-sqrip-avis.php:1764
+#: inc/class-sqrip-avis.php:1236 inc/class-sqrip-avis.php:1504
+#: inc/class-sqrip-avis.php:1744 inc/class-sqrip-avis.php:1852
 msgid "QR reference / SCOR"
 msgstr ""
 
-#: inc/class-sqrip-avis.php:1224 inc/class-sqrip-avis.php:1306
-#: inc/class-sqrip-avis.php:1490 inc/class-sqrip-avis.php:1763
+#: inc/class-sqrip-avis.php:1237 inc/class-sqrip-avis.php:1319
+#: inc/class-sqrip-avis.php:1503 inc/class-sqrip-avis.php:1743
+#: inc/class-sqrip-avis.php:1851
 msgid "Amount"
 msgstr ""
 
-#: inc/class-sqrip-avis.php:1225
+#: inc/class-sqrip-avis.php:1238
 msgid "Score"
 msgstr ""
 
-#: inc/class-sqrip-avis.php:1226
+#: inc/class-sqrip-avis.php:1239
 msgid "Findings"
 msgstr ""
 
-#: inc/class-sqrip-avis.php:1227
+#: inc/class-sqrip-avis.php:1240
 msgid "Consequence"
 msgstr ""
 
-#: inc/class-sqrip-avis.php:1287
+#: inc/class-sqrip-avis.php:1300
 #, php-format
 msgid "%d/10"
 msgstr ""
 
-#: inc/class-sqrip-avis.php:1303 inc/class-sqrip-camt-admin.php:583
+#: inc/class-sqrip-avis.php:1316 inc/class-sqrip-camt-admin.php:583
 msgid "Reference"
 msgstr ""
 
-#: inc/class-sqrip-avis.php:1475
+#: inc/class-sqrip-avis.php:1488
 msgid "Confirm"
 msgstr ""
 
-#: inc/class-sqrip-avis.php:1476
+#: inc/class-sqrip-avis.php:1489
 msgid "Reject"
 msgstr ""
 
-#: inc/class-sqrip-avis.php:1477
+#: inc/class-sqrip-avis.php:1490
 msgid "Open order"
 msgstr ""
 
-#: inc/class-sqrip-avis.php:1492 inc/class-sqrip-avis.php:1765
+#: inc/class-sqrip-avis.php:1505 inc/class-sqrip-avis.php:1745
+#: inc/class-sqrip-avis.php:1853
 msgid "Name"
 msgstr ""
 
-#: inc/class-sqrip-avis.php:1493
+#: inc/class-sqrip-avis.php:1506
 msgid "Action"
 msgstr ""
 
-#: inc/class-sqrip-avis.php:1500
+#: inc/class-sqrip-avis.php:1513
 msgid "The links are valid for 24 hours and work once."
 msgstr ""
 
-#: inc/class-sqrip-avis.php:1502
+#: inc/class-sqrip-avis.php:1515
 msgid ""
 "The sqrip payment notification service found a probable payment that could "
 "not be assigned automatically. Please check it against the order, then "
@@ -1339,106 +1342,117 @@ msgid ""
 "hours and work once."
 msgstr ""
 
-#: inc/class-sqrip-avis.php:1513
+#: inc/class-sqrip-avis.php:1526
 msgid "Received via the bank notification"
 msgstr ""
 
-#: inc/class-sqrip-avis.php:1515
+#: inc/class-sqrip-avis.php:1528
 msgid "From your shop"
 msgstr ""
 
-#: inc/class-sqrip-avis.php:1523
+#: inc/class-sqrip-avis.php:1536
 msgid "sqrip: payment above your limit — please release"
 msgstr ""
 
-#: inc/class-sqrip-avis.php:1526
+#: inc/class-sqrip-avis.php:1539
 msgid "sqrip: payment above the amount due — please release"
 msgstr ""
 
-#: inc/class-sqrip-avis.php:1529
+#: inc/class-sqrip-avis.php:1542
 msgid "sqrip: probable payment — please check"
 msgstr ""
 
-#: inc/class-sqrip-avis.php:1570 inc/class-sqrip-avis.php:1576
+#: inc/class-sqrip-avis.php:1583 inc/class-sqrip-avis.php:1589
 msgid "This link is not valid."
 msgstr ""
 
-#: inc/class-sqrip-avis.php:1582
+#: inc/class-sqrip-avis.php:1595
 msgid "This link has expired or was already used."
 msgstr ""
 
-#: inc/class-sqrip-avis.php:1595
+#: inc/class-sqrip-avis.php:1608
 msgid "The suggested payment was rejected. Nothing was changed."
 msgstr ""
 
-#: inc/class-sqrip-avis.php:1601
+#: inc/class-sqrip-avis.php:1614
 msgid "The order could not be found, so nothing was changed."
 msgstr ""
 
-#: inc/class-sqrip-avis.php:1606
+#: inc/class-sqrip-avis.php:1619
 #, php-format
 msgid ""
 "Payment confirmed by hand from an e-mail suggestion: %1$s %2$s, reference "
 "%3$s (probable match from the sqrip payment notification service)."
 msgstr ""
 
-#: inc/class-sqrip-avis.php:1622
+#: inc/class-sqrip-avis.php:1635
 #, php-format
 msgid "Order %s was marked as paid."
 msgstr ""
 
-#: inc/class-sqrip-avis.php:1637
+#: inc/class-sqrip-avis.php:1650
 msgid "sqrip payment notification"
 msgstr ""
 
-#: inc/class-sqrip-avis.php:1656 inc/class-sqrip-avis.php:1687
-#: inc/class-sqrip-avis.php:1835 inc/class-sqrip-camt-admin.php:137
+#: inc/class-sqrip-avis.php:1669 inc/class-sqrip-avis.php:1700
+#: inc/class-sqrip-avis.php:1939 inc/class-sqrip-camt-admin.php:137
 msgid "You are not allowed to do this."
 msgstr ""
 
-#: inc/class-sqrip-avis.php:1691
+#: inc/class-sqrip-avis.php:1704
 msgid "Please switch on the automatic payment reconciliation first."
 msgstr ""
 
-#: inc/class-sqrip-avis.php:1743
-#, php-format
-msgid "Last recognised: %1$s %2$s, reference %3$s, on %4$s"
-msgstr ""
-
-#: inc/class-sqrip-avis.php:1754
+#: inc/class-sqrip-avis.php:1734
 msgid "Orders still waiting for payment"
 msgstr ""
 
-#: inc/class-sqrip-avis.php:1757
+#: inc/class-sqrip-avis.php:1737
 msgid "There are no orders waiting for payment right now."
 msgstr ""
 
-#: inc/class-sqrip-avis.php:1842
+#: inc/class-sqrip-avis.php:1769
+msgid "Download CSV"
+msgstr ""
+
+#: inc/class-sqrip-avis.php:1848
+msgid "Order date"
+msgstr ""
+
+#: inc/class-sqrip-avis.php:1849
+msgid "Due date"
+msgstr ""
+
+#: inc/class-sqrip-avis.php:1850
+msgid "Currency"
+msgstr ""
+
+#: inc/class-sqrip-avis.php:1946
 msgid "Unknown step."
 msgstr ""
 
-#: inc/class-sqrip-avis.php:1846
+#: inc/class-sqrip-avis.php:1950
 msgid "Please set the mailbox name and save the settings first."
 msgstr ""
 
-#: inc/class-sqrip-avis.php:1937
+#: inc/class-sqrip-avis.php:2041
 msgid ""
 "No sqrip credits left — please top up your sqrip account to use the payment "
 "reconciliation."
 msgstr ""
 
-#: inc/class-sqrip-avis.php:1939
+#: inc/class-sqrip-avis.php:2043
 msgid ""
 "Your sqrip account is not active. Please confirm it at sqrip.ch before using "
 "the payment reconciliation."
 msgstr ""
 
-#: inc/class-sqrip-avis.php:1942
+#: inc/class-sqrip-avis.php:2046
 msgid ""
 "Please save the sqrip settings again to register this shop for the service."
 msgstr ""
 
-#: inc/class-sqrip-avis.php:1991
+#: inc/class-sqrip-avis.php:2095
 msgid "The payment notification service could not be reached."
 msgstr ""
 

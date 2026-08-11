@@ -1871,3 +1871,15 @@ msgstr "Attribué avec une faible certitude (score %1$d sur 10, référence %2$s
 
 msgid "The payment currency (%1$s) does not match the order's currency (%2$s)."
 msgstr "La devise du paiement (%1$s) ne correspond pas à la devise de la commande (%2$s)."
+
+msgid "Download CSV"
+msgstr "Télécharger le CSV"
+
+msgid "Order date"
+msgstr "Date de commande"
+
+msgid "Due date"
+msgstr "Échéance"
+
+msgid "Currency"
+msgstr "Devise"
