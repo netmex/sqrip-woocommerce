@@ -321,9 +321,12 @@ class Sqrip_Avis
      * Ask the service for the matches to the shop's open references and sort them
      * into the reconciler's categories.
      *
+     * @param bool $fresh When true (manual "Reconcile now"), ask the service to read the
+     *                    mailbox synchronously before matching, so a just-arrived e-mail is
+     *                    seen at once instead of waiting for the periodic poll.
      * @return array|string Report, or a message on failure.
      */
-    public static function run()
+    public static function run($fresh = false)
     {
         if (!self::is_enabled()) {
             return __('The payment notification service is switched off.', 'sqrip-swiss-qr-invoice');
@@ -349,7 +352,17 @@ class Sqrip_Avis
         $expectations = $reconciler->build_expectations($orders['orders']);
         $payload      = self::orders_payload($expectations);
 
-        $claim = self::post('/v2/claim', array('token' => self::token(), 'orders' => $payload));
+        $body = array('token' => self::token(), 'orders' => $payload);
+
+        // Manual "Reconcile now" asks the service to read the mailbox synchronously first,
+        // so a just-arrived e-mail is seen immediately instead of waiting for the periodic
+        // (5-minute) poll. The nudge and the periodic path leave this off — they don't need
+        // it, and it keeps the on-demand mailbox read to the rare manual click.
+        if ($fresh) {
+            $body['fresh'] = true;
+        }
+
+        $claim = self::post('/v2/claim', $body);
 
         if (!is_array($claim)) {
             return self::unreachable_message();
@@ -1691,13 +1704,14 @@ class Sqrip_Avis
             wp_send_json_error(array('message' => __('Please switch on the automatic payment reconciliation first.', 'sqrip-swiss-qr-invoice')), 403);
         }
 
-        $report = self::run();
+        // A human pressed the button: read the mailbox fresh, and the release limit does
+        // not apply here.
+        $report = self::run(true);
 
         if (!is_array($report)) {
             wp_send_json_error(array('message' => $report));
         }
 
-        // A human pressed the button: the release limit does not apply here.
         self::process($report, true);
 
         wp_send_json_success(array('html' => self::render_check($report)));
