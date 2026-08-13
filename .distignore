@@ -2,6 +2,20 @@
 /.git
 /.github
 /docs
+/tests
+
+# Never ship untracked developer or data cruft, even when the package is built
+# from a working copy that happens to contain it (real bank files, dev config).
+#
+# NOTE: /vendor IS shipped on purpose — it holds chillerlan/php-qrcode, a RUNTIME
+# dependency used to render GiroCodes. It carries no dev packages (the root has no
+# require-dev), so keep it in the build. composer.json/lock stay out; they are only
+# needed to rebuild vendor.
+/CAMT
+/.claude
+/scratchpad
+composer.json
+composer.lock
 
 .DS_Store
 .distignore
