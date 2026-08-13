@@ -314,6 +314,17 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'class' => 'qrinvoice-tab wc-enhanced-select sqrip-country-field'
             ),
 
+            'payment_scheme' => array(
+                'title' => __('Payment scheme', 'sqrip-swiss-qr-invoice'),
+                'type' => 'select',
+                'description' => __('Swiss QR-bill (generated via the sqrip API) or a GiroCode / EPC-QR for SEPA transfers in EUR (generated locally in the plugin). GiroCode requires a SEPA IBAN below and EUR as the shop currency.', 'sqrip-swiss-qr-invoice'),
+                'default' => 'swiss',
+                'options' => array(
+                    'swiss'    => __('Swiss QR-bill', 'sqrip-swiss-qr-invoice'),
+                    'girocode' => __('GiroCode (SEPA / EUR)', 'sqrip-swiss-qr-invoice'),
+                ),
+                'class' => 'qrinvoice-tab'
+            ),
             'section_payment_recevier' => array(
                 'title' => __('Payee', 'sqrip-swiss-qr-invoice'),
                 'type' => 'section',
@@ -2100,6 +2111,11 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'result' => 'success',
                 'redirect' => $this->get_return_url($order),
             );
+        }
+
+        // GiroCode (SEPA/EUR) is generated locally, without the sqrip API.
+        if (sqrip_get_plugin_option('payment_scheme') === 'girocode') {
+            return sqrip_process_payment_girocode($order);
         }
 
         // Second line of defence behind is_available(): an order can still arrive here with

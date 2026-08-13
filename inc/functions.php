@@ -1209,6 +1209,99 @@ function get_return_url_stt( $order = null ) {
 /*
  *  Processing payment - static function version
  */
+/**
+ * Local GiroCode (EPC-QR) generation for the SEPA/EUR path — no sqrip API call.
+ *
+ * A GiroCode is a commodity, so it is built inside the plugin: the SEPA IBAN and the
+ * currency are validated, the code is rendered with Sqrip_GiroCode, and the RF reference
+ * is written to the same meta key the Swiss path uses (sqrip_reference_id). That is what
+ * lets the camt reconciler match SEPA payments without any change. The SVG is kept for
+ * display; there is no PDF payment slip for a GiroCode.
+ *
+ * @param WC_Order $order
+ * @return array|false Checkout result, or false on a configuration error.
+ */
+function sqrip_process_payment_girocode($order)
+{
+    global $woocommerce;
+
+    if (!is_a($order, 'WC_Order')) {
+        return false;
+    }
+
+    $currency = $order->get_currency();
+    $amount   = floatval($order->get_total());
+    $iban     = sqrip_get_plugin_option('iban');
+
+    if (!Sqrip_Sepa_Iban::currency_is_eur($currency)) {
+        wc_add_notice(__('sqrip GiroCode: the shop currency must be EUR for a SEPA transfer.', 'sqrip-swiss-qr-invoice'), 'error');
+        $order->add_order_note(__('sqrip GiroCode not created: shop currency is not EUR.', 'sqrip-swiss-qr-invoice'));
+
+        return false;
+    }
+
+    $iban_check = Sqrip_Sepa_Iban::validate($iban);
+
+    if (!$iban_check['ok']) {
+        wc_add_notice(__('sqrip GiroCode: please configure a valid SEPA IBAN for the payee.', 'sqrip-swiss-qr-invoice'), 'error');
+        $order->add_order_note(sprintf(
+            /* translators: %s: machine-readable reason, e.g. "checksum" or "qr_iban_use_swiss_path". */
+            __('sqrip GiroCode not created: payee IBAN rejected (%s).', 'sqrip-swiss-qr-invoice'),
+            esc_html($iban_check['reason'])
+        ));
+
+        return false;
+    }
+
+    $payable_to = sqrip_get_payable_to_address(sqrip_get_plugin_option('address'));
+    $name       = (is_array($payable_to) && !empty($payable_to['name'])) ? $payable_to['name'] : get_bloginfo('name');
+
+    try {
+        $girocode = Sqrip_GiroCode::generate(array(
+            'name'           => $name,
+            'iban'           => $iban,
+            'amount'         => $amount,
+            'reference_base' => strval($order->get_id()),
+        ));
+    } catch (Exception $e) {
+        wc_add_notice(__('sqrip GiroCode could not be generated.', 'sqrip-swiss-qr-invoice'), 'error');
+        $order->add_order_note(sprintf(
+            /* translators: %s: technical error message from the generator. */
+            __('sqrip GiroCode error: %s', 'sqrip-swiss-qr-invoice'),
+            esc_html($e->getMessage())
+        ));
+
+        return false;
+    }
+
+    // Keep the SVG in the uploads directory (no GD needed). The reference is stored in any
+    // case — that is what the reconciler needs — so a failed file write is not fatal.
+    $upload = wp_upload_bits('sqrip-girocode-' . $order->get_id() . '.svg', null, $girocode['svg']);
+
+    $order->update_meta_data('sqrip_reference_id', $girocode['reference']);
+    $order->update_meta_data('sqrip_scheme', 'girocode');
+    $order->update_meta_data('sqrip_girocode_payload', $girocode['payload']);
+
+    if (empty($upload['error'])) {
+        $order->update_meta_data('sqrip_girocode_svg_url', $upload['url']);
+        $order->update_meta_data('sqrip_girocode_svg_path', $upload['file']);
+    }
+
+    $order->update_meta_data('sqrip_refund_iban_num', get_user_meta($order->get_user_id(), 'iban_num', true));
+    $order->add_order_note(__('sqrip GiroCode (SEPA) created.', 'sqrip-swiss-qr-invoice'));
+
+    if ($woocommerce && isset($woocommerce->cart) && $woocommerce->cart) {
+        $woocommerce->cart->empty_cart();
+    }
+
+    $order->save();
+
+    return array(
+        'result'   => 'success',
+        'redirect' => get_return_url_stt($order),
+    );
+}
+
 function process_payment_stt($order_id)
 {
     global $woocommerce;
@@ -1246,6 +1339,11 @@ function process_payment_stt($order_id)
             'result' => 'success',
             'redirect' => get_return_url_stt($order),
         );
+    }
+
+    // GiroCode (SEPA/EUR) is generated locally, without ever calling the sqrip API.
+    if (sqrip_get_plugin_option('payment_scheme') === 'girocode') {
+        return sqrip_process_payment_girocode($order);
     }
 
     $body = sqrip_prepare_qr_code_request_body($currency_symbol, $amount, strval($order_id));
