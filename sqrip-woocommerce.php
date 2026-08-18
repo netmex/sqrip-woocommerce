@@ -1892,8 +1892,25 @@ function sqrip_add_admin_to_recipients($recipient, $order) {
     return $recipient;
 }
 
-add_action( 'wpo_wcpdf_after_order_details', 'wpo_wcpdf_tax_exempt', 10, 2 );
-function wpo_wcpdf_tax_exempt( $document_type, $order ) {
+/**
+ * Append the QR payment part to the invoice of "PDF Invoices & Packing Slips".
+ *
+ * The callback used to be called wpo_wcpdf_tax_exempt() — the name of a widely pasted
+ * snippet about tax exemption, carrying the *other* plugin's prefix, declared globally
+ * and unguarded. Two problems: it says nothing about what the function does, and if
+ * that plugin, one of its extensions or a shop snippet ever declares the same name,
+ * PHP aborts with a fatal redeclare and the whole site is down. Renamed to our own
+ * prefix and guarded.
+ *
+ * sqrip only appends to an existing document, it does not register a document type of
+ * its own — which is the part the version 6 rewrite of that plugin touches.
+ *
+ * @param string   $document_type
+ * @param WC_Order $order
+ * @return void
+ */
+if ( ! function_exists( 'sqrip_append_qr_to_pdf_invoice' ) ) {
+    function sqrip_append_qr_to_pdf_invoice( $document_type, $order ) {
 
     if ( ! in_array( $document_type, array( 'invoice' ) ) ) {
         return;
@@ -1916,7 +1933,10 @@ function wpo_wcpdf_tax_exempt( $document_type, $order ) {
             </div>
         <?php
     }
+    }
 }
+
+add_action( 'wpo_wcpdf_after_order_details', 'sqrip_append_qr_to_pdf_invoice', 10, 2 );
 
 
 $current_directory = plugin_dir_path( __FILE__ ) . '/inc';
