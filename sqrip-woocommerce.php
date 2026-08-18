@@ -1902,8 +1902,10 @@ function sqrip_add_admin_to_recipients($recipient, $order) {
  * PHP aborts with a fatal redeclare and the whole site is down. Renamed to our own
  * prefix and guarded.
  *
- * sqrip only appends to an existing document, it does not register a document type of
- * its own — which is the part the version 6 rewrite of that plugin touches.
+ * This does NOT make sqrip ready for that plugin's version 6. It only removes a name
+ * collision of our own making. Whether version 6 still fires
+ * wpo_wcpdf_after_order_details is untested and has to be measured once it is out — if
+ * the hook goes away, the QR part silently disappears from every PDF invoice.
  *
  * @param string   $document_type
  * @param WC_Order $order
@@ -1934,9 +1936,9 @@ if ( ! function_exists( 'sqrip_append_qr_to_pdf_invoice' ) ) {
         <?php
     }
     }
-}
 
-add_action( 'wpo_wcpdf_after_order_details', 'sqrip_append_qr_to_pdf_invoice', 10, 2 );
+    add_action( 'wpo_wcpdf_after_order_details', 'sqrip_append_qr_to_pdf_invoice', 10, 2 );
+}
 
 
 $current_directory = plugin_dir_path( __FILE__ ) . '/inc';

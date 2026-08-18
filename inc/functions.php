@@ -965,7 +965,9 @@ if ( ! function_exists( 'sqrip_ends_with' ) ) {
             return str_ends_with( (string) $haystack, (string) $needle );
         }
 
-        $length = strlen( $needle );
+        $haystack = (string) $haystack;
+        $needle   = (string) $needle;
+        $length   = strlen( $needle );
 
         if ( ! $length ) {
             return true;
