@@ -147,7 +147,9 @@ Yes. We are already working on comparing the reconciliation of orders/purchases 
 = 1.10.5 : August 2026 – Fix =
 * Order notes now say why a QR invoice could not be created. Until now the note read "Renew QR Invoice error: Server Error", which looks like a breakdown at sqrip. In nearly every case it means the opposite: the invoice data was refused — a wrong IBAN, a reference the chosen format does not allow, or an address field that is empty, too long or contains characters a QR bill does not permit. The note now says that in plain words, names the field the service objected to, and keeps the original wording as a technical aside;
 * One order with unusable data can no longer switch sqrip off for your whole shop. If you use the option 'Turn sqrip services off automatically if an error occurs', it now takes effect only when the sqrip service itself is unreachable — not when a single order is refused because of its own data. Previously such an order could disable the payment method, and you had to notice and switch it back on by hand;
-* Nothing changes in your settings, and there is nothing you need to do.
+* Internal function names that carried another plugin's prefix, or a word as common as "endsWith", now use sqrip's own prefix. This closes a rare but total failure: if a snippet or another plugin happened to use the same name, WordPress stopped with a fatal error and the entire site went down — not just sqrip. How the plugin works is unchanged.
+* One exception worth knowing, and it affects almost nobody: if you removed the QR payment part from the PDF invoice with your own code — a remove_action on 'wpo_wcpdf_tax_exempt' — that line no longer matches and the payment part comes back. Point it at 'sqrip_append_qr_to_pdf_invoice' instead. The setting 'Combine QR-Slip with Invoice into one document' is not affected and remains the normal way to switch this off.
+* None of your settings are changed by this update.
 
 = 1.10.4 : August 2026 – Feature =
 * New setting 'Restrict QR-invoice by country': sqrip is then offered only for the invoice countries you select (Switzerland and Liechtenstein by default). A QR-invoice is always in Swiss francs, so for customers abroad it causes confusion, bank charges for paying in the wrong currency, and manual work on your side;
@@ -367,7 +369,7 @@ We made users (even more) happy with these changes:
 
 == Upgrade Notice ==
 = 1.10.5 =
-Recommended for everyone on 1.10.x. Order notes now explain why a QR invoice was refused instead of showing "Server Error", and a single order with unusable data can no longer switch the payment method off for the whole shop. Your settings are untouched.
+Recommended for everyone on 1.10.x. Order notes now explain why a QR invoice was refused instead of showing "Server Error", and a single order with unusable data can no longer switch the payment method off for the whole shop. Your settings are untouched. Also hardens internal function names; only relevant if you removed the QR part from the PDF invoice with your own code — see the changelog.
 
 = 1.10.4 =
 Adds an optional country restriction: offer sqrip only for the invoice countries you choose. Switched off on update — nothing changes until you enable it under QR-Invoice in the sqrip settings.

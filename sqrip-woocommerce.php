@@ -1116,14 +1116,14 @@ function sqrip_display_refund_qr_code($refund)
 
 }
 
-add_action('woocommerce_order_refunded', 'action_woocommerce_order_refunded', 10, 2);
+add_action('woocommerce_order_refunded', 'sqrip_handle_order_refunded', 10, 2);
 
 /**
  * Called when an order is refunded using WooCommerce
  * @param $order_id int
  * @param $refund_id int
  */
-function action_woocommerce_order_refunded($order_id, $refund_id)
+function sqrip_handle_order_refunded($order_id, $refund_id)
 {
 
     $order = wc_get_order($order_id);
@@ -1223,7 +1223,7 @@ function sqrip_save_extra_user_profile_fields($user_id)
 
 }
 
-function post_custom_field_updated($meta_id, $post_id, $meta_key, $meta_value)
+function sqrip_sync_refund_iban_to_customer($meta_id, $post_id, $meta_key, $meta_value)
 {
     if ($meta_key === 'sqrip_refund_iban_num') {
         global $order;
@@ -1238,7 +1238,7 @@ function post_custom_field_updated($meta_id, $post_id, $meta_key, $meta_value)
     }
 }
 
-add_action('updated_post_meta', 'post_custom_field_updated', 10, 4);
+add_action('updated_post_meta', 'sqrip_sync_refund_iban_to_customer', 10, 4);
 
 // Disable the Zip/postcode validation
 add_filter('woocommerce_validate_postcode', '__return_true');
@@ -1902,8 +1902,27 @@ function sqrip_add_admin_to_recipients($recipient, $order) {
     return $recipient;
 }
 
-add_action( 'wpo_wcpdf_after_order_details', 'wpo_wcpdf_tax_exempt', 10, 2 );
-function wpo_wcpdf_tax_exempt( $document_type, $order ) {
+/**
+ * Append the QR payment part to the invoice of "PDF Invoices & Packing Slips".
+ *
+ * The callback used to be called wpo_wcpdf_tax_exempt() — the name of a widely pasted
+ * snippet about tax exemption, carrying the *other* plugin's prefix, declared globally
+ * and unguarded. Two problems: it says nothing about what the function does, and if
+ * that plugin, one of its extensions or a shop snippet ever declares the same name,
+ * PHP aborts with a fatal redeclare and the whole site is down. Renamed to our own
+ * prefix and guarded.
+ *
+ * This does NOT make sqrip ready for that plugin's version 6. It only removes a name
+ * collision of our own making. Whether version 6 still fires
+ * wpo_wcpdf_after_order_details is untested and has to be measured once it is out — if
+ * the hook goes away, the QR part silently disappears from every PDF invoice.
+ *
+ * @param string   $document_type
+ * @param WC_Order $order
+ * @return void
+ */
+if ( ! function_exists( 'sqrip_append_qr_to_pdf_invoice' ) ) {
+    function sqrip_append_qr_to_pdf_invoice( $document_type, $order ) {
 
     if ( ! in_array( $document_type, array( 'invoice' ) ) ) {
         return;
@@ -1926,6 +1945,9 @@ function wpo_wcpdf_tax_exempt( $document_type, $order ) {
             </div>
         <?php
     }
+    }
+
+    add_action( 'wpo_wcpdf_after_order_details', 'sqrip_append_qr_to_pdf_invoice', 10, 2 );
 }
 
 

@@ -1018,7 +1018,7 @@ function sqrip_format_reference_id($reference_id, $order_id)
     switch ($qr_basis) {
         case 'order_number':
             if (strpos(strtolower($reference_id_formatted), 'rf') !== false) {
-                if (endsWith($reference_id_formatted, $order_id)) {
+                if (sqrip_ends_with($reference_id_formatted, $order_id)) {
                     $reference_id_formatted = sqrip_reference_id_format_with_order_id ($reference_id_formatted, $order_id, 4);
                 } else {
                     $reference_id_formatted = sqrip_default_reference_id_formatting($reference_id_formatted);
@@ -1026,7 +1026,7 @@ function sqrip_format_reference_id($reference_id, $order_id)
             } else {
                 $control_digit = substr($reference_id_formatted, -1);
                 $reference_without_control_digit = substr($reference_id_formatted, 0, -1);
-                $ref_ends_with_order_id = endsWith($reference_without_control_digit, $order_id);
+                $ref_ends_with_order_id = sqrip_ends_with($reference_without_control_digit, $order_id);
 
                 if ($ref_ends_with_order_id) {
                     $reference_id_formatted = sqrip_reference_id_format_with_order_id ($reference_id_formatted, $order_id, 2)." ".$control_digit;
@@ -1067,12 +1067,38 @@ function sqrip_default_reference_id_formatting ($reference_id_formatted) {
     return $reference_id_formatted;
 }
 
-function endsWith( $haystack, $needle ) {
-    $length = strlen( $needle );
-    if( !$length ) {
-        return true;
+/**
+ * Does $haystack end with $needle?
+ *
+ * Used to be a global endsWith(). That name is generic enough that a theme, a snippet
+ * or another plugin declares it sooner or later — and a second declaration is a fatal
+ * error that takes the whole site down, not just sqrip. Renamed to our prefix and
+ * guarded.
+ *
+ * PHP 8 has str_ends_with(); we still support 7.4, hence the fallback. An empty needle
+ * returns true in both branches, which is what the original did and what the callers
+ * rely on.
+ *
+ * @param string $haystack
+ * @param string $needle
+ * @return bool
+ */
+if ( ! function_exists( 'sqrip_ends_with' ) ) {
+    function sqrip_ends_with( $haystack, $needle ) {
+        if ( function_exists( 'str_ends_with' ) ) {
+            return str_ends_with( (string) $haystack, (string) $needle );
+        }
+
+        $haystack = (string) $haystack;
+        $needle   = (string) $needle;
+        $length   = strlen( $needle );
+
+        if ( ! $length ) {
+            return true;
+        }
+
+        return substr( $haystack, -$length ) === $needle;
     }
-    return substr( $haystack, -$length ) === $needle;
 }
 
 function sqrip_reference_id_format_with_order_id ($reference_id_formatted, $order_id, $start_length) {
