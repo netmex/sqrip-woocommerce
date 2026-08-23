@@ -4,7 +4,7 @@
  * Plugin Name:             sqrip.ch
  * Plugin URI:              https://sqrip.ch/
  * Description:             sqrip – A comprehensive, flexible and clever WooCommerce finance tool for the most widely used payment method in Switzerland: the bank transfers.
- * Version:                 1.10.4
+ * Version:                 1.10.5
  * Author:                  netmex digital gmbh
  * Author URI:              https://sqrip.ch/
  * Text Domain:             sqrip-swiss-qr-invoice
@@ -245,10 +245,10 @@ function sqrip_add_admin_notice()
 
 add_action('admin_enqueue_scripts', function ($hook_suffix) {
 
-    wp_enqueue_style('sqrip-admin', plugins_url('css/sqrip-admin.css', __FILE__), '', '1.10.4');
+    wp_enqueue_style('sqrip-admin', plugins_url('css/sqrip-admin.css', __FILE__), '', '1.10.5');
 
     if (isset($_GET['section']) && $_GET['section'] == "sqrip") {
-        wp_enqueue_script('sqrip-admin', plugins_url('js/sqrip-admin.js', __FILE__), array('jquery', 'selectWoo'), '1.10.4', true);
+        wp_enqueue_script('sqrip-admin', plugins_url('js/sqrip-admin.js', __FILE__), array('jquery', 'selectWoo'), '1.10.5', true);
 
         $sqrip_new_status = sqrip_get_plugin_option('enabled_new_status');
         $sqrip_new_awaiting_status = sqrip_get_plugin_option('enabled_new_awstatus');
@@ -316,8 +316,8 @@ add_action('admin_enqueue_scripts', function ($hook_suffix) {
         $screen->id === $sqrip_hpos_order_screen
     )) {
 
-        wp_enqueue_script('sqrip-order', plugins_url('js/sqrip-order.js', __FILE__), array('jquery'), '1.10.4', true);
-        wp_enqueue_script('sqrip-refund', plugins_url('js/sqrip-refund.js', __FILE__), array('jquery'), '1.10.4', true);
+        wp_enqueue_script('sqrip-order', plugins_url('js/sqrip-order.js', __FILE__), array('jquery'), '1.10.5', true);
+        wp_enqueue_script('sqrip-refund', plugins_url('js/sqrip-refund.js', __FILE__), array('jquery'), '1.10.5', true);
 
         wp_localize_script('sqrip-order', 'sqrip',
             array(
@@ -332,7 +332,7 @@ add_action('admin_enqueue_scripts', function ($hook_suffix) {
     }
 
     if (in_array($hook_suffix, ['user-edit.php', 'profile.php'])) {
-        wp_enqueue_script('sqrip-customer-profile', plugins_url('js/sqrip-customer-profile.js', __FILE__), array('jquery'), '1.10.4', true);
+        wp_enqueue_script('sqrip-customer-profile', plugins_url('js/sqrip-customer-profile.js', __FILE__), array('jquery'), '1.10.5', true);
         wp_localize_script('sqrip-customer-profile', 'sqrip', array('ajax_url' => admin_url('admin-ajax.php')));
     }
 
@@ -352,9 +352,9 @@ function sqrip_enqueue_scripts()
     // The third argument is $deps, so the version was left at false and WordPress
     // appended its own core version — which does not change when the plugin ships new
     // CSS. Returning visitors then combined new JS with a cached stylesheet.
-    wp_enqueue_style('sqrip', plugins_url('css/sqrip-order.css', __FILE__), array(), '1.10.4');
+    wp_enqueue_style('sqrip', plugins_url('css/sqrip-order.css', __FILE__), array(), '1.10.5');
 
-    wp_enqueue_script('sqrip', plugins_url('js/sqrip-fe.js', __FILE__), array('jquery'), '1.10.4', true);
+    wp_enqueue_script('sqrip', plugins_url('js/sqrip-fe.js', __FILE__), array('jquery'), '1.10.5', true);
 
     wp_localize_script('sqrip', 'sqrip',
         array(
@@ -870,6 +870,19 @@ add_action('woocommerce_process_shop_order_meta', function($post_id) {
             }
         }
 
+        // Determined before the request, so both error paths below can name the action the
+        // shop manager actually triggered instead of a bare "Error:".
+        if (isset($_POST['_sqrip_regenerate_qrcode'])) {
+            $order_notes = __('sqrip payment QR code was successfully regenerated', 'sqrip-swiss-qr-invoice');
+            $error_title = __('Renew QR Invoice error:', 'sqrip-swiss-qr-invoice');
+        } elseif (isset($_POST['_sqrip_initiate_payment'])) {
+            $order_notes = __('sqrip payment initiation was successful', 'sqrip-swiss-qr-invoice');
+            $error_title = __('Initiate sqrip payment error:', 'sqrip-swiss-qr-invoice');
+        } else {
+            $order_notes = '';
+            $error_title = __('Error:', 'sqrip-swiss-qr-invoice');
+        }
+
         $args = sqrip_prepare_remote_args($body, 'POST');
 
         $endpoint = 'code';
@@ -899,30 +912,36 @@ add_action('woocommerce_process_shop_order_meta', function($post_id) {
         // have always had this guard; this one did not.
         if ($status_code !== 200) {
 
-            $api_message = (is_object($response_body) && isset($response_body->message))
-                ? $response_body->message
-                : __('Connection error!', 'sqrip-swiss-qr-invoice');
+            $api_message = sqrip_api_error_summary($response_body);
+
+            if (trim($api_message) === '') {
+                $api_message = __('Connection error!', 'sqrip-swiss-qr-invoice');
+            }
 
             $order->add_order_note(
                 sprintf(
-                    __('Error: %s', 'sqrip-swiss-qr-invoice'),
-                    esc_html($api_message)
+                    __('%s %s <p>%s</p>', 'sqrip-swiss-qr-invoice'),
+                    $error_title,
+                    esc_html($api_message),
+                    esc_html(sqrip_api_error_details($response_body))
                 )
             );
 
-            sqrip_auto_turn_off();
+            // A 4xx says the request was wrong, not that the service is down — almost
+            // always the shop's own invoice data. Switching sqrip off for the whole shop
+            // because one order has a bad address would be out of all proportion, and the
+            // shop owner would have to notice and re-enable it by hand. Reserve the
+            // automatic shutdown for 5xx, where the service really is unwell.
+            if ($status_code < 400 || $status_code >= 500) {
+                sqrip_auto_turn_off();
+            }
 
             return;
         }
 
         {
 
-            if (isset($_POST['_sqrip_regenerate_qrcode'])) {
-                $order_notes = __('sqrip payment QR code was successfully regenerated', 'sqrip-swiss-qr-invoice');
-                $error_title = __('Renew QR Invoice error:', 'sqrip-swiss-qr-invoice');
-            } elseif (isset($_POST['_sqrip_initiate_payment'])) {
-                $error_title = __('Initiate sqrip payment error:', 'sqrip-swiss-qr-invoice');
-                $order_notes = __('sqrip payment initiation was successful', 'sqrip-swiss-qr-invoice');
+            if (isset($_POST['_sqrip_initiate_payment'])) {
                 $order->set_payment_method('sqrip');
             }
 
@@ -997,26 +1016,17 @@ add_action('woocommerce_process_shop_order_meta', function($post_id) {
 
             } else {
 
-                $errors_output = "";
-
-                if (isset($response_body->errors)) {
-                    $errors_output = json_encode($response_body->errors, JSON_PRETTY_PRINT);
-                    // $error_goto = 'Please add your address correctly at <a href="' . admin_url( 'admin.php?page=wc-settings&tab=checkout&section=sqrip' ) . '" aria-label="' . esc_attr__( 'sqrip settings', 'sqrip-swiss-qr-invoice' ) . '">' . esc_html__( 'sqrip settings', 'sqrip-swiss-qr-invoice' ) . '</a>';
-
-                    $error_arr = (array)$response_body->errors;
-                    if (
-                        isset($error_arr['payable_by.name']) ||
-                        isset($error_arr['payable_by.company'])
-                    ) {
-                        $errors_output = __('Please submit at least either Name / Last name or Company name to generate the qr-invoice', 'sqrip-swiss-qr-invoice');
-                    }
-
-                }
+                // The API answers HTTP 200 with message "Server Error" and no reference when
+                // the QR-bill generator rejects the invoice data. Passing that through made
+                // every such order look like an outage. Both are rendered by the shared
+                // helpers now, so this path and the 4xx path read the same.
+                $api_message   = sqrip_api_error_summary($response_body);
+                $errors_output = sqrip_api_error_details($response_body);
 
                 set_transient('sqrip_admin_action_errors', sprintf(
                     __('<b>%s</b> %s</br>%s', 'sqrip-swiss-qr-invoice'),
                     $error_title,
-                    esc_html($response_body->message),//." <a href='https://www.sqrip.ch/#pricing' target='_blank'>https://www.sqrip.ch/#pricing</a>"
+                    esc_html($api_message),
                     esc_html($errors_output)
                 ), 60);
 
@@ -1024,7 +1034,7 @@ add_action('woocommerce_process_shop_order_meta', function($post_id) {
                     sprintf(
                         __('%s %s <p>%s</p>', 'sqrip-swiss-qr-invoice'),
                         $error_title,
-                        esc_html($response_body->message),
+                        esc_html($api_message),
                         esc_html($errors_output)
                     )
                 );
@@ -1106,14 +1116,14 @@ function sqrip_display_refund_qr_code($refund)
 
 }
 
-add_action('woocommerce_order_refunded', 'action_woocommerce_order_refunded', 10, 2);
+add_action('woocommerce_order_refunded', 'sqrip_handle_order_refunded', 10, 2);
 
 /**
  * Called when an order is refunded using WooCommerce
  * @param $order_id int
  * @param $refund_id int
  */
-function action_woocommerce_order_refunded($order_id, $refund_id)
+function sqrip_handle_order_refunded($order_id, $refund_id)
 {
 
     $order = wc_get_order($order_id);
@@ -1213,7 +1223,7 @@ function sqrip_save_extra_user_profile_fields($user_id)
 
 }
 
-function post_custom_field_updated($meta_id, $post_id, $meta_key, $meta_value)
+function sqrip_sync_refund_iban_to_customer($meta_id, $post_id, $meta_key, $meta_value)
 {
     if ($meta_key === 'sqrip_refund_iban_num') {
         global $order;
@@ -1228,7 +1238,7 @@ function post_custom_field_updated($meta_id, $post_id, $meta_key, $meta_value)
     }
 }
 
-add_action('updated_post_meta', 'post_custom_field_updated', 10, 4);
+add_action('updated_post_meta', 'sqrip_sync_refund_iban_to_customer', 10, 4);
 
 // Disable the Zip/postcode validation
 add_filter('woocommerce_validate_postcode', '__return_true');
@@ -1892,8 +1902,27 @@ function sqrip_add_admin_to_recipients($recipient, $order) {
     return $recipient;
 }
 
-add_action( 'wpo_wcpdf_after_order_details', 'wpo_wcpdf_tax_exempt', 10, 2 );
-function wpo_wcpdf_tax_exempt( $document_type, $order ) {
+/**
+ * Append the QR payment part to the invoice of "PDF Invoices & Packing Slips".
+ *
+ * The callback used to be called wpo_wcpdf_tax_exempt() — the name of a widely pasted
+ * snippet about tax exemption, carrying the *other* plugin's prefix, declared globally
+ * and unguarded. Two problems: it says nothing about what the function does, and if
+ * that plugin, one of its extensions or a shop snippet ever declares the same name,
+ * PHP aborts with a fatal redeclare and the whole site is down. Renamed to our own
+ * prefix and guarded.
+ *
+ * This does NOT make sqrip ready for that plugin's version 6. It only removes a name
+ * collision of our own making. Whether version 6 still fires
+ * wpo_wcpdf_after_order_details is untested and has to be measured once it is out — if
+ * the hook goes away, the QR part silently disappears from every PDF invoice.
+ *
+ * @param string   $document_type
+ * @param WC_Order $order
+ * @return void
+ */
+if ( ! function_exists( 'sqrip_append_qr_to_pdf_invoice' ) ) {
+    function sqrip_append_qr_to_pdf_invoice( $document_type, $order ) {
 
     if ( ! in_array( $document_type, array( 'invoice' ) ) ) {
         return;
@@ -1916,6 +1945,9 @@ function wpo_wcpdf_tax_exempt( $document_type, $order ) {
             </div>
         <?php
     }
+    }
+
+    add_action( 'wpo_wcpdf_after_order_details', 'sqrip_append_qr_to_pdf_invoice', 10, 2 );
 }
 
 

@@ -926,3 +926,27 @@ msgstr ""
 #: inc/class-wc-sqrip-payment-gateway.php inc/functions.php
 msgid "The QR invoice is not available for your invoice address. Please choose a different payment method."
 msgstr ""
+
+#: inc/functions.php sqrip-woocommerce.php
+msgid "The QR invoice could not be created because the payment data was not accepted. Please check the IBAN, the reference format and the addresses."
+msgstr ""
+
+#: inc/functions.php sqrip-woocommerce.php
+msgid "%1$s (technical message: %2$s)"
+msgstr ""
+
+#: inc/functions.php sqrip-woocommerce.php
+msgid "The IBAN was not accepted. Check it under Payee in the sqrip settings — note that a QR-IBAN always needs a QR reference."
+msgstr ""
+
+#: inc/functions.php sqrip-woocommerce.php
+msgid "The reference number was not accepted. Check the reference settings of the payment method."
+msgstr ""
+
+#: inc/functions.php sqrip-woocommerce.php
+msgid "An address was not accepted — a field is empty, too long, or contains characters a QR bill does not allow."
+msgstr ""
+
+#: inc/functions.php sqrip-woocommerce.php
+msgid "Error:"
+msgstr ""
