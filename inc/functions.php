@@ -859,6 +859,130 @@ function sqrip_auto_turn_off() {
 }
 
 /**
+ * Is the message the API sent back too generic to put in front of a shop manager?
+ *
+ * When the Swiss QR-bill generator refuses the invoice data, the API answers HTTP 200
+ * with message "Server Error" and no reference. Copied into an order note verbatim that
+ * reads like an outage on our side, while it is really the shop's own data — wrong IBAN,
+ * a reference the format does not allow, an address field too long. (NET2-2339)
+ *
+ * @since 1.10.5
+ * @param string $message
+ * @return bool
+ */
+function sqrip_api_message_is_generic($message)
+{
+    $message = trim((string) $message);
+
+    if ($message === '') {
+        return true;
+    }
+
+    return strcasecmp($message, 'Server Error') === 0;
+}
+
+/**
+ * What to tell the shop when the API refused to create a QR invoice.
+ *
+ * Keeps the API's own wording whenever it says something useful, and replaces it with a
+ * plain sentence when it does not. The raw text is still appended, so support can see
+ * what really came back.
+ *
+ * @since 1.10.5
+ * @param object|null $response_body Decoded API response.
+ * @return string
+ */
+function sqrip_api_error_summary($response_body)
+{
+    $raw = (is_object($response_body) && isset($response_body->message))
+        ? (string) $response_body->message
+        : '';
+
+    if (!sqrip_api_message_is_generic($raw)) {
+        return $raw;
+    }
+
+    $summary = __('The QR invoice could not be created because the payment data was not accepted. Please check the IBAN, the reference format and the addresses.', 'sqrip-swiss-qr-invoice');
+
+    if (trim($raw) === '') {
+        return $summary;
+    }
+
+    return sprintf(
+        /* translators: 1: plain explanation, 2: verbatim message from the sqrip API */
+        __('%1$s (technical message: %2$s)', 'sqrip-swiss-qr-invoice'),
+        $summary,
+        $raw
+    );
+}
+
+/**
+ * The field-level complaints from the API, turned into something readable.
+ *
+ * Both error paths of the manual QR creation use this, so a shop sees the same
+ * explanation whether the API answered 200-without-reference or a 4xx.
+ *
+ * @since 1.10.5
+ * @param object|null $response_body Decoded API response.
+ * @return string Empty when the API named no fields.
+ */
+function sqrip_api_error_details($response_body)
+{
+    if (!is_object($response_body) || !isset($response_body->errors)) {
+        return '';
+    }
+
+    $errors = (array) $response_body->errors;
+
+    if (!$errors) {
+        return '';
+    }
+
+    $keys = array_map('strtolower', array_keys($errors));
+
+    $mentions = function ($needles) use ($keys) {
+        foreach ($keys as $key) {
+            foreach ((array) $needles as $needle) {
+                if (strpos($key, $needle) !== false) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    };
+
+    $hints = array();
+
+    // Unchanged from before: the one case the plugin already explained in plain words.
+    if (isset($errors['payable_by.name']) || isset($errors['payable_by.company'])) {
+        $hints[] = __('Please submit at least either Name / Last name or Company name to generate the qr-invoice', 'sqrip-swiss-qr-invoice');
+    }
+
+    if ($mentions('iban')) {
+        $hints[] = __('The IBAN was not accepted. Check it under Payee in the sqrip settings — note that a QR-IBAN always needs a QR reference.', 'sqrip-swiss-qr-invoice');
+    }
+
+    if ($mentions('reference')) {
+        $hints[] = __('The reference number was not accepted. Check the reference settings of the payment method.', 'sqrip-swiss-qr-invoice');
+    }
+
+    if ($mentions(array('street', 'city', 'postal', 'zip', 'address', 'building', 'country'))) {
+        $hints[] = __('An address was not accepted — a field is empty, too long, or contains characters a QR bill does not allow.', 'sqrip-swiss-qr-invoice');
+    }
+
+    // List what the API actually named as well, so nothing is hidden behind the hints.
+    $fields = array();
+
+    foreach ($errors as $field => $messages) {
+        $messages = is_array($messages) ? $messages : array($messages);
+        $fields[] = $field . ': ' . implode(' ', array_map('strval', $messages));
+    }
+
+    return trim(implode(' ', $hints) . ' ' . implode(' | ', $fields));
+}
+
+/**
  * Returns the meta value for an order that matches the meta_key
  * Checks if the WooCommerce HPOS is enabled
  * @param $order

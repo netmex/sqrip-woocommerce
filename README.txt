@@ -4,7 +4,7 @@ Donate link: https://sqrip.ch/
 Tags: woocommerce, payment, swiss qr invoice, qr-rechnung, einzahlungsschein
 Requires at least: 6.0
 Tested up to: 7.0
-Stable tag: 1.10.4
+Stable tag: 1.10.5
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -144,16 +144,19 @@ Yes. We are already working on comparing the reconciliation of orders/purchases 
 7. Refund functionality
 
 == Changelog ==
+= 1.10.5 : August 2026 – Fix =
+* Order notes now say why a QR invoice could not be created. Until now the note read "Renew QR Invoice error: Server Error", which looks like a breakdown at sqrip. In nearly every case it means the opposite: the invoice data was refused — a wrong IBAN, a reference the chosen format does not allow, or an address field that is empty, too long or contains characters a QR bill does not permit. The note now says that in plain words, names the field the service objected to, and keeps the original wording as a technical aside;
+* One order with unusable data can no longer switch sqrip off for your whole shop. If you use the option 'Turn sqrip services off automatically if an error occurs', it now takes effect only when the sqrip service itself is unreachable — not when a single order is refused because of its own data. Previously such an order could disable the payment method, and you had to notice and switch it back on by hand;
+* Nothing changes in your settings, and there is nothing you need to do.
+
 = 1.10.4 : August 2026 – Feature =
 * New setting 'Restrict QR-invoice by country': sqrip is then offered only for the invoice countries you select (Switzerland and Liechtenstein by default). A QR-invoice is always in Swiss francs, so for customers abroad it causes confusion, bank charges for paying in the wrong currency, and manual work on your side;
 * The restriction is switched **off** on update. Nothing changes for your shop until you switch it on yourself;
 * If a customer nevertheless reaches the payment step with an invoice address outside your list — for instance by changing the country late in the checkout — the order is not placed silently. The customer is told that the QR-invoice is unavailable for their address and can pick another payment method. The order is also never left without a way to pay;
 * The same rule applies to orders you create by hand in the backend: no QR-invoice is generated, and the reason is recorded in the order notes;
 * An empty country list switches the restriction off instead of blocking every order.
-
-
-= 1.10.4 : not released yet =
 * Corrected the description of the language setting. It said the QR invoice could be produced in the language your customer selected on a multilingual site — the plugin cannot do that. The language is taken from the shop setting for every QR invoice. Following the customer's language is planned for a future release;
+
 
 = 1.10.3 : Juli 2026 – Fixes =
 * Orders you enter by hand in the backend now get the QR slip inside the PDF invoice as well, if you use the 'PDF Invoices & Packing Slips' integration. Until now only orders placed through the shop did, so the same order taken by phone or e-mail produced an invoice without the QR slip;
@@ -363,6 +366,9 @@ We made users (even more) happy with these changes:
 * Here we go!
 
 == Upgrade Notice ==
+= 1.10.5 =
+Recommended for everyone on 1.10.x. Order notes now explain why a QR invoice was refused instead of showing "Server Error", and a single order with unusable data can no longer switch the payment method off for the whole shop. Your settings are untouched.
+
 = 1.10.4 =
 Adds an optional country restriction: offer sqrip only for the invoice countries you choose. Switched off on update — nothing changes until you enable it under QR-Invoice in the sqrip settings.
 

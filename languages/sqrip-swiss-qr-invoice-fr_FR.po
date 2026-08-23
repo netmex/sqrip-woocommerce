@@ -759,3 +759,27 @@ msgstr "Aucune facture QR sqrip n'a été créée : l'adresse de facturation se 
 #: inc/class-wc-sqrip-payment-gateway.php inc/functions.php
 msgid "The QR invoice is not available for your invoice address. Please choose a different payment method."
 msgstr "La facture QR n'est pas disponible pour votre adresse de facturation. Veuillez choisir un autre moyen de paiement."
+
+#: inc/functions.php sqrip-woocommerce.php
+msgid "The QR invoice could not be created because the payment data was not accepted. Please check the IBAN, the reference format and the addresses."
+msgstr "La facture QR n'a pas pu être créée, car les données de paiement ont été refusées. Veuillez vérifier l'IBAN, le format de la référence et les adresses."
+
+#: inc/functions.php sqrip-woocommerce.php
+msgid "%1$s (technical message: %2$s)"
+msgstr "%1$s (message technique : %2$s)"
+
+#: inc/functions.php sqrip-woocommerce.php
+msgid "The IBAN was not accepted. Check it under Payee in the sqrip settings — note that a QR-IBAN always needs a QR reference."
+msgstr "L'IBAN a été refusé. Vérifiez-le dans les réglages sqrip sous Bénéficiaire — notez qu'un QR-IBAN exige toujours une référence QR."
+
+#: inc/functions.php sqrip-woocommerce.php
+msgid "The reference number was not accepted. Check the reference settings of the payment method."
+msgstr "Le numéro de référence a été refusé. Vérifiez les réglages de référence du moyen de paiement."
+
+#: inc/functions.php sqrip-woocommerce.php
+msgid "An address was not accepted — a field is empty, too long, or contains characters a QR bill does not allow."
+msgstr "Une adresse a été refusée — un champ est vide, trop long ou contient des caractères qu'une facture QR n'autorise pas."
+
+#: inc/functions.php sqrip-woocommerce.php
+msgid "Error:"
+msgstr "Erreur :"
