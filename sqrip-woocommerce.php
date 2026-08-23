@@ -1106,14 +1106,14 @@ function sqrip_display_refund_qr_code($refund)
 
 }
 
-add_action('woocommerce_order_refunded', 'action_woocommerce_order_refunded', 10, 2);
+add_action('woocommerce_order_refunded', 'sqrip_handle_order_refunded', 10, 2);
 
 /**
  * Called when an order is refunded using WooCommerce
  * @param $order_id int
  * @param $refund_id int
  */
-function action_woocommerce_order_refunded($order_id, $refund_id)
+function sqrip_handle_order_refunded($order_id, $refund_id)
 {
 
     $order = wc_get_order($order_id);
@@ -1213,7 +1213,7 @@ function sqrip_save_extra_user_profile_fields($user_id)
 
 }
 
-function post_custom_field_updated($meta_id, $post_id, $meta_key, $meta_value)
+function sqrip_sync_refund_iban_to_customer($meta_id, $post_id, $meta_key, $meta_value)
 {
     if ($meta_key === 'sqrip_refund_iban_num') {
         global $order;
@@ -1228,7 +1228,7 @@ function post_custom_field_updated($meta_id, $post_id, $meta_key, $meta_value)
     }
 }
 
-add_action('updated_post_meta', 'post_custom_field_updated', 10, 4);
+add_action('updated_post_meta', 'sqrip_sync_refund_iban_to_customer', 10, 4);
 
 // Disable the Zip/postcode validation
 add_filter('woocommerce_validate_postcode', '__return_true');
