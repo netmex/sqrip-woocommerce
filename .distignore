@@ -5,11 +5,14 @@
 /tests
 
 # Never ship untracked developer or data cruft, even when the package is built
-# from a working copy that happens to contain it (real bank files, dev config,
-# composer's dev dependencies). These must never reach a customer or wp.org.
+# from a working copy that happens to contain it (real bank files, dev config).
+#
+# NOTE: /vendor IS shipped on purpose — it holds chillerlan/php-qrcode, a RUNTIME
+# dependency used to render GiroCodes. It carries no dev packages (the root has no
+# require-dev), so keep it in the build. composer.json/lock stay out; they are only
+# needed to rebuild vendor.
 /CAMT
 /.claude
-/vendor
 /scratchpad
 composer.json
 composer.lock
@@ -18,3 +21,4 @@ composer.lock
 .distignore
 .gitignore
 WORDPRESS-ORG-TRANSLATION-IMPORT.md
+CLAUDE.md

@@ -1863,3 +1863,27 @@ msgstr "Scadenza"
 
 msgid "Currency"
 msgstr "Valuta"
+
+#: inc/functions.php sqrip-woocommerce.php
+msgid "The QR invoice could not be created because the payment data was not accepted. Please check the IBAN, the reference format and the addresses."
+msgstr "Non è stato possibile creare la fattura QR perché i dati di pagamento non sono stati accettati. Verifichi l'IBAN, il formato del riferimento e gli indirizzi."
+
+#: inc/functions.php sqrip-woocommerce.php
+msgid "%1$s (technical message: %2$s)"
+msgstr "%1$s (messaggio tecnico: %2$s)"
+
+#: inc/functions.php sqrip-woocommerce.php
+msgid "The IBAN was not accepted. Check it under Payee in the sqrip settings — note that a QR-IBAN always needs a QR reference."
+msgstr "L'IBAN non è stato accettato. Lo verifichi nelle impostazioni sqrip alla voce Beneficiario — tenga presente che un QR-IBAN richiede sempre un riferimento QR."
+
+#: inc/functions.php sqrip-woocommerce.php
+msgid "The reference number was not accepted. Check the reference settings of the payment method."
+msgstr "Il numero di riferimento non è stato accettato. Verifichi le impostazioni del riferimento del metodo di pagamento."
+
+#: inc/functions.php sqrip-woocommerce.php
+msgid "An address was not accepted — a field is empty, too long, or contains characters a QR bill does not allow."
+msgstr "Un indirizzo non è stato accettato — un campo è vuoto, troppo lungo o contiene caratteri non ammessi in una fattura QR."
+
+#: inc/functions.php sqrip-woocommerce.php
+msgid "Error:"
+msgstr "Errore:"
