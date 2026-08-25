@@ -4,7 +4,7 @@
  * Plugin Name:             sqrip.ch
  * Plugin URI:              https://sqrip.ch/
  * Description:             sqrip – A comprehensive, flexible and clever WooCommerce finance tool for the most widely used payment method in Switzerland: the bank transfers.
- * Version:                 1.11.0-beta31
+ * Version:                 1.11.0-beta32
  * Author:                  netmex digital gmbh
  * Author URI:              https://sqrip.ch/
  * Text Domain:             sqrip-swiss-qr-invoice
@@ -274,12 +274,12 @@ function sqrip_add_admin_notice()
 
 add_action('admin_enqueue_scripts', function ($hook_suffix) {
 
-    wp_enqueue_style('sqrip-admin', plugins_url('css/sqrip-admin.css', __FILE__), '', '1.11.0-beta31');
+    wp_enqueue_style('sqrip-admin', plugins_url('css/sqrip-admin.css', __FILE__), '', '1.11.0-beta32');
 
     if (isset($_GET['section']) && $_GET['section'] == "sqrip") {
-        wp_enqueue_script('sqrip-admin', plugins_url('js/sqrip-admin.js', __FILE__), array('jquery', 'selectWoo'), '1.11.0-beta31', true);
+        wp_enqueue_script('sqrip-admin', plugins_url('js/sqrip-admin.js', __FILE__), array('jquery', 'selectWoo'), '1.11.0-beta32', true);
 
-        wp_enqueue_script('sqrip-avis', plugins_url('js/sqrip-avis.js', __FILE__), array('jquery', 'sqrip-admin'), '1.11.0-beta31', true);
+        wp_enqueue_script('sqrip-avis', plugins_url('js/sqrip-avis.js', __FILE__), array('jquery', 'sqrip-admin'), '1.11.0-beta32', true);
 
         $sqrip_new_status = sqrip_get_plugin_option('enabled_new_status');
         $sqrip_new_awaiting_status = sqrip_get_plugin_option('enabled_new_awstatus');
@@ -321,6 +321,9 @@ add_action('admin_enqueue_scripts', function ($hook_suffix) {
                 'txt_avis_checking' => __('Checking…', 'sqrip-swiss-qr-invoice'),
                 'txt_avis_applied' => __('order(s) marked as paid.', 'sqrip-swiss-qr-invoice'),
                 'txt_avis_failed' => __('Could not reach the payment notification service.', 'sqrip-swiss-qr-invoice'),
+                'txt_avis_retry' => __('Please try again shortly or reload the page.', 'sqrip-swiss-qr-invoice'),
+                'txt_avis_session_expired' => __('Your session has expired — that is why the reconciliation was refused. Please reload the page and try again.', 'sqrip-swiss-qr-invoice'),
+                'txt_avis_reload_link' => __('Reload the page', 'sqrip-swiss-qr-invoice'),
                 'txt_camt_choose_file' => __('Please choose a file first.', 'sqrip-swiss-qr-invoice'),
                 'txt_camt_reading' => __('Reading…', 'sqrip-swiss-qr-invoice'),
                 'txt_camt_applying' => __('Applying…', 'sqrip-swiss-qr-invoice'),
@@ -376,8 +379,8 @@ add_action('admin_enqueue_scripts', function ($hook_suffix) {
         $screen->id === $sqrip_hpos_order_screen
     )) {
 
-        wp_enqueue_script('sqrip-order', plugins_url('js/sqrip-order.js', __FILE__), array('jquery'), '1.11.0-beta31', true);
-        wp_enqueue_script('sqrip-refund', plugins_url('js/sqrip-refund.js', __FILE__), array('jquery'), '1.11.0-beta31', true);
+        wp_enqueue_script('sqrip-order', plugins_url('js/sqrip-order.js', __FILE__), array('jquery'), '1.11.0-beta32', true);
+        wp_enqueue_script('sqrip-refund', plugins_url('js/sqrip-refund.js', __FILE__), array('jquery'), '1.11.0-beta32', true);
 
         wp_localize_script('sqrip-order', 'sqrip',
             array(
@@ -392,7 +395,7 @@ add_action('admin_enqueue_scripts', function ($hook_suffix) {
     }
 
     if (in_array($hook_suffix, ['user-edit.php', 'profile.php'])) {
-        wp_enqueue_script('sqrip-customer-profile', plugins_url('js/sqrip-customer-profile.js', __FILE__), array('jquery'), '1.11.0-beta31', true);
+        wp_enqueue_script('sqrip-customer-profile', plugins_url('js/sqrip-customer-profile.js', __FILE__), array('jquery'), '1.11.0-beta32', true);
         wp_localize_script('sqrip-customer-profile', 'sqrip', array('ajax_url' => admin_url('admin-ajax.php')));
     }
 
@@ -412,9 +415,9 @@ function sqrip_enqueue_scripts()
     // The third argument is $deps, so the version was left at false and WordPress
     // appended its own core version — which does not change when the plugin ships new
     // CSS. Returning visitors then combined new JS with a cached stylesheet.
-    wp_enqueue_style('sqrip', plugins_url('css/sqrip-order.css', __FILE__), array(), '1.11.0-beta31');
+    wp_enqueue_style('sqrip', plugins_url('css/sqrip-order.css', __FILE__), array(), '1.11.0-beta32');
 
-    wp_enqueue_script('sqrip', plugins_url('js/sqrip-fe.js', __FILE__), array('jquery'), '1.11.0-beta31', true);
+    wp_enqueue_script('sqrip', plugins_url('js/sqrip-fe.js', __FILE__), array('jquery'), '1.11.0-beta32', true);
 
     wp_localize_script('sqrip', 'sqrip',
         array(

@@ -2014,3 +2014,12 @@ msgid "sqrip: batch payment mismatch — please check %d order"
 msgid_plural "sqrip: batch payment mismatch — please check %d orders"
 msgstr[0] "sqrip: Sammelbuchung stimmt nicht – %d Bestellung prüfen"
 msgstr[1] "sqrip: Sammelbuchung stimmt nicht – %d Bestellungen prüfen"
+
+msgid "Please try again shortly or reload the page."
+msgstr "Bitte versuchen Sie es gleich nochmals oder laden Sie die Seite neu."
+
+msgid "Your session has expired — that is why the reconciliation was refused. Please reload the page and try again."
+msgstr "Ihre Sitzung ist abgelaufen – deshalb wurde der Abgleich abgewiesen. Bitte laden Sie die Seite neu und versuchen Sie es erneut."
+
+msgid "Reload the page"
+msgstr "Seite neu laden"

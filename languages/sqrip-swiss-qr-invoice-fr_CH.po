@@ -2026,3 +2026,12 @@ msgid "sqrip: batch payment mismatch — please check %d order"
 msgid_plural "sqrip: batch payment mismatch — please check %d orders"
 msgstr[0] "sqrip : paiement groupé incohérent – vérifier %d commande"
 msgstr[1] "sqrip : paiement groupé incohérent – vérifier %d commandes"
+
+msgid "Please try again shortly or reload the page."
+msgstr "Merci de réessayer dans un instant ou de recharger la page."
+
+msgid "Your session has expired — that is why the reconciliation was refused. Please reload the page and try again."
+msgstr "Votre session a expiré — c'est pourquoi le rapprochement a été refusé. Merci de recharger la page et de réessayer."
+
+msgid "Reload the page"
+msgstr "Recharger la page"

@@ -114,6 +114,30 @@
             });
         });
 
+        // Turn a failed request into a fix, not a raw error dump. A WordPress nonce
+        // failure comes back as HTTP 403 with the body "-1": the page's security token
+        // expired (e.g. the tab was open across a plugin update). Offer a one-click
+        // reload instead of reporting the code. Anything else: a short, actionable hint
+        // plus a small status number for support — never the raw response text.
+        function avisFailMessage(jqXHR) {
+            var status = jqXHR ? jqXHR.status : 0;
+            var body = jqXHR && jqXHR.responseText ? String(jqXHR.responseText).trim() : '';
+
+            if (status === 403 && body.slice(0, 2) === '-1') {
+                return (s.txt_avis_session_expired || '')
+                    + ' <a href="#" class="sqrip-avis-reload">' + (s.txt_avis_reload_link || '') + '</a>';
+            }
+
+            return (s.txt_avis_failed || '')
+                + (s.txt_avis_retry ? ' ' + s.txt_avis_retry : '')
+                + ' [' + (status || '?') + ']';
+        }
+
+        $(document).on('click', '.sqrip-avis-reload', function (e) {
+            e.preventDefault();
+            window.location.reload();
+        });
+
         $(document).on('click', '.sqrip-avis-reconcile', function () {
             var $btn = $(this).prop('disabled', true);
             var $result = $('.sqrip-avis-result').text(s.txt_avis_checking || '');
@@ -129,11 +153,7 @@
                     $result.text(err);
                 }
             }).fail(function (jqXHR) {
-                var status = jqXHR ? jqXHR.status : '?';
-                var body = jqXHR && jqXHR.responseText
-                    ? ' — ' + String(jqXHR.responseText).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 300)
-                    : '';
-                $result.text((s.txt_avis_failed || '') + ' [AJAX ' + status + ']' + body);
+                $result.html(avisFailMessage(jqXHR));
             }).always(function () {
                 $btn.prop('disabled', false);
             });

@@ -2006,3 +2006,12 @@ msgid "sqrip: batch payment mismatch — please check %d order"
 msgid_plural "sqrip: batch payment mismatch — please check %d orders"
 msgstr[0] "sqrip: pagamento cumulativo incoerente – verificare %d ordine"
 msgstr[1] "sqrip: pagamento cumulativo incoerente – verificare %d ordini"
+
+msgid "Please try again shortly or reload the page."
+msgstr "Riprovi tra poco o ricarichi la pagina."
+
+msgid "Your session has expired — that is why the reconciliation was refused. Please reload the page and try again."
+msgstr "La sua sessione è scaduta — per questo la riconciliazione è stata rifiutata. Ricarichi la pagina e riprovi."
+
+msgid "Reload the page"
+msgstr "Ricarica la pagina"

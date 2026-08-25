@@ -2236,3 +2236,12 @@ msgid "sqrip: batch payment mismatch — please check %d order"
 msgid_plural "sqrip: batch payment mismatch — please check %d orders"
 msgstr[0] ""
 msgstr[1] ""
+
+msgid "Please try again shortly or reload the page."
+msgstr ""
+
+msgid "Your session has expired — that is why the reconciliation was refused. Please reload the page and try again."
+msgstr ""
+
+msgid "Reload the page"
+msgstr ""
