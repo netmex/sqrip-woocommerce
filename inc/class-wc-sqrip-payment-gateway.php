@@ -990,6 +990,14 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'desc_tip' => true,
                 'class' => 'comparison-tab sqrip-avis-detail'
             ),
+            'avis_extra_statuses' => array(
+                'title' => __('Also reconcile these order statuses', 'sqrip-swiss-qr-invoice'),
+                'type' => 'multiselect',
+                'default' => '',
+                'options' => wc_get_order_statuses(),
+                'description' => __('Normally sqrip reconciles only its own QR-invoice orders. Pick additional order statuses here to also reconcile orders that are not sqrip QR orders — for example plain bank transfers, or orders another (GiroCode/SEPA) plugin manages. Any payment method in these statuses is included; the order note will state that sqrip reconciled a non-sqrip order. Leave empty to keep the default (sqrip orders only).', 'sqrip-swiss-qr-invoice'),
+                'class' => 'comparison-tab sqrip-avis-detail'
+            ),
             'avis_reconcile' => array(
                 'title' => __('Reconcile', 'sqrip-swiss-qr-invoice'),
                 'type' => 'avis_reconcile',

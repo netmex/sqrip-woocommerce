@@ -489,7 +489,7 @@ class Sqrip_Avis
 
             $order = wc_get_order($entry['order_id']);
 
-            if (!$order || $order->get_payment_method() !== 'sqrip') {
+            if (!$order || !sqrip_order_in_avis_scope($order)) {
                 continue;
             }
 
@@ -517,14 +517,14 @@ class Sqrip_Avis
             } elseif ($decision === 'hold_approval') {
                 $reason = $is_overpaid ? 'overpayment' : 'over_threshold';
                 self::send_approval_email($order, $entry, $paid_slip, $amount, $expected, $currency, $reason);
-                $order->add_order_note(self::hold_note($paid_slip, $reason));
+                self::add_order_note($order, self::hold_note($paid_slip, $reason));
                 $held[] = $entry['order_number'];
                 $consequence = ($reason === 'overpayment')
                     ? __('Held — overpaid, e-mailed for your release.', 'sqrip-swiss-qr-invoice')
                     : __('Held — above your limit, e-mailed for your release.', 'sqrip-swiss-qr-invoice');
                 self::log_add($ref_norm, $paid_slip['reference'], $amount, $currency, $score, $aspects, $consequence);
             } else { // hold_notify (checksum) — collect for one aggregated e-mail
-                $order->add_order_note(self::hold_note($paid_slip, 'checksum'));
+                self::add_order_note($order, self::hold_note($paid_slip, 'checksum'));
                 $held[] = $entry['order_number'];
                 $checksum_held[] = array(
                     'order'     => $order,
@@ -649,7 +649,7 @@ class Sqrip_Avis
         $info     = ($ref_norm !== '' && isset($by_ref[$ref_norm])) ? $by_ref[$ref_norm] : null;
         $order    = $info ? wc_get_order($info['order_id']) : null;
 
-        if (!$order || $order->get_payment_method() !== 'sqrip') {
+        if (!$order || !sqrip_order_in_avis_scope($order)) {
             $order = null;
         }
 
@@ -659,7 +659,7 @@ class Sqrip_Avis
 
         // Order note (plain) + a detailed e-mail (HTML with the order link).
         if ($order) {
-            $order->add_order_note(self::warning_message($w));
+            self::add_order_note($order, self::warning_message($w));
         }
 
         if ($type === 'underpayment' && $order) {
@@ -678,6 +678,25 @@ class Sqrip_Avis
     }
 
     /**
+     * Add an order note. For an order that is NOT one of sqrip's own QR orders — reconciled
+     * only because the shop opted its status into the reconciliation — the note says so
+     * explicitly. That matters when another plugin also manages the same order (e.g. adds a
+     * GiroCode or sets the status), so it stays clear who did what.
+     *
+     * @param \WC_Order $order
+     * @param string    $text
+     * @return void
+     */
+    private static function add_order_note($order, $text)
+    {
+        if ($order && is_a($order, 'WC_Order') && $order->get_payment_method() !== 'sqrip') {
+            $text .= ' ' . __('Note: this order does not use the sqrip QR payment method — the sqrip payment notification service matched it via the order number read from the bank document.', 'sqrip-swiss-qr-invoice');
+        }
+
+        $order->add_order_note($text);
+    }
+
+    /**
      * Book one order as paid: order note, void sibling invoices (Skonto/reminder), and
      * move it to the shop's "completed" status.
      *
@@ -688,7 +707,7 @@ class Sqrip_Avis
      */
     private static function book_order($order, $entry, $paid_slip)
     {
-        $order->add_order_note(self::note($paid_slip));
+        self::add_order_note($order, self::note($paid_slip));
 
         if (!empty($entry['alternatives']) && !empty($entry['paid_alternative'])) {
             sqrip_void_other_invoices($order, $entry['paid_alternative']);
@@ -1610,11 +1629,11 @@ class Sqrip_Avis
 
         $order = wc_get_order($data['order_id']);
 
-        if (!$order || $order->get_payment_method() !== 'sqrip') {
+        if (!$order || !sqrip_order_in_avis_scope($order)) {
             self::suggestion_page(__('The order could not be found, so nothing was changed.', 'sqrip-swiss-qr-invoice'));
         }
 
-        $order->add_order_note(sprintf(
+        self::add_order_note($order, sprintf(
             /* translators: 1: currency, 2: amount, 3: reference */
             __('Payment confirmed by hand from an e-mail suggestion: %1$s %2$s, reference %3$s (probable match from the sqrip payment notification service).', 'sqrip-swiss-qr-invoice'),
             $data['currency'],

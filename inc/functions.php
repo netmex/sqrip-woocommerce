@@ -42,6 +42,60 @@ function sqrip_get_plugin_options()
 }
 
 /**
+ * Additional order statuses the payment reconciliation should cover, beyond the sqrip
+ * "awaiting payment" status. This is the opt-in that lets sqrip reconcile orders it does
+ * not own itself — e.g. plain bank transfers (bacs) or orders a GiroCode/SEPA plugin
+ * manages. Empty by default, so existing shops are unaffected.
+ *
+ * @since 1.11
+ * @return string[] Order-status keys, each with the "wc-" prefix.
+ */
+function sqrip_avis_extra_statuses()
+{
+    $raw = sqrip_get_plugin_option('avis_extra_statuses');
+
+    if (!is_array($raw)) {
+        $raw = ($raw === '' || $raw === null || $raw === false) ? array() : array($raw);
+    }
+
+    $out = array();
+
+    foreach ($raw as $status) {
+        $status = (string) $status;
+
+        if ($status === '') {
+            continue;
+        }
+
+        $out[] = (strpos($status, 'wc-') === 0) ? $status : ('wc-' . $status);
+    }
+
+    return $out;
+}
+
+/**
+ * Whether the payment reconciliation may act on this order. Always true for sqrip's own
+ * QR orders; true for any other order only if its status is one the shop explicitly added
+ * under "reconcile these extra statuses too". Keeps the sqrip-only behaviour by default.
+ *
+ * @since 1.11
+ * @param WC_Order|mixed $order
+ * @return bool
+ */
+function sqrip_order_in_avis_scope($order)
+{
+    if (!is_a($order, 'WC_Order')) {
+        return false;
+    }
+
+    if ($order->get_payment_method() === 'sqrip') {
+        return true;
+    }
+
+    return in_array('wc-' . $order->get_status(), sqrip_avis_extra_statuses(), true);
+}
+
+/**
  * Countries a QR invoice may be created for.
  *
  * @since 1.10.4

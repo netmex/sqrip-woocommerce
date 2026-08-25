@@ -127,9 +127,13 @@ class Sqrip_Camt_Reconciler
             $status = 'wc-' . $status;
         }
 
+        // Also cover any extra statuses the shop opted into (non-sqrip orders, e.g. bank
+        // transfers or GiroCode/SEPA-managed orders). Empty by default → unchanged.
+        $statuses = array_values(array_unique(array_merge(array($status), sqrip_avis_extra_statuses())));
+
         $found = wc_get_orders(array(
             'limit'   => self::MAX_ORDERS + 1,
-            'status'  => $status,
+            'status'  => $statuses,
             'type'    => 'shop_order',
             'orderby' => 'date',
             'order'   => 'ASC',
@@ -150,7 +154,7 @@ class Sqrip_Camt_Reconciler
                 continue;
             }
 
-            if ($order->get_payment_method() !== 'sqrip') {
+            if (!sqrip_order_in_avis_scope($order)) {
                 continue;
             }
 

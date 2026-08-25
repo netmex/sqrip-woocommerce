@@ -1895,3 +1895,12 @@ msgstr "Eine Adresse wurde nicht akzeptiert — ein Feld ist leer, zu lang oder 
 #: inc/functions.php sqrip-woocommerce.php
 msgid "Error:"
 msgstr "Fehler:"
+
+msgid "Also reconcile these order statuses"
+msgstr "Auch diese Bestellstatus abgleichen"
+
+msgid "Normally sqrip reconciles only its own QR-invoice orders. Pick additional order statuses here to also reconcile orders that are not sqrip QR orders — for example plain bank transfers, or orders another (GiroCode/SEPA) plugin manages. Any payment method in these statuses is included; the order note will state that sqrip reconciled a non-sqrip order. Leave empty to keep the default (sqrip orders only)."
+msgstr "Normalerweise gleicht sqrip nur die eigenen QR-Rechnungs-Bestellungen ab. Wählen Sie hier zusätzliche Bestellstatus, um auch Bestellungen abzugleichen, die keine sqrip-QR-Bestellungen sind — z. B. gewöhnliche Banküberweisungen oder Bestellungen, die ein anderes (GiroCode/SEPA-)Plugin verwaltet. Jede Zahlart in diesen Status wird einbezogen; die Bestellnotiz vermerkt, dass sqrip eine Nicht-sqrip-Bestellung abgeglichen hat. Leer lassen für das Standardverhalten (nur sqrip-Bestellungen)."
+
+msgid "Note: this order does not use the sqrip QR payment method — the sqrip payment notification service matched it via the order number read from the bank document."
+msgstr "Hinweis: Diese Bestellung nutzt nicht die sqrip-QR-Zahlart — der sqrip Auskunftsdienst hat sie über die aus dem Bankbeleg gelesene Bestellnummer zugeordnet."

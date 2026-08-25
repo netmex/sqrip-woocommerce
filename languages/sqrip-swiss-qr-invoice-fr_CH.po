@@ -1907,3 +1907,12 @@ msgstr "Une adresse a été refusée — un champ est vide, trop long ou contien
 #: inc/functions.php sqrip-woocommerce.php
 msgid "Error:"
 msgstr "Erreur :"
+
+msgid "Also reconcile these order statuses"
+msgstr "Rapprocher aussi ces statuts de commande"
+
+msgid "Normally sqrip reconciles only its own QR-invoice orders. Pick additional order statuses here to also reconcile orders that are not sqrip QR orders — for example plain bank transfers, or orders another (GiroCode/SEPA) plugin manages. Any payment method in these statuses is included; the order note will state that sqrip reconciled a non-sqrip order. Leave empty to keep the default (sqrip orders only)."
+msgstr "Normalement, sqrip ne rapproche que ses propres commandes avec QR-facture. Sélectionnez ici des statuts de commande supplémentaires pour rapprocher aussi des commandes qui ne sont pas des commandes QR sqrip — par exemple de simples virements bancaires ou des commandes gérées par un autre plugin (GiroCode/SEPA). Tout mode de paiement dans ces statuts est inclus ; la note de commande indiquera que sqrip a rapproché une commande non-sqrip. Laissez vide pour le comportement par défaut (commandes sqrip uniquement)."
+
+msgid "Note: this order does not use the sqrip QR payment method — the sqrip payment notification service matched it via the order number read from the bank document."
+msgstr "Remarque : cette commande n'utilise pas le mode de paiement QR de sqrip — le service d'information sqrip l'a rapprochée via le numéro de commande lu dans le document bancaire."
