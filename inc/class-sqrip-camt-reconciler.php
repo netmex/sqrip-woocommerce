@@ -283,6 +283,21 @@ class Sqrip_Camt_Reconciler
                 }
             }
 
+            // Opted-in non-sqrip order (bank transfer / GiroCode): it has no sqrip QR
+            // reference, so it produced no slip above. Add a bare slip keyed on nothing but
+            // the order total, so the order still enters the reconciliation and is matched
+            // by its order number (reference stays empty). Only for non-sqrip orders — a
+            // sqrip order without a reference is an error state and is still skipped.
+            if (!$slips && $order->get_payment_method() !== 'sqrip') {
+                $slips[] = array(
+                    'index'        => null,
+                    'kind'         => 'order_number',
+                    'reference'    => '',
+                    'expected'     => $total,
+                    'already_paid' => false,
+                );
+            }
+
             if (!$slips) {
                 continue;
             }

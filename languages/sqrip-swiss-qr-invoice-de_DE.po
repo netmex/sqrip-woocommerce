@@ -1904,3 +1904,9 @@ msgstr "Normalerweise gleicht sqrip nur die eigenen QR-Rechnungs-Bestellungen ab
 
 msgid "Note: this order does not use the sqrip QR payment method — the sqrip payment notification service matched it via the order number read from the bank document."
 msgstr "Hinweis: Diese Bestellung nutzt nicht die sqrip-QR-Zahlart — der sqrip Auskunftsdienst hat sie über die aus dem Bankbeleg gelesene Bestellnummer zugeordnet."
+
+msgid "A payment came in for order %s, but the order has no payment reference — matched by the order number only. Please check and assign it by hand."
+msgstr "Für Bestellung %s ist eine Zahlung eingegangen, aber die Bestellung hat keine Zahlungsreferenz — Zuordnung nur über die Bestellnummer. Bitte prüfen und von Hand zuordnen."
+
+msgid "Flagged — no payment reference."
+msgstr "Markiert — keine Zahlungsreferenz."

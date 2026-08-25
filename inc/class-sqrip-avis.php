@@ -592,15 +592,14 @@ class Sqrip_Avis
     private static function process_warnings(array $warnings, array $expectations)
     {
         $by_ref     = self::orders_by_ref($expectations);
+        $by_num     = self::orders_by_num($expectations);
         $candidates = array();
 
         foreach ($warnings as $w) {
             $type = isset($w['type']) ? $w['type'] : '';
 
             // Overpayment and checksum are handled next to the match in process().
-            // no_reference_key cannot occur for us (we never issue a QR bill without a
-            // reference), so it is intentionally dropped.
-            if ($type === 'overpayment' || $type === 'checksum' || $type === 'no_reference_key' || $type === '') {
+            if ($type === 'overpayment' || $type === 'checksum' || $type === '') {
                 continue;
             }
 
@@ -626,7 +625,7 @@ class Sqrip_Avis
                 continue;
             }
 
-            self::handle_simple_warning($w, $by_ref);
+            self::handle_simple_warning($w, $by_ref, $by_num);
         }
 
         if ($candidates) {
@@ -640,14 +639,23 @@ class Sqrip_Avis
      *
      * @param array $w      One warning from the service.
      * @param array $by_ref normalised reference => order info.
+     * @param array $by_num order number => order info (for warnings that carry only the
+     *                      order number, e.g. no_reference_key on a non-sqrip order).
      * @return void
      */
-    private static function handle_simple_warning(array $w, array $by_ref)
+    private static function handle_simple_warning(array $w, array $by_ref, array $by_num = array())
     {
         $type     = $w['type'];
         $ref_norm = isset($w['reference']) ? self::normalize($w['reference']) : '';
         $info     = ($ref_norm !== '' && isset($by_ref[$ref_norm])) ? $by_ref[$ref_norm] : null;
-        $order    = $info ? wc_get_order($info['order_id']) : null;
+
+        // Fall back to the order number when the warning carries no resolvable reference
+        // (a non-sqrip / bank-transfer order matched by its order number only).
+        if (!$info && isset($w['order_number']) && isset($by_num[(string) $w['order_number']])) {
+            $info = $by_num[(string) $w['order_number']];
+        }
+
+        $order = $info ? wc_get_order($info['order_id']) : null;
 
         if (!$order || !sqrip_order_in_avis_scope($order)) {
             $order = null;
@@ -666,6 +674,8 @@ class Sqrip_Avis
             self::send_underpayment_email($order, $ref_display, $expected, $w, $currency);
         } elseif ($type === 'low_confidence' && $order) {
             self::send_lowconfidence_email($order, $ref_display, $w, $currency);
+        } elseif ($type === 'no_reference_key' && $order) {
+            self::send_no_reference_key_email($order);
         } else {
             self::send_fallback_email($order, $w, $currency);
         }
@@ -768,6 +778,39 @@ class Sqrip_Avis
     }
 
     /**
+     * order number => {order_id, order_number, currency, expected, reference_display} for
+     * every open order, so a warning that carries only the order number (a non-sqrip order
+     * matched by its number) can still be resolved to its order.
+     *
+     * @param array $expectations
+     * @return array
+     */
+    private static function orders_by_num(array $expectations)
+    {
+        $by_num = array();
+
+        foreach ($expectations as $order) {
+            $num = (string) $order['order_number'];
+
+            if ($num === '') {
+                continue;
+            }
+
+            $slip = isset($order['slips'][0]) ? $order['slips'][0] : array();
+
+            $by_num[$num] = array(
+                'order_id'          => $order['order_id'],
+                'order_number'      => $order['order_number'],
+                'currency'          => $order['currency'],
+                'expected'          => isset($slip['expected']) ? $slip['expected'] : (isset($order['total']) ? $order['total'] : null),
+                'reference_display' => isset($slip['reference']) ? (string) $slip['reference'] : '',
+            );
+        }
+
+        return $by_num;
+    }
+
+    /**
      * @param array $slip
      * @return string
      */
@@ -850,6 +893,12 @@ class Sqrip_Avis
                 }
 
                 return $base;
+            case 'no_reference_key':
+                return sprintf(
+                    /* translators: %s: order number */
+                    __('A payment came in for order %s, but the order has no payment reference — matched by the order number only. Please check and assign it by hand.', 'sqrip-swiss-qr-invoice'),
+                    isset($w['order_number']) ? $w['order_number'] : ''
+                );
         }
 
         return isset($w['message']) ? (string) $w['message'] : __('A payment needs your attention.', 'sqrip-swiss-qr-invoice');
@@ -868,6 +917,8 @@ class Sqrip_Avis
                 return __('Held — underpaid.', 'sqrip-swiss-qr-invoice');
             case 'low_confidence':
                 return __('Flagged — please check.', 'sqrip-swiss-qr-invoice');
+            case 'no_reference_key':
+                return __('Flagged — no payment reference.', 'sqrip-swiss-qr-invoice');
             case 'no_reference':
             case 'bulk_payment':
                 return __('E-mailed for your assignment.', 'sqrip-swiss-qr-invoice');
@@ -1111,6 +1162,26 @@ class Sqrip_Avis
         if ($order && is_a($order, 'WC_Order')) {
             $body .= '<p style="font-family:sans-serif;font-size:14px;">&rarr; ' . self::check_order_link($order) . '</p>';
         }
+
+        self::mail_admin(self::subject_check(), $body);
+    }
+
+    /**
+     * A payment matched an order by its number, but the order carries no payment reference
+     * (a non-sqrip / bank-transfer order). Ask the admin to check and assign it by hand.
+     *
+     * @param \WC_Order $order
+     * @return void
+     */
+    private static function send_no_reference_key_email($order)
+    {
+        $body = '<p style="font-family:sans-serif;font-size:14px;">'
+            . sprintf(
+                /* translators: %s: order number (as a link) */
+                esc_html__('A payment came in for order %s, but the order has no payment reference — matched by the order number only. Please check and assign it by hand.', 'sqrip-swiss-qr-invoice'),
+                self::order_link_html($order))
+            . '</p>'
+            . '<p style="font-family:sans-serif;font-size:14px;">&rarr; ' . self::check_order_link($order) . '</p>';
 
         self::mail_admin(self::subject_check(), $body);
     }
