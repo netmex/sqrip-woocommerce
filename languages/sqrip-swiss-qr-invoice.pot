@@ -2132,3 +2132,107 @@ msgstr ""
 #, php-format
 msgid "Change status to %s"
 msgstr ""
+
+msgid "Order %1$s, outstanding amount %2$s."
+msgstr ""
+
+msgid "Customer:"
+msgstr ""
+
+msgid "open draft"
+msgstr ""
+
+msgid "sqrip #%1$s: underpaid — %2$s still missing"
+msgstr ""
+
+msgid "sqrip #%s: underpaid — please check"
+msgstr ""
+
+msgid "Received: %1$s — %2$s still missing."
+msgstr ""
+
+msgid "Your order #%1$s – %2$s still outstanding"
+msgstr ""
+
+msgid "Hello %1$s,\r\n\r\nThank you for your payment of %2$s for order #%3$s. The invoice total is %4$s, so %5$s is still outstanding. Please transfer the remaining amount.\r\n\r\nKind regards"
+msgstr ""
+
+msgid "Contact the customer:"
+msgstr ""
+
+msgid "The order stays on \"%s\" (unpaid)."
+msgstr ""
+
+msgid "Open the order to cancel or record a part payment: %s"
+msgstr ""
+
+msgid "sqrip #%1$s: overpaid — %2$s too much"
+msgstr ""
+
+msgid "sqrip #%s: overpaid — please check"
+msgstr ""
+
+msgid "Received: %1$s — %2$s too much."
+msgstr ""
+
+msgid "Your order #%1$s – refund of %2$s"
+msgstr ""
+
+msgid "Hello %1$s,\r\n\r\nYou paid %2$s for order #%3$s; the invoice total was %4$s. We will refund the difference of %5$s. Please let us know your IBAN if we do not already have it.\r\n\r\nKind regards"
+msgstr ""
+
+msgid "The order was set to \"%s\" (booked as paid)."
+msgstr ""
+
+msgid "Open the order to issue the refund: %s"
+msgstr ""
+
+msgid "sqrip #%s: uncertain match — please check"
+msgstr ""
+
+msgid "A payment of %1$s from \"%2$s\" may belong to order %3$s: %4$s."
+msgstr ""
+
+msgid "A payment of %1$s was assigned to order %2$s, but the match is uncertain."
+msgstr ""
+
+msgid "A payment was assigned to order %s, but the match is uncertain."
+msgstr ""
+
+msgid "Uncertain because only a few details match and there is no clear reference."
+msgstr ""
+
+msgid "sqrip: payment received — could not be assigned"
+msgstr ""
+
+msgid "amount %s"
+msgstr ""
+
+msgid "sender \"%s\""
+msgstr ""
+
+msgid "text \"%s\""
+msgstr ""
+
+msgid "A payment (%s) could not be assigned to any order."
+msgstr ""
+
+msgid "A payment could not be assigned to any order."
+msgstr ""
+
+msgid "It may be order %s — please check."
+msgstr ""
+
+msgid "Please check all open orders."
+msgstr ""
+
+msgid "sqrip #%s: matched by order number — please check"
+msgstr ""
+
+msgid "A payment came in for order %s, but the order has no payment reference — matched by the order number from the payment message only. Please check and assign it by hand."
+msgstr ""
+
+msgid "sqrip: batch payment mismatch — please check %d order"
+msgid_plural "sqrip: batch payment mismatch — please check %d orders"
+msgstr[0] ""
+msgstr[1] ""

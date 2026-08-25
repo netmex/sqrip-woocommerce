@@ -1902,3 +1902,107 @@ msgstr "È arrivato un pagamento per l'ordine %s, ma l'ordine non ha un riferime
 
 msgid "Flagged — no payment reference."
 msgstr "Segnalato — nessun riferimento di pagamento."
+
+msgid "Order %1$s, outstanding amount %2$s."
+msgstr "Ordine %1$s, importo aperto %2$s."
+
+msgid "Customer:"
+msgstr "Cliente:"
+
+msgid "open draft"
+msgstr "apri la bozza"
+
+msgid "sqrip #%1$s: underpaid — %2$s still missing"
+msgstr "sqrip #%1$s: pagamento insufficiente – mancano %2$s"
+
+msgid "sqrip #%s: underpaid — please check"
+msgstr "sqrip #%s: pagamento insufficiente – da verificare"
+
+msgid "Received: %1$s — %2$s still missing."
+msgstr "Ricevuto: %1$s – mancano %2$s."
+
+msgid "Your order #%1$s – %2$s still outstanding"
+msgstr "Il suo ordine #%1$s – %2$s ancora dovuto"
+
+msgid "Hello %1$s,\r\n\r\nThank you for your payment of %2$s for order #%3$s. The invoice total is %4$s, so %5$s is still outstanding. Please transfer the remaining amount.\r\n\r\nKind regards"
+msgstr "Buongiorno %1$s,\r\n\r\ngrazie per il suo pagamento di %2$s per l'ordine #%3$s. L'importo della fattura è %4$s, restano quindi da pagare %5$s. La preghiamo di bonificare l'importo residuo.\r\n\r\nCordiali saluti"
+
+msgid "Contact the customer:"
+msgstr "Scrivere al cliente:"
+
+msgid "The order stays on \"%s\" (unpaid)."
+msgstr "L'ordine resta su „%s\" (non pagato)."
+
+msgid "Open the order to cancel or record a part payment: %s"
+msgstr "Aprire l'ordine per lo storno o un pagamento parziale: %s"
+
+msgid "sqrip #%1$s: overpaid — %2$s too much"
+msgstr "sqrip #%1$s: pagamento eccessivo – %2$s di troppo"
+
+msgid "sqrip #%s: overpaid — please check"
+msgstr "sqrip #%s: pagamento eccessivo – da verificare"
+
+msgid "Received: %1$s — %2$s too much."
+msgstr "Ricevuto: %1$s – %2$s di troppo."
+
+msgid "Your order #%1$s – refund of %2$s"
+msgstr "Il suo ordine #%1$s – rimborso di %2$s"
+
+msgid "Hello %1$s,\r\n\r\nYou paid %2$s for order #%3$s; the invoice total was %4$s. We will refund the difference of %5$s. Please let us know your IBAN if we do not already have it.\r\n\r\nKind regards"
+msgstr "Buongiorno %1$s,\r\n\r\nha pagato %2$s per l'ordine #%3$s; l'importo della fattura era %4$s. Le rimborsiamo la differenza di %5$s. La preghiamo di comunicarci il suo IBAN se non ne siamo già in possesso.\r\n\r\nCordiali saluti"
+
+msgid "The order was set to \"%s\" (booked as paid)."
+msgstr "L'ordine è stato impostato su „%s\" (registrato come pagato)."
+
+msgid "Open the order to issue the refund: %s"
+msgstr "Aprire l'ordine per effettuare il rimborso: %s"
+
+msgid "sqrip #%s: uncertain match — please check"
+msgstr "sqrip #%s: abbinamento incerto – da verificare"
+
+msgid "A payment of %1$s from \"%2$s\" may belong to order %3$s: %4$s."
+msgstr "Un pagamento di %1$s da „%2$s\" potrebbe corrispondere all'ordine %3$s: %4$s."
+
+msgid "A payment of %1$s was assigned to order %2$s, but the match is uncertain."
+msgstr "Un pagamento di %1$s è stato assegnato all'ordine %2$s, ma l'abbinamento è incerto."
+
+msgid "A payment was assigned to order %s, but the match is uncertain."
+msgstr "Un pagamento è stato assegnato all'ordine %s, ma l'abbinamento è incerto."
+
+msgid "Uncertain because only a few details match and there is no clear reference."
+msgstr "Incerto perché corrispondono solo pochi elementi e non c'è una referenza chiara."
+
+msgid "sqrip: payment received — could not be assigned"
+msgstr "sqrip: pagamento ricevuto – impossibile assegnarlo"
+
+msgid "amount %s"
+msgstr "importo %s"
+
+msgid "sender \"%s\""
+msgstr "mittente „%s\""
+
+msgid "text \"%s\""
+msgstr "testo „%s\""
+
+msgid "A payment (%s) could not be assigned to any order."
+msgstr "Un pagamento (%s) non ha potuto essere assegnato ad alcun ordine."
+
+msgid "A payment could not be assigned to any order."
+msgstr "Un pagamento non ha potuto essere assegnato ad alcun ordine."
+
+msgid "It may be order %s — please check."
+msgstr "Potrebbe essere l'ordine %s – da verificare."
+
+msgid "Please check all open orders."
+msgstr "Verificare tutti gli ordini aperti."
+
+msgid "sqrip #%s: matched by order number — please check"
+msgstr "sqrip #%s: assegnato tramite numero d'ordine – da verificare"
+
+msgid "A payment came in for order %s, but the order has no payment reference — matched by the order number from the payment message only. Please check and assign it by hand."
+msgstr "Per l'ordine %s è arrivato un pagamento, ma l'ordine non ha una referenza di pagamento – assegnato solo tramite il numero d'ordine presente nel messaggio. Verificare e assegnare a mano."
+
+msgid "sqrip: batch payment mismatch — please check %d order"
+msgid_plural "sqrip: batch payment mismatch — please check %d orders"
+msgstr[0] "sqrip: pagamento cumulativo incoerente – verificare %d ordine"
+msgstr[1] "sqrip: pagamento cumulativo incoerente – verificare %d ordini"

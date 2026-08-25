@@ -957,14 +957,6 @@ class Sqrip_Avis
     }
 
     /**
-     * @return string Subject of the "please check" e-mails.
-     */
-    private static function subject_check()
-    {
-        return __('sqrip: action needed — please check a payment', 'sqrip-swiss-qr-invoice');
-    }
-
-    /**
      * @param string     $currency
      * @param float|null $amount
      * @return string Currency + amount, or '' when unknown.
@@ -1036,33 +1028,168 @@ class Sqrip_Avis
     }
 
     /**
+     * "Order #123, outstanding amount CHF 95.85." — the reference-free variant, used where
+     * naming a "reference" would be wrong (an order matched only by its number carries none).
+     *
+     * @param \WC_Order  $order
+     * @param float|null $expected
+     * @param string     $currency
+     * @return string Escaped markup.
+     */
+    private static function order_due_line($order, $expected, $currency)
+    {
+        $amt = self::amount_str($currency, $expected);
+
+        return sprintf(
+            /* translators: 1: order link like #123, 2: outstanding amount */
+            esc_html__('Order %1$s, outstanding amount %2$s.', 'sqrip-swiss-qr-invoice'),
+            self::order_link_html($order),
+            $amt !== '' ? esc_html($amt) : '&mdash;'
+        );
+    }
+
+    /**
+     * "Customer: Jane Doe · jane@example.com" as a paragraph, or '' when the order carries
+     * neither a name nor an e-mail. Lets the admin see at a glance whom to contact.
+     *
+     * @param \WC_Order $order
+     * @return string Escaped markup (may be empty).
+     */
+    private static function contact_line($order)
+    {
+        $name  = trim((string) $order->get_formatted_billing_full_name());
+        $email = trim((string) $order->get_billing_email());
+        $parts = array_filter(array($name, $email), 'strlen');
+
+        if (!$parts) {
+            return '';
+        }
+
+        return '<p style="font-family:sans-serif;font-size:14px;">'
+            . esc_html__('Customer:', 'sqrip-swiss-qr-invoice') . ' '
+            . esc_html(implode(' · ', $parts)) . '</p>';
+    }
+
+    /**
+     * A "mailto:" link that opens the shop's mail program with a ready subject and body,
+     * so the admin can act in one click. Returns '' when the order has no e-mail address.
+     * Body newlines use CRLF so mail clients render the draft with line breaks.
+     *
+     * @param \WC_Order $order
+     * @param string    $subject
+     * @param string    $body
+     * @param string    $label
+     * @return string Escaped anchor (may be empty).
+     */
+    private static function mailto_link($order, $subject, $body, $label)
+    {
+        $email = trim((string) $order->get_billing_email());
+
+        if ($email === '') {
+            return '';
+        }
+
+        $href = 'mailto:' . rawurlencode($email)
+            . '?subject=' . rawurlencode($subject)
+            . '&body=' . rawurlencode($body);
+
+        return '<a href="' . esc_url($href, array('mailto')) . '">' . esc_html($label) . '</a>';
+    }
+
+    /**
+     * "Contact the customer (draft): <a>…</a>" — the prepared-e-mail action line, or ''
+     * when the order has no e-mail address to write to.
+     *
+     * @param \WC_Order $order
+     * @param string    $subject
+     * @param string    $body
+     * @param string    $lead
+     * @return string Escaped markup (may be empty).
+     */
+    private static function contact_action($order, $subject, $body, $lead)
+    {
+        $link = self::mailto_link($order, $subject, $body, __('open draft', 'sqrip-swiss-qr-invoice'));
+
+        return $link === '' ? '' : esc_html($lead) . ' ' . $link;
+    }
+
+    /**
+     * The WooCommerce orders screen (HPOS-aware), used when no single order is identified.
+     *
+     * @return string
+     */
+    private static function orders_list_url()
+    {
+        if (class_exists('\\Automattic\\WooCommerce\\Utilities\\OrderUtil')
+            && \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled()) {
+            return admin_url('admin.php?page=wc-orders');
+        }
+
+        return admin_url('edit.php?post_type=shop_order');
+    }
+
+    /**
      * Customer paid too little: order stays open, admin informed.
      *
      * @return void
      */
     private static function send_underpayment_email($order, $reference, $expected, array $w, $currency)
     {
-        $received = self::amount_str($currency, isset($w['received']) ? $w['received'] : null);
+        $number    = $order->get_order_number();
+        $exp_f     = ($expected === null || $expected === '') ? null : (float) $expected;
+        $rec_f     = isset($w['received']) ? (float) $w['received'] : null;
+        $received  = self::amount_str($currency, $rec_f);
+        $total_s   = self::amount_str($currency, $exp_f);
+        $missing   = ($exp_f !== null && $rec_f !== null) ? self::amount_str($currency, round($exp_f - $rec_f, 2)) : '';
+
+        $subject = ($missing !== '')
+            ? sprintf(
+                /* translators: 1: order number, 2: missing amount */
+                __('sqrip #%1$s: underpaid — %2$s still missing', 'sqrip-swiss-qr-invoice'), $number, $missing)
+            : sprintf(
+                /* translators: %s: order number */
+                __('sqrip #%s: underpaid — please check', 'sqrip-swiss-qr-invoice'), $number);
+
+        $line = self::order_due_line($order, $expected, $currency) . ' '
+            . ($missing !== ''
+                ? sprintf(
+                    /* translators: 1: received amount, 2: missing amount */
+                    esc_html__('Received: %1$s — %2$s still missing.', 'sqrip-swiss-qr-invoice'),
+                    esc_html($received !== '' ? $received : '&mdash;'), esc_html($missing))
+                : sprintf(
+                    /* translators: %s: received amount */
+                    esc_html__('The customer paid too little (%s).', 'sqrip-swiss-qr-invoice'),
+                    $received !== '' ? esc_html($received) : '&mdash;'));
+
+        // A ready draft asking the customer to transfer the remaining amount.
+        $name       = trim((string) $order->get_formatted_billing_full_name());
+        $mail_sub   = sprintf(
+            /* translators: 1: order number, 2: missing amount */
+            __('Your order #%1$s – %2$s still outstanding', 'sqrip-swiss-qr-invoice'), $number, $missing !== '' ? $missing : $total_s);
+        $mail_body  = sprintf(
+            /* translators: 1: customer name, 2: received amount, 3: order number, 4: order total, 5: missing amount */
+            __("Hello %1\$s,\r\n\r\nThank you for your payment of %2\$s for order #%3\$s. The invoice total is %4\$s, so %5\$s is still outstanding. Please transfer the remaining amount.\r\n\r\nKind regards", 'sqrip-swiss-qr-invoice'),
+            $name !== '' ? $name : '', $received, $number, $total_s, $missing);
+
+        $contact = self::contact_action($order, $mail_sub, $mail_body, __('Contact the customer:', 'sqrip-swiss-qr-invoice'));
 
         $body =
-            '<p style="font-family:sans-serif;font-size:14px;">'
-            . self::order_ref_line($order, $reference, $expected, $currency) . ' '
-            . sprintf(
-                /* translators: %s: received amount */
-                esc_html__('The customer paid too little (%s).', 'sqrip-swiss-qr-invoice'),
-                $received !== '' ? esc_html($received) : '&mdash;'
-            )
-            . '</p>'
+            '<p style="font-family:sans-serif;font-size:14px;">' . $line . '</p>'
+            . self::contact_line($order)
             . '<p style="font-family:sans-serif;font-size:14px;">&rarr; '
             . sprintf(
                 /* translators: %s: order status */
-                esc_html__('The order stays on "%s".', 'sqrip-swiss-qr-invoice'),
+                esc_html__('The order stays on "%s" (unpaid).', 'sqrip-swiss-qr-invoice'),
                 esc_html(self::status_name($order))
             )
-            . '<br>&rarr; ' . self::check_order_link($order)
+            . ($contact !== '' ? '<br>&rarr; ' . $contact : '')
+            . '<br>&rarr; ' . sprintf(
+                /* translators: %s: order link */
+                esc_html__('Open the order to cancel or record a part payment: %s', 'sqrip-swiss-qr-invoice'),
+                self::order_link_html($order))
             . '</p>';
 
-        self::mail_admin(self::subject_check(), $body);
+        self::mail_admin($subject, $body);
     }
 
     /**
@@ -1073,27 +1200,61 @@ class Sqrip_Avis
      */
     private static function send_overpayment_paid_email($order, $reference, $expected, array $w, $currency)
     {
-        $received = self::amount_str($currency, isset($w['received']) ? $w['received'] : null);
+        $number   = $order->get_order_number();
+        $exp_f    = ($expected === null || $expected === '') ? null : (float) $expected;
+        $rec_f    = isset($w['received']) ? (float) $w['received'] : null;
+        $received = self::amount_str($currency, $rec_f);
+        $total_s  = self::amount_str($currency, $exp_f);
+        $excess   = ($exp_f !== null && $rec_f !== null) ? self::amount_str($currency, round($rec_f - $exp_f, 2)) : '';
+
+        $subject = ($excess !== '')
+            ? sprintf(
+                /* translators: 1: order number, 2: overpaid amount */
+                __('sqrip #%1$s: overpaid — %2$s too much', 'sqrip-swiss-qr-invoice'), $number, $excess)
+            : sprintf(
+                /* translators: %s: order number */
+                __('sqrip #%s: overpaid — please check', 'sqrip-swiss-qr-invoice'), $number);
+
+        $line = self::order_due_line($order, $expected, $currency) . ' '
+            . ($excess !== ''
+                ? sprintf(
+                    /* translators: 1: received amount, 2: overpaid amount */
+                    esc_html__('Received: %1$s — %2$s too much.', 'sqrip-swiss-qr-invoice'),
+                    esc_html($received !== '' ? $received : '&mdash;'), esc_html($excess))
+                : sprintf(
+                    /* translators: %s: received amount */
+                    esc_html__('The customer paid too much (%s).', 'sqrip-swiss-qr-invoice'),
+                    $received !== '' ? esc_html($received) : '&mdash;'));
+
+        // A ready draft announcing the refund of the difference.
+        $name      = trim((string) $order->get_formatted_billing_full_name());
+        $mail_sub  = sprintf(
+            /* translators: 1: order number, 2: refund amount */
+            __('Your order #%1$s – refund of %2$s', 'sqrip-swiss-qr-invoice'), $number, $excess);
+        $mail_body = sprintf(
+            /* translators: 1: customer name, 2: received amount, 3: order number, 4: order total, 5: refund amount */
+            __("Hello %1\$s,\r\n\r\nYou paid %2\$s for order #%3\$s; the invoice total was %4\$s. We will refund the difference of %5\$s. Please let us know your IBAN if we do not already have it.\r\n\r\nKind regards", 'sqrip-swiss-qr-invoice'),
+            $name !== '' ? $name : '', $received, $number, $total_s, $excess);
+
+        $contact = self::contact_action($order, $mail_sub, $mail_body, __('Contact the customer:', 'sqrip-swiss-qr-invoice'));
 
         $body =
-            '<p style="font-family:sans-serif;font-size:14px;">'
-            . self::order_ref_line($order, $reference, $expected, $currency) . ' '
-            . sprintf(
-                /* translators: %s: received amount */
-                esc_html__('The customer paid too much (%s).', 'sqrip-swiss-qr-invoice'),
-                $received !== '' ? esc_html($received) : '&mdash;'
-            )
-            . '</p>'
+            '<p style="font-family:sans-serif;font-size:14px;">' . $line . '</p>'
+            . self::contact_line($order)
             . '<p style="font-family:sans-serif;font-size:14px;">&rarr; '
             . sprintf(
                 /* translators: %s: new order status */
-                esc_html__('The order was set to "%s".', 'sqrip-swiss-qr-invoice'),
+                esc_html__('The order was set to "%s" (booked as paid).', 'sqrip-swiss-qr-invoice'),
                 esc_html(self::status_name($order))
             )
-            . '<br>&rarr; ' . self::check_order_link($order)
+            . ($contact !== '' ? '<br>&rarr; ' . $contact : '')
+            . '<br>&rarr; ' . sprintf(
+                /* translators: %s: order link */
+                esc_html__('Open the order to issue the refund: %s', 'sqrip-swiss-qr-invoice'),
+                self::order_link_html($order))
             . '</p>';
 
-        self::mail_admin(self::subject_check(), $body);
+        self::mail_admin($subject, $body);
     }
 
     /**
@@ -1103,20 +1264,43 @@ class Sqrip_Avis
      */
     private static function send_lowconfidence_email($order, $reference, array $w, $currency)
     {
-        $score = isset($w['score']) ? (int) $w['score'] : 0;
+        $number  = $order->get_order_number();
+        $pay_ccy = isset($w['payment_currency']) ? (string) $w['payment_currency'] : '';
+        $pay_str = self::amount_str($pay_ccy !== '' ? $pay_ccy : $currency, isset($w['payment_amount']) ? $w['payment_amount'] : null);
+        $sender  = isset($w['sender']) ? trim((string) $w['sender']) : '';
 
-        $body =
-            '<p style="font-family:sans-serif;font-size:14px;">'
-            . sprintf(
-                /* translators: 1: order link, 2: reference, 3: score 0-10 */
-                esc_html__('A payment was assigned to order %1$s (reference %2$s), but only with low confidence (score %3$d/10).', 'sqrip-swiss-qr-invoice'),
-                self::order_link_html($order), esc_html((string) $reference), $score
-            )
-            . '</p>';
+        $subject = sprintf(
+            /* translators: %s: order number */
+            __('sqrip #%s: uncertain match — please check', 'sqrip-swiss-qr-invoice'), $number);
+
+        // Order side, for a side-by-side eyeball check against the payment.
+        $cust       = trim((string) $order->get_formatted_billing_full_name());
+        $city       = trim((string) $order->get_billing_city());
+        $ord_total  = self::amount_str($order->get_currency(), $order->get_total());
+        $order_side = implode(', ', array_filter(array($cust, $city), 'strlen'));
+        $order_side = ($ord_total !== '') ? trim($order_side . ' · ' . $ord_total, " \xC2\xB7") : $order_side;
+
+        if ($sender !== '' && $pay_str !== '') {
+            // Payer known (the service passed it): show the comparison payment <-> order.
+            $intro = sprintf(
+                /* translators: 1: payment amount, 2: payer name/place, 3: order link, 4: order side "name, place · total" */
+                esc_html__('A payment of %1$s from "%2$s" may belong to order %3$s: %4$s.', 'sqrip-swiss-qr-invoice'),
+                esc_html($pay_str), esc_html($sender), self::order_link_html($order), esc_html($order_side));
+        } elseif ($pay_str !== '') {
+            $intro = sprintf(
+                /* translators: 1: payment amount, 2: order link */
+                esc_html__('A payment of %1$s was assigned to order %2$s, but the match is uncertain.', 'sqrip-swiss-qr-invoice'),
+                esc_html($pay_str), self::order_link_html($order));
+        } else {
+            $intro = sprintf(
+                /* translators: %s: order link */
+                esc_html__('A payment was assigned to order %s, but the match is uncertain.', 'sqrip-swiss-qr-invoice'),
+                self::order_link_html($order));
+        }
+
+        $body = '<p style="font-family:sans-serif;font-size:14px;">' . $intro . '</p>';
 
         if (!empty($w['currency_mismatch'])) {
-            // The service now sends the credit's own currency; if present, name both.
-            $pay_ccy  = isset($w['payment_currency']) ? (string) $w['payment_currency'] : '';
             $mismatch = ($pay_ccy !== '')
                 ? sprintf(
                     /* translators: 1: payment currency, 2: order currency */
@@ -1128,11 +1312,16 @@ class Sqrip_Avis
                     esc_html($currency));
 
             $body .= '<p style="font-family:sans-serif;font-size:14px;">' . $mismatch . '</p>';
+        } else {
+            $body .= '<p style="font-family:sans-serif;font-size:13px;color:#555;">'
+                . esc_html__('Uncertain because only a few details match and there is no clear reference.', 'sqrip-swiss-qr-invoice')
+                . '</p>';
         }
 
-        $body .= '<p style="font-family:sans-serif;font-size:14px;">&rarr; ' . self::check_order_link($order) . '</p>';
+        $body .= self::contact_line($order)
+            . '<p style="font-family:sans-serif;font-size:14px;">&rarr; ' . self::check_order_link($order) . '</p>';
 
-        self::mail_admin(self::subject_check(), $body);
+        self::mail_admin($subject, $body);
     }
 
     /**
@@ -1149,21 +1338,41 @@ class Sqrip_Avis
         $ccy    = ($currency !== '' && $currency !== null) ? $currency
             : (isset($w['payment_currency']) ? (string) $w['payment_currency'] : '');
         $desc   = self::amount_str($ccy, $amount);
+        $sender = isset($w['sender']) ? trim((string) $w['sender']) : '';
+        $text   = isset($w['payment_text']) ? trim((string) $w['payment_text']) : '';
 
-        $body = '<p style="font-family:sans-serif;font-size:14px;">'
-            . ($desc !== ''
-                ? sprintf(
-                    /* translators: %s: amount */
-                    esc_html__('A payment (%s) needs your attention.', 'sqrip-swiss-qr-invoice'),
-                    esc_html($desc))
-                : esc_html__('A payment needs your attention.', 'sqrip-swiss-qr-invoice'))
-            . '</p>';
+        $subject = __('sqrip: payment received — could not be assigned', 'sqrip-swiss-qr-invoice');
+
+        // Name every detail the service actually delivered: amount, and — once the server
+        // passes them — the payer and the payment's own message text.
+        $facts = array();
+        if ($desc !== '')   { $facts[] = sprintf(/* translators: %s: amount */ esc_html__('amount %s', 'sqrip-swiss-qr-invoice'), esc_html($desc)); }
+        if ($sender !== '') { $facts[] = sprintf(/* translators: %s: payer */ esc_html__('sender "%s"', 'sqrip-swiss-qr-invoice'), esc_html($sender)); }
+        if ($text !== '')   { $facts[] = sprintf(/* translators: %s: payment message text */ esc_html__('text "%s"', 'sqrip-swiss-qr-invoice'), esc_html($text)); }
+
+        $lead = $facts
+            ? sprintf(
+                /* translators: %s: comma-separated list of payment details */
+                esc_html__('A payment (%s) could not be assigned to any order.', 'sqrip-swiss-qr-invoice'),
+                implode(', ', $facts))
+            : esc_html__('A payment could not be assigned to any order.', 'sqrip-swiss-qr-invoice');
+
+        $body = '<p style="font-family:sans-serif;font-size:14px;">' . $lead . '</p>';
 
         if ($order && is_a($order, 'WC_Order')) {
-            $body .= '<p style="font-family:sans-serif;font-size:14px;">&rarr; ' . self::check_order_link($order) . '</p>';
+            $body .= '<p style="font-family:sans-serif;font-size:14px;">&rarr; '
+                . sprintf(
+                    /* translators: %s: order link */
+                    esc_html__('It may be order %s — please check.', 'sqrip-swiss-qr-invoice'),
+                    self::order_link_html($order))
+                . '</p>';
+        } else {
+            $body .= '<p style="font-family:sans-serif;font-size:14px;">&rarr; '
+                . '<a href="' . esc_url(self::orders_list_url()) . '">' . esc_html__('Please check all open orders.', 'sqrip-swiss-qr-invoice') . '</a>'
+                . '</p>';
         }
 
-        self::mail_admin(self::subject_check(), $body);
+        self::mail_admin($subject, $body);
     }
 
     /**
@@ -1175,15 +1384,20 @@ class Sqrip_Avis
      */
     private static function send_no_reference_key_email($order)
     {
+        $subject = sprintf(
+            /* translators: %s: order number */
+            __('sqrip #%s: matched by order number — please check', 'sqrip-swiss-qr-invoice'), $order->get_order_number());
+
         $body = '<p style="font-family:sans-serif;font-size:14px;">'
             . sprintf(
                 /* translators: %s: order number (as a link) */
-                esc_html__('A payment came in for order %s, but the order has no payment reference — matched by the order number only. Please check and assign it by hand.', 'sqrip-swiss-qr-invoice'),
+                esc_html__('A payment came in for order %s, but the order has no payment reference — matched by the order number from the payment message only. Please check and assign it by hand.', 'sqrip-swiss-qr-invoice'),
                 self::order_link_html($order))
             . '</p>'
+            . self::contact_line($order)
             . '<p style="font-family:sans-serif;font-size:14px;">&rarr; ' . self::check_order_link($order) . '</p>';
 
-        self::mail_admin(self::subject_check(), $body);
+        self::mail_admin($subject, $body);
     }
 
     /**
@@ -1227,7 +1441,14 @@ class Sqrip_Avis
             . '<p style="font-family:sans-serif;font-size:14px;">&rarr; ' . esc_html__('All orders stay on their current status.', 'sqrip-swiss-qr-invoice')
             . '<br>&rarr; ' . esc_html__('Please check the orders.', 'sqrip-swiss-qr-invoice') . '</p>';
 
-        self::mail_admin(self::subject_check(), $body);
+        $subject = sprintf(
+            /* translators: %d: number of affected orders */
+            _n('sqrip: batch payment mismatch — please check %d order',
+               'sqrip: batch payment mismatch — please check %d orders',
+               count($held), 'sqrip-swiss-qr-invoice'),
+            count($held));
+
+        self::mail_admin($subject, $body);
     }
 
     /**
