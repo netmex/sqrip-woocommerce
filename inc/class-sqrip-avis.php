@@ -1632,7 +1632,7 @@ class Sqrip_Avis
                         <td><?php echo esc_html(self::log_score($row)); ?></td>
                         <td><?php echo esc_html(self::aspects_label(isset($row['aspects']) ? $row['aspects'] : array())); ?></td>
                         <td><?php echo esc_html(isset($row['consequence']) ? $row['consequence'] : ''); ?></td>
-                        <td><button type="button" class="button-link button-link-delete sqrip-avis-forget" data-fp="<?php echo esc_attr(self::log_fp($row)); ?>"><?php esc_html_e('Delete', 'sqrip-swiss-qr-invoice'); ?></button></td>
+                        <td><button type="button" class="button-link sqrip-avis-forget" style="color:#b32d2e;" data-fp="<?php echo esc_attr(self::log_fp($row)); ?>" title="<?php esc_attr_e('Delete', 'sqrip-swiss-qr-invoice'); ?>" aria-label="<?php esc_attr_e('Delete', 'sqrip-swiss-qr-invoice'); ?>"><span class="dashicons dashicons-trash" aria-hidden="true"></span></button></td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>
@@ -2286,9 +2286,11 @@ class Sqrip_Avis
                             <td><code><?php echo esc_html(implode(', ', $refs)); ?></code></td>
                             <td><?php echo esc_html(self::contact_label($order)); ?></td>
                             <td>
-                                <button type="button" class="button-link sqrip-avis-confirm" data-order="<?php echo esc_attr($entry['order_id']); ?>"><?php esc_html_e('Confirm payment', 'sqrip-swiss-qr-invoice'); ?></button>
-                                &nbsp;·&nbsp;
-                                <button type="button" class="button-link button-link-delete sqrip-avis-cancel" data-order="<?php echo esc_attr($entry['order_id']); ?>" data-edit="<?php echo $order ? esc_url($order->get_edit_order_url()) : ''; ?>"><?php esc_html_e('Cancel order', 'sqrip-swiss-qr-invoice'); ?></button>
+                                <div style="display:flex;gap:10px;align-items:center;">
+                                    <?php // Confirm: the very same tick WooCommerce shows in the orders list for "complete". ?>
+                                    <button type="button" class="button wc-action-button wc-action-button-complete sqrip-avis-confirm" data-order="<?php echo esc_attr($entry['order_id']); ?>" title="<?php esc_attr_e('Confirm payment', 'sqrip-swiss-qr-invoice'); ?>" aria-label="<?php esc_attr_e('Confirm payment', 'sqrip-swiss-qr-invoice'); ?>"><?php esc_html_e('Confirm payment', 'sqrip-swiss-qr-invoice'); ?></button>
+                                    <button type="button" class="button-link sqrip-avis-cancel" style="color:#b32d2e;" data-order="<?php echo esc_attr($entry['order_id']); ?>" data-edit="<?php echo $order ? esc_url($order->get_edit_order_url()) : ''; ?>" title="<?php esc_attr_e('Cancel order', 'sqrip-swiss-qr-invoice'); ?>" aria-label="<?php esc_attr_e('Cancel order', 'sqrip-swiss-qr-invoice'); ?>"><span class="dashicons dashicons-no-alt" aria-hidden="true"></span></button>
+                                </div>
                             </td>
                         </tr>
                     <?php endforeach; ?>
