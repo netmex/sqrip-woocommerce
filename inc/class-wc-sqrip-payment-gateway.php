@@ -1000,8 +1000,8 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             ),
             'avis_tpl_underpayment_subject' => array(
                 'title' => __('Underpayment: subject of the customer e-mail', 'sqrip-swiss-qr-invoice'),
-                'type' => 'text',
-                'default' => Sqrip_Avis::default_draft('avis_tpl_underpayment_subject'),
+                'type' => 'avis_template',
+                'input' => 'text',
                 'description' => sprintf(
                     /* translators: %s: list of available placeholders */
                     __('Subject of the ready draft the "Contact the customer" link opens when a customer underpaid. Pre-filled with the built-in wording — adjust it freely; clear the field to keep the built-in default. Placeholders: %s', 'sqrip-swiss-qr-invoice'),
@@ -1010,16 +1010,16 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             ),
             'avis_tpl_underpayment_body' => array(
                 'title' => __('Underpayment: text of the customer e-mail', 'sqrip-swiss-qr-invoice'),
-                'type' => 'textarea',
-                'default' => Sqrip_Avis::default_draft('avis_tpl_underpayment_body'),
+                'type' => 'avis_template',
+                'input' => 'textarea',
                 'css' => 'height:130px;',
                 'description' => __('Text of that draft — pre-filled with the built-in wording. Adjust it freely: tone (formal / informal), your own standard blocks. Clear the field to keep the built-in default. Same placeholders as above.', 'sqrip-swiss-qr-invoice'),
                 'class' => 'comparison-tab sqrip-avis-detail'
             ),
             'avis_tpl_overpayment_subject' => array(
                 'title' => __('Overpayment: subject of the customer e-mail', 'sqrip-swiss-qr-invoice'),
-                'type' => 'text',
-                'default' => Sqrip_Avis::default_draft('avis_tpl_overpayment_subject'),
+                'type' => 'avis_template',
+                'input' => 'text',
                 'description' => sprintf(
                     /* translators: %s: list of available placeholders */
                     __('Subject of the ready draft the "Contact the customer" link opens when a customer overpaid. Pre-filled with the built-in wording — adjust it freely; clear the field to keep the built-in default. Placeholders: %s', 'sqrip-swiss-qr-invoice'),
@@ -1028,8 +1028,8 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             ),
             'avis_tpl_overpayment_body' => array(
                 'title' => __('Overpayment: text of the customer e-mail', 'sqrip-swiss-qr-invoice'),
-                'type' => 'textarea',
-                'default' => Sqrip_Avis::default_draft('avis_tpl_overpayment_body'),
+                'type' => 'avis_template',
+                'input' => 'textarea',
                 'css' => 'height:130px;',
                 'description' => __('Text of that draft — pre-filled with the built-in wording; for the overpayment case, {differenz} is the amount paid too much (the refund). Adjust it freely; clear the field to keep the built-in default. Same placeholders as above.', 'sqrip-swiss-qr-invoice'),
                 'class' => 'comparison-tab sqrip-avis-detail'
@@ -1276,6 +1276,80 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
         <?php
 
         return ob_get_clean();
+    }
+
+    /**
+     * A customer-e-mail template field (subject as a text line, body as a textarea) that
+     * shows the built-in suggestion whenever the shop has not entered its own text.
+     *
+     * WooCommerce's own field default only appears while the option key is absent from the
+     * saved settings. On this shop the key already exists as an empty string (an earlier
+     * version shipped the fields empty and a save persisted that ''), which would hide the
+     * suggestion. So the value is resolved here instead: stored text, else default_draft().
+     * That is exactly the runtime fallback too, so what is shown equals what is sent, and
+     * clearing the field falls back to the built-in wording.
+     *
+     * @param string $key
+     * @param array  $data
+     * @return string
+     */
+    public function generate_avis_template_html($key, $data)
+    {
+        $field_key = $this->get_field_key($key);
+
+        $data = wp_parse_args($data, array(
+            'title'       => '',
+            'input'       => 'text',
+            'class'       => '',
+            'css'         => '',
+            'description' => '',
+            'desc_tip'    => false,
+        ));
+
+        $value = $this->get_option($key);
+
+        if ($value === '' || $value === null) {
+            $value = Sqrip_Avis::default_draft($key);
+        }
+
+        ob_start();
+        ?>
+        <tr valign="top">
+            <th scope="row" class="titledesc">
+                <label for="<?php echo esc_attr($field_key); ?>"><?php echo wp_kses_post($data['title']); ?><?php echo $this->get_tooltip_html($data); // WPCS: XSS ok. ?></label>
+            </th>
+            <td class="forminp">
+                <fieldset>
+                    <legend class="screen-reader-text"><span><?php echo wp_kses_post($data['title']); ?></span></legend>
+                    <?php if ($data['input'] === 'textarea') : ?>
+                        <textarea rows="6" class="input-text wide-input <?php echo esc_attr($data['class']); ?>"
+                                  name="<?php echo esc_attr($field_key); ?>" id="<?php echo esc_attr($field_key); ?>"
+                                  style="<?php echo esc_attr($data['css']); ?>"><?php echo esc_textarea($value); ?></textarea>
+                    <?php else : ?>
+                        <input class="input-text regular-input <?php echo esc_attr($data['class']); ?>" type="text"
+                               name="<?php echo esc_attr($field_key); ?>" id="<?php echo esc_attr($field_key); ?>"
+                               style="<?php echo esc_attr($data['css']); ?>" value="<?php echo esc_attr($value); ?>" />
+                    <?php endif; ?>
+                    <?php echo $this->get_description_html($data); // WPCS: XSS ok. ?>
+                </fieldset>
+            </td>
+        </tr>
+        <?php
+
+        return ob_get_clean();
+    }
+
+    /**
+     * Save handler for an avis_template field: keep the text as entered, newlines and all,
+     * but strip any markup.
+     *
+     * @param string $key
+     * @param string $value
+     * @return string
+     */
+    public function validate_avis_template_field($key, $value)
+    {
+        return sanitize_textarea_field(wp_unslash((string) $value));
     }
 
     /**
