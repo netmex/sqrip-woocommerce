@@ -2048,3 +2048,39 @@ msgstr "Testo di questa bozza — in caso di pagamento eccessivo, {differenz} è
 
 msgid "The payment notification service is not reachable right now. Please try again in a minute; if it keeps happening, save the sqrip settings again to re-register, or contact support."
 msgstr "Il servizio di notifica dei pagamenti non è al momento raggiungibile. Riprovi tra un minuto; se persiste, salvi di nuovo le impostazioni sqrip (nuova registrazione) o contatti il supporto."
+
+msgid "Cancel order"
+msgstr "Annulla ordine"
+
+msgid "Delete"
+msgstr "Elimina"
+
+msgid "Confirmed as paid by hand from the sqrip reconcile table."
+msgstr "Confermato come pagato a mano dalla tabella di riconciliazione sqrip."
+
+msgid "Cancelled by hand from the sqrip reconcile table."
+msgstr "Annullato a mano dalla tabella di riconciliazione sqrip."
+
+msgid "The order could not be found."
+msgstr "L'ordine non è stato trovato."
+
+msgid "Order #%s marked as paid."
+msgstr "Ordine #%s contrassegnato come pagato."
+
+msgid "Order #%s cancelled."
+msgstr "Ordine #%s annullato."
+
+msgid "Nothing to remove."
+msgstr "Niente da rimuovere."
+
+msgid "Mark this order as paid? It moves to your configured status for completed orders."
+msgstr "Contrassegnare questo ordine come pagato? Passa allo stato configurato per gli ordini completati."
+
+msgid "Cancel this order? Its status is set to \"cancelled\" and the order opens in a new tab."
+msgstr "Annullare questo ordine? Lo stato viene impostato su „annullato\" e l'ordine si apre in una nuova scheda."
+
+msgid "Remove this payment from the list? It will not appear again."
+msgstr "Rimuovere questo pagamento dall'elenco? Non riapparirà."
+
+msgid "The action could not be completed. Please reload the page and try again."
+msgstr "L'azione non è stata completata. Ricarichi la pagina e riprovi."

@@ -62,6 +62,9 @@ class Sqrip_Avis
             add_action('wp_ajax_sqrip_avis_reconcile', array(__CLASS__, 'ajax_reconcile'));
             add_action('wp_ajax_sqrip_avis_onboard', array(__CLASS__, 'ajax_onboard'));
             add_action('wp_ajax_sqrip_avis_status', array(__CLASS__, 'ajax_status'));
+            add_action('wp_ajax_sqrip_avis_confirm', array(__CLASS__, 'ajax_confirm_order'));
+            add_action('wp_ajax_sqrip_avis_cancel', array(__CLASS__, 'ajax_cancel_order'));
+            add_action('wp_ajax_sqrip_avis_forget', array(__CLASS__, 'ajax_forget_payment'));
             add_action('woocommerce_update_options_payment_gateways_sqrip', array(__CLASS__, 'maybe_register'));
             add_action('admin_notices', array(__CLASS__, 'maybe_notice'));
 
@@ -1603,6 +1606,7 @@ class Sqrip_Avis
                     <th><?php esc_html_e('Score', 'sqrip-swiss-qr-invoice'); ?></th>
                     <th><?php esc_html_e('Findings', 'sqrip-swiss-qr-invoice'); ?></th>
                     <th><?php esc_html_e('Consequence', 'sqrip-swiss-qr-invoice'); ?></th>
+                    <th><?php esc_html_e('Action', 'sqrip-swiss-qr-invoice'); ?></th>
                 </tr>
             </thead>
             <tbody>
@@ -1614,6 +1618,7 @@ class Sqrip_Avis
                         <td><?php echo esc_html(self::log_score($row)); ?></td>
                         <td><?php echo esc_html(self::aspects_label(isset($row['aspects']) ? $row['aspects'] : array())); ?></td>
                         <td><?php echo esc_html(isset($row['consequence']) ? $row['consequence'] : ''); ?></td>
+                        <td><button type="button" class="button-link button-link-delete sqrip-avis-forget" data-fp="<?php echo esc_attr(self::log_fp($row)); ?>"><?php esc_html_e('Delete', 'sqrip-swiss-qr-invoice'); ?></button></td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>
@@ -2083,6 +2088,146 @@ class Sqrip_Avis
     }
 
     /**
+     * Row action: confirm a waiting order as paid by hand. Moves it to the shop's own
+     * "completed" status — the same status the automatic booking uses — so this never
+     * hard-codes a status or overrides the shop's configuration.
+     *
+     * @return void
+     */
+    public static function ajax_confirm_order()
+    {
+        check_ajax_referer(self::NONCE, 'security');
+
+        if (!current_user_can('manage_woocommerce')) {
+            wp_send_json_error(array('message' => __('You are not allowed to do this.', 'sqrip-swiss-qr-invoice')), 403);
+        }
+
+        $order = self::action_order();
+
+        if (!$order) {
+            wp_send_json_error(array('message' => __('The order could not be found.', 'sqrip-swiss-qr-invoice')));
+        }
+
+        self::add_order_note($order, __('Confirmed as paid by hand from the sqrip reconcile table.', 'sqrip-swiss-qr-invoice'));
+
+        $status_completed = sqrip_get_plugin_option('status_completed');
+
+        if ($status_completed) {
+            $order->update_status($status_completed, '');
+        } else {
+            $order->save();
+        }
+
+        wp_send_json_success(array(
+            /* translators: %s: order number */
+            'message' => sprintf(__('Order #%s marked as paid.', 'sqrip-swiss-qr-invoice'), $order->get_order_number()),
+        ));
+    }
+
+    /**
+     * Row action: cancel a waiting order. Sets WooCommerce's own "cancelled" status and
+     * returns the order's edit URL so the browser can open it for a closer look.
+     *
+     * @return void
+     */
+    public static function ajax_cancel_order()
+    {
+        check_ajax_referer(self::NONCE, 'security');
+
+        if (!current_user_can('manage_woocommerce')) {
+            wp_send_json_error(array('message' => __('You are not allowed to do this.', 'sqrip-swiss-qr-invoice')), 403);
+        }
+
+        $order = self::action_order();
+
+        if (!$order) {
+            wp_send_json_error(array('message' => __('The order could not be found.', 'sqrip-swiss-qr-invoice')));
+        }
+
+        self::add_order_note($order, __('Cancelled by hand from the sqrip reconcile table.', 'sqrip-swiss-qr-invoice'));
+        $order->update_status('cancelled', '');
+
+        wp_send_json_success(array(
+            'edit_url' => $order->get_edit_order_url(),
+            /* translators: %s: order number */
+            'message'  => sprintf(__('Order #%s cancelled.', 'sqrip-swiss-qr-invoice'), $order->get_order_number()),
+        ));
+    }
+
+    /**
+     * Row action: forget one entry of the recognised-payments log so it no longer shows.
+     * It will not reappear: a processed payment is deduplicated and never re-logged. The
+     * row is matched by a content fingerprint, so the visible index may shift safely.
+     *
+     * @return void
+     */
+    public static function ajax_forget_payment()
+    {
+        check_ajax_referer(self::NONCE, 'security');
+
+        if (!current_user_can('manage_woocommerce')) {
+            wp_send_json_error(array('message' => __('You are not allowed to do this.', 'sqrip-swiss-qr-invoice')), 403);
+        }
+
+        $fp = isset($_POST['fp']) ? sanitize_text_field(wp_unslash($_POST['fp'])) : '';
+
+        if ($fp === '') {
+            wp_send_json_error(array('message' => __('Nothing to remove.', 'sqrip-swiss-qr-invoice')));
+        }
+
+        $log = get_option(self::LOG_OPTION, array());
+        $log = is_array($log) ? $log : array();
+
+        $kept    = array();
+        $removed = 0;
+
+        foreach ($log as $row) {
+            if ($removed === 0 && self::log_fp($row) === $fp) {
+                $removed++;
+                continue;
+            }
+
+            $kept[] = $row;
+        }
+
+        if ($removed) {
+            update_option(self::LOG_OPTION, $kept, false);
+        }
+
+        wp_send_json_success(array('removed' => $removed));
+    }
+
+    /**
+     * The WC order named by an "order" POST field, or null. Shared by the row actions.
+     *
+     * @return \WC_Order|null
+     */
+    private static function action_order()
+    {
+        $order_id = isset($_POST['order']) ? absint($_POST['order']) : 0;
+        $order    = $order_id ? wc_get_order($order_id) : null;
+
+        return ($order && is_a($order, 'WC_Order')) ? $order : null;
+    }
+
+    /**
+     * A short, stable fingerprint of one log row, used to match the "Delete" button on a
+     * row to the stored entry regardless of its position.
+     *
+     * @param array $row
+     * @return string
+     */
+    private static function log_fp($row)
+    {
+        $ts  = isset($row['ts']) ? (int) $row['ts'] : 0;
+        $ref = isset($row['reference']) ? (string) $row['reference'] : '';
+        $amt = (isset($row['amount']) && $row['amount'] !== null) ? number_format((float) $row['amount'], 2, '.', '') : '';
+        $ccy = isset($row['currency']) ? (string) $row['currency'] : '';
+
+        return substr(md5($ts . '|' . $ref . '|' . $amt . '|' . $ccy), 0, 16);
+    }
+
+    /**
      * The table shown after "check now": every order waiting for payment and whether
      * a payment has come in for it. Doubles as the confirmation that notifications are
      * arriving and being recognised.
@@ -2108,6 +2253,7 @@ class Sqrip_Avis
                         <th><?php esc_html_e('Amount', 'sqrip-swiss-qr-invoice'); ?></th>
                         <th><?php esc_html_e('QR reference / SCOR', 'sqrip-swiss-qr-invoice'); ?></th>
                         <th><?php esc_html_e('Name', 'sqrip-swiss-qr-invoice'); ?></th>
+                        <th><?php esc_html_e('Action', 'sqrip-swiss-qr-invoice'); ?></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -2125,6 +2271,11 @@ class Sqrip_Avis
                             <td><?php echo esc_html($entry['currency'] . ' ' . number_format((float) $entry['total'], 2, '.', '')); ?></td>
                             <td><code><?php echo esc_html(implode(', ', $refs)); ?></code></td>
                             <td><?php echo esc_html(self::contact_label($order)); ?></td>
+                            <td>
+                                <button type="button" class="button-link sqrip-avis-confirm" data-order="<?php echo esc_attr($entry['order_id']); ?>"><?php esc_html_e('Confirm payment', 'sqrip-swiss-qr-invoice'); ?></button>
+                                &nbsp;·&nbsp;
+                                <button type="button" class="button-link button-link-delete sqrip-avis-cancel" data-order="<?php echo esc_attr($entry['order_id']); ?>" data-edit="<?php echo $order ? esc_url($order->get_edit_order_url()) : ''; ?>"><?php esc_html_e('Cancel order', 'sqrip-swiss-qr-invoice'); ?></button>
+                            </td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>

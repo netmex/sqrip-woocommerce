@@ -158,5 +158,44 @@
                 $btn.prop('disabled', false);
             });
         });
+
+        // Row actions on the reconcile tables. Each asks for confirmation, then posts to
+        // admin-ajax with the same nonce; on success the affected row is removed. On any
+        // failure the button is re-enabled and a plain message proposes a reload — never a
+        // raw error.
+        function rowAction(action, data, $row, done) {
+            $.post(s.ajax_url, $.extend({ action: action, security: s.avis_nonce }, data), function (res) {
+                if (res && res.success) {
+                    $row.fadeOut(150, function () { $(this).remove(); });
+                    if (done) { done(res.data || {}); }
+                } else {
+                    window.alert((res && res.data && res.data.message) ? res.data.message : (s.txt_avis_action_failed || ''));
+                }
+            }).fail(function () {
+                window.alert(s.txt_avis_action_failed || '');
+            });
+        }
+
+        $(document).on('click', '.sqrip-avis-confirm', function () {
+            if (!window.confirm(s.txt_avis_confirm_paid || '')) { return; }
+            var $btn = $(this).prop('disabled', true);
+            rowAction('sqrip_avis_confirm', { order: $btn.data('order') }, $btn.closest('tr'), null);
+        });
+
+        $(document).on('click', '.sqrip-avis-cancel', function () {
+            if (!window.confirm(s.txt_avis_confirm_cancel || '')) { return; }
+            var $btn = $(this).prop('disabled', true);
+            var edit = $btn.data('edit');
+            rowAction('sqrip_avis_cancel', { order: $btn.data('order') }, $btn.closest('tr'), function (d) {
+                var url = (d && d.edit_url) ? d.edit_url : edit;
+                if (url) { window.open(url, '_blank'); }
+            });
+        });
+
+        $(document).on('click', '.sqrip-avis-forget', function () {
+            if (!window.confirm(s.txt_avis_confirm_forget || '')) { return; }
+            var $btn = $(this).prop('disabled', true);
+            rowAction('sqrip_avis_forget', { fp: $btn.data('fp') }, $btn.closest('tr'), null);
+        });
     });
 })(jQuery);

@@ -2278,3 +2278,39 @@ msgstr ""
 
 msgid "The payment notification service is not reachable right now. Please try again in a minute; if it keeps happening, save the sqrip settings again to re-register, or contact support."
 msgstr ""
+
+msgid "Cancel order"
+msgstr ""
+
+msgid "Delete"
+msgstr ""
+
+msgid "Confirmed as paid by hand from the sqrip reconcile table."
+msgstr ""
+
+msgid "Cancelled by hand from the sqrip reconcile table."
+msgstr ""
+
+msgid "The order could not be found."
+msgstr ""
+
+msgid "Order #%s marked as paid."
+msgstr ""
+
+msgid "Order #%s cancelled."
+msgstr ""
+
+msgid "Nothing to remove."
+msgstr ""
+
+msgid "Mark this order as paid? It moves to your configured status for completed orders."
+msgstr ""
+
+msgid "Cancel this order? Its status is set to \"cancelled\" and the order opens in a new tab."
+msgstr ""
+
+msgid "Remove this payment from the list? It will not appear again."
+msgstr ""
+
+msgid "The action could not be completed. Please reload the page and try again."
+msgstr ""

@@ -2056,3 +2056,39 @@ msgstr "Text dieses Entwurfs – bei der Überzahlung ist {differenz} der zu vie
 
 msgid "The payment notification service is not reachable right now. Please try again in a minute; if it keeps happening, save the sqrip settings again to re-register, or contact support."
 msgstr "Der Zahlungsavis-Dienst ist gerade nicht erreichbar. Bitte in einer Minute erneut versuchen; hält es an, die sqrip-Einstellungen erneut speichern (neu registrieren) oder den Support kontaktieren."
+
+msgid "Cancel order"
+msgstr "Bestellung stornieren"
+
+msgid "Delete"
+msgstr "Löschen"
+
+msgid "Confirmed as paid by hand from the sqrip reconcile table."
+msgstr "Von Hand über die sqrip-Abgleichstabelle als bezahlt bestätigt."
+
+msgid "Cancelled by hand from the sqrip reconcile table."
+msgstr "Von Hand über die sqrip-Abgleichstabelle storniert."
+
+msgid "The order could not be found."
+msgstr "Die Bestellung wurde nicht gefunden."
+
+msgid "Order #%s marked as paid."
+msgstr "Bestellung #%s als bezahlt markiert."
+
+msgid "Order #%s cancelled."
+msgstr "Bestellung #%s storniert."
+
+msgid "Nothing to remove."
+msgstr "Nichts zu entfernen."
+
+msgid "Mark this order as paid? It moves to your configured status for completed orders."
+msgstr "Diese Bestellung als bezahlt markieren? Sie wechselt in Ihren konfigurierten Status für abgeschlossene Bestellungen."
+
+msgid "Cancel this order? Its status is set to \"cancelled\" and the order opens in a new tab."
+msgstr "Diese Bestellung stornieren? Der Status wird auf „storniert\" gesetzt und die Bestellung öffnet sich in einem neuen Tab."
+
+msgid "Remove this payment from the list? It will not appear again."
+msgstr "Diese Zahlung aus der Liste entfernen? Sie erscheint nicht wieder."
+
+msgid "The action could not be completed. Please reload the page and try again."
+msgstr "Die Aktion konnte nicht ausgeführt werden. Bitte laden Sie die Seite neu und versuchen Sie es erneut."

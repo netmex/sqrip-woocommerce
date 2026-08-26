@@ -2068,3 +2068,39 @@ msgstr "Texte de ce brouillon — en cas de surpaiement, {differenz} est le mont
 
 msgid "The payment notification service is not reachable right now. Please try again in a minute; if it keeps happening, save the sqrip settings again to re-register, or contact support."
 msgstr "Le service de notification de paiement n'est pas joignable pour le moment. Merci de réessayer dans une minute ; si cela persiste, enregistrez à nouveau les réglages sqrip (nouvelle inscription) ou contactez le support."
+
+msgid "Cancel order"
+msgstr "Annuler la commande"
+
+msgid "Delete"
+msgstr "Supprimer"
+
+msgid "Confirmed as paid by hand from the sqrip reconcile table."
+msgstr "Confirmé comme payé à la main depuis le tableau de rapprochement sqrip."
+
+msgid "Cancelled by hand from the sqrip reconcile table."
+msgstr "Annulé à la main depuis le tableau de rapprochement sqrip."
+
+msgid "The order could not be found."
+msgstr "La commande est introuvable."
+
+msgid "Order #%s marked as paid."
+msgstr "Commande #%s marquée comme payée."
+
+msgid "Order #%s cancelled."
+msgstr "Commande #%s annulée."
+
+msgid "Nothing to remove."
+msgstr "Rien à supprimer."
+
+msgid "Mark this order as paid? It moves to your configured status for completed orders."
+msgstr "Marquer cette commande comme payée ? Elle passe au statut que vous avez configuré pour les commandes terminées."
+
+msgid "Cancel this order? Its status is set to \"cancelled\" and the order opens in a new tab."
+msgstr "Annuler cette commande ? Son statut passe à « annulée » et la commande s'ouvre dans un nouvel onglet."
+
+msgid "Remove this payment from the list? It will not appear again."
+msgstr "Retirer ce paiement de la liste ? Il ne réapparaîtra pas."
+
+msgid "The action could not be completed. Please reload the page and try again."
+msgstr "L'action n'a pas pu être effectuée. Merci de recharger la page et de réessayer."
