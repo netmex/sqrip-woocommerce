@@ -2023,3 +2023,36 @@ msgstr "Ihre Sitzung ist abgelaufen – deshalb wurde der Abgleich abgewiesen. B
 
 msgid "Reload the page"
 msgstr "Seite neu laden"
+
+msgid "Underpayment: subject of the customer e-mail"
+msgstr "Unterzahlung: Betreff der Kunden-E-Mail"
+
+msgid "Your order #{bestellnummer} – {differenz} still outstanding"
+msgstr "Ihre Bestellung #{bestellnummer} – {differenz} noch offen"
+
+msgid "Subject of the ready draft the \"Contact the customer\" link opens when a customer underpaid. Leave empty for the built-in wording. Placeholders: %s"
+msgstr "Betreff des fertigen Entwurfs, den der Link „Kunde anschreiben\" bei einer Unterzahlung öffnet. Leer lassen für den eingebauten Text. Platzhalter: %s"
+
+msgid "Underpayment: text of the customer e-mail"
+msgstr "Unterzahlung: Text der Kunden-E-Mail"
+
+msgid "Text of that draft — set your own wording, tone (formal / informal), and standard blocks. Leave empty for the built-in wording. Same placeholders as above."
+msgstr "Text dieses Entwurfs – eigener Wortlaut, Anrede (Du/Sie) und eigene Textbausteine. Leer lassen für den eingebauten Text. Gleiche Platzhalter wie oben."
+
+msgid "Overpayment: subject of the customer e-mail"
+msgstr "Überzahlung: Betreff der Kunden-E-Mail"
+
+msgid "Your order #{bestellnummer} – refund of {differenz}"
+msgstr "Ihre Bestellung #{bestellnummer} – Rückerstattung von {differenz}"
+
+msgid "Subject of the ready draft the \"Contact the customer\" link opens when a customer overpaid. Leave empty for the built-in wording. Placeholders: %s"
+msgstr "Betreff des fertigen Entwurfs, den der Link „Kunde anschreiben\" bei einer Überzahlung öffnet. Leer lassen für den eingebauten Text. Platzhalter: %s"
+
+msgid "Overpayment: text of the customer e-mail"
+msgstr "Überzahlung: Text der Kunden-E-Mail"
+
+msgid "Text of that draft — for the overpayment case, {differenz} is the amount paid too much (the refund). Leave empty for the built-in wording. Same placeholders as above."
+msgstr "Text dieses Entwurfs – bei der Überzahlung ist {differenz} der zu viel bezahlte Betrag (die Rückerstattung). Leer lassen für den eingebauten Text. Gleiche Platzhalter wie oben."
+
+msgid "The payment notification service is not reachable right now. Please try again in a minute; if it keeps happening, save the sqrip settings again to re-register, or contact support."
+msgstr "Der Zahlungsavis-Dienst ist gerade nicht erreichbar. Bitte in einer Minute erneut versuchen; hält es an, die sqrip-Einstellungen erneut speichern (neu registrieren) oder den Support kontaktieren."

@@ -2035,3 +2035,36 @@ msgstr "Votre session a expiré — c'est pourquoi le rapprochement a été refu
 
 msgid "Reload the page"
 msgstr "Recharger la page"
+
+msgid "Underpayment: subject of the customer e-mail"
+msgstr "Sous-paiement : objet de l'e-mail au client"
+
+msgid "Your order #{bestellnummer} – {differenz} still outstanding"
+msgstr "Votre commande #{bestellnummer} – {differenz} encore dû"
+
+msgid "Subject of the ready draft the \"Contact the customer\" link opens when a customer underpaid. Leave empty for the built-in wording. Placeholders: %s"
+msgstr "Objet du brouillon prêt que le lien « Écrire au client » ouvre en cas de sous-paiement. Laissez vide pour le texte intégré. Espaces réservés : %s"
+
+msgid "Underpayment: text of the customer e-mail"
+msgstr "Sous-paiement : texte de l'e-mail au client"
+
+msgid "Text of that draft — set your own wording, tone (formal / informal), and standard blocks. Leave empty for the built-in wording. Same placeholders as above."
+msgstr "Texte de ce brouillon — votre propre formulation, le ton (tu/vous) et vos blocs de texte. Laissez vide pour le texte intégré. Mêmes espaces réservés que ci-dessus."
+
+msgid "Overpayment: subject of the customer e-mail"
+msgstr "Surpaiement : objet de l'e-mail au client"
+
+msgid "Your order #{bestellnummer} – refund of {differenz}"
+msgstr "Votre commande #{bestellnummer} – remboursement de {differenz}"
+
+msgid "Subject of the ready draft the \"Contact the customer\" link opens when a customer overpaid. Leave empty for the built-in wording. Placeholders: %s"
+msgstr "Objet du brouillon prêt que le lien « Écrire au client » ouvre en cas de surpaiement. Laissez vide pour le texte intégré. Espaces réservés : %s"
+
+msgid "Overpayment: text of the customer e-mail"
+msgstr "Surpaiement : texte de l'e-mail au client"
+
+msgid "Text of that draft — for the overpayment case, {differenz} is the amount paid too much (the refund). Leave empty for the built-in wording. Same placeholders as above."
+msgstr "Texte de ce brouillon — en cas de surpaiement, {differenz} est le montant payé en trop (le remboursement). Laissez vide pour le texte intégré. Mêmes espaces réservés que ci-dessus."
+
+msgid "The payment notification service is not reachable right now. Please try again in a minute; if it keeps happening, save the sqrip settings again to re-register, or contact support."
+msgstr "Le service de notification de paiement n'est pas joignable pour le moment. Merci de réessayer dans une minute ; si cela persiste, enregistrez à nouveau les réglages sqrip (nouvelle inscription) ou contactez le support."

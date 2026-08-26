@@ -998,6 +998,44 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'description' => __('Normally sqrip reconciles only its own QR-invoice orders. Pick additional order statuses here to also reconcile orders that are not sqrip QR orders — for example plain bank transfers, or orders another (GiroCode/SEPA) plugin manages. Any payment method in these statuses is included; the order note will state that sqrip reconciled a non-sqrip order. Leave empty to keep the default (sqrip orders only).', 'sqrip-swiss-qr-invoice'),
                 'class' => 'comparison-tab sqrip-avis-detail'
             ),
+            'avis_tpl_underpayment_subject' => array(
+                'title' => __('Underpayment: subject of the customer e-mail', 'sqrip-swiss-qr-invoice'),
+                'type' => 'text',
+                'default' => '',
+                'placeholder' => __('Your order #{bestellnummer} – {differenz} still outstanding', 'sqrip-swiss-qr-invoice'),
+                'description' => sprintf(
+                    /* translators: %s: list of available placeholders */
+                    __('Subject of the ready draft the "Contact the customer" link opens when a customer underpaid. Leave empty for the built-in wording. Placeholders: %s', 'sqrip-swiss-qr-invoice'),
+                    '<code>{kunde}</code>, <code>{bestellnummer}</code>, <code>{betrag}</code>, <code>{total}</code>, <code>{differenz}</code>'),
+                'class' => 'comparison-tab sqrip-avis-detail'
+            ),
+            'avis_tpl_underpayment_body' => array(
+                'title' => __('Underpayment: text of the customer e-mail', 'sqrip-swiss-qr-invoice'),
+                'type' => 'textarea',
+                'default' => '',
+                'css' => 'height:130px;',
+                'description' => __('Text of that draft — set your own wording, tone (formal / informal), and standard blocks. Leave empty for the built-in wording. Same placeholders as above.', 'sqrip-swiss-qr-invoice'),
+                'class' => 'comparison-tab sqrip-avis-detail'
+            ),
+            'avis_tpl_overpayment_subject' => array(
+                'title' => __('Overpayment: subject of the customer e-mail', 'sqrip-swiss-qr-invoice'),
+                'type' => 'text',
+                'default' => '',
+                'placeholder' => __('Your order #{bestellnummer} – refund of {differenz}', 'sqrip-swiss-qr-invoice'),
+                'description' => sprintf(
+                    /* translators: %s: list of available placeholders */
+                    __('Subject of the ready draft the "Contact the customer" link opens when a customer overpaid. Leave empty for the built-in wording. Placeholders: %s', 'sqrip-swiss-qr-invoice'),
+                    '<code>{kunde}</code>, <code>{bestellnummer}</code>, <code>{betrag}</code>, <code>{total}</code>, <code>{differenz}</code>'),
+                'class' => 'comparison-tab sqrip-avis-detail'
+            ),
+            'avis_tpl_overpayment_body' => array(
+                'title' => __('Overpayment: text of the customer e-mail', 'sqrip-swiss-qr-invoice'),
+                'type' => 'textarea',
+                'default' => '',
+                'css' => 'height:130px;',
+                'description' => __('Text of that draft — for the overpayment case, {differenz} is the amount paid too much (the refund). Leave empty for the built-in wording. Same placeholders as above.', 'sqrip-swiss-qr-invoice'),
+                'class' => 'comparison-tab sqrip-avis-detail'
+            ),
             'avis_reconcile' => array(
                 'title' => __('Reconcile', 'sqrip-swiss-qr-invoice'),
                 'type' => 'avis_reconcile',

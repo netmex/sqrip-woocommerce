@@ -1397,8 +1397,22 @@ jQuery(document).ready(function ($) {
                     out.text(message).css('color', 'darkred');
                     panel.find('.sqrip-camt-apply').prop('disabled', true);
                 },
-                error: function () {
-                    out.text(sqrip.txt_camt_failed).css('color', 'darkred');
+                error: function (jqXHR) {
+                    // Propose a fix, don't dump the error. HTTP 403 with body "-1" is a
+                    // WordPress nonce failure (the page's token expired) — offer a
+                    // one-click reload; anything else gets a short retry hint.
+                    var status = jqXHR ? jqXHR.status : 0;
+                    var raw = jqXHR && jqXHR.responseText ? String(jqXHR.responseText).trim() : '';
+
+                    if (status === 403 && raw.slice(0, 2) === '-1') {
+                        out.html((sqrip.txt_avis_session_expired || '')
+                            + ' <a href="#" class="sqrip-avis-reload">' + (sqrip.txt_avis_reload_link || '') + '</a>')
+                            .css('color', 'darkred');
+                    } else {
+                        out.text((sqrip.txt_camt_failed || '')
+                            + (sqrip.txt_avis_retry ? ' ' + sqrip.txt_avis_retry : ''))
+                            .css('color', 'darkred');
+                    }
                     panel.find('.sqrip-camt-apply').prop('disabled', true);
                 },
                 complete: function () {

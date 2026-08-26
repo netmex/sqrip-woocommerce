@@ -2245,3 +2245,36 @@ msgstr ""
 
 msgid "Reload the page"
 msgstr ""
+
+msgid "Underpayment: subject of the customer e-mail"
+msgstr ""
+
+msgid "Your order #{bestellnummer} – {differenz} still outstanding"
+msgstr ""
+
+msgid "Subject of the ready draft the \"Contact the customer\" link opens when a customer underpaid. Leave empty for the built-in wording. Placeholders: %s"
+msgstr ""
+
+msgid "Underpayment: text of the customer e-mail"
+msgstr ""
+
+msgid "Text of that draft — set your own wording, tone (formal / informal), and standard blocks. Leave empty for the built-in wording. Same placeholders as above."
+msgstr ""
+
+msgid "Overpayment: subject of the customer e-mail"
+msgstr ""
+
+msgid "Your order #{bestellnummer} – refund of {differenz}"
+msgstr ""
+
+msgid "Subject of the ready draft the \"Contact the customer\" link opens when a customer overpaid. Leave empty for the built-in wording. Placeholders: %s"
+msgstr ""
+
+msgid "Overpayment: text of the customer e-mail"
+msgstr ""
+
+msgid "Text of that draft — for the overpayment case, {differenz} is the amount paid too much (the refund). Leave empty for the built-in wording. Same placeholders as above."
+msgstr ""
+
+msgid "The payment notification service is not reachable right now. Please try again in a minute; if it keeps happening, save the sqrip settings again to re-register, or contact support."
+msgstr ""

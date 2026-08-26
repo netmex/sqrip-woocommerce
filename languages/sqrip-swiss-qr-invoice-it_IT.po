@@ -2015,3 +2015,36 @@ msgstr "La sua sessione è scaduta — per questo la riconciliazione è stata ri
 
 msgid "Reload the page"
 msgstr "Ricarica la pagina"
+
+msgid "Underpayment: subject of the customer e-mail"
+msgstr "Pagamento insufficiente: oggetto dell'e-mail al cliente"
+
+msgid "Your order #{bestellnummer} – {differenz} still outstanding"
+msgstr "Il suo ordine #{bestellnummer} – {differenz} ancora dovuto"
+
+msgid "Subject of the ready draft the \"Contact the customer\" link opens when a customer underpaid. Leave empty for the built-in wording. Placeholders: %s"
+msgstr "Oggetto della bozza pronta che il link „Scrivere al cliente\" apre in caso di pagamento insufficiente. Lasci vuoto per il testo integrato. Segnaposto: %s"
+
+msgid "Underpayment: text of the customer e-mail"
+msgstr "Pagamento insufficiente: testo dell'e-mail al cliente"
+
+msgid "Text of that draft — set your own wording, tone (formal / informal), and standard blocks. Leave empty for the built-in wording. Same placeholders as above."
+msgstr "Testo di questa bozza — formulazione propria, tono (formale/informale) e blocchi di testo. Lasci vuoto per il testo integrato. Stessi segnaposto di cui sopra."
+
+msgid "Overpayment: subject of the customer e-mail"
+msgstr "Pagamento eccessivo: oggetto dell'e-mail al cliente"
+
+msgid "Your order #{bestellnummer} – refund of {differenz}"
+msgstr "Il suo ordine #{bestellnummer} – rimborso di {differenz}"
+
+msgid "Subject of the ready draft the \"Contact the customer\" link opens when a customer overpaid. Leave empty for the built-in wording. Placeholders: %s"
+msgstr "Oggetto della bozza pronta che il link „Scrivere al cliente\" apre in caso di pagamento eccessivo. Lasci vuoto per il testo integrato. Segnaposto: %s"
+
+msgid "Overpayment: text of the customer e-mail"
+msgstr "Pagamento eccessivo: testo dell'e-mail al cliente"
+
+msgid "Text of that draft — for the overpayment case, {differenz} is the amount paid too much (the refund). Leave empty for the built-in wording. Same placeholders as above."
+msgstr "Testo di questa bozza — in caso di pagamento eccessivo, {differenz} è l'importo pagato in eccesso (il rimborso). Lasci vuoto per il testo integrato. Stessi segnaposto di cui sopra."
+
+msgid "The payment notification service is not reachable right now. Please try again in a minute; if it keeps happening, save the sqrip settings again to re-register, or contact support."
+msgstr "Il servizio di notifica dei pagamenti non è al momento raggiungibile. Riprovi tra un minuto; se persiste, salvi di nuovo le impostazioni sqrip (nuova registrazione) o contatti il supporto."
