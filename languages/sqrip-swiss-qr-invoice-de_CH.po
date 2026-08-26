@@ -2092,3 +2092,21 @@ msgstr "Diese Zahlung aus der Liste entfernen? Sie erscheint nicht wieder."
 
 msgid "The action could not be completed. Please reload the page and try again."
 msgstr "Die Aktion konnte nicht ausgeführt werden. Bitte laden Sie die Seite neu und versuchen Sie es erneut."
+
+msgid "Hello {kunde},\r\n\r\nThank you for your payment of {betrag} for order #{bestellnummer}. The invoice total is {total}, so {differenz} is still outstanding. Please transfer the remaining amount.\r\n\r\nKind regards"
+msgstr "Guten Tag {kunde},\r\n\r\nvielen Dank für Ihre Zahlung von {betrag} zu Bestellung #{bestellnummer}. Der Rechnungsbetrag beträgt {total}, es sind noch {differenz} offen. Bitte überweisen Sie den Restbetrag.\r\n\r\nFreundliche Grüsse"
+
+msgid "Hello {kunde},\r\n\r\nYou paid {betrag} for order #{bestellnummer}; the invoice total was {total}. We will refund the difference of {differenz}. Please let us know your IBAN if we do not already have it.\r\n\r\nKind regards"
+msgstr "Guten Tag {kunde},\r\n\r\nSie haben {betrag} zu Bestellung #{bestellnummer} bezahlt; der Rechnungsbetrag war {total}. Wir erstatten Ihnen die Differenz von {differenz} zurück. Bitte teilen Sie uns Ihre IBAN mit, falls sie uns noch nicht vorliegt.\r\n\r\nFreundliche Grüsse"
+
+msgid "Subject of the ready draft the \"Contact the customer\" link opens when a customer underpaid. Pre-filled with the built-in wording — adjust it freely; clear the field to keep the built-in default. Placeholders: %s"
+msgstr "Betreff des fertigen Entwurfs, den der Link „Kunde anschreiben\" bei einer Unterzahlung öffnet. Vorausgefüllt mit dem eingebauten Text – frei anpassbar; Feld leeren, um den eingebauten Text zu behalten. Platzhalter: %s"
+
+msgid "Text of that draft — pre-filled with the built-in wording. Adjust it freely: tone (formal / informal), your own standard blocks. Clear the field to keep the built-in default. Same placeholders as above."
+msgstr "Text dieses Entwurfs – vorausgefüllt mit dem eingebauten Text. Frei anpassbar: Anrede (Du/Sie), eigene Textbausteine. Feld leeren, um den eingebauten Text zu behalten. Gleiche Platzhalter wie oben."
+
+msgid "Subject of the ready draft the \"Contact the customer\" link opens when a customer overpaid. Pre-filled with the built-in wording — adjust it freely; clear the field to keep the built-in default. Placeholders: %s"
+msgstr "Betreff des fertigen Entwurfs, den der Link „Kunde anschreiben\" bei einer Überzahlung öffnet. Vorausgefüllt mit dem eingebauten Text – frei anpassbar; Feld leeren, um den eingebauten Text zu behalten. Platzhalter: %s"
+
+msgid "Text of that draft — pre-filled with the built-in wording; for the overpayment case, {differenz} is the amount paid too much (the refund). Adjust it freely; clear the field to keep the built-in default. Same placeholders as above."
+msgstr "Text dieses Entwurfs – vorausgefüllt mit dem eingebauten Text; bei der Überzahlung ist {differenz} der zu viel bezahlte Betrag (die Rückerstattung). Frei anpassbar; Feld leeren, um den eingebauten Text zu behalten. Gleiche Platzhalter wie oben."

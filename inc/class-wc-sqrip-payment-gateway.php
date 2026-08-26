@@ -1001,39 +1001,37 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
             'avis_tpl_underpayment_subject' => array(
                 'title' => __('Underpayment: subject of the customer e-mail', 'sqrip-swiss-qr-invoice'),
                 'type' => 'text',
-                'default' => '',
-                'placeholder' => __('Your order #{bestellnummer} – {differenz} still outstanding', 'sqrip-swiss-qr-invoice'),
+                'default' => Sqrip_Avis::default_draft('avis_tpl_underpayment_subject'),
                 'description' => sprintf(
                     /* translators: %s: list of available placeholders */
-                    __('Subject of the ready draft the "Contact the customer" link opens when a customer underpaid. Leave empty for the built-in wording. Placeholders: %s', 'sqrip-swiss-qr-invoice'),
+                    __('Subject of the ready draft the "Contact the customer" link opens when a customer underpaid. Pre-filled with the built-in wording — adjust it freely; clear the field to keep the built-in default. Placeholders: %s', 'sqrip-swiss-qr-invoice'),
                     '<code>{kunde}</code>, <code>{bestellnummer}</code>, <code>{betrag}</code>, <code>{total}</code>, <code>{differenz}</code>'),
                 'class' => 'comparison-tab sqrip-avis-detail'
             ),
             'avis_tpl_underpayment_body' => array(
                 'title' => __('Underpayment: text of the customer e-mail', 'sqrip-swiss-qr-invoice'),
                 'type' => 'textarea',
-                'default' => '',
+                'default' => Sqrip_Avis::default_draft('avis_tpl_underpayment_body'),
                 'css' => 'height:130px;',
-                'description' => __('Text of that draft — set your own wording, tone (formal / informal), and standard blocks. Leave empty for the built-in wording. Same placeholders as above.', 'sqrip-swiss-qr-invoice'),
+                'description' => __('Text of that draft — pre-filled with the built-in wording. Adjust it freely: tone (formal / informal), your own standard blocks. Clear the field to keep the built-in default. Same placeholders as above.', 'sqrip-swiss-qr-invoice'),
                 'class' => 'comparison-tab sqrip-avis-detail'
             ),
             'avis_tpl_overpayment_subject' => array(
                 'title' => __('Overpayment: subject of the customer e-mail', 'sqrip-swiss-qr-invoice'),
                 'type' => 'text',
-                'default' => '',
-                'placeholder' => __('Your order #{bestellnummer} – refund of {differenz}', 'sqrip-swiss-qr-invoice'),
+                'default' => Sqrip_Avis::default_draft('avis_tpl_overpayment_subject'),
                 'description' => sprintf(
                     /* translators: %s: list of available placeholders */
-                    __('Subject of the ready draft the "Contact the customer" link opens when a customer overpaid. Leave empty for the built-in wording. Placeholders: %s', 'sqrip-swiss-qr-invoice'),
+                    __('Subject of the ready draft the "Contact the customer" link opens when a customer overpaid. Pre-filled with the built-in wording — adjust it freely; clear the field to keep the built-in default. Placeholders: %s', 'sqrip-swiss-qr-invoice'),
                     '<code>{kunde}</code>, <code>{bestellnummer}</code>, <code>{betrag}</code>, <code>{total}</code>, <code>{differenz}</code>'),
                 'class' => 'comparison-tab sqrip-avis-detail'
             ),
             'avis_tpl_overpayment_body' => array(
                 'title' => __('Overpayment: text of the customer e-mail', 'sqrip-swiss-qr-invoice'),
                 'type' => 'textarea',
-                'default' => '',
+                'default' => Sqrip_Avis::default_draft('avis_tpl_overpayment_body'),
                 'css' => 'height:130px;',
-                'description' => __('Text of that draft — for the overpayment case, {differenz} is the amount paid too much (the refund). Leave empty for the built-in wording. Same placeholders as above.', 'sqrip-swiss-qr-invoice'),
+                'description' => __('Text of that draft — pre-filled with the built-in wording; for the overpayment case, {differenz} is the amount paid too much (the refund). Adjust it freely; clear the field to keep the built-in default. Same placeholders as above.', 'sqrip-swiss-qr-invoice'),
                 'class' => 'comparison-tab sqrip-avis-detail'
             ),
             'avis_reconcile' => array(

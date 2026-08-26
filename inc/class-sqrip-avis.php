@@ -1117,24 +1117,48 @@ class Sqrip_Avis
     }
 
     /**
-     * Fill a shop-defined customer-e-mail template with the order's values, or fall back
-     * to the built-in default when the shop left the template empty. The shop uses plain
-     * {name}-style tokens, so nobody has to deal with printf's %1$s. An empty template
-     * keeps exactly the built-in wording — so shops that change nothing are unaffected.
+     * The built-in suggestion for one customer-e-mail template, in the shop's language and
+     * in the plain {token} form. It is the single source of truth: the settings field is
+     * pre-filled with it (so the shop sees and can edit the wording), and it is also the
+     * runtime fallback when the shop has not saved its own version. So a shop that changes
+     * nothing sends exactly this wording — unchanged from before the fields existed.
      *
-     * @param string $option  Plugin option key holding the template ('' = use default).
-     * @param string $default Built-in text, already localised (tokens NOT applied to it).
+     * @param string $option Plugin option key.
+     * @return string
+     */
+    public static function default_draft($option)
+    {
+        switch ($option) {
+            case 'avis_tpl_underpayment_subject':
+                return __('Your order #{bestellnummer} – {differenz} still outstanding', 'sqrip-swiss-qr-invoice');
+            case 'avis_tpl_underpayment_body':
+                return __("Hello {kunde},\r\n\r\nThank you for your payment of {betrag} for order #{bestellnummer}. The invoice total is {total}, so {differenz} is still outstanding. Please transfer the remaining amount.\r\n\r\nKind regards", 'sqrip-swiss-qr-invoice');
+            case 'avis_tpl_overpayment_subject':
+                return __('Your order #{bestellnummer} – refund of {differenz}', 'sqrip-swiss-qr-invoice');
+            case 'avis_tpl_overpayment_body':
+                return __("Hello {kunde},\r\n\r\nYou paid {betrag} for order #{bestellnummer}; the invoice total was {total}. We will refund the difference of {differenz}. Please let us know your IBAN if we do not already have it.\r\n\r\nKind regards", 'sqrip-swiss-qr-invoice');
+        }
+
+        return '';
+    }
+
+    /**
+     * Fill a customer-e-mail template with the order's values. Uses the shop's saved
+     * template, or the built-in suggestion (default_draft) when the shop has none. The
+     * shop writes plain {name}-style tokens, so nobody has to deal with printf's %1$s.
+     *
+     * @param string $option  Plugin option key holding the template.
      * @param array  $tokens  token name => replacement value.
      * @param bool   $is_body Normalise newlines to CRLF (for e-mail bodies).
      * @return string
      */
-    private static function draft_text($option, $default, array $tokens, $is_body = false)
+    private static function draft_text($option, array $tokens, $is_body = false)
     {
         $tpl = sqrip_get_plugin_option($option);
         $tpl = ($tpl === null || $tpl === false) ? '' : trim((string) $tpl);
 
         if ($tpl === '') {
-            return $default;
+            $tpl = self::default_draft($option);
         }
 
         $search = $replace = array();
@@ -1211,13 +1235,8 @@ class Sqrip_Avis
             'total'         => $total_s,
             'differenz'     => $missing,
         );
-        $mail_sub  = self::draft_text('avis_tpl_underpayment_subject', sprintf(
-            /* translators: 1: order number, 2: missing amount */
-            __('Your order #%1$s – %2$s still outstanding', 'sqrip-swiss-qr-invoice'), $number, $missing !== '' ? $missing : $total_s), $tokens);
-        $mail_body = self::draft_text('avis_tpl_underpayment_body', sprintf(
-            /* translators: 1: customer name, 2: received amount, 3: order number, 4: order total, 5: missing amount */
-            __("Hello %1\$s,\r\n\r\nThank you for your payment of %2\$s for order #%3\$s. The invoice total is %4\$s, so %5\$s is still outstanding. Please transfer the remaining amount.\r\n\r\nKind regards", 'sqrip-swiss-qr-invoice'),
-            $name !== '' ? $name : '', $received, $number, $total_s, $missing), $tokens, true);
+        $mail_sub  = self::draft_text('avis_tpl_underpayment_subject', $tokens);
+        $mail_body = self::draft_text('avis_tpl_underpayment_body', $tokens, true);
 
         $contact = self::contact_action($order, $mail_sub, $mail_body, __('Contact the customer:', 'sqrip-swiss-qr-invoice'));
 
@@ -1285,13 +1304,8 @@ class Sqrip_Avis
             'total'         => $total_s,
             'differenz'     => $excess,
         );
-        $mail_sub  = self::draft_text('avis_tpl_overpayment_subject', sprintf(
-            /* translators: 1: order number, 2: refund amount */
-            __('Your order #%1$s – refund of %2$s', 'sqrip-swiss-qr-invoice'), $number, $excess), $tokens);
-        $mail_body = self::draft_text('avis_tpl_overpayment_body', sprintf(
-            /* translators: 1: customer name, 2: received amount, 3: order number, 4: order total, 5: refund amount */
-            __("Hello %1\$s,\r\n\r\nYou paid %2\$s for order #%3\$s; the invoice total was %4\$s. We will refund the difference of %5\$s. Please let us know your IBAN if we do not already have it.\r\n\r\nKind regards", 'sqrip-swiss-qr-invoice'),
-            $name !== '' ? $name : '', $received, $number, $total_s, $excess), $tokens, true);
+        $mail_sub  = self::draft_text('avis_tpl_overpayment_subject', $tokens);
+        $mail_body = self::draft_text('avis_tpl_overpayment_body', $tokens, true);
 
         $contact = self::contact_action($order, $mail_sub, $mail_body, __('Contact the customer:', 'sqrip-swiss-qr-invoice'));
 

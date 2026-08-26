@@ -2104,3 +2104,21 @@ msgstr "Retirer ce paiement de la liste ? Il ne réapparaîtra pas."
 
 msgid "The action could not be completed. Please reload the page and try again."
 msgstr "L'action n'a pas pu être effectuée. Merci de recharger la page et de réessayer."
+
+msgid "Hello {kunde},\r\n\r\nThank you for your payment of {betrag} for order #{bestellnummer}. The invoice total is {total}, so {differenz} is still outstanding. Please transfer the remaining amount.\r\n\r\nKind regards"
+msgstr "Bonjour {kunde},\r\n\r\nmerci pour votre paiement de {betrag} pour la commande #{bestellnummer}. Le montant de la facture est de {total}, il reste donc {differenz} à payer. Merci de virer le montant restant.\r\n\r\nCordialement"
+
+msgid "Hello {kunde},\r\n\r\nYou paid {betrag} for order #{bestellnummer}; the invoice total was {total}. We will refund the difference of {differenz}. Please let us know your IBAN if we do not already have it.\r\n\r\nKind regards"
+msgstr "Bonjour {kunde},\r\n\r\nvous avez payé {betrag} pour la commande #{bestellnummer} ; le montant de la facture était de {total}. Nous vous remboursons la différence de {differenz}. Merci de nous communiquer votre IBAN si nous ne l'avons pas encore.\r\n\r\nCordialement"
+
+msgid "Subject of the ready draft the \"Contact the customer\" link opens when a customer underpaid. Pre-filled with the built-in wording — adjust it freely; clear the field to keep the built-in default. Placeholders: %s"
+msgstr "Objet du brouillon prêt que le lien « Écrire au client » ouvre en cas de sous-paiement. Pré-rempli avec le texte intégré — modifiable librement ; videz le champ pour conserver le texte intégré. Espaces réservés : %s"
+
+msgid "Text of that draft — pre-filled with the built-in wording. Adjust it freely: tone (formal / informal), your own standard blocks. Clear the field to keep the built-in default. Same placeholders as above."
+msgstr "Texte de ce brouillon — pré-rempli avec le texte intégré. Modifiable librement : ton (tu/vous), vos propres blocs de texte. Videz le champ pour conserver le texte intégré. Mêmes espaces réservés que ci-dessus."
+
+msgid "Subject of the ready draft the \"Contact the customer\" link opens when a customer overpaid. Pre-filled with the built-in wording — adjust it freely; clear the field to keep the built-in default. Placeholders: %s"
+msgstr "Objet du brouillon prêt que le lien « Écrire au client » ouvre en cas de surpaiement. Pré-rempli avec le texte intégré — modifiable librement ; videz le champ pour conserver le texte intégré. Espaces réservés : %s"
+
+msgid "Text of that draft — pre-filled with the built-in wording; for the overpayment case, {differenz} is the amount paid too much (the refund). Adjust it freely; clear the field to keep the built-in default. Same placeholders as above."
+msgstr "Texte de ce brouillon — pré-rempli avec le texte intégré ; en cas de surpaiement, {differenz} est le montant payé en trop (le remboursement). Modifiable librement ; videz le champ pour conserver le texte intégré. Mêmes espaces réservés que ci-dessus."

@@ -2084,3 +2084,21 @@ msgstr "Rimuovere questo pagamento dall'elenco? Non riapparirà."
 
 msgid "The action could not be completed. Please reload the page and try again."
 msgstr "L'azione non è stata completata. Ricarichi la pagina e riprovi."
+
+msgid "Hello {kunde},\r\n\r\nThank you for your payment of {betrag} for order #{bestellnummer}. The invoice total is {total}, so {differenz} is still outstanding. Please transfer the remaining amount.\r\n\r\nKind regards"
+msgstr "Buongiorno {kunde},\r\n\r\ngrazie per il suo pagamento di {betrag} per l'ordine #{bestellnummer}. L'importo della fattura è {total}, restano quindi da pagare {differenz}. La preghiamo di bonificare l'importo residuo.\r\n\r\nCordiali saluti"
+
+msgid "Hello {kunde},\r\n\r\nYou paid {betrag} for order #{bestellnummer}; the invoice total was {total}. We will refund the difference of {differenz}. Please let us know your IBAN if we do not already have it.\r\n\r\nKind regards"
+msgstr "Buongiorno {kunde},\r\n\r\nha pagato {betrag} per l'ordine #{bestellnummer}; l'importo della fattura era {total}. Le rimborsiamo la differenza di {differenz}. La preghiamo di comunicarci il suo IBAN se non ne siamo già in possesso.\r\n\r\nCordiali saluti"
+
+msgid "Subject of the ready draft the \"Contact the customer\" link opens when a customer underpaid. Pre-filled with the built-in wording — adjust it freely; clear the field to keep the built-in default. Placeholders: %s"
+msgstr "Oggetto della bozza pronta che il link „Scrivere al cliente\" apre in caso di pagamento insufficiente. Precompilato con il testo integrato — modificabile liberamente; svuoti il campo per mantenere il testo integrato. Segnaposto: %s"
+
+msgid "Text of that draft — pre-filled with the built-in wording. Adjust it freely: tone (formal / informal), your own standard blocks. Clear the field to keep the built-in default. Same placeholders as above."
+msgstr "Testo di questa bozza — precompilato con il testo integrato. Modificabile liberamente: tono (formale/informale), blocchi di testo propri. Svuoti il campo per mantenere il testo integrato. Stessi segnaposto di cui sopra."
+
+msgid "Subject of the ready draft the \"Contact the customer\" link opens when a customer overpaid. Pre-filled with the built-in wording — adjust it freely; clear the field to keep the built-in default. Placeholders: %s"
+msgstr "Oggetto della bozza pronta che il link „Scrivere al cliente\" apre in caso di pagamento eccessivo. Precompilato con il testo integrato — modificabile liberamente; svuoti il campo per mantenere il testo integrato. Segnaposto: %s"
+
+msgid "Text of that draft — pre-filled with the built-in wording; for the overpayment case, {differenz} is the amount paid too much (the refund). Adjust it freely; clear the field to keep the built-in default. Same placeholders as above."
+msgstr "Testo di questa bozza — precompilato con il testo integrato; in caso di pagamento eccessivo, {differenz} è l'importo pagato in eccesso (il rimborso). Modificabile liberamente; svuoti il campo per mantenere il testo integrato. Stessi segnaposto di cui sopra."
