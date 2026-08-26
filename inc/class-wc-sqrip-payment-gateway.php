@@ -1005,7 +1005,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'description' => sprintf(
                     /* translators: %s: list of available placeholders */
                     __('Subject of the ready draft the "Contact the customer" link opens when a customer underpaid. Pre-filled with the built-in wording — adjust it freely; clear the field to keep the built-in default. Placeholders: %s', 'sqrip-swiss-qr-invoice'),
-                    '<code>{kunde}</code>, <code>{bestellnummer}</code>, <code>{betrag}</code>, <code>{total}</code>, <code>{differenz}</code>'),
+                    '<code>{kunde}</code>, <code>{vorname}</code>, <code>{nachname}</code>, <code>{bestellnummer}</code>, <code>{betrag}</code>, <code>{total}</code>, <code>{differenz}</code>'),
                 'class' => 'comparison-tab sqrip-avis-detail'
             ),
             'avis_tpl_underpayment_body' => array(
@@ -1023,7 +1023,7 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'description' => sprintf(
                     /* translators: %s: list of available placeholders */
                     __('Subject of the ready draft the "Contact the customer" link opens when a customer overpaid. Pre-filled with the built-in wording — adjust it freely; clear the field to keep the built-in default. Placeholders: %s', 'sqrip-swiss-qr-invoice'),
-                    '<code>{kunde}</code>, <code>{bestellnummer}</code>, <code>{betrag}</code>, <code>{total}</code>, <code>{differenz}</code>'),
+                    '<code>{kunde}</code>, <code>{vorname}</code>, <code>{nachname}</code>, <code>{bestellnummer}</code>, <code>{betrag}</code>, <code>{total}</code>, <code>{differenz}</code>'),
                 'class' => 'comparison-tab sqrip-avis-detail'
             ),
             'avis_tpl_overpayment_body' => array(

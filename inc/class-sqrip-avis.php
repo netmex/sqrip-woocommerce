@@ -1227,9 +1227,13 @@ class Sqrip_Avis
 
         // A ready draft asking the customer to transfer the remaining amount — the shop
         // can override subject and text under "Reconcile" settings; empty = this default.
-        $name   = trim((string) $order->get_formatted_billing_full_name());
+        $name     = trim((string) $order->get_formatted_billing_full_name());
+        $vorname  = trim((string) $order->get_billing_first_name());
+        $nachname = trim((string) $order->get_billing_last_name());
         $tokens = array(
             'kunde'         => $name,
+            'vorname'       => $vorname,
+            'nachname'      => $nachname,
             'bestellnummer' => $number,
             'betrag'        => $received,
             'total'         => $total_s,
@@ -1296,9 +1300,13 @@ class Sqrip_Avis
         // A ready draft announcing the refund of the difference — the shop can override
         // subject and text under "Reconcile" settings; empty = this default. Here
         // {differenz} is the amount overpaid (the refund).
-        $name   = trim((string) $order->get_formatted_billing_full_name());
+        $name     = trim((string) $order->get_formatted_billing_full_name());
+        $vorname  = trim((string) $order->get_billing_first_name());
+        $nachname = trim((string) $order->get_billing_last_name());
         $tokens = array(
             'kunde'         => $name,
+            'vorname'       => $vorname,
+            'nachname'      => $nachname,
             'bestellnummer' => $number,
             'betrag'        => $received,
             'total'         => $total_s,
@@ -2287,8 +2295,8 @@ class Sqrip_Avis
                             <td><?php echo esc_html(self::contact_label($order)); ?></td>
                             <td>
                                 <div style="display:flex;gap:10px;align-items:center;">
-                                    <?php // Confirm: the very same tick WooCommerce shows in the orders list for "complete". ?>
-                                    <button type="button" class="button wc-action-button wc-action-button-complete sqrip-avis-confirm" data-order="<?php echo esc_attr($entry['order_id']); ?>" title="<?php esc_attr_e('Confirm payment', 'sqrip-swiss-qr-invoice'); ?>" aria-label="<?php esc_attr_e('Confirm payment', 'sqrip-swiss-qr-invoice'); ?>"><?php esc_html_e('Confirm payment', 'sqrip-swiss-qr-invoice'); ?></button>
+                                    <?php // Confirm: a green check, matching the red cancel/delete icons. ?>
+                                    <button type="button" class="button-link sqrip-avis-confirm" style="color:#46b450;" data-order="<?php echo esc_attr($entry['order_id']); ?>" title="<?php esc_attr_e('Confirm payment', 'sqrip-swiss-qr-invoice'); ?>" aria-label="<?php esc_attr_e('Confirm payment', 'sqrip-swiss-qr-invoice'); ?>"><span class="dashicons dashicons-yes-alt" aria-hidden="true"></span></button>
                                     <button type="button" class="button-link sqrip-avis-cancel" style="color:#b32d2e;" data-order="<?php echo esc_attr($entry['order_id']); ?>" data-edit="<?php echo $order ? esc_url($order->get_edit_order_url()) : ''; ?>" title="<?php esc_attr_e('Cancel order', 'sqrip-swiss-qr-invoice'); ?>" aria-label="<?php esc_attr_e('Cancel order', 'sqrip-swiss-qr-invoice'); ?>"><span class="dashicons dashicons-no-alt" aria-hidden="true"></span></button>
                                 </div>
                             </td>
