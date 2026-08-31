@@ -972,11 +972,11 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'class' => 'comparison-tab sqrip-avis-detail'
             ),
             'avis_accounts' => array(
-                'title' => __('Your bank accounts', 'sqrip-swiss-qr-invoice'),
+                'title' => __('Your IBANs', 'sqrip-swiss-qr-invoice'),
                 'type' => 'textarea',
                 'default' => '',
                 'css' => 'height:80px;',
-                'description' => __('If your bank sends credit notifications for several accounts to your sqrip address, list the accounts that are yours here — one per line, as account number or IBAN, exactly as they appear on the notification (e.g. 6461.6824.2003 or CH18 0076 1646 1682 4200 3). Only payments on these accounts are then reconciled; notifications for other accounts are ignored. Leave empty to reconcile every incoming notification (the default).', 'sqrip-swiss-qr-invoice'),
+                'description' => __('List the IBANs of your own bank accounts, one per line, exactly as they appear on the notification (e.g. CH18 0076 1646 1682 4200 3). If your bank sends credit notifications for several accounts to your sqrip address, only payments on these IBANs are then reconciled; notifications for other accounts are ignored. Enter the IBAN, not the bare account number — a plain account number is not matched. Leave empty to reconcile every incoming notification (the default).', 'sqrip-swiss-qr-invoice'),
                 'class' => 'comparison-tab sqrip-avis-detail'
             ),
             'avis_threshold' => array(

@@ -400,11 +400,12 @@ class Sqrip_Avis
     }
 
     /**
-     * The shop's own bank accounts, as the admin typed them (account number and/or IBAN),
-     * one string per entry. The admin lists them one per line or comma-separated; this just
-     * splits and trims — no normalisation, the service compares normalised on its side.
-     * Returns an empty array when nothing is configured, which the service reads as "no
-     * account filter" (its default), so leaving the field blank changes nothing.
+     * The shop's own IBANs, as the admin typed them, one string per entry. The admin lists
+     * them one per line or comma-separated; this just splits and trims — no normalisation,
+     * the service compares normalised on its side and matches on the IBAN only (a bare
+     * account number is ignored there). Returns an empty array when nothing is configured,
+     * which the service reads as "no account filter", so leaving the field blank changes
+     * nothing.
      *
      * @return array
      */
