@@ -2110,3 +2110,9 @@ msgstr "Betreff des fertigen Entwurfs, den der Link „Kunde anschreiben\" bei e
 
 msgid "Text of that draft — pre-filled with the built-in wording; for the overpayment case, {differenz} is the amount paid too much (the refund). Adjust it freely; clear the field to keep the built-in default. Same placeholders as above."
 msgstr "Text dieses Entwurfs – vorausgefüllt mit dem eingebauten Text; bei der Überzahlung ist {differenz} der zu viel bezahlte Betrag (die Rückerstattung). Frei anpassbar; Feld leeren, um den eingebauten Text zu behalten. Gleiche Platzhalter wie oben."
+
+msgid "Your bank accounts"
+msgstr "Ihre Bankkonten"
+
+msgid "If your bank sends credit notifications for several accounts to your sqrip address, list the accounts that are yours here — one per line, as account number or IBAN, exactly as they appear on the notification (e.g. 6461.6824.2003 or CH18 0076 1646 1682 4200 3). Only payments on these accounts are then reconciled; notifications for other accounts are ignored. Leave empty to reconcile every incoming notification (the default)."
+msgstr "Falls Ihre Bank Gutschriftsanzeigen für mehrere Konten an Ihre sqrip-Adresse schickt, tragen Sie hier die Konten ein, die Ihnen gehören — eines pro Zeile, als Kontonummer oder IBAN, genau wie auf der Anzeige (z. B. 6461.6824.2003 oder CH18 0076 1646 1682 4200 3). Nur Zahlungen auf diese Konten werden dann abgeglichen; Anzeigen anderer Konten werden ignoriert. Leer lassen, um jede eingehende Anzeige abzugleichen (Standard)."

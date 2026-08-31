@@ -2122,3 +2122,9 @@ msgstr "Objet du brouillon prêt que le lien « Écrire au client » ouvre en ca
 
 msgid "Text of that draft — pre-filled with the built-in wording; for the overpayment case, {differenz} is the amount paid too much (the refund). Adjust it freely; clear the field to keep the built-in default. Same placeholders as above."
 msgstr "Texte de ce brouillon — pré-rempli avec le texte intégré ; en cas de surpaiement, {differenz} est le montant payé en trop (le remboursement). Modifiable librement ; videz le champ pour conserver le texte intégré. Mêmes espaces réservés que ci-dessus."
+
+msgid "Your bank accounts"
+msgstr "Vos comptes bancaires"
+
+msgid "If your bank sends credit notifications for several accounts to your sqrip address, list the accounts that are yours here — one per line, as account number or IBAN, exactly as they appear on the notification (e.g. 6461.6824.2003 or CH18 0076 1646 1682 4200 3). Only payments on these accounts are then reconciled; notifications for other accounts are ignored. Leave empty to reconcile every incoming notification (the default)."
+msgstr "Si votre banque envoie des avis de crédit pour plusieurs comptes à votre adresse sqrip, indiquez ici les comptes qui vous appartiennent — un par ligne, sous forme de numéro de compte ou d'IBAN, exactement comme sur l'avis (p. ex. 6461.6824.2003 ou CH18 0076 1646 1682 4200 3). Seuls les paiements sur ces comptes sont alors rapprochés ; les avis d'autres comptes sont ignorés. Laissez vide pour rapprocher chaque avis entrant (par défaut)."

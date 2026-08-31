@@ -355,7 +355,10 @@ class Sqrip_Avis
         $expectations = $reconciler->build_expectations($orders['orders']);
         $payload      = self::orders_payload($expectations);
 
-        $body = array('token' => self::token(), 'orders' => $payload);
+        // Which of the shop's bank accounts count as its own. Sent on every claim (the
+        // service holds no state for it); empty means "no account filter", which is the
+        // service's default behaviour, so nothing changes for a shop that leaves it blank.
+        $body = array('token' => self::token(), 'orders' => $payload, 'accounts' => self::accounts());
 
         // Manual "Reconcile now" asks the service to read the mailbox synchronously first,
         // so a just-arrived e-mail is seen immediately instead of waiting for the periodic
@@ -394,6 +397,36 @@ class Sqrip_Avis
         // manual "Reconcile now" behave identically and each match/warning is acted on
         // exactly once (the service delivers each only once, then drops it).
         return $report;
+    }
+
+    /**
+     * The shop's own bank accounts, as the admin typed them (account number and/or IBAN),
+     * one string per entry. The admin lists them one per line or comma-separated; this just
+     * splits and trims — no normalisation, the service compares normalised on its side.
+     * Returns an empty array when nothing is configured, which the service reads as "no
+     * account filter" (its default), so leaving the field blank changes nothing.
+     *
+     * @return array
+     */
+    private static function accounts()
+    {
+        $raw = sqrip_get_plugin_option('avis_accounts');
+
+        if (!is_string($raw) || trim($raw) === '') {
+            return array();
+        }
+
+        $out = array();
+
+        foreach (preg_split('/[\r\n,]+/', $raw) as $entry) {
+            $entry = trim($entry);
+
+            if ($entry !== '') {
+                $out[] = $entry;
+            }
+        }
+
+        return array_values(array_unique($out));
     }
 
     /**

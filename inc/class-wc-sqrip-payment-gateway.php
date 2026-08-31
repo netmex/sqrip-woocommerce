@@ -971,6 +971,14 @@ class WC_Sqrip_Payment_Gateway extends WC_Payment_Gateway
                 'description' => __('Forward your shop account\'s credit notifications to our notification service. The service reads them, compares the payment details, and tells the plugin which order was paid. The plugin updates the order status according to your "Status of completed orders" setting.', 'sqrip-swiss-qr-invoice'),
                 'class' => 'comparison-tab sqrip-avis-detail'
             ),
+            'avis_accounts' => array(
+                'title' => __('Your bank accounts', 'sqrip-swiss-qr-invoice'),
+                'type' => 'textarea',
+                'default' => '',
+                'css' => 'height:80px;',
+                'description' => __('If your bank sends credit notifications for several accounts to your sqrip address, list the accounts that are yours here — one per line, as account number or IBAN, exactly as they appear on the notification (e.g. 6461.6824.2003 or CH18 0076 1646 1682 4200 3). Only payments on these accounts are then reconciled; notifications for other accounts are ignored. Leave empty to reconcile every incoming notification (the default).', 'sqrip-swiss-qr-invoice'),
+                'class' => 'comparison-tab sqrip-avis-detail'
+            ),
             'avis_threshold' => array(
                 'title' => __('Configure', 'sqrip-swiss-qr-invoice'),
                 'type' => 'avis_threshold',
